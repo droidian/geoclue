@@ -1,0 +1,16 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+datadir=@datadir@
+
+Name: geoclue
+Description: This library provide an abstract interface to get Geography Location Information
+Requires: dbus-glib-1
+Version: @VERSION@
+Libs: -L${libdir} -lgeoclue
+Cflags: -I${includedir}/geoclue -I${libdir}/geoclue/include
+
+
+geocluexml=${datadir}/geoclue/dbus/geoclue_glue.xml
+geocluemarshallist=${datadir}/geoclue/dbus/geoclue_signal_marshal.list

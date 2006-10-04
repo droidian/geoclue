@@ -1,0 +1,149 @@
+<!-- Geoclue - A DBus api and wrapper for geography information
+ * Copyright (C) 2006 Garmin
+ * 
+ * 
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License version 2 as published by the Free Software Foundation; 
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ -->
+
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/org/foinse_project/geoclue">
+  <interface name="org.foinse_project.geoclue">
+
+    <method name="version">
+      <arg type="i" name="major" direction="out" />
+      <arg type="i" name="minor" direction="out" />
+      <arg type="i" name="micro" direction="out" />
+    </method> 
+
+    <method name="service_provider">
+      <arg type="s" name="name" direction="out" />
+    </method>  
+    
+
+    <signal name="current_position_changed">
+      <arg type="d" name="latitude" direction="out" />
+      <arg type="d" name="longitude" direction="out" />
+    </signal>
+      
+    
+    <method name="current_position">    
+      <arg type="d" name="latitude" direction="out" />
+      <arg type="d" name="longitude" direction="out" />
+    </method>
+
+
+    <method name="current_position_error">    
+      <arg type="d" name="latitude_error" direction="out" /><!-- Meters -->
+      <arg type="d" name="longitude_error" direction="out" /><!-- Meters -->
+    </method>
+
+    <method name="current_altitude">    
+      <arg type="d" name="altitude" direction="out" /><!-- Meters -->
+    </method>
+
+    <method name="current_velocity">    
+      <arg type="d" name="north_velocity" direction="out" /><!-- Meters per Second -->
+      <arg type="d" name="east_velocity" direction="out" /><!-- Meters per Second -->
+    </method>
+
+    <method name="current_time">    
+      <arg type="i" name="year" direction="out" />
+      <arg type="i" name="month" direction="out" />
+      <arg type="i" name="day" direction="out" />
+      <arg type="i" name="hours" direction="out" />
+      <arg type="i" name="minutes" direction="out" />
+      <arg type="i" name="seconds" direction="out" />              
+    </method>
+
+    <method name="satellites_in_view">    	
+      <arg type="ai" name="prn_numbers" direction="out" />
+    </method>
+
+    <method name="satellites_data">    	
+      <arg type="i" name="prn_number" direction="in" />
+      <arg type="d" name="elevation" direction="out" /><!-- Degrees -->
+      <arg type="d" name="azimuth" direction="out" /><!-- Degrees -->
+      <arg type="d" name="signal_noise_ratio" direction="out" />
+    </method>
+
+    <method name="sun_rise">   
+      <arg type="d" name="latitude" direction="in" />
+      <arg type="d" name="longitude" direction="in" /> 
+      <arg type="i" name="year" direction="in" />
+      <arg type="i" name="month" direction="in" />
+      <arg type="i" name="day" direction="in" />
+      <arg type="i" name="hours" direction="out" />
+      <arg type="i" name="minutes" direction="out" />
+      <arg type="i" name="seconds" direction="out" />              
+    </method>
+    
+    
+    <method name="sun_set">   
+      <arg type="d" name="latitude" direction="in" />
+      <arg type="d" name="longitude" direction="in" /> 
+      <arg type="i" name="year" direction="in" />
+      <arg type="i" name="month" direction="in" />
+      <arg type="i" name="day" direction="in" />
+      <arg type="i" name="hours" direction="out" />
+      <arg type="i" name="minutes" direction="out" />
+      <arg type="i" name="seconds" direction="out" />              
+    </method>
+
+
+    <method name="moon_rise">   
+      <arg type="d" name="latitude" direction="in" />
+      <arg type="d" name="longitude" direction="in" /> 
+      <arg type="i" name="year" direction="in" />
+      <arg type="i" name="month" direction="in" />
+      <arg type="i" name="day" direction="in" />
+      <arg type="i" name="hours" direction="out" />
+      <arg type="i" name="minutes" direction="out" />
+      <arg type="i" name="seconds" direction="out" />              
+    </method>
+
+
+    <method name="moon_set">   
+      <arg type="d" name="latitude" direction="in" />
+      <arg type="d" name="longitude" direction="in" /> 
+      <arg type="i" name="year" direction="in" />
+      <arg type="i" name="month" direction="in" />
+      <arg type="i" name="day" direction="in" />
+      <arg type="i" name="hours" direction="out" />
+      <arg type="i" name="minutes" direction="out" />
+      <arg type="i" name="seconds" direction="out" />              
+    </method>
+
+
+
+    <method name="geocode">   
+      <arg type="s" name="street" direction="in" />
+      <arg type="s" name="city" direction="in" /> 
+      <arg type="s" name="state" direction="in" />
+      <arg type="s" name="zip" direction="in" />
+      <arg type="d" name="latitude" direction="out" />
+      <arg type="d" name="longitude" direction="out" />
+      <arg type="i" name="return_code" direction="out" />
+    </method>
+
+    <method name="geocode_free_text">   
+      <arg type="s" name="free_text" direction="in" />
+      <arg type="d" name="latitude" direction="out" />
+      <arg type="d" name="longitude" direction="out" /> 
+      <arg type="i" name="return_code" direction="out" />
+    </method>
+
+  </interface>
+</node>

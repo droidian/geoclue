@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8" ?>
 <!-- Geoclue - A DBus api and wrapper for geography information
  * Copyright (C) 2006 Garmin
  * 
@@ -17,7 +18,6 @@
  * Boston, MA 02111-1307, USA.
  -->
 
-<?xml version="1.0" encoding="UTF-8" ?>
 
 <node name="/org/foinse_project/geoclue">
   <interface name="org.foinse_project.geoclue">

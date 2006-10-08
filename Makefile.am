@@ -1,7 +1,4 @@
-SUBDIRS = geoclue example @YAHOOBACKEND@ 
-
-
-
+SUBDIRS = geoclue example backend 
 
 EXTRA_DIST = geoclue.pc.in
 DISTCLEANFILES = geoclue.pc

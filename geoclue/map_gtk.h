@@ -1,4 +1,4 @@
-/* Geoclue - A DBus api and wrapper for geography information
+/* GEOCLUE_MAP - A DBus api and wrapper for getting geography pictures
  * Copyright (C) 2006 Garmin
  * 
  * 
@@ -14,21 +14,23 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
- */
+ * Boston, MA 02111-1307, USA.*/
+#ifndef __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_H__
+#define __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_H__
 
-#include <stdio.h>
-#include <geoclue/geoclue.h>
-#include <glib.h>
+#include <geoclue/map.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 
-int main (int argc, char** argv)
-{
-    g_type_init();
-    geoclue_init();
-    gdouble lat, lon;
-    geoclue_current_position(&lat, &lon);
-    printf("You are at %f %f\n", lat, lon);
-    
+
+G_BEGIN_DECLS
+
+ typedef void (*GEOCLUE_MAP_GTK_CALLBACK)(GdkPixbuf* map_buffer, void* userdata);
+
  
-    return 0;   
-}
+
+GEOCLUE_MAP_RETURNCODE geoclue_map_gtk_get_gdk_pixbuf (const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_width, const gint IN_height, const gint IN_zoom, GEOCLUE_MAP_GTK_CALLBACK func, void* userdatain );
+
+
+G_END_DECLS
+
+#endif // __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_H__

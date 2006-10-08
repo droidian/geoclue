@@ -12,5 +12,8 @@ Libs: -L${libdir} -lgeoclue
 Cflags: -I${includedir}/geoclue -I${libdir}/geoclue/include
 
 
-geocluexml=${datadir}/geoclue/dbus/geoclue_glue.xml
-geocluemarshallist=${datadir}/geoclue/dbus/geoclue_signal_marshal.list
+positionxml=${datadir}/geoclue/dbus/position_glue.xml
+positionmarshallist=${datadir}/geoclue/dbus/position_signal_marshal.list
+
+mapxml=${datadir}/geoclue/dbus/map_glue.xml
+mapmarshallist=${datadir}/map/dbus/map_signal_marshal.list

@@ -1,8 +1,8 @@
-AC_INIT(geoclue/geoclue.c)
+AC_INIT(geoclue/position.c)
 
 PACKAGE=geoclue
 
-VERSION=0.1
+VERSION=0.2
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 
@@ -17,23 +17,14 @@ AC_SUBST(DBUS_BINDING_TOOL)
 AM_CONFIG_HEADER(config.h)
 
 
-
-AC_ARG_ENABLE(yahoo-backend, AS_HELP_STRING([--enable-yahoo-backend],[enable yahoo backend]), enable_yahoo_backend=yes, enable_yahoo_backend=no)
-
-
-if test $enable_yahoo_backend = yes; then
-	AC_OUTPUT(	yahoobackend/Makefile )
-	PKG_CHECK_MODULES(YAHOO, libsoup-2.2 libxml-2.0 dbus-glib-1 geomap gtk+-2.0)
-	AC_SUBST(YAHOO_CFLAGS)
-	AC_SUBST(YAHOO_LIBS)
-	YAHOOBACKEND=yahoobackend
-fi
-
-AC_SUBST(YAHOOBACKEND)
+PKG_CHECK_MODULES(YAHOO, libsoup-2.2 libxml-2.0 dbus-glib-1 geomap gtk+-2.0)
+AC_SUBST(YAHOO_CFLAGS)
+AC_SUBST(YAHOO_LIBS)
 
 
 
-PKG_CHECK_MODULES(DEPS,  dbus-glib-1)
+
+PKG_CHECK_MODULES(DEPS,  dbus-glib-1 gtk+-2.0)
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 
@@ -42,5 +33,8 @@ AC_SUBST(DEPS_LIBS)
 AC_OUTPUT(Makefile 
 	geoclue/Makefile 
 	example/Makefile
-	geoclue.pc 
+	geoclue.pc
+	backend/Makefile
+	backend/map_yahoo/Makefile
+	backend/position_manual/Makefile
 )

@@ -35,6 +35,7 @@ AC_OUTPUT(Makefile
 	example/Makefile
 	geoclue.pc
 	backend/Makefile
+	backend/geoclue_master/Makefile
 	backend/map_yahoo/Makefile
 	backend/position_manual/Makefile
 )

@@ -1,4 +1,4 @@
-bin_PROGRAMS = geoclue_position_example geoclue_map_example  geoclue_map_layout_example
+bin_PROGRAMS = geoclue-position-example geoclue-map-example  geoclue-map-layout-example
 
 geoclue_map_example_SOURCES = geoclue_map_example.c
 geoclue_map_layout_example_SOURCES = geoclue_map_layout_example.c

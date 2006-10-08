@@ -1,6 +1,8 @@
 bin_PROGRAMS = geoclue-master
 
 geoclue_master_SOURCES = geoclue_master.c \ 
+			geoclue_map_master.c \
+			geoclue_position_master.c \
 	geoclue_map_signal_marshal.c	\
 	geoclue_position_signal_marshal.c	
 

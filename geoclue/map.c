@@ -28,9 +28,9 @@
 #include <map_signal_marshal.h>
 
 
-#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.geoclue_map"
-#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/geoclue_map"
-#define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.geoclue_map"   
+#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.map"
+#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/map"
+#define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.map"   
         
 static  DBusGConnection*        geoclue_map_connection =   NULL;
 static  DBusGProxy*             geoclue_map_proxy      =   NULL;

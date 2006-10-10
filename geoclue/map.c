@@ -27,9 +27,9 @@
 #include <stdio.h>
 #include <map_signal_marshal.h>
 
-
-#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.map"
-#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/map"
+//Change to yahoo hard code for now
+#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.map.yahoo"
+#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/map/yahoo"
 #define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.map"   
         
 static  DBusGConnection*        geoclue_map_connection =   NULL;
@@ -39,7 +39,7 @@ static  void*                   userdatastore     =   NULL;
 
 
    
-void geoclue_map_get_geoclue_map_finished(void* userdata, GEOCLUE_MAP_RETURNCODE returncode, GArray* geoclue_map_buffer, gchar* buffer_mime_type)
+void geoclue_map_get_map_finished(void* userdata, GEOCLUE_MAP_RETURNCODE returncode, GArray* geoclue_map_buffer, gchar* buffer_mime_type)
 {   
    // printf("\n\n\nGet Map Finished returned \n\n\n\n");
    if(returncode == GEOCLUE_MAP_SUCCESS)
@@ -112,11 +112,11 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_init()
                                         G_TYPE_NONE,
                                         G_TYPE_INT, DBUS_TYPE_G_UCHAR_ARRAY, G_TYPE_STRING, G_TYPE_INVALID);
     dbus_g_proxy_add_signal (geoclue_map_proxy,
-                             "get_geoclue_map_finished",
+                             "get_map_finished",
                              G_TYPE_INT, DBUS_TYPE_G_UCHAR_ARRAY, G_TYPE_STRING, G_TYPE_INVALID);
     dbus_g_proxy_connect_signal (geoclue_map_proxy,
-                                 "get_geoclue_map_finished",
-                                 (GCallback) geoclue_map_get_geoclue_map_finished,
+                                 "get_map_finished",
+                                 (GCallback) geoclue_map_get_map_finished,
                                  (gpointer)NULL,
                                  (GClosureNotify) NULL);
 

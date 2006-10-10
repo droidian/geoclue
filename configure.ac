@@ -17,7 +17,7 @@ AC_SUBST(DBUS_BINDING_TOOL)
 AM_CONFIG_HEADER(config.h)
 
 
-PKG_CHECK_MODULES(YAHOO, libsoup-2.2 libxml-2.0 dbus-glib-1 geomap gtk+-2.0)
+PKG_CHECK_MODULES(YAHOO, libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
 AC_SUBST(YAHOO_CFLAGS)
 AC_SUBST(YAHOO_LIBS)
 

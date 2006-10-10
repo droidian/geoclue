@@ -27,11 +27,16 @@
 #include <position_client_glue.h>
 #include <stdio.h>
 #include <position_signal_marshal.h>
+#include <geoclue_master_client_glue.h>
 
-
-#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position"
-#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position"
+//#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position"
+//#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"   
+ 
+#define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
+#define GEOCLUE_MASTER_DBUS_PATH        "/org/foinse_project/geoclue/master"
+#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.foinse_project.geoclue.master" 
+ 
         
 static  DBusGConnection*        geoclue_position_connection =   NULL;
 static  DBusGProxy*             geoclue_position_proxy      =   NULL;
@@ -105,11 +110,36 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_init()
         g_error_free (error);
         return GEOCLUE_POSITION_DBUS_ERROR;
     }
+    
+    
+    
+     
+    DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_position_connection,
+                                                    GEOCLUE_MASTER_DBUS_SERVICE,
+                                                    GEOCLUE_MASTER_DBUS_PATH,
+                                                    GEOCLUE_MASTER_DBUS_INTERFACE);   
+    
+   
+    char* service;
+    char* path;
+    org_foinse_project_geoclue_master_get_best_position_provider (master, &service, &path, &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting best position provider: %s\n", error->message);
+        g_error_free (error);  
+        return GEOCLUE_POSITION_DBUS_ERROR;        
+    }   
+    
+    
+    
+    
     geoclue_position_proxy = dbus_g_proxy_new_for_name (geoclue_position_connection,
-                                                    GEOCLUE_POSITION_DBUS_SERVICE,
-                                                    GEOCLUE_POSITION_DBUS_PATH,
+                                                    service,
+                                                    path,
                                                     GEOCLUE_POSITION_DBUS_INTERFACE);
-                                    
+    
+    free(service);
+    free(path);                                
     dbus_g_object_register_marshaller ( _geoclue_position_VOID__DOUBLE_DOUBLE,
                                         G_TYPE_NONE,
                                         G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_INVALID);

@@ -17,63 +17,63 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __GEOCLUESERVER_SERVER_H__
-#define __GEOCLUESERVER_SERVER_H__
+#ifndef __GEOCLUE_POSITION_SERVER_H__
+#define __GEOCLUE_POSITION_SERVER_H__
 
 #define DBUS_API_SUBJECT_TO_CHANGE
 
 
 #include <dbus/dbus-glib.h>
 #include <glib.h>
-#define GEOCLUESERVER_DBUS_SERVICE     "org.foinse_project.geoclue"
-#define GEOCLUESERVER_DBUS_PATH        "/org/foinse_project/geoclue"
-#define GEOCLUESERVER_DBUS_INTERFACE   "org.foinse_project.geoclue"
+#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position.manual"
+#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position/manual"
+#define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"
 
 G_BEGIN_DECLS
 
-//Let's create a geoclueserver object that has one method of geoclueserver
-typedef struct Geoclueserver Geoclueserver;
-typedef struct GeoclueserverClass GeoclueserverClass;
+//Let's create a geoclue_position object that has one method of geoclue_position
+typedef struct GeocluePosition GeocluePosition;
+typedef struct GeocluePositionClass GeocluePositionClass;
 
-GType geoclueserver_get_type (void);
-struct Geoclueserver
+GType geoclue_position_get_type (void);
+struct GeocluePosition
 {
     GObject parent;
      
 };
 
-struct GeoclueserverClass
+struct GeocluePositionClass
 {
   GObjectClass parent;
   DBusGConnection *connection;
 
           /* Signals */
-    void (*current_position_changed) (Geoclueserver*, gdouble, gdouble );
+    void (*current_position_changed) (GeocluePosition*, gdouble, gdouble );
 };
 
-#define TYPE_GEOCLUESERVER              (geoclueserver_get_type ())
-#define GEOCLUESERVER(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), TYPE_GEOCLUESERVER, Geoclueserver))
-#define GEOCLUESERVER_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_GEOCLUESERVER, GeoclueserverClass))
-#define IS_GEOCLUESERVER(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), TYPE_GEOCLUESERVER))
-#define IS_GEOCLUESERVER_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_GEOCLUESERVER))
-#define GEOCLUESERVER_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_GEOCLUESERVER, GeoclueserverClass))
+#define TYPE_GEOCLUE_POSITION              (geoclue_position_get_type ())
+#define GEOCLUE_POSITION(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), TYPE_GEOCLUE_POSITION, GeocluePosition))
+#define GEOCLUE_POSITION_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_GEOCLUE_POSITION, GeocluePositionClass))
+#define IS_GEOCLUE_POSITION(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), TYPE_GEOCLUE_POSITION))
+#define IS_GEOCLUE_POSITION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_GEOCLUE_POSITION))
+#define GEOCLUE_POSITION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_GEOCLUE_POSITION, GeocluePositionClass))
 
-gboolean geoclueserver_version (Geoclueserver *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
-gboolean geoclueserver_service_provider(Geoclueserver *obj, char** name, GError **error);   
+gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
+gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error);   
 
-gboolean geoclueserver_current_position(Geoclueserver *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error );
-gboolean geoclueserver_current_position_error(Geoclueserver *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error );
-gboolean geoclueserver_current_altitude(Geoclueserver *obj, gdouble* OUT_altitude, GError **error );
-gboolean geoclueserver_current_velocity(Geoclueserver *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error );
-gboolean geoclueserver_current_time(Geoclueserver *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclueserver_satellites_in_view(Geoclueserver *obj, GArray** OUT_prn_numbers, GError **error );
-gboolean geoclueserver_satellites_data(Geoclueserver *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error );
-gboolean geoclueserver_sun_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclueserver_sun_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclueserver_moon_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclueserver_moon_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclueserver_geocode(Geoclueserver *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
-gboolean geoclueserver_geocode_free_text(Geoclueserver *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
+gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error );
+gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error );
+gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error );
+gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error );
+gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error );
+gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error );
+gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_geocode(GeocluePosition *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
+gboolean geoclue_position_geocode_free_text(GeocluePosition *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
 
 
 

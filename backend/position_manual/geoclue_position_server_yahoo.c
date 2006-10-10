@@ -18,15 +18,15 @@
  */
 
 #include <geoclue_position_server_yahoo.h>
-#include <geoclueserver_server_glue.h>
-#include <geoclueserver_signal_marshal.h>
+#include <geoclue_position_server_glue.h>
+#include <geoclue_position_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
 //#include <geoclue/position.h>
-#include <geomap/geomap_gtk_layout.h>
+//#include <geomap/geomap_gtk_layout.h>
 
 
 #include <gtk/gtk.h>
-#include <geomap/geomap_gtk_layout.h>
+#include <geoclue/map_gtk_layout.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -47,7 +47,7 @@ GtkWidget* layout;
 
 
 
-G_DEFINE_TYPE(Geoclueserver, geoclueserver, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
 
 
@@ -59,21 +59,21 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 //Default handler
-void geoclueserver_current_position_changed(Geoclueserver* obj, gdouble lat, gdouble lon)
+void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
 {   
     g_print("Current Position Changed\n");
 }
 
 static void
-geoclueserver_init (Geoclueserver *obj)
+geoclue_position_init (GeocluePosition *obj)
 {
 	GError *error = NULL;
 	DBusGProxy *driver_proxy;
-	GeoclueserverClass *klass = GEOCLUESERVER_GET_CLASS(obj);
+	GeocluePositionClass *klass = GEOCLUE_POSITION_GET_CLASS(obj);
 	guint request_ret;
 	
 	dbus_g_connection_register_g_object (klass->connection,
-			GEOCLUESERVER_DBUS_PATH ,
+			GEOCLUE_POSITION_DBUS_PATH ,
 			G_OBJECT (obj));
 
 	driver_proxy = dbus_g_proxy_new_for_name (klass->connection,
@@ -83,7 +83,7 @@ geoclueserver_init (Geoclueserver *obj)
 
 
 	if(!org_freedesktop_DBus_request_name (driver_proxy,
-			GEOCLUESERVER_DBUS_SERVICE,
+			GEOCLUE_POSITION_DBUS_SERVICE,
 			0, &request_ret,    
 			&error))
 	{
@@ -95,7 +95,7 @@ geoclueserver_init (Geoclueserver *obj)
 
 
 static void
-geoclueserver_class_init (GeoclueserverClass *klass)
+geoclue_position_class_init (GeocluePositionClass *klass)
 {
 	GError *error = NULL;
 
@@ -103,15 +103,15 @@ geoclueserver_class_init (GeoclueserverClass *klass)
 
 	signals[CURRENT_POSITION_CHANGED] =
         g_signal_new ("current_position_changed",
-                TYPE_GEOCLUESERVER,
+                TYPE_GEOCLUE_POSITION,
                 G_SIGNAL_RUN_LAST,
-                G_STRUCT_OFFSET (GeoclueserverClass, current_position_changed),
+                G_STRUCT_OFFSET (GeocluePositionClass, current_position_changed),
                 NULL, 
                 NULL,
-                _geoclueserver_VOID__DOUBLE_DOUBLE,
+                _geoclue_position_VOID__DOUBLE_DOUBLE,
                 G_TYPE_NONE, 2 ,G_TYPE_DOUBLE, G_TYPE_DOUBLE);
   
-    klass->current_position_changed = geoclueserver_current_position_changed;
+    klass->current_position_changed = geoclue_position_current_position_changed;
  
 	if (klass->connection == NULL)
 	{
@@ -120,12 +120,12 @@ geoclueserver_class_init (GeoclueserverClass *klass)
 		return;
 	}	
 
-	dbus_g_object_type_install_info (TYPE_GEOCLUESERVER, &dbus_glib_geoclueserver_object_info);	
+	dbus_g_object_type_install_info (TYPE_GEOCLUE_POSITION, &dbus_glib_geoclue_position_object_info);	
     
 }
 
 
-gboolean geoclueserver_version (Geoclueserver *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
+gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
 {
     *OUT_major = 1;
     *OUT_minor = 0;
@@ -134,74 +134,74 @@ gboolean geoclueserver_version (Geoclueserver *obj, gint* OUT_major, gint* OUT_m
 }
 
 
-gboolean geoclueserver_service_provider(Geoclueserver *obj, char** name, GError **error)
+gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error)
 {
     *name = "Yahoo and NMEA";
     return TRUE;
 }
 
-gboolean geoclueserver_current_position(Geoclueserver *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
+gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
     g_object_get(G_OBJECT(layout), "latitude", OUT_latitude , "longitude", OUT_longitude, NULL);   
     return TRUE;
 }
 
-gboolean geoclueserver_current_position_error(Geoclueserver *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
+gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_current_altitude(Geoclueserver *obj, gdouble* OUT_altitude, GError **error )
+gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_current_velocity(Geoclueserver *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
+gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_current_time(Geoclueserver *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_satellites_in_view(Geoclueserver *obj, GArray** OUT_prn_numbers, GError **error )
+gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_satellites_data(Geoclueserver *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
+gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_sun_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_sun_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_moon_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_moon_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_geocode(Geoclueserver *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
+gboolean geoclue_position_geocode(GeocluePosition *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
 {
     return FALSE;
 }
 
-gboolean geoclueserver_geocode_free_text(Geoclueserver *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
+gboolean geoclue_position_geocode_free_text(GeocluePosition *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
 {
     return FALSE;
 }
@@ -232,20 +232,20 @@ static void grab_map_clicked( GtkWidget *widget, gpointer  data )
     temp = gtk_entry_get_text(GTK_ENTRY(zoom));
     g_print(temp);
     sscanf(temp, "%d", &zoo);        
-    geomap_gtk_layout_zoom( GEOMAP_GTK_LAYOUT(layout),  zoo);
-    geomap_gtk_layout_lat_lon( GEOMAP_GTK_LAYOUT(layout),lat ,lon );
+    geoclue_map_gtk_layout_zoom( GEOCLUE_MAP_GTK_LAYOUT(layout),  zoo);
+    geoclue_map_gtk_layout_lat_lon( GEOCLUE_MAP_GTK_LAYOUT(layout),lat ,lon );
 }
 
 
 
 void zoom_in_clicked( GtkWidget *widget, gpointer   data )
 {
-    geomap_gtk_layout_zoom_in(GEOMAP_GTK_LAYOUT(layout));
+    geoclue_map_gtk_layout_zoom_in(GEOCLUE_MAP_GTK_LAYOUT(layout));
 }
 
 void zoom_out_clicked( GtkWidget *widget, gpointer   data )
 {
-    geomap_gtk_layout_zoom_out(GEOMAP_GTK_LAYOUT(layout));
+    geoclue_map_gtk_layout_zoom_out(GEOCLUE_MAP_GTK_LAYOUT(layout));
 }
 
 
@@ -254,13 +254,13 @@ int main(int argc, char **argv)
 {
     gtk_init (&argc, &argv);
 
-    if(geomap_init())
+    if(geoclue_map_init())
     {   
         g_print("Error Opening Geomap\n");       
     }    
     
-    Geoclueserver* obj = NULL;  
-    obj = GEOCLUESERVER(g_type_create_instance (geoclueserver_get_type()));   
+    GeocluePosition* obj = NULL;  
+    obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));   
     
     latitude = gtk_entry_new(); 
     longitude = gtk_entry_new();  
@@ -284,13 +284,13 @@ int main(int argc, char **argv)
     gtk_container_add (GTK_CONTAINER (window), vbox);
 
 
-    // This is a little weird to get the geomap layout widget to work
+    // This is a little weird to get the geoclue_map layout widget to work
     // You create an event box and use that for the constructor
     // Then you add the eventbox to whatever widget you want the
     // Geo layout to appear    
     GtkWidget* eventbox = gtk_event_box_new();
     gtk_box_pack_start(GTK_BOX (vbox),eventbox , TRUE,TRUE, 0);  
-    layout = geomap_gtk_layout_new( GTK_EVENT_BOX(eventbox), DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM );
+    layout = geoclue_map_gtk_layout_new( GTK_EVENT_BOX(eventbox), DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM );
 
     GtkWidget* tempvbox;
     tempvbox =  gtk_vbox_new(TRUE, 2);

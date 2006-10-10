@@ -17,10 +17,30 @@
  * Boston, MA 02111-1307, USA.
  */
 #include <geoclue_map_server_yahoo.h>
-#include <geomapserver_server_glue.h>
-#include <geomapserver_signal_marshal.h>
+#include <geoclue_map_server_glue.h>
+#include <geoclue_map_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
-#include <geomap/geomap.h>
+
+
+
+typedef enum _geoclue_map_returncode
+{
+    GEOCLUE_MAP_SUCCESS                  = 0,
+    GEOCLUE_MAP_NOT_INITIALIZED          = -1, 
+    GEOCLUE_MAP_DBUS_ERROR               = -2,
+    GEOCLUE_MAP_SERVICE_NOT_AVAILABLE    = -3,
+    GEOCLUE_MAP_HEIGHT_TOO_BIG           = -4,
+    GEOCLUE_MAP_HEIGHT_TOO_SMALL         = -5,
+    GEOCLUE_MAP_WIDTH_TOO_BIG            = -6,
+    GEOCLUE_MAP_WIDTH_TOO_SMALL          = -7,
+    GEOCLUE_MAP_ZOOM_TOO_BIG             = -8,
+    GEOCLUE_MAP_ZOOM_TOO_SMALL           = -9,
+    GEOCLUE_MAP_INVALID_LATITUDE         = -10,
+    GEOCLUE_MAP_INVALID_LONGITUDE        = -11   
+   
+} GEOCLUE_MAP_RETURNCODE;
+
+
 
 #include <libxml/xmlreader.h>
 #include <libsoup/soup.h>
@@ -30,12 +50,12 @@
 
 
 
-#define GEOMAP_MIN_HEIGHT 100
-#define GEOMAP_MAX_HEIGHT 2000
-#define GEOMAP_MIN_WIDTH 100
-#define GEOMAP_MAX_WIDTH 3000
-#define GEOMAP_MIN_ZOOM 1
-#define GEOMAP_MAX_ZOOM 12
+#define GEOCLUE_MAP_MIN_HEIGHT 100
+#define GEOCLUE_MAP_MAX_HEIGHT 2000
+#define GEOCLUE_MAP_MIN_WIDTH 100
+#define GEOCLUE_MAP_MAX_WIDTH 3000
+#define GEOCLUE_MAP_MIN_ZOOM 1
+#define GEOCLUE_MAP_MAX_ZOOM 12
 
 
 //This is latitude per pixel at zoom level 5 on yahoo
@@ -49,11 +69,11 @@ gdouble IN_longitude;
 gint IN_width;
 gint IN_height;
 gint IN_zoom;
-Geomapserver* server; 
+GeoclueMap* server; 
 } params;
 
 
-G_DEFINE_TYPE(Geomapserver, geomapserver, G_TYPE_OBJECT)
+G_DEFINE_TYPE(GeoclueMap, geoclue_map, G_TYPE_OBJECT)
 
 
 /* Filter signals and args */
@@ -66,7 +86,7 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 //Default handler
-void geomapserver_get_map_finished(Geomapserver* obj, gint returncode, GArray* map_buffer, gchar* buffer_mime_type)
+void geoclue_map_get_map_finished(GeoclueMap* obj, gint returncode, GArray* map_buffer, gchar* buffer_mime_type)
 {   
 
 printf("finished sending map\n");
@@ -78,19 +98,20 @@ printf("finished sending map\n");
 
 
 static void
-geomapserver_init (Geomapserver *obj)
+geoclue_map_init (GeoclueMap *obj)
 {
 
 
 	GError *error = NULL;
 	DBusGProxy *driver_proxy;
-	GeomapserverClass *klass = GEOMAPSERVER_GET_CLASS(obj);
+	GeoclueMapClass *klass = GEOCLUE_MAP_GET_CLASS(obj);
 	guint request_ret;
 	
 	/* Register DBUS path */
 	dbus_g_connection_register_g_object (klass->connection,
-			GEOMAPSERVER_DBUS_PATH ,
+			GEOCLUE_MAP_DBUS_PATH ,
 			G_OBJECT (obj));
+
 
 	/* Register the service name, the constant here are defined in dbus-glib-bindings.h */
 	driver_proxy = dbus_g_proxy_new_for_name (klass->connection,
@@ -100,7 +121,7 @@ geomapserver_init (Geomapserver *obj)
 
 
 	if(!org_freedesktop_DBus_request_name (driver_proxy,
-			GEOMAPSERVER_DBUS_SERVICE,
+			GEOCLUE_MAP_DBUS_SERVICE,
 			0, &request_ret,    /* See tutorial for more infos about these */
 			&error))
 	{
@@ -109,15 +130,20 @@ geomapserver_init (Geomapserver *obj)
         exit(1);
 	}	
 
-  
+if (request_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+{ 
+    g_printerr("Yahoo maps service already running!\n");
+}
 
+  
+    g_print("registered mapping interface \n");
 
 }
 
 
 
 static void
-geomapserver_class_init (GeomapserverClass *klass)
+geoclue_map_class_init (GeoclueMapClass *klass)
 {
 	GError *error = NULL;
 
@@ -125,15 +151,15 @@ geomapserver_class_init (GeomapserverClass *klass)
 
 	signals[GET_MAP_FINISHED] =
         g_signal_new ("get_map_finished",
-                TYPE_GEOMAPSERVER,
+                TYPE_GEOCLUE_MAP,
                 G_SIGNAL_RUN_LAST,
-                G_STRUCT_OFFSET (GeomapserverClass, get_map_finished),
+                G_STRUCT_OFFSET (GeoclueMapClass, get_map_finished),
                 NULL, /* accumulator */
                 NULL, /* accumulator data */
-                _geomapserver_VOID__INT_BOXED_STRING,
+                _geoclue_map_VOID__INT_BOXED_STRING,
                 G_TYPE_NONE, 3 ,G_TYPE_INT,  DBUS_TYPE_G_UCHAR_ARRAY , G_TYPE_STRING);
   
-    klass->get_map_finished = geomapserver_get_map_finished;
+    klass->get_map_finished = geoclue_map_get_map_finished;
   
 
    
@@ -147,13 +173,14 @@ geomapserver_class_init (GeomapserverClass *klass)
 	}	
 	/* &dbus_glib__object_info is provided in the server-bindings.h file */
 	/* OBJECT_TYPE_SERVER is the GType of your server object */
-	dbus_g_object_type_install_info (TYPE_GEOMAPSERVER, &dbus_glib_geomapserver_object_info);	
+	dbus_g_object_type_install_info (TYPE_GEOCLUE_MAP, &dbus_glib_geoclue_map_object_info);	
     
 }
 
 
-gboolean geomapserver_version (Geomapserver *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
+gboolean geoclue_map_version (GeoclueMap *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
 {
+        printf("Yahoo!!!\n");
     *OUT_major = 1;
     *OUT_minor = 0;
     *OUT_micro = 0;
@@ -162,53 +189,55 @@ gboolean geomapserver_version (Geomapserver *obj, gint* OUT_major, gint* OUT_min
 }
 
 
-gboolean geomapserver_service_provider(Geomapserver *obj, char** name, GError **error)
+gboolean geoclue_map_service_provider(GeoclueMap *obj, char** name, GError **error)
 {
     *name = "Yahoo Maps";
+    printf("Yahoo!!!\n");
     return TRUE;
 }
 
-gboolean geomapserver_max_zoom(Geomapserver *obj, int* max_zoom, GError **error)
+gboolean geoclue_map_max_zoom(GeoclueMap *obj, int* max_zoom, GError **error)
 {
-    *max_zoom = GEOMAP_MAX_ZOOM;
+        printf("Yahoo!!!\n");
+    *max_zoom = GEOCLUE_MAP_MAX_ZOOM;
     return TRUE;
 }
 
 
-gboolean geomapserver_min_zoom(Geomapserver *obj, int* min_zoom, GError **error)
+gboolean geoclue_map_min_zoom(GeoclueMap *obj, int* min_zoom, GError **error)
 {
-   *min_zoom = GEOMAP_MIN_ZOOM;
+   *min_zoom = GEOCLUE_MAP_MIN_ZOOM;
     return TRUE;
 }
 
-gboolean geomapserver_max_height(Geomapserver *obj, int* max_height, GError **error)
+gboolean geoclue_map_max_height(GeoclueMap *obj, int* max_height, GError **error)
 {
-    *max_height = GEOMAP_MAX_HEIGHT;
+    *max_height = GEOCLUE_MAP_MAX_HEIGHT;
     return TRUE;
 }
 
-gboolean geomapserver_min_height(Geomapserver *obj, int* min_height, GError **error)
+gboolean geoclue_map_min_height(GeoclueMap *obj, int* min_height, GError **error)
 {
-    *min_height = GEOMAP_MIN_HEIGHT;
+    *min_height = GEOCLUE_MAP_MIN_HEIGHT;
     return TRUE;
 }
 
-gboolean geomapserver_max_width(Geomapserver *obj, int* max_width, GError **error)
+gboolean geoclue_map_max_width(GeoclueMap *obj, int* max_width, GError **error)
 {
-    *max_width = GEOMAP_MAX_WIDTH;
+    *max_width = GEOCLUE_MAP_MAX_WIDTH;
     return TRUE;
 }
 
-gboolean geomapserver_min_width(Geomapserver *obj, int* min_width, GError **error)
+gboolean geoclue_map_min_width(GeoclueMap *obj, int* min_width, GError **error)
 {
-    *min_width = GEOMAP_MIN_WIDTH;
+    *min_width = GEOCLUE_MAP_MIN_WIDTH;
     return TRUE;
 }
 
 
 
 
-void geomapserver_map_thread(params *obj)
+void geoclue_map_map_thread(params *obj)
 {
 
 gdouble IN_latitude = obj->IN_latitude;
@@ -331,47 +360,47 @@ gint IN_zoom = obj->IN_zoom;
 
 
 
-gboolean geomapserver_get_map (Geomapserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_width, const gint IN_height, const gint IN_zoom, int* return_code, GError **error)
+gboolean geoclue_map_get_map (GeoclueMap *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_width, const gint IN_height, const gint IN_zoom, int* return_code, GError **error)
 {
 
     if( IN_latitude > 180.0 || IN_latitude < -180.0)
     {
-        *return_code = GEOMAP_INVALID_LATITUDE;
+        *return_code = GEOCLUE_MAP_INVALID_LATITUDE;
         return TRUE;
     }
     if( IN_longitude > 180.0 || IN_longitude < -180.0)
     {
-        *return_code = GEOMAP_INVALID_LONGITUDE;
+        *return_code = GEOCLUE_MAP_INVALID_LONGITUDE;
         return TRUE;
     }
-    if( IN_height > GEOMAP_MAX_HEIGHT)
+    if( IN_height > GEOCLUE_MAP_MAX_HEIGHT)
     {
-        *return_code = GEOMAP_HEIGHT_TOO_BIG;
+        *return_code = GEOCLUE_MAP_HEIGHT_TOO_BIG;
         return TRUE;
     }   
-    if( IN_height < GEOMAP_MIN_HEIGHT)
+    if( IN_height < GEOCLUE_MAP_MIN_HEIGHT)
     {
-        *return_code = GEOMAP_HEIGHT_TOO_SMALL;
+        *return_code = GEOCLUE_MAP_HEIGHT_TOO_SMALL;
         return TRUE;
     }
-    if( IN_zoom > GEOMAP_MAX_ZOOM)
+    if( IN_zoom > GEOCLUE_MAP_MAX_ZOOM)
     {
-        *return_code = GEOMAP_ZOOM_TOO_BIG;
+        *return_code = GEOCLUE_MAP_ZOOM_TOO_BIG;
         return TRUE;
     }   
-    if( IN_zoom < GEOMAP_MIN_ZOOM)
+    if( IN_zoom < GEOCLUE_MAP_MIN_ZOOM)
     {
-        *return_code = GEOMAP_ZOOM_TOO_SMALL;
+        *return_code = GEOCLUE_MAP_ZOOM_TOO_SMALL;
         return TRUE;
     } 
-    if( IN_width > GEOMAP_MAX_WIDTH)
+    if( IN_width > GEOCLUE_MAP_MAX_WIDTH)
     {
-        *return_code = GEOMAP_WIDTH_TOO_BIG;
+        *return_code = GEOCLUE_MAP_WIDTH_TOO_BIG;
         return TRUE;
     }   
-    if( IN_width < GEOMAP_MIN_WIDTH)
+    if( IN_width < GEOCLUE_MAP_MIN_WIDTH)
     {
-        *return_code = GEOMAP_WIDTH_TOO_SMALL;
+        *return_code = GEOCLUE_MAP_WIDTH_TOO_SMALL;
         return TRUE;
     }        
 
@@ -383,7 +412,7 @@ gboolean geomapserver_get_map (Geomapserver *obj, const gdouble IN_latitude, con
     parameters->IN_zoom = IN_zoom;
     parameters->server = obj;
 
-    GThread* mythread = g_thread_create((GThreadFunc)geomapserver_map_thread,  parameters,  FALSE, NULL);
+    GThread* mythread = g_thread_create((GThreadFunc)geoclue_map_map_thread,  parameters,  FALSE, NULL);
 
       
     *return_code = 0;
@@ -391,7 +420,7 @@ gboolean geomapserver_get_map (Geomapserver *obj, const gdouble IN_latitude, con
     return TRUE;
 }
 
-gboolean geomapserver_latlong_to_offset(Geomapserver *obj, const gdouble IN_latitude, const gdouble IN_longitude,  const gint IN_zoom, const gdouble IN_center_latitude, const gdouble IN_center_longitude, int* OUT_x_offset, int* OUT_y_offset, GError **error)
+gboolean geoclue_map_latlong_to_offset(GeoclueMap *obj, const gdouble IN_latitude, const gdouble IN_longitude,  const gint IN_zoom, const gdouble IN_center_latitude, const gdouble IN_center_longitude, int* OUT_x_offset, int* OUT_y_offset, GError **error)
 {
       printf("Long offset \n");  
 
@@ -410,7 +439,7 @@ gboolean geomapserver_latlong_to_offset(Geomapserver *obj, const gdouble IN_lati
     return TRUE;
 }
 
-gboolean geomapserver_offset_to_latlong(Geomapserver *obj, const int IN_x_offset,const int IN_y_offset, const gint IN_zoom, const gdouble IN_center_latitude, const gdouble IN_center_longitude, gdouble* OUT_latitude, gdouble* OUT_longitude,  GError **error )
+gboolean geoclue_map_offset_to_latlong(GeoclueMap *obj, const int IN_x_offset,const int IN_y_offset, const gint IN_zoom, const gdouble IN_center_latitude, const gdouble IN_center_longitude, gdouble* OUT_latitude, gdouble* OUT_longitude,  GError **error )
 {
 
     /* Higher zoom levels it doubles per level */  
@@ -435,7 +464,7 @@ gboolean geomapserver_offset_to_latlong(Geomapserver *obj, const int IN_x_offset
     return TRUE;
 }
 
-gboolean geomapserver_find_zoom_level (Geomapserver *obj, const gdouble IN_latitude_top_left, const gdouble IN_longitude_top_left, const gdouble IN_latitude_bottom_right, const gdouble IN_longitude_bottom_right, const gint IN_width, const gint IN_height,  gint* OUT_zoom, GError** error)
+gboolean geoclue_map_find_zoom_level (GeoclueMap *obj, const gdouble IN_latitude_top_left, const gdouble IN_longitude_top_left, const gdouble IN_latitude_bottom_right, const gdouble IN_longitude_bottom_right, const gint IN_width, const gint IN_height,  gint* OUT_zoom, GError** error)
 {
 
     // Do Y first as it is easy and will be a good guess to start
@@ -451,7 +480,7 @@ gboolean geomapserver_find_zoom_level (Geomapserver *obj, const gdouble IN_latit
     double zoom_factor = (MAGIC_NUMBER * pow(2.0,(double)*OUT_zoom - 5.0));
     double make_me_one = zoom_factor * (IN_height) / lat_delta;
     
-    while( *OUT_zoom  <= GEOMAP_MAX_ZOOM && make_me_one < 1)
+    while( *OUT_zoom  <= GEOCLUE_MAP_MAX_ZOOM && make_me_one < 1)
     {
         *OUT_zoom++;
         make_me_one *= 2.0;       
@@ -464,7 +493,7 @@ gboolean geomapserver_find_zoom_level (Geomapserver *obj, const gdouble IN_latit
     zoom_factor = (MAGIC_NUMBER * pow(2.0,(double)*OUT_zoom - 5.0));
     make_me_one = zoom_factor * (IN_width / cos_value) / lon_delta;
     
-    while( *OUT_zoom  <= GEOMAP_MAX_ZOOM && make_me_one < 1)
+    while( *OUT_zoom  <= GEOCLUE_MAP_MAX_ZOOM && make_me_one < 1)
     {
         *OUT_zoom++;
         make_me_one *= 2.0;       
@@ -504,9 +533,9 @@ int main( int   argc,
     LIBXML_TEST_VERSION
       
 
-    Geomapserver* obj = NULL; 
+    GeoclueMap* obj = NULL; 
   
-    obj = GEOMAPSERVER(g_type_create_instance (geomapserver_get_type()));
+    obj = GEOCLUE_MAP(g_type_create_instance (geoclue_map_get_type()));
         
 
 

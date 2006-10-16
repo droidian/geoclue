@@ -366,43 +366,6 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_moon_set ( const gdouble IN_latitud
     return GEOCLUE_POSITION_SUCCESS;              
 }
 
-GEOCLUE_POSITION_RETURNCODE geoclue_position_geocode ( const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_geocode ( geoclue_position_proxy, IN_street , IN_city , IN_state , IN_zip , OUT_latitude , OUT_longitude , OUT_return_code , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position geocode: %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-GEOCLUE_POSITION_RETURNCODE geoclue_position_geocode_free_text ( const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_geocode_free_text ( geoclue_position_proxy, IN_free_text , OUT_latitude , OUT_longitude , OUT_return_code ,  &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position geocode_free_text: %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-
 
 
 

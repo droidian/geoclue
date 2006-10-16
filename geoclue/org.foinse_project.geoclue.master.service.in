@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.foinse_project.geoclue.master
+Exec=@execdir@/geoclue-master

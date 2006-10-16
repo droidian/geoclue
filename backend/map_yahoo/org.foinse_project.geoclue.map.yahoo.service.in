@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.foinse_project.geoclue.map.yahoo
+Exec=@execdir@/geoclue-map-server-yahoo

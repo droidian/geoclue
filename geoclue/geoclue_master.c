@@ -115,8 +115,8 @@ gboolean geoclue_master_version (GeoclueMaster *obj, gint* OUT_major, gint* OUT_
 gboolean geoclue_master_get_best_position_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, GError **error)
 {
 
-	*OUT_service = strdup("org.foinse_project.geoclue.position.manual");
-	*OUT_path = strdup("/org/foinse_project/geoclue/position/manual"); 
+	*OUT_service = strdup("org.foinse_project.geoclue.position.hostip");
+	*OUT_path = strdup("/org/foinse_project/geoclue/position/hostip"); 
 		  
     return TRUE;
 }
@@ -127,8 +127,8 @@ gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char ***
 	*OUT_path = malloc(3 * sizeof(char*));
 	(*OUT_service)[0] = strdup("org.foinse_project.geoclue.position.manual");
 	(*OUT_path)[0] = strdup("/org/foinse_project/geoclue/position/manual"); 
-	(*OUT_service)[1] = strdup("org.foinse_project.geoclue.position.hostipinfo");
-	(*OUT_path)[1] = strdup("/org/foinse_project/geoclue/position/hostipinfo"); 	
+	(*OUT_service)[1] = strdup("org.foinse_project.geoclue.position.hostip");
+	(*OUT_path)[1] = strdup("/org/foinse_project/geoclue/position/hostip"); 	
 	(*OUT_service)[2] = NULL;
 	(*OUT_path)[2] = NULL;
     

@@ -17,7 +17,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <geoclue_position_server_yahoo.h>
+#include <geoclue_position_server_manual.h>
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
@@ -136,7 +136,7 @@ gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* 
 
 gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error)
 {
-    *name = "Yahoo and NMEA";
+    *name = "Manual user set";
     return TRUE;
 }
 

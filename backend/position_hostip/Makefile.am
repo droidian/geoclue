@@ -1,28 +1,25 @@
-bin_PROGRAMS = geoclue-position-server-manual
+bin_PROGRAMS = geoclue-position-server-hostip
 
-geoclue_position_server_manual_SOURCES = geoclue_position_server_manual.c \
+geoclue_position_server_hostip_SOURCES = geoclue_position_server_hostip.c \
 				geoclue_position_signal_marshal.c
 
 
-AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
-
-
-service_in_files = org.foinse_project.geoclue.position.manual.service.in
+service_in_files = org.foinse_project.geoclue.position.hostip.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 
 # D-Bus service descriptor installation
 servicedir = $(DBUS_SERVICES_DIR)
 service_DATA = $(service_files)
-
 execdir = @bindir@
-
 $(service_DATA): $(service_in_files) Makefile
 	for f in $(service_in_files) ; do \
 		sed -e 's;@execdir@;$(execdir);' $< > $@ ;\
 	done
 
+
+AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
+AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
 
 EXTRA_DIST = \
 		$(service_in_files)

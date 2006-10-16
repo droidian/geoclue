@@ -29,6 +29,9 @@ AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 
 
+DBUS_SERVICES_DIR=`pkg-config dbus-1 --variable=exec_prefix`/share/dbus-1/services
+AC_SUBST(DBUS_SERVICES_DIR)
+
 
 AC_OUTPUT(Makefile 
 	geoclue/Makefile 
@@ -38,4 +41,6 @@ AC_OUTPUT(Makefile
 	backend/geoclue_master/Makefile
 	backend/map_yahoo/Makefile
 	backend/position_manual/Makefile
+	backend/geocode_yahoo/Makefile
+	backend/position_hostip/Makefile
 )

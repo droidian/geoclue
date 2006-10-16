@@ -128,22 +128,5 @@
 
 
 
-    <method name="geocode">   
-      <arg type="s" name="street" direction="in" />
-      <arg type="s" name="city" direction="in" /> 
-      <arg type="s" name="state" direction="in" />
-      <arg type="s" name="zip" direction="in" />
-      <arg type="d" name="latitude" direction="out" />
-      <arg type="d" name="longitude" direction="out" />
-      <arg type="i" name="return_code" direction="out" />
-    </method>
-
-    <method name="geocode_free_text">   
-      <arg type="s" name="free_text" direction="in" />
-      <arg type="d" name="latitude" direction="out" />
-      <arg type="d" name="longitude" direction="out" /> 
-      <arg type="i" name="return_code" direction="out" />
-    </method>
-
   </interface>
 </node>

@@ -22,6 +22,8 @@ AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(YAHOO_LIBS) 
 
 EXTRA_DIST = \
+		geoclue_geocode_server_yahoo.h \
+		geocode_yahoo.desc \
 		$(service_in_files)
 
 BUILT_SOURCES = \
@@ -31,6 +33,13 @@ BUILT_SOURCES = \
 CLEANFILES = \
 	geoclue_geocode_server_glue.h \
 		$(service_files)
+
+
+backendregistrationdir = $(datadir)/geoclue/backend
+backendregistration_DATA = \ 
+	geocode_yahoo.desc
+
+
 
 geoclue_geocode_server_glue.h:../../geoclue/geocode_glue.xml
 	$(DBUS_BINDING_TOOL) --prefix=geoclue_geocode --mode=glib-server  $< |  sed 's;\data = user_data;\data = (DBusGAsyncData\*)user_data;g' > $@ 

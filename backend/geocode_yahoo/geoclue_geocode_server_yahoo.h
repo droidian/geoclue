@@ -45,7 +45,7 @@ struct GeoclueGeocode
 {
     GObject parent;
 
-     
+    GMainLoop*  loop;     
 };
 
 struct GeoclueGeocodeClass
@@ -70,6 +70,10 @@ gboolean geoclue_geocode_service_provider(GeoclueGeocode *obj, char** name, GErr
 gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
 gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
 gboolean geoclue_geocode_lat_lon_to_address(GeoclueGeocode *obj, gdouble IN_latitude, gdouble IN_longitude, char ** OUT_street, char ** OUT_city, char ** OUT_state, char ** OUT_zip, gint* OUT_return_code, GError **error );
+
+gboolean geoclue_geocode_service_available(GeoclueGeocode *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
+gboolean geoclue_geocode_shutdown(GeoclueGeocode *obj, GError** error);
+
 
 
 

@@ -21,12 +21,17 @@
 //#include <geoclue_map_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
 
+
 //#include <geoclue_map_client_glue.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 
 
 
-G_DEFINE_TYPE(GeoclueMaster, geoclueserver_map, G_TYPE_OBJECT)
+
+G_DEFINE_TYPE(GeoclueMaster, geoclueserver_master, G_TYPE_OBJECT)
 
 
 /* Filter signals and args */
@@ -38,16 +43,41 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 
+static void
+geoclueserver_add_backend(GeoclueMaster *obj, char* path)
+{
+    printf("Added %s\n", path);
+    int newfile = g_open(path, O_RDONLY,0);
+    if(newfile != -2)
+    {                
 
+        char** backendstrings = malloc(sizeof(char*)*5);
+        GIOChannel* channel = g_io_channel_unix_new(newfile);
+        g_io_channel_read_line(channel,&backendstrings[0],NULL, NULL, NULL);
+        g_io_channel_read_line(channel,&backendstrings[1],NULL, NULL, NULL);
+        g_io_channel_read_line(channel,&backendstrings[2],NULL, NULL, NULL);
+        g_io_channel_read_line(channel,&backendstrings[3],NULL, NULL, NULL);     
+        backendstrings[4] = NULL;
+        printf("Added %s\n", backendstrings[0]);
+        obj->backends = g_list_prepend(obj->backends, (void*)backendstrings);      
+    }
+    
+}
 
 
 
 
 static void
-geoclueserver_map_init (GeoclueMaster *obj)
+geoclueserver_master_init (GeoclueMaster *obj)
 {
+    obj->client = gconf_client_get_default();
+    gconf_client_add_dir(obj->client,
+                       "/apps/geoclue",
+                       GCONF_CLIENT_PRELOAD_RECURSIVE,
+                       NULL);
+    
 
-
+    obj->backends = NULL;
 	GError *error = NULL;
 	DBusGProxy *driver_proxy;
 	GeoclueMasterClass *klass = GEOCLUE_MASTER_GET_CLASS(obj);
@@ -75,6 +105,33 @@ geoclueserver_map_init (GeoclueMaster *obj)
 		g_error_free (error);
 	}	
 
+  GDir* dir = g_dir_open("/usr/local/share/geoclue/backend",0,NULL);
+  const gchar* filename;
+  if(dir != NULL)
+  {
+      filename = g_dir_read_name(dir);
+      while(filename != NULL)
+      {
+        char* fullpath = g_strconcat("/usr/local/share/geoclue/backend", "/", filename, NULL);
+        geoclueserver_add_backend(obj, fullpath);
+        free(fullpath);
+        filename = g_dir_read_name(dir);
+      }
+  }
+
+  dir = g_dir_open("/usr/share/geoclue/backend",0,NULL);
+  if(dir != NULL)
+  {  
+      filename = g_dir_read_name(dir);
+      while(filename != NULL)
+      {
+        char* fullpath = g_strconcat("/usr/share/geoclue/backend", "/", filename, NULL);
+        geoclueserver_add_backend(obj, fullpath);
+        free(fullpath);
+        filename = g_dir_read_name(dir);
+      }
+  }
+
   
 
 
@@ -83,7 +140,7 @@ geoclueserver_map_init (GeoclueMaster *obj)
 
 
 static void
-geoclueserver_map_class_init (GeoclueMasterClass *klass)
+geoclueserver_master_class_init (GeoclueMasterClass *klass)
 {
 	GError *error = NULL;
 
@@ -112,17 +169,40 @@ gboolean geoclue_master_version (GeoclueMaster *obj, gint* OUT_major, gint* OUT_
 }
 
 
-gboolean geoclue_master_get_best_position_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, GError **error)
-{
 
-	*OUT_service = strdup("org.foinse_project.geoclue.position.hostip");
-	*OUT_path = strdup("/org/foinse_project/geoclue/position/hostip"); 
+
+
+gboolean geoclue_master_get_default_position_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error)
+{
+    guint length =  g_list_length(obj->backends);
+    printf("length %d\n",length);
+    int i;    
+    for(i = 0; i < length; i++)
+    {
+        char** backend = g_list_nth_data(obj->backends, i);
+        printf("Services \n\t%s\n\t%s\n\t%s\n\t%s\n", backend[0], backend[1], backend[2], backend[3]);
+    }   
+
+
+	*OUT_service = gconf_client_get_string(obj->client, "/apps/geoclue/position/defaultservice",NULL);
+	*OUT_path = gconf_client_get_string(obj->client, "/apps/geoclue/position/defaultpath",NULL); 
 		  
     return TRUE;
 }
-
-gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, GError **error)
+gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error)
 {
+    guint length =  g_list_length(obj->backends);
+    printf("length %d\n",length);
+    int i;
+    for(i = 0; i < length; i++)
+    {
+        char** backend = g_list_nth_data(obj->backends, i);
+        printf("Services \n\t%s\n\t%s\n\t%s\n\t%s\n", backend[0], backend[1], backend[2], backend[3]);
+    }    
+
+    
+    
+    
 	*OUT_service = malloc(3 * sizeof(char*));
 	*OUT_path = malloc(3 * sizeof(char*));
 	(*OUT_service)[0] = strdup("org.foinse_project.geoclue.position.manual");
@@ -136,10 +216,48 @@ gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char ***
 }
 
 
-gboolean geoclue_master_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error)
+gboolean geoclue_master_position_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error)
 {   
     return TRUE;
 }
+
+
+
+gboolean geoclue_master_get_default_map_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error)
+{   
+    return TRUE;
+}
+
+
+gboolean geoclue_master_get_all_map_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error)
+{   
+    return TRUE;
+}
+
+
+gboolean geoclue_master_map_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error)
+{   
+    return TRUE;
+}
+
+
+gboolean geoclue_master_get_default_geocode_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error)
+{   
+    return TRUE;
+}
+
+
+gboolean geoclue_master_get_all_geocode_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error)
+{   
+    return TRUE;
+}
+
+
+gboolean geoclue_master_geocode_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error)
+{   
+    return TRUE;
+}
+
 
 
 
@@ -150,6 +268,9 @@ int main( int   argc,
 {
     
     g_type_init ();
+    gconf_init(argc, argv, NULL);
+    
+    
    
     GMainLoop*  loop = g_main_loop_new(NULL,TRUE);
     

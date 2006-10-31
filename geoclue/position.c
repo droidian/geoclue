@@ -54,7 +54,12 @@ void geoclue_position_current_position_changed(void* userdata, gdouble lat, gdou
             callbackfunction( lat, lon , userdatastore );           
    
 }
-
+GEOCLUE_POSITION_RETURNCODE geoclue_position_set_position_callback(GEOCLUE_POSITION_CALLBACK callback, void* userdata )
+{
+    callbackfunction = callback;
+    userdatastore = userdata;
+    
+}
 
 
 
@@ -98,7 +103,41 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_service_provider(char** name)
 }
    
    
-   
+GEOCLUE_POSITION_RETURNCODE geoclue_position_init_specific(char* service, char* path)
+{
+    GError* error = NULL;
+    geoclue_position_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    if (geoclue_position_connection == NULL)
+    {
+        g_printerr ("Geomap failed to open connection to bus: %s\n", error->message);
+        g_error_free (error);
+        return GEOCLUE_POSITION_DBUS_ERROR;
+    }
+    
+    
+    geoclue_position_proxy = dbus_g_proxy_new_for_name (geoclue_position_connection,
+                                                    service,
+                                                    path,
+                                                    GEOCLUE_POSITION_DBUS_INTERFACE);
+                                
+    dbus_g_object_register_marshaller ( _geoclue_position_VOID__DOUBLE_DOUBLE,
+                                        G_TYPE_NONE,
+                                        G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_INVALID);
+    dbus_g_proxy_add_signal (geoclue_position_proxy,
+                             "current_position_changed",
+                             G_TYPE_DOUBLE, G_TYPE_DOUBLE,  G_TYPE_INVALID);
+    dbus_g_proxy_connect_signal (geoclue_position_proxy,
+                                 "current_position_changed",
+                                 (GCallback) geoclue_position_current_position_changed,
+                                 (gpointer)NULL,
+                                 (GClosureNotify) NULL);
+
+    callbackfunction    = NULL;
+    userdatastore       = NULL;  
+    return GEOCLUE_POSITION_SUCCESS;        
+}
+
+  
    
 GEOCLUE_POSITION_RETURNCODE geoclue_position_init()
 {
@@ -122,10 +161,11 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_init()
    
     char* service;
     char* path;
-    org_foinse_project_geoclue_master_get_best_position_provider (master, &service, &path, &error);
+    char* desc;
+    org_foinse_project_geoclue_master_get_default_position_provider (master, &service, &path, &desc, &error);
     if( error != NULL )
     {
-        g_printerr ("Error getting best position provider: %s\n", error->message);
+        g_printerr ("Error getting default position provider: %s\n", error->message);
         g_error_free (error);  
         return GEOCLUE_POSITION_DBUS_ERROR;        
     }   
@@ -139,7 +179,8 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_init()
                                                     GEOCLUE_POSITION_DBUS_INTERFACE);
     
     free(service);
-    free(path);                                
+    free(path); 
+    free(desc);                               
     dbus_g_object_register_marshaller ( _geoclue_position_VOID__DOUBLE_DOUBLE,
                                         G_TYPE_NONE,
                                         G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_INVALID);
@@ -167,6 +208,31 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_close()
     userdatastore       = NULL;
     return GEOCLUE_POSITION_SUCCESS;   
 }
+
+
+
+
+GEOCLUE_POSITION_RETURNCODE geoclue_position_get_all_providers(char*** OUT_service, char*** OUT_path, char*** OUT_desc)
+{
+    GError* error = NULL;
+    
+    DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_position_connection,
+                                                    GEOCLUE_MASTER_DBUS_SERVICE,
+                                                    GEOCLUE_MASTER_DBUS_PATH,
+                                                    GEOCLUE_MASTER_DBUS_INTERFACE);   
+
+    org_foinse_project_geoclue_master_get_all_position_providers (master, OUT_service, OUT_path, OUT_desc, &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting all position provider: %s\n", error->message);
+        g_error_free (error);  
+        return GEOCLUE_POSITION_DBUS_ERROR;        
+    }   
+    
+    return GEOCLUE_POSITION_SUCCESS;        
+}
+
+
 
 GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position ( gdouble* OUT_latitude, gdouble* OUT_longitude )
 {

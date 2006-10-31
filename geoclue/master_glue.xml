@@ -33,26 +33,29 @@
 
 <!-- client methods -->
 
-    <method name="get_best_position_provider">
+    <method name="get_default_position_provider">
       <arg type="s" name="service" direction="out" />
       <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
     </method>
     
     <method name="get_all_position_providers">
       <arg type="as" name="service" direction="out" />
       <arg type="as" name="path" direction="out" />
+      <arg type="as" name="description" direction="out" />
     </method>    
      
     <signal name="better_position_provider_available">
       <arg type="s" name="service" direction="out" />
       <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
     </signal>
     
 <!-- end client methods -->
 
 <!-- server methods -->
 
-    <method name="provider_update">
+    <method name="position_provider_update">
       <arg type="s" name="service" direction="in" />
       <arg type="s" name="path" direction="in" />
       <arg type="i" name="accuracy" direction="in" />
@@ -60,6 +63,82 @@
     </method>
        
 <!-- end server methods -->
+
+
+
+
+
+
+<!-- client methods -->
+
+    <method name="get_default_map_provider">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </method>
+    
+    <method name="get_all_map_providers">
+      <arg type="as" name="service" direction="out" />
+      <arg type="as" name="path" direction="out" />
+      <arg type="as" name="description" direction="out" />
+    </method>    
+     
+    <signal name="better_map_provider_available">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </signal>
+    
+<!-- end client methods -->
+
+<!-- server methods -->
+
+    <method name="map_provider_update">
+      <arg type="s" name="service" direction="in" />
+      <arg type="s" name="path" direction="in" />
+      <arg type="i" name="accuracy" direction="in" />
+      <arg type="b" name="active" direction="in" />
+    </method>
+       
+<!-- end server methods -->
+
+
+<!-- client methods -->
+
+    <method name="get_default_geocode_provider">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </method>
+    
+    <method name="get_all_geocode_providers">
+      <arg type="as" name="service" direction="out" />
+      <arg type="as" name="path" direction="out" />
+      <arg type="as" name="description" direction="out" />
+    </method>    
+     
+    <signal name="better_geocode_provider_available">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </signal>
+    
+<!-- end client methods -->
+
+<!-- server methods -->
+
+    <method name="geocode_provider_update">
+      <arg type="s" name="service" direction="in" />
+      <arg type="s" name="path" direction="in" />
+      <arg type="i" name="accuracy" direction="in" />
+      <arg type="b" name="active" direction="in" />
+    </method>
+       
+<!-- end server methods -->
+
+
+
+
 
 
 

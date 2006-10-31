@@ -22,6 +22,8 @@ AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
 
 EXTRA_DIST = \
+		geoclue_position_server_hostip.h \
+		position_hostip.desc \
 		$(service_in_files)
 
 BUILT_SOURCES = \
@@ -35,6 +37,10 @@ CLEANFILES = \
 	geoclue_position_signal_marshal.h	\
 	geoclue_position_server_glue.h \
 		$(service_files)
+
+backendregistrationdir = $(datadir)/geoclue/backend
+backendregistration_DATA = \ 
+	position_hostip.desc
 
 
 geoclue_position_server_glue.h:../../geoclue/position_glue.xml

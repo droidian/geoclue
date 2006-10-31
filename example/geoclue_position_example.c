@@ -24,7 +24,8 @@
 int main (int argc, char** argv)
 {
     g_type_init();
-    geoclue_position_init();
+    printf("Asking for location\n");
+    geoclue_position_init_specific("org.foinse_project.geoclue.position.gpsd","/org/foinse_project/geoclue/position/gpsd");
     gdouble lat, lon;
     geoclue_position_current_position(&lat, &lon);
     printf("You are at %f %f\n", lat, lon);

@@ -17,7 +17,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <geoclue_position_server_hostip.h>
+#include <geoclue_position_server_gpsd.h>
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>
+
 
 
 #define PROGRAM_HEIGHT 640
@@ -60,6 +61,10 @@ void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat
 {   
     g_print("Current Position Changed\n");
 }
+
+
+
+
 
 static void
 geoclue_position_init (GeocluePosition *obj)
@@ -133,99 +138,29 @@ gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* 
 
 gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error)
 {
-    *name = "www.hostip.info";
+    *name = "gpsd";
     return TRUE;
 }
 
 gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
-    *OUT_latitude = -999.99;
-    *OUT_longitude = -999.99;
-    SoupSession *session;
-    SoupMessage *msg;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    int fd;
     
-   
-    
-    char* proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    
-    printf("found proxy %s:end\n", proxy_env); 
-        
-    
-    if (proxy_env != NULL) {  
-        printf("added proxy %s\n", proxy_env); 
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
-    }
-    else
-    {
-        session = soup_session_sync_new ();
-           
-    }
-    
-    
-    char url[5000];
-
-    snprintf(url, 5000,"http://api.hostip.info/");
-    
-    g_print(url);
-    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message(session, msg);
-
-    char *name, *value;
-    xmlTextReaderPtr reader;
-    int ret;
-    char* pngurl;
-
-    
-    reader = xmlReaderForMemory (msg->response.body, 
-                         msg->response.length, 
-                         NULL, 
-                         NULL, 
-                         0);
-    
-    
-
-        ret = xmlTextReaderRead(reader);
-        
-        //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-        while (ret == 1) {
-            
-                name = (char*)xmlTextReaderConstName(reader);
-                
-                 printf("%s\n", name);
-
-                   if (!strcmp(name,"gml:coordinates"))
-                   {
-                        //read next and grab text value.  
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched latitude %s %s\n", name, value);
-                        char junk;
-                        sscanf(value, "%lf%c%lf",OUT_longitude , &junk, OUT_latitude);   
-                        //printf(" got char :%c: \n", junk);
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                              
-                   }                   
-            ret = xmlTextReaderRead(reader);
-        }
-        xmlFreeTextReader(reader);
-    
-    
-    
+    g_print(" Querying GPSD\n");
+     gps_query(obj->gpsdata, "w+x\n");
      
+     *OUT_latitude = obj->gpsdata->fix.latitude;
+     *OUT_longitude = obj->gpsdata->fix.longitude;
+     
+     g_print("Sending back %f %f\n", *OUT_latitude, *OUT_longitude);
+
+     //*OUT_latitude = obj->gpsdata->newdata.latitude;
+     //*OUT_longitude = obj->gpsdata->newdata.longitude;
+     
+    // g_print("Sending back %f %f\n", *OUT_latitude, *OUT_longitude);
+
+     
+
+      
     return TRUE;
 }
 
@@ -281,20 +216,11 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
 
 
 
+
+
+
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {
-    gdouble temp, temp2;
-    
-    geoclue_position_current_position(obj, &temp, &temp2, error);
-    if( temp == -999.99 || temp2 == -999.99)
-    {
-        *OUT_available = FALSE;
-        *OUT_reason = "Cannot Connect to api.hostip.info\n";
-    }
-    else
-    {
-        *OUT_available = TRUE;
-    }   
     return TRUE;  
 }
 
@@ -303,6 +229,18 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
     g_main_loop_quit (obj->loop);
     return TRUE;
 }
+
+static void update_gps(struct gps_data_t *gpsdata, 
+             char *message, 
+             size_t len, int level)
+{
+    
+    g_print("Callback %s\n", message);
+    
+    
+}
+                
+
 
 
 
@@ -316,6 +254,10 @@ int main(int argc, char **argv)
     g_type_init ();
     g_thread_init (NULL);
 
+    
+
+    printf("Starting GPSD\n");
+    
 
     /*
      * this initialize the library and check potential ABI mismatches
@@ -331,17 +273,37 @@ int main(int argc, char **argv)
     obj->loop = g_main_loop_new(NULL,TRUE);
         
 
+   char *server = NULL, *port = DEFAULT_GPSD_PORT;
+        
+    obj->gpsdata = gps_open(server, port);
+    if(obj->gpsdata)
+    {  
+     
+        gps_set_raw_hook(obj->gpsdata, update_gps);
+         
+         
+        printf("Success running main loop\n"); 
+        g_main_loop_run(obj->loop);
+       
+        gps_close(obj->gpsdata);
+     
+        g_object_unref(obj);   
+        g_main_loop_unref(obj->loop);
+     
+       
+    }
+    else
+    {
+        g_printerr("Cannot Find GPSD\n");
+    }
 
 
-    g_main_loop_run(obj->loop);
-    
-    g_object_unref(obj);   
-    g_main_loop_unref(obj->loop);
+
+
+
+   
  
     return(0);
 }
-
-
-
 
 

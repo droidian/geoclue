@@ -25,9 +25,11 @@
 
 #include <dbus/dbus-glib.h>
 #include <glib.h>
-#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position.hostip"
-#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position/hostip"
+#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position.gpsd"
+#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position/gpsd"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"
+
+#include "gps.h"
 
 G_BEGIN_DECLS
 
@@ -39,8 +41,9 @@ GType geoclue_position_get_type (void);
 struct GeocluePosition
 {
     GObject parent;
+    struct gps_data_t *gpsdata;
 
-    GMainLoop*  loop;     
+    GMainLoop*  loop;    
 };
 
 struct GeocluePositionClass
@@ -76,6 +79,7 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
 
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
 gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error);
+
 
 
 

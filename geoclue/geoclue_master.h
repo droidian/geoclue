@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <gconf/gconf-client.h>
 
 #define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
 #define GEOCLUE_MASTER_DBUS_PATH        "/org/foinse_project/geoclue/master"
@@ -40,10 +40,13 @@ G_BEGIN_DECLS
 typedef struct GeoclueMaster GeoclueMaster;
 typedef struct GeoclueMasterClass GeoclueMasterClass;
 
-GType geoclueserver_map_get_type (void);
+GType geoclueserver_master_get_type (void);
 struct GeoclueMaster
 {
-    GObject parent;     
+    GObject parent;   
+    GList* backends;  
+    
+    GConfClient* client;
 };
 
 struct GeoclueMasterClass
@@ -54,7 +57,7 @@ struct GeoclueMasterClass
 
 };
 
-#define TYPE_GEOCLUE_MASTER              (geoclueserver_map_get_type ())
+#define TYPE_GEOCLUE_MASTER              (geoclueserver_master_get_type ())
 #define GEOCLUE_MASTER(object)           (G_TYPE_CHECK_INSTANCE_CAST ((object), TYPE_GEOCLUE_MASTER, GeoclueMaster))
 #define GEOCLUE_MASTER_CLASS(klass)      (G_TYPE_CHECK_CLASS_CAST ((klass), TYPE_GEOCLUE_MASTER, GeoclueMasterClass))
 #define IS_GEOCLUE_MASTER(object)        (G_TYPE_CHECK_INSTANCE_TYPE ((object), TYPE_GEOCLUE_MASTER))
@@ -63,10 +66,17 @@ struct GeoclueMasterClass
 
 gboolean geoclue_master_version (GeoclueMaster *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
 
-gboolean geoclue_master_version (GeoclueMaster *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
-gboolean geoclue_master_get_best_position_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, GError **error);
-gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, GError **error);
-gboolean geoclue_master_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
+gboolean geoclue_master_get_default_position_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error);
+gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error);
+gboolean geoclue_master_position_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
+
+gboolean geoclue_master_get_default_map_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error);
+gboolean geoclue_master_get_all_map_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error);
+gboolean geoclue_master_map_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
+
+gboolean geoclue_master_get_default_geocode_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error);
+gboolean geoclue_master_get_all_geocode_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error);
+gboolean geoclue_master_geocode_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
 
 
 

@@ -59,6 +59,15 @@
       <arg type="i" name="return_code" direction="out" />
     </method>    
     
+    <method name="service_available">
+      <arg type="b" name="available" direction="out" />
+      <arg type="s" name="reason" direction="out" />
+    </method>      
+    
+    <method name="shutdown">
+    </method>        
+
+
 
   </interface>
 </node>

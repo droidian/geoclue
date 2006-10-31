@@ -39,12 +39,80 @@ typedef enum _geoclue_position_returncode
     typedef void (*GEOCLUE_POSITION_CALLBACK)(gdouble lat, gdouble lon, void* userdata);
 
  
-
+    /*!
+     * \brief texttospeech version 
+     * \param major placeholder for version return 
+     * \param minor 
+     * \param micro
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */
     GEOCLUE_POSITION_RETURNCODE geoclue_position_version(int* major, int* minor, int* micro);
+    
+     /*!
+     * \brief texttospeech init, must be called first.  Uses default provider 
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */
     GEOCLUE_POSITION_RETURNCODE geoclue_position_init();
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_close();       
+    
+     /*!
+     * \brief texttospeech init, must be called first.  
+     * \param service DBUS service path 
+     * \param path DBUS path to object
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_init_specific(char* service, char* path);
+
+     /*!
+     * \brief query master for all providers of position 
+     * \param service DBUS service path array
+     * \param path DBUS path to object array
+     * \param desc Text Description array
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_get_all_providers(char*** OUT_service, char*** OUT_path, char*** OUT_desc);
+    
+    
+     /*!
+     * \brief Clean up and free memory 
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_close();  
+    
+     /*!
+     * \brief Text description of current provider
+     * \param name name of provider
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */     
     GEOCLUE_POSITION_RETURNCODE geoclue_position_service_provider(char** name);       
+
+     /*!
+     * \brief Current Position
+     * \param OUT_latitude In degrees
+     * \param OUT_longitude In degrees
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */  
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position ( gdouble* OUT_latitude, gdouble* OUT_longitude );
+    
+     /*!
+     * \brief Asyncronous notification of location changed callback
+     * \param callback Function to call
+     * \param userdata User specified data
+     * \return TRUE Version returned sucessfully
+     *         FALSE Error
+     */  
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_set_position_callback(GEOCLUE_POSITION_CALLBACK callback, void* userdata );    
+    
+    
+     /*!
+     * \brief Not implemented Yet
+     */
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* OUT_latitude_error, gdouble* OUT_longitude_error );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_altitude ( gdouble* OUT_altitude );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_velocity ( gdouble* OUT_north_velocity, gdouble* OUT_east_velocity );

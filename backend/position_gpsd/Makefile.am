@@ -1,32 +1,29 @@
-bin_PROGRAMS = geoclue-position-server-manual
+bin_PROGRAMS = geoclue-position-server-gpsd
 
-geoclue_position_server_manual_SOURCES = geoclue_position_server_manual.c \
+geoclue_position_server_gpsd_SOURCES = geoclue_position_server_gpsd.c \
 				geoclue_position_signal_marshal.c
 
 
-AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
-
-
-service_in_files = org.foinse_project.geoclue.position.manual.service.in
+service_in_files = org.foinse_project.geoclue.position.gpsd.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 
 # D-Bus service descriptor installation
 servicedir = $(DBUS_SERVICES_DIR)
 service_DATA = $(service_files)
-
 execdir = @bindir@
-
 $(service_DATA): $(service_in_files) Makefile
 	for f in $(service_in_files) ; do \
 		sed -e 's;@execdir@;$(execdir);' $< > $@ ;\
 	done
 
 
+AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
+AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la -lgps
+
 EXTRA_DIST = \
-		geoclue_position_server_manual.h \
-		position_manual.desc \
+		geoclue_position_server_gpsd.h \
+		position_gpsd.desc \
 		$(service_in_files)
 
 BUILT_SOURCES = \
@@ -43,7 +40,8 @@ CLEANFILES = \
 
 backendregistrationdir = $(datadir)/geoclue/backend
 backendregistration_DATA = \ 
-	position_manual.desc
+	position_gpsd.desc
+
 
 geoclue_position_server_glue.h:../../geoclue/position_glue.xml
 	$(DBUS_BINDING_TOOL) --prefix=geoclue_position --mode=glib-server  $< |  sed 's;\data = user_data;\data = (DBusGAsyncData\*)user_data;g' > $@ 

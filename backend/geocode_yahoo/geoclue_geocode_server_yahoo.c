@@ -371,6 +371,19 @@ gboolean geoclue_geocode_lat_lon_to_address(GeoclueGeocode *obj, gdouble IN_lati
 
 
 
+gboolean geoclue_geocode_service_available(GeoclueGeocode *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
+{
+    return TRUE;  
+}
+
+
+gboolean geoclue_geocode_shutdown(GeoclueGeocode *obj, GError** error)
+{
+    g_main_loop_quit (obj->loop);
+    return TRUE;  
+}
+
+
 
 
 
@@ -383,8 +396,7 @@ int main( int   argc,
     g_thread_init (NULL);
 
     
-    GMainLoop*  loop = g_main_loop_new(NULL,TRUE);
-    
+
     
 
     /*
@@ -398,14 +410,16 @@ int main( int   argc,
     GeoclueGeocode* obj = NULL; 
   
     obj = GEOCLUE_GEOCODE(g_type_create_instance (geoclue_geocode_get_type()));
-        
+
+    obj->loop = g_main_loop_new(NULL,TRUE);
+            
 
 
 
-    g_main_loop_run(loop);
+    g_main_loop_run(obj->loop);
     
     g_object_unref(obj);   
-    g_main_loop_unref(loop);
+    g_main_loop_unref(obj->loop);
     
     
     return 0;

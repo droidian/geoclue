@@ -39,7 +39,7 @@ GType geoclue_position_get_type (void);
 struct GeocluePosition
 {
     GObject parent;
-     
+
 };
 
 struct GeocluePositionClass
@@ -74,6 +74,9 @@ gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latit
 gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
 gboolean geoclue_position_geocode(GeocluePosition *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
 gboolean geoclue_position_geocode_free_text(GeocluePosition *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
+
+gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
+gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error);
 
 
 

@@ -207,6 +207,18 @@ gboolean geoclue_position_geocode_free_text(GeocluePosition *obj, const char * I
 }
 
 
+gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
+{
+    return TRUE;
+}
+
+gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
+{
+    gtk_main_quit ();
+    return TRUE;
+}
+
+
 
 
 

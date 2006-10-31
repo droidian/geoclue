@@ -31,6 +31,8 @@ EXTRA_DIST = \
 		map_glue.xml \
 		map_signal_marshal.list \
 		master_glue.xml \
+		master_signal_marshal.list \
+		geoclue_master.h \
 		geocode_glue.xml \
 		$(service_in_files)
 		
@@ -130,6 +132,7 @@ geoclue_master_signal_marshal.c:master_signal_marshal.list
 	
 geocode_client_glue.h:geocode_glue.xml
 	$(DBUS_BINDING_TOOL) --prefix=geoclue_geocode --mode=glib-client $< > $@
+
 
 
 

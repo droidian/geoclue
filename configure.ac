@@ -2,7 +2,7 @@ AC_INIT(geoclue/position.c)
 
 PACKAGE=geoclue
 
-VERSION=0.2
+VERSION=0.4
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 
@@ -16,15 +16,32 @@ AC_SUBST(DBUS_BINDING_TOOL)
 
 AM_CONFIG_HEADER(config.h)
 
+dnl Check for GPSD headers
 
-PKG_CHECK_MODULES(YAHOO, libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
+AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
+if test "x$ac_cv_gps_h" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+AC_CHECK_LIB(gps, gps_open,[ac_cv_libgps=yes] )
+if test "x$ac_cv_libgps" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+
+AM_GCONF_SOURCE_2
+AC_PATH_PROG(GCONFTOOL, gconftool-2)
+
+
+
+PKG_CHECK_MODULES(YAHOO, gconf-2.0 libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
 AC_SUBST(YAHOO_CFLAGS)
 AC_SUBST(YAHOO_LIBS)
 
+PKG_CHECK_MODULES(APPLET, libpanelapplet-2.0)
+AC_SUBST(APPLET_CFLAGS)
+AC_SUBST(APPLET_LIBS)
 
 
-
-PKG_CHECK_MODULES(DEPS,  dbus-glib-1 gtk+-2.0)
+PKG_CHECK_MODULES(DEPS,  gconf-2.0 dbus-glib-1 gtk+-2.0)
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 
@@ -36,11 +53,13 @@ AC_SUBST(DBUS_SERVICES_DIR)
 AC_OUTPUT(Makefile 
 	geoclue/Makefile 
 	example/Makefile
+	applet/Makefile
+	data/Makefile
 	geoclue.pc
 	backend/Makefile
-	backend/geoclue_master/Makefile
 	backend/map_yahoo/Makefile
 	backend/position_manual/Makefile
 	backend/geocode_yahoo/Makefile
 	backend/position_hostip/Makefile
+	backend/position_gpsd/Makefile
 )

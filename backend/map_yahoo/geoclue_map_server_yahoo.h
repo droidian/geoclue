@@ -52,6 +52,8 @@ struct GeoclueMap
     
     
     gboolean pending_request;
+    
+    GMainLoop*  loop;
      
 };
 
@@ -86,6 +88,8 @@ gboolean geoclue_map_latlong_to_offset(GeoclueMap *obj, const gdouble IN_latitud
 gboolean geoclue_map_offset_to_latlong(GeoclueMap *obj, const int IN_x_offset,const int IN_y_offset, const gint IN_zoom, const gdouble IN_center_latitude, const gdouble IN_center_longitude, gdouble* OUT_latitude, gdouble* OUT_longitude,  GError **error );
 gboolean geoclue_map_find_zoom_level (GeoclueMap *obj, const gdouble IN_latitude_top_left, const gdouble IN_longitude_top_left, const gdouble IN_latitude_bottom_right, const gdouble IN_longitude_bottom_right, const gint IN_width, const gint IN_height,  gint* OUT_zoom, GError** error);
 
+gboolean geoclue_map_service_available(GeoclueMap *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
+gboolean geoclue_map_shutdown(GeoclueMap *obj, GError** error);
 
 
 

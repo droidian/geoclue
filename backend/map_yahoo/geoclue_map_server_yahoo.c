@@ -508,6 +508,16 @@ gboolean geoclue_map_find_zoom_level (GeoclueMap *obj, const gdouble IN_latitude
 }
 
 
+gboolean geoclue_map_service_available(GeoclueMap *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
+{
+    return TRUE;  
+}
+
+gboolean geoclue_map_shutdown(GeoclueMap *obj, GError** error)
+{
+    g_main_loop_quit (obj->loop);
+    return TRUE;
+}
 
 
 
@@ -521,8 +531,7 @@ int main( int   argc,
     g_thread_init (NULL);
 
     
-    GMainLoop*  loop = g_main_loop_new(NULL,TRUE);
-    
+   
     
 
     /*
@@ -536,14 +545,17 @@ int main( int   argc,
     GeoclueMap* obj = NULL; 
   
     obj = GEOCLUE_MAP(g_type_create_instance (geoclue_map_get_type()));
+  
+  
+    obj->loop = g_main_loop_new(NULL,TRUE);
         
 
 
 
-    g_main_loop_run(loop);
+    g_main_loop_run(obj->loop);
     
     g_object_unref(obj);   
-    g_main_loop_unref(loop);
+    g_main_loop_unref(obj->loop);
     
     
     return 0;

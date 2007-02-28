@@ -25,10 +25,23 @@ int main (int argc, char** argv)
 {
     g_type_init();
     printf("Asking for location\n");
-    geoclue_position_init_specific("org.foinse_project.geoclue.position.gpsd","/org/foinse_project/geoclue/position/gpsd");
+    geoclue_position_init();
+    //geoclue_position_init_specific("org.foinse_project.geoclue.position.gpsd","/org/foinse_project/geoclue/position/gpsd");
     gdouble lat, lon;
     geoclue_position_current_position(&lat, &lon);
     printf("You are at %f %f\n", lat, lon);
+    
+    geoclue_position_current_altitude ( &lon );
+    
+    double temp, temp2;
+    geoclue_position_current_velocity( &temp, &temp2 ) ;
+    printf("2d vel %f %f \n", temp, temp2);
+    temp = sqrt(temp * temp + temp2 * temp2);
+    printf("1d vel %f \n", temp);
+    geoclue_position_current_altitude( &temp ) ;   
+    printf("Altitude %f \n", temp);
+     
+     
     
  
     return 0;   

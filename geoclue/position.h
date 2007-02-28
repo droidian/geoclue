@@ -27,13 +27,25 @@ G_BEGIN_DECLS
 
 typedef enum _geoclue_position_returncode
 {
-    GEOCLUE_POSITION_SUCCESS                  = 0,
+    GEOCLUE_POSITION_SUCCESS                  =  0,
     GEOCLUE_POSITION_NOT_INITIALIZED          = -1, 
     GEOCLUE_POSITION_DBUS_ERROR               = -2,
     GEOCLUE_POSITION_SERVICE_NOT_AVAILABLE    = -3, 
+    GEOCLUE_POSITION_METHOD_NOT_IMPLEMENTED   = -4,
+    GEOCLUE_POSITION_NO_SATELLITE_FIX         = -5,
+    GEOCLUE_POSITION_SATELLITE_NOT_IN_VIEW    = -6
    
 } GEOCLUE_POSITION_RETURNCODE;
 
+typedef enum _geoclue_position_fix
+{
+    GEOCLUE_POSITION_NO_FIX                         = -1,  
+    GEOCLUE_POSITION_TWO_DIMENSION                  = 1,  
+    GEOCLUE_POSITION_THREE_DIMENSION                = 2,  
+    GEOCLUE_POSITION_TWO_DIMENSION_DIFFERENTIAL     = 3,  
+    GEOCLUE_POSITION_THREE_DIMENSION_DIFFERENTIAL   = 4    
+  
+} GEOCLUE_POSITION_FIX;
 
 
     typedef void (*GEOCLUE_POSITION_CALLBACK)(gdouble lat, gdouble lon, void* userdata);
@@ -113,16 +125,12 @@ typedef enum _geoclue_position_returncode
      /*!
      * \brief Not implemented Yet
      */
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* OUT_latitude_error, gdouble* OUT_longitude_error );
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GEOCLUE_POSITION_FIX* OUT_fix_type );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_altitude ( gdouble* OUT_altitude );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_current_velocity ( gdouble* OUT_north_velocity, gdouble* OUT_east_velocity );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_current_time ( gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_in_view ( GArray** OUT_prn_numbers );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_sun_rise ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_sun_set ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_moon_rise ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds );
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_moon_set ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds );
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, gboolean* OUT_differential, gboolean* OUT_ephemeris );
+    
 
 
 G_END_DECLS

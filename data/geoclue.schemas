@@ -78,5 +78,33 @@
       		</locale>
     	</schema>
 
+
+    	<!-- find -->
+    	
+    	<schema>
+      		<key>/schemas/apps/geoclue/find/defaultservice</key>
+      		<applyto>/apps/geoclue/find/defaultservice</applyto>
+      		<owner>geoclue</owner>
+      		<type>string</type>
+      		<default>org.foinse_project.geoclue.find.yahoo</default>
+      		<locale name="C">
+        		<short>find provider service</short>
+        		<long>DBus service of default geoclue find provider</long>
+      		</locale>
+    	</schema> 
+    	<schema>
+      		<key>/schemas/apps/geoclue/find/defaultpath</key>
+      		<applyto>/apps/geoclue/find/defaultpath</applyto>
+      		<owner>geoclue</owner>
+      		<type>string</type>
+      		<default>/org/foinse_project/geoclue/find/yahoo</default>
+      		<locale name="C">
+        		<short>find provider path</short>
+        		<long>DBus path of default geoclue find provider</long>
+      		</locale>
+    	</schema>
+
+
+
   	</schemalist>
 </gconfschemafile>

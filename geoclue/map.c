@@ -27,10 +27,15 @@
 #include <stdio.h>
 #include <map_signal_marshal.h>
 
-//Change to yahoo hard code for now
-#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.map.yahoo"
-#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/map/yahoo"
+#include <geoclue_master_client_glue.h>
+
+
 #define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.map"   
+ 
+#define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
+#define GEOCLUE_MASTER_DBUS_PATH        "/org/foinse_project/geoclue/master"
+#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.foinse_project.geoclue.master" 
+
         
 static  DBusGConnection*        geoclue_map_connection =   NULL;
 static  DBusGProxy*             geoclue_map_proxy      =   NULL;
@@ -90,6 +95,67 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_service_provider(char** name)
     }
     return GEOCLUE_MAP_SUCCESS;              
 }
+
+GEOCLUE_MAP_RETURNCODE geoclue_map_init_specific(char* service, char* path)
+{
+    GError* error = NULL;
+    geoclue_map_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    if (geoclue_map_connection == NULL)
+    {
+        g_printerr ("GEOCLUE_MAP failed to open connection to bus: %s\n", error->message);
+        g_error_free (error);
+        return GEOCLUE_MAP_DBUS_ERROR;
+    }
+    
+    
+    geoclue_map_proxy = dbus_g_proxy_new_for_name (geoclue_map_connection,
+                                                    service,
+                                                    path,
+                                                    GEOCLUE_MAP_DBUS_INTERFACE);
+                   
+    dbus_g_object_register_marshaller ( _geoclue_map_VOID__INT_BOXED_STRING,
+                                        G_TYPE_NONE,
+                                        G_TYPE_INT, DBUS_TYPE_G_UCHAR_ARRAY, G_TYPE_STRING, G_TYPE_INVALID);
+    dbus_g_proxy_add_signal (geoclue_map_proxy,
+                             "get_map_finished",
+                             G_TYPE_INT, DBUS_TYPE_G_UCHAR_ARRAY, G_TYPE_STRING, G_TYPE_INVALID);
+    dbus_g_proxy_connect_signal (geoclue_map_proxy,
+                                 "get_map_finished",
+                                 (GCallback) geoclue_map_get_map_finished,
+                                 (gpointer)NULL,
+                                 (GClosureNotify) NULL);
+
+    callbackfunction    = NULL;
+    userdatastore       = NULL;  
+    return GEOCLUE_MAP_SUCCESS;        
+}
+
+GEOCLUE_MAP_RETURNCODE geoclue_map_get_all_providers(char*** OUT_service, char*** OUT_path, char*** OUT_desc)
+{
+    GError* error = NULL;
+        
+    if (geoclue_map_connection == NULL)
+    {
+        geoclue_map_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    }
+    
+
+    
+    DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_map_connection,
+                                                    GEOCLUE_MASTER_DBUS_SERVICE,
+                                                    GEOCLUE_MASTER_DBUS_PATH,
+                                                    GEOCLUE_MASTER_DBUS_INTERFACE);   
+
+    org_foinse_project_geoclue_master_get_all_position_providers (master, OUT_service, OUT_path, OUT_desc, &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting all position provider: %s\n", error->message);
+        g_error_free (error);  
+        return GEOCLUE_MAP_DBUS_ERROR;        
+    }   
+    
+    return GEOCLUE_MAP_SUCCESS;     
+}
    
    
    
@@ -103,10 +169,36 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_init()
         g_error_free (error);
         return GEOCLUE_MAP_DBUS_ERROR;
     }
+    
+    
+    
+     
+    DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_map_connection,
+                                                    GEOCLUE_MASTER_DBUS_SERVICE,
+                                                    GEOCLUE_MASTER_DBUS_PATH,
+                                                    GEOCLUE_MASTER_DBUS_INTERFACE);   
+    
+   
+    char* service;
+    char* path;
+    char* desc;
+    org_foinse_project_geoclue_master_get_default_map_provider (master, &service, &path, &desc, &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting default map provider: %s\n", error->message);
+        g_error_free (error);  
+        return GEOCLUE_MAP_DBUS_ERROR;        
+    }   
+    
+    printf(" Getting Service %s and path %s\n",service, path);
     geoclue_map_proxy = dbus_g_proxy_new_for_name (geoclue_map_connection,
-                                                    GEOCLUE_MAP_DBUS_SERVICE,
-                                                    GEOCLUE_MAP_DBUS_PATH,
+                                                    service,
+                                                    path,
                                                     GEOCLUE_MAP_DBUS_INTERFACE);
+    
+    free(service);
+    free(path); 
+    free(desc); 
                                     
     dbus_g_object_register_marshaller ( _geoclue_map_VOID__INT_BOXED_STRING,
                                         G_TYPE_NONE,

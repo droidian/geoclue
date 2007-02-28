@@ -48,7 +48,14 @@
     <method name="current_position_error">    
       <arg type="d" name="latitude_error" direction="out" /><!-- Meters -->
       <arg type="d" name="longitude_error" direction="out" /><!-- Meters -->
+      <arg type="i" name="fix_type" direction="out"/>
     </method>
+    <!-- fix_type enum    GEOCLUE_POSITION_NO_FIX                         = -1,  
+    					GEOCLUE_POSITION_TWO_DIMENSION                  = 1,  
+    					GEOCLUE_POSITION_THREE_DIMENSION                = 2,  
+    					GEOCLUE_POSITION_TWO_DIMENSION_DIFFERENTIAL     = 3,  
+    					GEOCLUE_POSITION_THREE_DIMENSION_DIFFERENTIAL   = 4   -->
+    
 
     <method name="current_altitude">    
       <arg type="d" name="altitude" direction="out" /><!-- Meters -->
@@ -59,14 +66,6 @@
       <arg type="d" name="east_velocity" direction="out" /><!-- Meters per Second -->
     </method>
 
-    <method name="current_time">    
-      <arg type="i" name="year" direction="out" />
-      <arg type="i" name="month" direction="out" />
-      <arg type="i" name="day" direction="out" />
-      <arg type="i" name="hours" direction="out" />
-      <arg type="i" name="minutes" direction="out" />
-      <arg type="i" name="seconds" direction="out" />              
-    </method>
 
     <method name="satellites_in_view">    	
       <arg type="ai" name="prn_numbers" direction="out" />
@@ -77,54 +76,11 @@
       <arg type="d" name="elevation" direction="out" /><!-- Degrees -->
       <arg type="d" name="azimuth" direction="out" /><!-- Degrees -->
       <arg type="d" name="signal_noise_ratio" direction="out" />
-    </method>
-
-    <method name="sun_rise">   
-      <arg type="d" name="latitude" direction="in" />
-      <arg type="d" name="longitude" direction="in" /> 
-      <arg type="i" name="year" direction="in" />
-      <arg type="i" name="month" direction="in" />
-      <arg type="i" name="day" direction="in" />
-      <arg type="i" name="hours" direction="out" />
-      <arg type="i" name="minutes" direction="out" />
-      <arg type="i" name="seconds" direction="out" />              
-    </method>
-    
-    
-    <method name="sun_set">   
-      <arg type="d" name="latitude" direction="in" />
-      <arg type="d" name="longitude" direction="in" /> 
-      <arg type="i" name="year" direction="in" />
-      <arg type="i" name="month" direction="in" />
-      <arg type="i" name="day" direction="in" />
-      <arg type="i" name="hours" direction="out" />
-      <arg type="i" name="minutes" direction="out" />
-      <arg type="i" name="seconds" direction="out" />              
+      <arg type="b" name="differential" direction="out" />
+      <arg type="b" name="ephemeris" direction="out" />
     </method>
 
 
-    <method name="moon_rise">   
-      <arg type="d" name="latitude" direction="in" />
-      <arg type="d" name="longitude" direction="in" /> 
-      <arg type="i" name="year" direction="in" />
-      <arg type="i" name="month" direction="in" />
-      <arg type="i" name="day" direction="in" />
-      <arg type="i" name="hours" direction="out" />
-      <arg type="i" name="minutes" direction="out" />
-      <arg type="i" name="seconds" direction="out" />              
-    </method>
-
-
-    <method name="moon_set">   
-      <arg type="d" name="latitude" direction="in" />
-      <arg type="d" name="longitude" direction="in" /> 
-      <arg type="i" name="year" direction="in" />
-      <arg type="i" name="month" direction="in" />
-      <arg type="i" name="day" direction="in" />
-      <arg type="i" name="hours" direction="out" />
-      <arg type="i" name="minutes" direction="out" />
-      <arg type="i" name="seconds" direction="out" />              
-    </method>
 
     <method name="service_available">
       <arg type="b" name="available" direction="out" />

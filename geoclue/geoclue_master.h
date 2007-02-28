@@ -44,7 +44,11 @@ GType geoclueserver_master_get_type (void);
 struct GeoclueMaster
 {
     GObject parent;   
-    GList* backends;  
+    GList* position_backends;  
+    GList* map_backends;
+    GList* geocode_backends;
+    GList* find_backends;
+
     
     GConfClient* client;
 };
@@ -78,6 +82,9 @@ gboolean geoclue_master_get_default_geocode_provider (GeoclueMaster *obj, char *
 gboolean geoclue_master_get_all_geocode_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error);
 gboolean geoclue_master_geocode_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
 
+gboolean geoclue_master_get_default_find_provider (GeoclueMaster *obj, char ** OUT_service, char ** OUT_path, char ** OUT_description, GError **error);
+gboolean geoclue_master_get_all_find_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error);
+gboolean geoclue_master_find_provider_update (GeoclueMaster *obj, const char * IN_service, const char * IN_path, const gint IN_accuracy, const gboolean IN_active, GError **error);
 
 
 

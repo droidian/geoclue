@@ -66,6 +66,9 @@ typedef enum _geoclue_map_returncode
      *            GEOCLUE_MAP_SERVICE_NOT_AVAILABLE    = -2 
      */
     GEOCLUE_MAP_RETURNCODE geoclue_map_init();
+    GEOCLUE_MAP_RETURNCODE geoclue_map_init_specific(char* service, char* path);
+    GEOCLUE_MAP_RETURNCODE geoclue_map_get_all_providers(char*** OUT_service, char*** OUT_path, char*** OUT_desc);
+ 
 
     /*!
      * \brief geoclue_map cleanup 

@@ -2,7 +2,7 @@ AC_INIT(geoclue/position.c)
 
 PACKAGE=geoclue
 
-VERSION=0.4
+VERSION=0.6
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 
@@ -16,29 +16,19 @@ AC_SUBST(DBUS_BINDING_TOOL)
 
 AM_CONFIG_HEADER(config.h)
 
-dnl Check for GPSD headers
-
-AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
-if test "x$ac_cv_gps_h" != xyes; then
-    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
-fi
-AC_CHECK_LIB(gps, gps_open,[ac_cv_libgps=yes] )
-if test "x$ac_cv_libgps" != xyes; then
-    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
-fi
 
 AM_GCONF_SOURCE_2
 AC_PATH_PROG(GCONFTOOL, gconftool-2)
 
 
+              
+AC_ARG_ENABLE(dev,
+              [AC_HELP_STRING([--enable-dev],
+                              [Only compile client libraries disable backends and applets])],
+              [enable_dev=yes],
+              [enable_dev=no])
 
-PKG_CHECK_MODULES(YAHOO, gconf-2.0 libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
-AC_SUBST(YAHOO_CFLAGS)
-AC_SUBST(YAHOO_LIBS)
 
-PKG_CHECK_MODULES(APPLET, libpanelapplet-2.0)
-AC_SUBST(APPLET_CFLAGS)
-AC_SUBST(APPLET_LIBS)
 
 
 PKG_CHECK_MODULES(DEPS,  gconf-2.0 dbus-glib-1 gtk+-2.0)
@@ -50,16 +40,66 @@ DBUS_SERVICES_DIR=`pkg-config dbus-1 --variable=exec_prefix`/share/dbus-1/servic
 AC_SUBST(DBUS_SERVICES_DIR)
 
 
-AC_OUTPUT(Makefile 
-	geoclue/Makefile 
-	example/Makefile
+
+if test "x$enable_dev" = "xno"
+then
+
+
+
+
+dnl Check for GPSD headers
+
+AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
+if test "x$ac_cv_gps_h" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+AC_CHECK_LIB(gps, gps_open,[ac_cv_libgps=yes] )
+if test "x$ac_cv_libgps" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+
+
+PKG_CHECK_MODULES(HTTPXML, libsoup-2.2 libxml-2.0)
+AC_SUBST(HTTPXML_CFLAGS)
+AC_SUBST(HTTPXML_LIBS)
+
+
+
+PKG_CHECK_MODULES(APPLET, libpanelapplet-2.0)
+AC_SUBST(APPLET_CFLAGS)
+AC_SUBST(APPLET_LIBS)
+
+PKG_CHECK_MODULES(YAHOO, gconf-2.0 libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
+AC_SUBST(YAHOO_CFLAGS)
+AC_SUBST(YAHOO_LIBS)
+
+
+
+dnl substitute subdirs into makefiles
+EXTRA_SUBDIRS="applet backend"
+
+
+
+AC_OUTPUT(	
 	applet/Makefile
-	data/Makefile
-	geoclue.pc
 	backend/Makefile
 	backend/map_yahoo/Makefile
-	backend/position_manual/Makefile
 	backend/geocode_yahoo/Makefile
+	backend/position_manual/Makefile
 	backend/position_hostip/Makefile
 	backend/position_gpsd/Makefile
 )
+
+fi
+
+dnl substitute subdirs into makefiles
+AC_SUBST(EXTRA_SUBDIRS)
+
+
+AC_OUTPUT(Makefile 
+	geoclue/Makefile 
+	example/Makefile
+	data/Makefile
+	geoclue.pc
+)
+

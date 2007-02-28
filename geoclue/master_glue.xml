@@ -136,7 +136,38 @@
        
 <!-- end server methods -->
 
+<!-- client methods -->
 
+    <method name="get_default_find_provider">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </method>
+    
+    <method name="get_all_find_providers">
+      <arg type="as" name="service" direction="out" />
+      <arg type="as" name="path" direction="out" />
+      <arg type="as" name="description" direction="out" />
+    </method>    
+     
+    <signal name="new_find_provider_available">
+      <arg type="s" name="service" direction="out" />
+      <arg type="s" name="path" direction="out" />
+      <arg type="s" name="description" direction="out" />
+    </signal>
+    
+<!-- end client methods -->
+
+<!-- server methods -->
+
+    <method name="find_provider_update">
+      <arg type="s" name="service" direction="in" />
+      <arg type="s" name="path" direction="in" />
+      <arg type="i" name="accuracy" direction="in" />
+      <arg type="b" name="active" direction="in" />
+    </method>
+       
+<!-- end server methods -->
 
 
 

@@ -1,4 +1,4 @@
-SUBDIRS = geoclue example backend applet data
+SUBDIRS = geoclue example data @EXTRA_SUBDIRS@
 
 EXTRA_DIST = geoclue.pc.in
 DISTCLEANFILES = geoclue.pc

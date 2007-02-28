@@ -29,8 +29,6 @@
 #include <position_signal_marshal.h>
 #include <geoclue_master_client_glue.h>
 
-//#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position"
-//#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"   
  
 #define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
@@ -47,8 +45,6 @@ static  void*                   userdatastore     =   NULL;
    
 void geoclue_position_current_position_changed(void* userdata, gdouble lat, gdouble lon)
 {
-
-        g_print("current position changed \n");
  
         if(callbackfunction != NULL)
             callbackfunction( lat, lon , userdatastore );           
@@ -215,6 +211,10 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_close()
 GEOCLUE_POSITION_RETURNCODE geoclue_position_get_all_providers(char*** OUT_service, char*** OUT_path, char*** OUT_desc)
 {
     GError* error = NULL;
+    if (geoclue_position_connection == NULL)
+    {
+        geoclue_position_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    }
     
     DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_position_connection,
                                                     GEOCLUE_MASTER_DBUS_SERVICE,
@@ -252,7 +252,7 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position ( gdouble* OUT_lat
     return GEOCLUE_POSITION_SUCCESS;              
 }
 
-GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* OUT_latitude_error, gdouble* OUT_longitude_error )
+GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GEOCLUE_POSITION_FIX* OUT_fix_type )
 {
     if(geoclue_position_connection == NULL)
         return GEOCLUE_POSITION_NOT_INITIALIZED;  
@@ -260,7 +260,7 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_current_position_error ( gdouble* O
         return GEOCLUE_POSITION_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_position_current_position_error ( geoclue_position_proxy, OUT_latitude_error, OUT_longitude_error, &error );
+    org_foinse_project_geoclue_position_current_position_error ( geoclue_position_proxy, OUT_latitude_error, OUT_longitude_error, OUT_fix_type, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_position current_position_error: %s\n", error->message);
@@ -306,23 +306,6 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_current_velocity ( gdouble* OUT_nor
     return GEOCLUE_POSITION_SUCCESS;              
 }
 
-GEOCLUE_POSITION_RETURNCODE geoclue_position_current_time ( gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_current_time ( geoclue_position_proxy, OUT_year, OUT_month , OUT_day , OUT_hours , OUT_minutes , OUT_seconds , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position current_time: %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
 
 GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_in_view ( GArray** OUT_prn_numbers )
 {
@@ -342,7 +325,7 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_in_view ( GArray** OUT_p
     return GEOCLUE_POSITION_SUCCESS;              
 }
 
-GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio )
+GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, gboolean* OUT_differential, gboolean* OUT_ephemeris )
 {
     if(geoclue_position_connection == NULL)
         return GEOCLUE_POSITION_NOT_INITIALIZED;  
@@ -350,82 +333,10 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn
         return GEOCLUE_POSITION_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_position_satellites_data  ( geoclue_position_proxy, IN_prn_number , OUT_elevation, OUT_azimuth , OUT_signal_noise_ratio , &error );
+    org_foinse_project_geoclue_position_satellites_data  ( geoclue_position_proxy, IN_prn_number , OUT_elevation, OUT_azimuth , OUT_signal_noise_ratio , OUT_differential,  OUT_ephemeris, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_position satellites_data : %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-GEOCLUE_POSITION_RETURNCODE geoclue_position_sun_rise ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_sun_rise ( geoclue_position_proxy, IN_latitude, IN_longitude , IN_year , IN_month  , IN_day , OUT_hours, OUT_minutes , OUT_seconds , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position sun_rise : %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-GEOCLUE_POSITION_RETURNCODE geoclue_position_sun_set ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_sun_set( geoclue_position_proxy, IN_latitude, IN_longitude , IN_year , IN_month  , IN_day , OUT_hours, OUT_minutes , OUT_seconds , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position sun_set : %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-GEOCLUE_POSITION_RETURNCODE geoclue_position_moon_rise ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_moon_rise ( geoclue_position_proxy, IN_latitude, IN_longitude , IN_year , IN_month  , IN_day , OUT_hours, OUT_minutes , OUT_seconds , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position moon_riser: %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
-
-GEOCLUE_POSITION_RETURNCODE geoclue_position_moon_set ( const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds )
-{
-    if(geoclue_position_connection == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-    if(geoclue_position_proxy == NULL)
-        return GEOCLUE_POSITION_NOT_INITIALIZED;  
-                                   
-    GError* error = NULL;
-    org_foinse_project_geoclue_position_moon_set( geoclue_position_proxy, IN_latitude, IN_longitude , IN_year , IN_month  , IN_day , OUT_hours, OUT_minutes , OUT_seconds , &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position moon_set: %s\n", error->message);
         g_error_free (error);  
         return GEOCLUE_POSITION_DBUS_ERROR;        
     }

@@ -28,6 +28,8 @@ AM_LDFLAGS = $(DEPS_LIBS)
 EXTRA_DIST = \
 		position_glue.xml \
 		position_signal_marshal.list \
+		find_glue.xml \
+		find_signal_marshal.list \
 		map_glue.xml \
 		map_signal_marshal.list \
 		master_glue.xml \
@@ -40,6 +42,8 @@ EXTRA_DIST = \
 
 libgeoclue_la_SOURCES = 	position.c \
   				position_signal_marshal.c \
+ 				find.c \
+  				find_signal_marshal.c \
 				map.c \
 				map_gtk.c \
 				map_gtk_layout.c \
@@ -51,6 +55,7 @@ libgeoclue_la_LIBADD = $(DEPS_LIBS)
 
 libgeoclue_ladir=$(includedir)/geoclue/geoclue
 libgeoclue_la_HEADERS = 	position.h \ 
+				find.h \ 
 				map.h \
 				map_gtk.h \
 				map_gtk_layout.h \
@@ -62,6 +67,9 @@ BUILT_SOURCES = \
 				position_client_glue.h \
 				position_signal_marshal.h \
 				position_signal_marshal.c \
+				find_client_glue.h \
+				find_signal_marshal.h \
+				find_signal_marshal.c \
 				map_client_glue.h \
 				map_signal_marshal.h \
 				map_signal_marshal.c \
@@ -75,6 +83,9 @@ CLEANFILES =	\
 				position_client_glue.h \
 				position_signal_marshal.h \
 				position_signal_marshal.c \
+				find_client_glue.h \
+				find_signal_marshal.h \
+				find_signal_marshal.c \
 				map_client_glue.h \
 				map_signal_marshal.h \
 				map_signal_marshal.c \
@@ -89,6 +100,8 @@ dbusspecdir = $(datadir)/geoclue/dbus
 dbusspec_DATA = \ 
 		position_glue.xml \
 		position_signal_marshal.list \
+		find_glue.xml \
+		find_signal_marshal.list \
 		map_glue.xml \
 		map_signal_marshal.list \
 		geocode_glue.xml 
@@ -104,6 +117,16 @@ position_signal_marshal.h:position_signal_marshal.list
 	glib-genmarshal --prefix _geoclue_position --header $< > $@ 
 position_signal_marshal.c:position_signal_marshal.list
 	glib-genmarshal --prefix _geoclue_position --body $< > $@ 
+
+
+
+find_client_glue.h:find_glue.xml
+	$(DBUS_BINDING_TOOL) --prefix=geoclue_find --mode=glib-client $< > $@
+
+find_signal_marshal.h:find_signal_marshal.list
+	glib-genmarshal --prefix _geoclue_find --header $< > $@ 
+find_signal_marshal.c:find_signal_marshal.list
+	glib-genmarshal --prefix _geoclue_find --body $< > $@ 
 
 
 map_client_glue.h:map_glue.xml

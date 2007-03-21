@@ -28,6 +28,12 @@ AC_ARG_ENABLE(dev,
               [enable_dev=yes],
               [enable_dev=no])
 
+AC_ARG_ENABLE(panel-applet,
+              [AC_HELP_STRING([--enable-panel-applet],
+                              [Compile the panel applet])],
+              [enable_panel_applet=yes],
+              [enable_panel_applet=no])
+
 
 
 
@@ -63,9 +69,19 @@ PKG_CHECK_MODULES(HTTPXML, libsoup-2.2 libxml-2.0)
 AC_SUBST(HTTPXML_CFLAGS)
 AC_SUBST(HTTPXML_LIBS)
 
+APPLET_CFLAGS=
+APPLET_LIBS=
 
 
+if test "x$enable_panel_applet" = "xyes"
+then
 PKG_CHECK_MODULES(APPLET, libpanelapplet-2.0)
+EXTRA_SUBDIRS="applet"
+AC_OUTPUT(	
+	applet/Makefile
+)
+fi
+
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
 
@@ -76,12 +92,11 @@ AC_SUBST(YAHOO_LIBS)
 
 
 dnl substitute subdirs into makefiles
-EXTRA_SUBDIRS="applet backend"
+EXTRA_SUBDIRS=${EXTRA_SUBDIRS} backend
 
 
 
 AC_OUTPUT(	
-	applet/Makefile
 	backend/Makefile
 	backend/map_yahoo/Makefile
 	backend/geocode_yahoo/Makefile

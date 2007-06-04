@@ -36,7 +36,7 @@ CLEANFILES = \
 
 
 backendregistrationdir = $(datadir)/geoclue/backend
-backendregistration_DATA = \ 
+backendregistration_DATA = \
 	geocode_yahoo.desc
 
 

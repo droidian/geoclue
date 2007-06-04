@@ -92,7 +92,7 @@ AC_SUBST(YAHOO_LIBS)
 
 
 dnl substitute subdirs into makefiles
-EXTRA_SUBDIRS=${EXTRA_SUBDIRS} backend
+EXTRA_SUBDIRS="${EXTRA_SUBDIRS} backend"
 
 
 

@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
     if(argv[1] == NULL)
     {
         printf("Please enter search term as arguement (geoclue-find-example \"wifi\"\n"); 
-        exit(1);  
+        return(1);  
     }
         
     

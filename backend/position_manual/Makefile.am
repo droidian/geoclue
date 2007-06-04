@@ -42,7 +42,7 @@ CLEANFILES = \
 		$(service_files)
 
 backendregistrationdir = $(datadir)/geoclue/backend
-backendregistration_DATA = \ 
+backendregistration_DATA = \
 	position_manual.desc
 
 geoclue_position_server_glue.h:../../geoclue/position_glue.xml

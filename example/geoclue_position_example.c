@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <geoclue/position.h>
 #include <glib.h>
+#include <math.h>
 
 int main (int argc, char** argv)
 {

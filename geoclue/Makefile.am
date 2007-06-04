@@ -54,8 +54,8 @@ libgeoclue_la_CFLAGS = $(DEPS_CFLAGS) -I$(top_srcdir)
 libgeoclue_la_LIBADD = $(DEPS_LIBS)
 
 libgeoclue_ladir=$(includedir)/geoclue/geoclue
-libgeoclue_la_HEADERS = 	position.h \ 
-				find.h \ 
+libgeoclue_la_HEADERS = 	position.h \
+				find.h \
 				map.h \
 				map_gtk.h \
 				map_gtk_layout.h \
@@ -97,7 +97,7 @@ CLEANFILES =	\
 
 
 dbusspecdir = $(datadir)/geoclue/dbus
-dbusspec_DATA = \ 
+dbusspec_DATA = \
 		position_glue.xml \
 		position_signal_marshal.list \
 		find_glue.xml \

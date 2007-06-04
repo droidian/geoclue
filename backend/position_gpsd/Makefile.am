@@ -39,7 +39,7 @@ CLEANFILES = \
 		$(service_files)
 
 backendregistrationdir = $(datadir)/geoclue/backend
-backendregistration_DATA = \ 
+backendregistration_DATA = \
 	position_gpsd.desc
 
 

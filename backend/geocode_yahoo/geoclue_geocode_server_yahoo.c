@@ -150,9 +150,6 @@ gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street
     SoupMessage *msg;
     const char *cafile = NULL;
     SoupUri *proxy = NULL;
-    int fd;
-    
-   
     
     char* proxy_env;
     
@@ -188,7 +185,6 @@ gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street
     char *name, *value;
     xmlTextReaderPtr reader;
     int ret;
-    char* pngurl;
 
     
     reader = xmlReaderForMemory (msg->response.body, 
@@ -260,9 +256,7 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
     SoupMessage *msg;
     const char *cafile = NULL;
     SoupUri *proxy = NULL;
-    int fd;
     
-   
     
     char* proxy_env;
     
@@ -298,8 +292,7 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
     char *name, *value;
     xmlTextReaderPtr reader;
     int ret;
-    char* pngurl;
-
+    
     
     reader = xmlReaderForMemory (msg->response.body, 
                          msg->response.length, 
@@ -308,7 +301,7 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
                          0);
     
     
-
+    
         ret = xmlTextReaderRead(reader);
         
         //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
@@ -317,9 +310,9 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
                 name = (char*)xmlTextReaderConstName(reader);
                 
                  printf("%s\n", name);
-
-                   if (!strcmp(name,YAHOO_LAT))
-                   {
+                    
+                    if (!strcmp(name,YAHOO_LAT))
+                    {
                         //read next and grab text value.   For some reason there is two so do it twice
                         ret = xmlTextReaderRead(reader);
                         name = (char*)xmlTextReaderConstName(reader);
@@ -332,9 +325,9 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
                         ret = xmlTextReaderRead(reader);
                         name = (char*)xmlTextReaderConstName(reader);
                               
-                   }
-                   if (!strcmp(name,YAHOO_LON))
-                   {
+                    }
+                    if (!strcmp(name,YAHOO_LON))
+                    {
                         //read next and grab text value.   For some reason there is two so do it twice
                         ret = xmlTextReaderRead(reader);
                         name = (char*)xmlTextReaderConstName(reader);
@@ -347,7 +340,7 @@ gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char *
                         ret = xmlTextReaderRead(reader);
                         name = (char*)xmlTextReaderConstName(reader);
                            
-                   }                
+                    }                
             ret = xmlTextReaderRead(reader);
         }
         xmlFreeTextReader(reader);
@@ -390,15 +383,10 @@ gboolean geoclue_geocode_shutdown(GeoclueGeocode *obj, GError** error)
 int main( int   argc,
           char *argv[] )
 {
-    guint request_name_result;
-    
     g_type_init ();
     g_thread_init (NULL);
-
     
-
     
-
     /*
      * this initialize the library and check potential ABI mismatches
      * between the version it was compiled for and the actual shared
@@ -413,9 +401,7 @@ int main( int   argc,
 
     obj->loop = g_main_loop_new(NULL,TRUE);
             
-
-
-
+    
     g_main_loop_run(obj->loop);
     
     g_object_unref(obj);   

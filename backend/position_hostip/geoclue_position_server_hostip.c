@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>
-
+#include <string.h>
 
 #define PROGRAM_HEIGHT 640
 #define PROGRAM_WIDTH 480
@@ -145,16 +145,14 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     SoupMessage *msg;
     const char *cafile = NULL;
     SoupUri *proxy = NULL;
-    int fd;
     
-   
     
     char* proxy_env;
     
     proxy_env = getenv ("http_proxy");
     
     printf("found proxy %s:end\n", proxy_env); 
-        
+    
     
     if (proxy_env != NULL) {  
         printf("added proxy %s\n", proxy_env); 
@@ -183,8 +181,7 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     char *name, *value;
     xmlTextReaderPtr reader;
     int ret;
-    char* pngurl;
-
+    
     
     reader = xmlReaderForMemory (msg->response.body, 
                          msg->response.length, 
@@ -311,8 +308,6 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
 
 int main(int argc, char **argv) 
 {
-     guint request_name_result;
-    
     g_type_init ();
     g_thread_init (NULL);
 
@@ -329,10 +324,8 @@ int main(int argc, char **argv)
   
     obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
     obj->loop = g_main_loop_new(NULL,TRUE);
-        
-
-
-
+    
+    
     g_main_loop_run(obj->loop);
     
     g_object_unref(obj);   
@@ -340,8 +333,3 @@ int main(int argc, char **argv)
  
     return(0);
 }
-
-
-
-
-

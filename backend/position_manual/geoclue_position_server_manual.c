@@ -26,6 +26,7 @@
 
 
 #include <gtk/gtk.h>
+#include <geoclue/map.h>
 #include <geoclue/map_gtk_layout.h>
 #include <stdio.h>
 #include <string.h>

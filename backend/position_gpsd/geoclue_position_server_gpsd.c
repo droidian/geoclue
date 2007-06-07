@@ -249,26 +249,23 @@ static void update_gps(struct gps_data_t *gpsdata,
 
 int main(int argc, char **argv) 
 {
-     guint request_name_result;
-    
     g_type_init ();
     g_thread_init (NULL);
-
     
-
+    
     printf("Starting GPSD\n");
     
-
+    
     /*
      * this initialize the library and check potential ABI mismatches
      * between the version it was compiled for and the actual shared
      * library used.
      */
     LIBXML_TEST_VERSION
-      
-
+    
+    
     GeocluePosition* obj = NULL; 
-  
+    
     obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
     obj->loop = g_main_loop_new(NULL,TRUE);
         
@@ -296,14 +293,6 @@ int main(int argc, char **argv)
     {
         g_printerr("Cannot Find GPSD\n");
     }
-
-
-
-
-
-   
- 
+     
     return(0);
 }
-
-

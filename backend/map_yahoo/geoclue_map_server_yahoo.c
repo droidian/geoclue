@@ -253,7 +253,6 @@ gint IN_zoom = obj->IN_zoom;
     const char *cafile = NULL;
     SoupUri *proxy = NULL;
     SoupUri *base_uri = NULL;
-    int fd;
     
     base_uri = soup_uri_new ("http://api.local.yahoo.com/MapsService/V1/mapImage?appid=libgeomap&latitude=38.0&longitude=-122.0&imagetype=png&image_height=800&image_width=800&zoom=7");
     
@@ -304,45 +303,35 @@ gint IN_zoom = obj->IN_zoom;
                          0);
     
     
-
-        ret = xmlTextReaderRead(reader);
-        
-        //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-        while (ret == 1) {
-            
-                name = (char*)xmlTextReaderConstName(reader);
-                   if (!strcmp(name,"#text"))
-                   {
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("%s %s\n", name, value);
-                        int size = strlen(value);
-                        pngurl = malloc(size);
-                        strcpy(pngurl, value);
-                        
-                        
-                   }
-            ret = xmlTextReaderRead(reader);
+    ret = xmlTextReaderRead(reader);
+    
+    //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
+    while (ret == 1) {
+        name = (char*)xmlTextReaderConstName(reader);
+        if (!strcmp(name,"#text"))
+        {
+            value = (char*)xmlTextReaderConstValue(reader);
+            printf("%s %s\n", name, value);
+            int size = strlen(value);
+            pngurl = malloc(size);
+            strcpy(pngurl, value);
         }
-        xmlFreeTextReader(reader);
-
-
-
-
+        ret = xmlTextReaderRead(reader);
+    }
+    xmlFreeTextReader(reader);
+    
+    
     // A very bad rough sanity check
     if(pngurl != NULL)
     {
         if(pngurl[0] == 'h')
         {
-    
+            
             printf("Trying to grab image %s\n", pngurl);
             msg2 = soup_message_new ("GET", pngurl);
             soup_session_send_message(session, msg2);
             printf("got message\n, parsing\n");
-        
-        
-        
-        
-                                                     
+            
             GArray *mydata;
             mydata = g_array_new(FALSE,FALSE, sizeof(guint8));
             mydata->data = msg2->response.body;
@@ -353,9 +342,7 @@ gint IN_zoom = obj->IN_zoom;
                                        0, mydata, "image/png"); 
         }
     } 
-  
-  
-
+    
 };
 
 
@@ -498,10 +485,8 @@ gboolean geoclue_map_find_zoom_level (GeoclueMap *obj, const gdouble IN_latitude
         *OUT_zoom++;
         make_me_one *= 2.0;       
     }
-
-   
-   
-      printf("Long offset \n");  
+    
+    printf("Long offset \n");  
 
 
     return TRUE;       
@@ -520,20 +505,13 @@ gboolean geoclue_map_shutdown(GeoclueMap *obj, GError** error)
 }
 
 
-
-
 int main( int   argc,
           char *argv[] )
 {
-    guint request_name_result;
-    
     g_type_init ();
     g_thread_init (NULL);
-
     
-   
     
-
     /*
      * this initialize the library and check potential ABI mismatches
      * between the version it was compiled for and the actual shared
@@ -543,28 +521,16 @@ int main( int   argc,
       
 
     GeoclueMap* obj = NULL; 
-  
+    
     obj = GEOCLUE_MAP(g_type_create_instance (geoclue_map_get_type()));
-  
-  
+    
     obj->loop = g_main_loop_new(NULL,TRUE);
-        
-
-
-
+    
+    
     g_main_loop_run(obj->loop);
     
     g_object_unref(obj);   
     g_main_loop_unref(obj->loop);
     
-    
     return 0;
 }
-
-
-
-
-
-
-
-

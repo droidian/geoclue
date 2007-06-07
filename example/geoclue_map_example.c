@@ -24,6 +24,7 @@
 #include <geoclue/map_gtk.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 
 #define PROGRAM_HEIGHT 640
@@ -187,7 +188,7 @@ void image_size_callback(GtkWidget*widget, GtkAllocation *event, gpointer data )
     {
         printf("Size Changed Starting update %d %d to %d %d\n", last_width ,last_height, event->width, event->height);
         pending = TRUE;
-        if(reference_lat = -1234)
+        if(reference_lat == -1234)
         {
             reference_lat = DEFAULT_LAT;
             reference_lon = DEFAULT_LON;

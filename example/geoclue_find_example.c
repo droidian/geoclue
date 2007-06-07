@@ -16,6 +16,7 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
+#include <stdlib.h>
 #include <gtk/gtk.h>
 #include <geoclue/find.h>
 
@@ -48,7 +49,7 @@ int main(int argc, char **argv) {
     if(argv[1] == NULL)
     {
         printf("Please enter search term as arguement (geoclue-find-example \"wifi\"\n"); 
-        return(1);  
+        exit(1);  
     }
         
     
@@ -59,9 +60,10 @@ int main(int argc, char **argv) {
     
     char** categories;
     char** subcategories;
-    GEOCLUE_FIND_RETURNCODE retncode;
     
-
+    GEOCLUE_FIND_RETURNCODE retncode = 0;
+    // TODO: should set retncode properly
+    
     if(geoclue_find_top_level_categories(&categories) == GEOCLUE_FIND_SUCCESS)
     {
           
@@ -86,12 +88,10 @@ int main(int argc, char **argv) {
         free(categories);
     }
 
-    gint id;
     geoclue_find_find_near (38.0,-95.0, "Food", argv[1], results, NULL);  
     g_main_run(loop); 
     
-
-    return(0);
+    return(retncode);
 }
 
 

@@ -25,6 +25,7 @@
 #include <map.h>
 #include <map_client_glue.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <map_signal_marshal.h>
 
 #include <geoclue_master_client_glue.h>

@@ -23,6 +23,8 @@
 
 
 //#include <geoclue_map_client_glue.h>
+#include <glib/gstdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

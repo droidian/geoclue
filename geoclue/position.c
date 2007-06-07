@@ -26,6 +26,7 @@
 #include <position.h>
 #include <position_client_glue.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <position_signal_marshal.h>
 #include <geoclue_master_client_glue.h>
 
@@ -50,14 +51,13 @@ void geoclue_position_current_position_changed(void* userdata, gdouble lat, gdou
             callbackfunction( lat, lon , userdatastore );           
    
 }
+
 GEOCLUE_POSITION_RETURNCODE geoclue_position_set_position_callback(GEOCLUE_POSITION_CALLBACK callback, void* userdata )
 {
     callbackfunction = callback;
     userdatastore = userdata;
-    
+    return GEOCLUE_POSITION_SUCCESS;
 }
-
-
 
 
 GEOCLUE_POSITION_RETURNCODE geoclue_position_version(int* major, int* minor, int* micro)

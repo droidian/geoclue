@@ -26,6 +26,7 @@
 #include <find.h>
 #include <find_client_glue.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <find_signal_marshal.h>
 #include <geoclue_master_client_glue.h>
 
@@ -40,7 +41,7 @@ static  DBusGConnection*        geoclue_find_connection =   NULL;
 static  DBusGProxy*             geoclue_find_proxy      =   NULL;
 static  GEOCLUE_FIND_CALLBACK   callbackfunction        =   NULL;
 static  void*                   userdatastore           =   NULL; 
-static  int                     current_search_id       =   NULL; 
+static  int                     current_search_id       =   0;
 
    
 //void geoclue_find_results_found(void* userdata, gdouble lat, gdouble lon)

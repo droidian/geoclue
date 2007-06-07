@@ -17,6 +17,8 @@
  * Boston, MA 02111-1307, USA.
  */
  
+#include "map.h"
+#include "map_gtk.h"
 #include "map_gtk_layout.h"
 #include "gtk/gtkprivate.h"
 #include "gtk/gtkimage.h"
@@ -484,8 +486,6 @@ geoclue_map_gtk_layout_unrealize (GtkWidget *widget)
 gboolean       
 geoclue_map_gtk_layout_add_widget(GeocluemapGtkLayout* geoclue_maplayout, GtkWidget* widget, gdouble IN_latitude, gdouble IN_longitude)
 {
-
-
     GeocluemapGtkLayoutChild* reference_image = (GeocluemapGtkLayoutChild*)g_list_nth_data(geoclue_maplayout->geoclue_map_image_children, 0);
    
     if(reference_image != NULL)
@@ -511,8 +511,8 @@ geoclue_map_gtk_layout_add_widget(GeocluemapGtkLayout* geoclue_maplayout, GtkWid
         gtk_layout_put( GTK_LAYOUT(geoclue_maplayout),GTK_WIDGET(widget),new_widget->x,new_widget->y );
         gtk_widget_show_all(GTK_WIDGET(geoclue_maplayout->eventbox));  
     }
-
-return TRUE;
+    
+    return TRUE;
 }
 
 

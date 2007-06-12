@@ -177,11 +177,10 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     
     msg = soup_message_new ("GET", url);
     soup_session_send_message(session, msg);
-
     char *name, *value;
     xmlTextReaderPtr reader;
     int ret;
-    
+    gboolean success = FALSE;
     
     reader = xmlReaderForMemory (msg->response.body, 
                          msg->response.length, 
@@ -192,7 +191,6 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     
 
         ret = xmlTextReaderRead(reader);
-        
         //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
         while (ret == 1) {
             
@@ -214,7 +212,9 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
                         //skip closing tag
                         ret = xmlTextReaderRead(reader);
                         name = (char*)xmlTextReaderConstName(reader);
-                              
+
+						success = TRUE;
+						break;
                    }                   
             ret = xmlTextReaderRead(reader);
         }
@@ -223,7 +223,7 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     
     
      
-    return TRUE;
+    return success;
 }
 
 gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )

@@ -22,25 +22,14 @@
 #include <geoclue_position_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
 
-
-
-#include <libxml/xmlreader.h>
+#include <libxml/xpath.h>
 #include <libsoup/soup.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
 
-#define PROGRAM_HEIGHT 640
-#define PROGRAM_WIDTH 480
-#define DEFAULT_LAT 38.857
-#define DEFAULT_LON -94.8
-#define DEFAULT_ZOOM 8
-#define DEFAULT_LAT_STRING "38.857"
-#define DEFAULT_LON_STRING "-94.8"
-#define DEFAULT_ZOOM_STRING "8"
-
-
+#define HOSTIP_API "http://api.hostip.info/"
 
 
 
@@ -137,92 +126,82 @@ gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GE
     return TRUE;
 }
 
-gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
+
+gchar* geoclue_position_get_hostip_xml()
 {
-    *OUT_latitude = -999.99;
-    *OUT_longitude = -999.99;
     SoupSession *session;
     SoupMessage *msg;
     const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    
-    
-    char* proxy_env;
-    
+    SoupUri *proxy = NULL;    
+    gchar *proxy_env;
+    gchar *result; 
+
     proxy_env = getenv ("http_proxy");
-    
-    printf("found proxy %s:end\n", proxy_env); 
-    
-    
     if (proxy_env != NULL) {  
-        printf("added proxy %s\n", proxy_env); 
         proxy = soup_uri_new (proxy_env);
         session = soup_session_sync_new_with_options (
             SOUP_SESSION_SSL_CA_FILE, cafile,
             SOUP_SESSION_PROXY_URI, proxy,
             NULL);
-    }
-    else
-    {
+        g_free (proxy_env);
+    }else{
         session = soup_session_sync_new ();
-           
     }
     
-    
-    char url[5000];
-
-    snprintf(url, 5000,"http://api.hostip.info/");
-    
-    g_print(url);
-    
-    msg = soup_message_new ("GET", url);
+    msg = soup_message_new ("GET", HOSTIP_API);
     soup_session_send_message(session, msg);
-    char *name, *value;
-    xmlTextReaderPtr reader;
-    int ret;
+    result = g_strdup (msg->response.body);
+   
+    return result;
+}
+
+gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
+{
     gboolean success = FALSE;
-    
-    reader = xmlReaderForMemory (msg->response.body, 
-                         msg->response.length, 
-                         NULL, 
-                         NULL, 
-                         0);
-    
-    
+    gchar *xml;
+    gchar *value;
+    xmlDocPtr doc;
+    xmlXPathContextPtr xpathCtx;   
+    xmlXPathObjectPtr xpathObj; 
 
-        ret = xmlTextReaderRead(reader);
-        //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-        while (ret == 1) {
+    *OUT_latitude = -999.99;
+    *OUT_longitude = -999.99;
+
+    xml = geoclue_position_get_hostip_xml();
+
+    xmlInitParser();
+    LIBXML_TEST_VERSION
+    doc = xmlParseDoc (xml);
+    g_free(xml);
+
+    if (doc) {
+        xpathCtx = xmlXPathNewContext(doc);
+        if (xpathCtx) {
+            // Register gml namespace and evaluate xpath
+            xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
+            xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);
             
-                name = (char*)xmlTextReaderConstName(reader);
-                
-                 printf("%s\n", name);
+            if(!xpathObj) {
+                // hostip probably does not have coordinates for this IP
 
-                   if (!strcmp(name,"gml:coordinates"))
-                   {
-                        //read next and grab text value.  
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched latitude %s %s\n", name, value);
-                        char junk;
-                        sscanf(value, "%lf%c%lf",OUT_longitude , &junk, OUT_latitude);   
-                        //printf(" got char :%c: \n", junk);
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-
-						success = TRUE;
-						break;
-                   }                   
-            ret = xmlTextReaderRead(reader);
+            } else {
+                if (xpathObj->nodesetval->nodeNr >= 1){
+                    value = xpathObj->nodesetval->nodeTab[0]->children->content;
+                    
+                    printf ("%s\n", value);
+                    // get first child (text node) of the only node in the nodeset
+                    sscanf (value, "%lf,%lf", OUT_longitude , OUT_latitude);
+                    g_free (value);
+                    success = TRUE;
+                }
+                xmlXPathFreeObject(xpathObj);
+            }
+            xmlXPathFreeContext(xpathCtx);
         }
-        xmlFreeTextReader(reader);
-    
-    
-    
-     
+	    xmlFreeDoc(doc);
+    }        
+    xmlCleanupParser();
+
     return success;
 }
 

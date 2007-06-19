@@ -168,9 +168,6 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     *OUT_longitude = -999.99;
 
     xml = geoclue_position_get_hostip_xml();
-
-    xmlInitParser();
-    LIBXML_TEST_VERSION
     doc = xmlParseDoc (xml);
     g_free(xml);
 
@@ -200,7 +197,6 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
         }
 	    xmlFreeDoc(doc);
     }        
-    xmlCleanupParser();
 
     return success;
 }
@@ -296,6 +292,7 @@ int main(int argc, char **argv)
      * between the version it was compiled for and the actual shared
      * library used.
      */
+    xmlInitParser();
     LIBXML_TEST_VERSION
       
 
@@ -309,6 +306,8 @@ int main(int argc, char **argv)
     
     g_object_unref(obj);   
     g_main_loop_unref(obj->loop);
- 
+    
+    xmlCleanupParser();
+    
     return(0);
 }

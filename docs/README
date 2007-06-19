@@ -1,0 +1,8 @@
+geoclue.dia is a source file for Dia (the diagram creation tool, 
+http://live.gnome.org/Dia). Dia wasn't as ready for use as I was 
+hoping, but it gets the job done. 
+
+By default Dia saves the files as gzipped xml, but I saved this one 
+without compression. We'll see if using source control has any benefit
+in this case.
+

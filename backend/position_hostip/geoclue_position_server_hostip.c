@@ -23,6 +23,7 @@
 #include <dbus/dbus-glib-bindings.h>
 
 #include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
 #include <libsoup/soup.h>
 #include <fcntl.h>
 #include <stdlib.h>

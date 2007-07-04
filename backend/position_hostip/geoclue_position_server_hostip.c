@@ -170,7 +170,6 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
 
     xml = geoclue_position_get_hostip_xml();
     doc = xmlParseDoc (xml);
-    g_free(xml);
 
     if (doc) {
         xpathCtx = xmlXPathNewContext(doc);
@@ -196,9 +195,10 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
             }
             xmlXPathFreeContext(xpathCtx);
         }
-	    xmlFreeDoc(doc);
-    }        
-
+        //FIXME: I have no idea why this segfaults every second call??
+        //xmlFreeDoc(doc);
+    }
+    g_free(xml);
     return success;
 }
 

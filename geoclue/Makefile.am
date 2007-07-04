@@ -53,7 +53,7 @@ libgeoclue_la_SOURCES = 	position.c \
 libgeoclue_la_CFLAGS = $(DEPS_CFLAGS) -I$(top_srcdir)
 libgeoclue_la_LIBADD = $(DEPS_LIBS)
 
-libgeoclue_ladir=$(includedir)/geoclue/geoclue
+libgeoclue_ladir=$(includedir)/geoclue
 libgeoclue_la_HEADERS = 	position.h \
 				find.h \
 				map.h \

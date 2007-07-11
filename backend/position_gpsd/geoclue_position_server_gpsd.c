@@ -17,37 +17,30 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <geoclue_position_server_gpsd.h>
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
 
-
-
-#include <libxml/xmlreader.h>
-#include <libsoup/soup.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <math.h>
 
 
 
-#define PROGRAM_HEIGHT 640
-#define PROGRAM_WIDTH 480
-#define DEFAULT_LAT 38.857
-#define DEFAULT_LON -94.8
-#define DEFAULT_ZOOM 8
-#define DEFAULT_LAT_STRING "38.857"
-#define DEFAULT_LON_STRING "-94.8"
-#define DEFAULT_ZOOM_STRING "8"
-
-
-
-
-
 G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
 
+/* NOTE:
+ *  "GeocluePosition* obj" should be in defined in main(), but it's here because it's
+ *  needed in gps_callback (for emitting the gobject signal)... A smarter solution 
+ *  would be nice 
+ */
+GeocluePosition* obj = NULL;
 
 enum {
   CURRENT_POSITION_CHANGED,
@@ -57,13 +50,16 @@ enum {
 static guint signals[LAST_SIGNAL];
 
 //Default handler
-void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
+void geoclue_position_current_position_changed (GeocluePosition* obj, gdouble lat, gdouble lon)
 {   
     g_print("Current Position Changed\n");
 }
 
-
-
+/* callback for gpsd signals */
+static void gps_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
+{
+    g_signal_emit_by_name (obj, "current_position_changed", gpsdata->fix.latitude, gpsdata->fix.longitude);
+}
 
 
 static void
@@ -93,7 +89,6 @@ geoclue_position_init (GeocluePosition *obj)
 		g_error_free (error);
 	}	
 }
-
 
 
 static void
@@ -215,10 +210,6 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
 }
 
 
-
-
-
-
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {
     return TRUE;  
@@ -230,21 +221,6 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
     return TRUE;
 }
 
-static void update_gps(struct gps_data_t *gpsdata, 
-             char *message, 
-             size_t len, int level)
-{
-    
-    g_print("Callback %s\n", message);
-    
-    
-}
-                
-
-
-
-
-
 
 
 int main(int argc, char **argv) 
@@ -255,17 +231,6 @@ int main(int argc, char **argv)
     
     printf("Starting GPSD\n");
     
-    
-    /*
-     * this initialize the library and check potential ABI mismatches
-     * between the version it was compiled for and the actual shared
-     * library used.
-     */
-    LIBXML_TEST_VERSION
-    
-    
-    GeocluePosition* obj = NULL; 
-    
     obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
     obj->loop = g_main_loop_new(NULL,TRUE);
         
@@ -275,19 +240,15 @@ int main(int argc, char **argv)
     obj->gpsdata = gps_open(server, port);
     if(obj->gpsdata)
     {  
-     
-        gps_set_raw_hook(obj->gpsdata, update_gps);
-         
-         
-        printf("Success running main loop\n"); 
+        g_debug ("Attaching callback, running main loop...\n");
+        
+        gps_set_callback (obj->gpsdata, gps_callback, &th_gps);
         g_main_loop_run(obj->loop);
        
         gps_close(obj->gpsdata);
      
-        g_object_unref(obj);   
+        g_object_unref(obj);
         g_main_loop_unref(obj->loop);
-     
-       
     }
     else
     {

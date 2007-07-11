@@ -30,6 +30,16 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+
+#ifdef HAVE_LIBGPSBT
+#include <gpsbt.h>
+#endif
+
+#define GPSBT_MAX_ERROR_BUF_LEN 255
+
 
 
 G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
@@ -221,24 +231,43 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
 
 int main(int argc, char **argv) 
 {
+    char* server = NULL;
+    char* port = DEFAULT_GPSD_PORT;
+
     g_type_init ();
     g_thread_init (NULL);
     
+
+#ifdef HAVE_LIBGPSBT
+    /* prepare for starting gpsd on systems using libgpsbt */
+    int st;
+    pthread_t th_gps;
+    char errbuf[MAX_ERROR_BUF_LEN+1];
+    memset (errbuf, 0, MAX_ERROR_BUF_LEN+1);
+    gpsbt_t bt_ctx = { {0} };
     
-    printf("Starting GPSD\n");
-    
+    setenv ("GPSD_PROG", "/usr/sbin/gpsd", 1); /* hack to bypass maemo bug */
+    g_debug ("Running gpsbt_start");
+    st = gpsbt_start (NULL, 0, 0, 0, errbuf, GPSBT_MAX_ERROR_BUF_LEN, 0, &bt_ctx);
+    if (st<0) {
+        g_printerr ("Error %d in gpsbt_start: %s (%s)\n", errno, strerror(errno), errbuf);
+        return (1);
+    }
+
+    /* wait for gpsd to get started */
+    sleep (1);
+#endif
+
     obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
     obj->loop = g_main_loop_new(NULL,TRUE);
-        
-
-   char *server = NULL, *port = DEFAULT_GPSD_PORT;
-        
+    g_debug ("Starting GPSD\n");
     obj->gpsdata = gps_open(server, port);
+
     if(obj->gpsdata)
     {  
         g_debug ("Attaching callback, running main loop...\n");
-        
         gps_set_callback (obj->gpsdata, gps_callback, &th_gps);
+
         g_main_loop_run(obj->loop);
        
         gps_close(obj->gpsdata);
@@ -250,6 +279,10 @@ int main(int argc, char **argv)
     {
         g_printerr("Cannot Find GPSD\n");
     }
+
+ifdef HAVE_LIBGPSBT
+    gpsbt_stop (&bt_ctx);
+#endif
      
     return(0);
 }

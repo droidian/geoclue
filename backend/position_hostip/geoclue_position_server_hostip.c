@@ -128,14 +128,13 @@ gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GE
 }
 
 
-gchar* geoclue_position_get_hostip_xml()
+static gboolean get_hostip_xml (gchar **xml)
 {
     SoupSession *session;
     SoupMessage *msg;
     const char *cafile = NULL;
-    SoupUri *proxy = NULL;    
+    SoupUri *proxy = NULL;
     gchar *proxy_env;
-    gchar *result; 
 
     proxy_env = getenv ("http_proxy");
     if (proxy_env != NULL) {  
@@ -144,60 +143,75 @@ gchar* geoclue_position_get_hostip_xml()
             SOUP_SESSION_SSL_CA_FILE, cafile,
             SOUP_SESSION_PROXY_URI, proxy,
             NULL);
+        soup_uri_free (proxy);
         g_free (proxy_env);
-    }else{
+    } else {
         session = soup_session_sync_new ();
     }
     
+    if (!session) {
+        return FALSE;
+    }    
+
     msg = soup_message_new ("GET", HOSTIP_API);
-    soup_session_send_message(session, msg);
-    result = g_strdup (msg->response.body);
-   
-    return result;
+    soup_session_send_message (session, msg);
+    *xml = g_strdup (msg->response.body);
+
+    if (!xml) {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
     gboolean success = FALSE;
-    gchar *xml;
+    gchar *xml = NULL;
     gchar *value;
     xmlDocPtr doc;
     xmlXPathContextPtr xpathCtx;   
     xmlXPathObjectPtr xpathObj; 
-
+    
     *OUT_latitude = -999.99;
     *OUT_longitude = -999.99;
-
-    xml = geoclue_position_get_hostip_xml();
-    doc = xmlParseDoc (xml);
-
-    if (doc) {
-        xpathCtx = xmlXPathNewContext(doc);
-        if (xpathCtx) {
-            // Register gml namespace and evaluate xpath
-            xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
-            xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);
-            
-            if(!xpathObj) {
-                // hostip probably does not have coordinates for this IP
-
-            } else {
-                if (xpathObj->nodesetval->nodeNr >= 1){
-                    value = xpathObj->nodesetval->nodeTab[0]->children->content;
-                    
-                    printf ("%s\n", value);
-                    // get first child (text node) of the only node in the nodeset
-                    sscanf (value, "%lf,%lf", OUT_longitude , OUT_latitude);
-                    g_free (value);
-                    success = TRUE;
-                }
-                xmlXPathFreeObject(xpathObj);
-            }
-            xmlXPathFreeContext(xpathCtx);
-        }
-        //FIXME: I have no idea why this segfaults every second call??
-        //xmlFreeDoc(doc);
+    
+    g_debug ("Getting xml from hostip.info...");
+    if (!get_hostip_xml (&xml)) {
+        return FALSE;
     }
+    doc = xmlParseDoc (xml);
+    
+    if (!doc) {
+        g_free (xml);
+        return FALSE;
+    }
+    
+    xpathCtx = xmlXPathNewContext(doc);
+    if (xpathCtx) {
+        // Register gml namespace and evaluate xpath
+        xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
+        xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);
+        
+        if(!xpathObj) {
+            // hostip probably does not have coordinates for this IP
+        } else {
+            if (xpathObj->nodesetval->nodeNr >= 1){
+                value = xpathObj->nodesetval->nodeTab[0]->children->content;
+                
+                printf ("%s\n", value);
+                // get first child (text node) of the only node in the nodeset
+                sscanf (value, "%lf,%lf", OUT_longitude , OUT_latitude);
+                g_free (value);
+                success = TRUE;
+            }
+            xmlXPathFreeObject(xpathObj);
+        }
+        xmlXPathFreeContext(xpathCtx);
+    }
+    //FIXME: as far as I know doc should be freed, but this segfaults...
+    //xmlFreeDoc (doc);
+    
     g_free(xml);
     return success;
 }

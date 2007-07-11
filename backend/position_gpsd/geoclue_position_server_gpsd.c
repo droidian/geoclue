@@ -242,8 +242,8 @@ int main(int argc, char **argv)
 #ifdef HAVE_LIBGPSBT
     /* prepare for starting gpsd on systems using libgpsbt */
     int st;
-    char errbuf[MAX_ERROR_BUF_LEN+1];
-    memset (errbuf, 0, MAX_ERROR_BUF_LEN+1);
+    char errbuf[GPSBT_MAX_ERROR_BUF_LEN+1];
+    memset (errbuf, 0, GPSBT_MAX_ERROR_BUF_LEN+1);
     gpsbt_t bt_ctx = { {0} };
     
     setenv ("GPSD_PROG", "/usr/sbin/gpsd", 1); /* hack to bypass maemo bug */

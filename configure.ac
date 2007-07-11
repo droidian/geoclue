@@ -64,6 +64,10 @@ if test "x$ac_cv_libgps" != xyes; then
     AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
 fi
 
+dnl check for libgpsbt
+AC_CHECK_LIB(gpsmgr, gpsmgr_is_gpsd_running)
+AC_CHECK_LIB(gpsbt, gpsbt_start)
+
 
 PKG_CHECK_MODULES(HTTPXML, libsoup-2.2 libxml-2.0)
 AC_SUBST(HTTPXML_CFLAGS)

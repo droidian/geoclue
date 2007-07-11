@@ -139,24 +139,20 @@ gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GE
 
 gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
-    
-    g_print(" Querying GPSD\n");
-     gps_query(obj->gpsdata, "w+x\n");
-     
-     *OUT_latitude = obj->gpsdata->fix.latitude;
-     *OUT_longitude = obj->gpsdata->fix.longitude;
-     
-     g_print("Sending back %f %f\n", *OUT_latitude, *OUT_longitude);
+    /* if everything is fine, we can just read obj->gpsdata */ 
+    if (obj->gpsdata->status && 
+        obj->gpsdata->online && 
+        obj->gpsdata->fix.mode > 1 &&
+        (obj->gpsdata->set & (LATLON_SET | ALTITUDE_SET))) {    
 
-     //*OUT_latitude = obj->gpsdata->newdata.latitude;
-     //*OUT_longitude = obj->gpsdata->newdata.longitude;
-     
-    // g_print("Sending back %f %f\n", *OUT_latitude, *OUT_longitude);
-
-     
-
-      
-    return TRUE;
+        *OUT_latitude = obj->gpsdata->fix.latitude;
+        *OUT_longitude = obj->gpsdata->fix.longitude;
+        
+        g_debug ("Sending back %f %f", *OUT_latitude, *OUT_longitude);
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )

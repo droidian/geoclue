@@ -233,6 +233,7 @@ int main(int argc, char **argv)
 {
     char* server = NULL;
     char* port = DEFAULT_GPSD_PORT;
+    pthread_t th_gps;
 
     g_type_init ();
     g_thread_init (NULL);
@@ -241,7 +242,6 @@ int main(int argc, char **argv)
 #ifdef HAVE_LIBGPSBT
     /* prepare for starting gpsd on systems using libgpsbt */
     int st;
-    pthread_t th_gps;
     char errbuf[MAX_ERROR_BUF_LEN+1];
     memset (errbuf, 0, MAX_ERROR_BUF_LEN+1);
     gpsbt_t bt_ctx = { {0} };
@@ -280,7 +280,7 @@ int main(int argc, char **argv)
         g_printerr("Cannot Find GPSD\n");
     }
 
-ifdef HAVE_LIBGPSBT
+#ifdef HAVE_LIBGPSBT
     gpsbt_stop (&bt_ctx);
 #endif
      

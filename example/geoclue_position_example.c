@@ -22,28 +22,51 @@
 #include <glib.h>
 #include <math.h>
 
+/**
+ *
+ * Call the test program with no arguments (default backend will be used),
+ * or use the name of the backend as argument:
+ *     ./geoclue-position-example gpsd
+ *
+**/
+
+
 int main (int argc, char** argv)
 {
-    g_type_init();
-    printf("Asking for location\n");
-    geoclue_position_init();
-    //geoclue_position_init_specific("org.foinse_project.geoclue.position.gpsd","/org/foinse_project/geoclue/position/gpsd");
     gdouble lat, lon;
-    geoclue_position_current_position(&lat, &lon);
-    printf("You are at %f %f\n", lat, lon);
+    gboolean init_ok = FALSE;
     
-    geoclue_position_current_altitude ( &lon );
+    g_type_init ();
+    g_thread_init (NULL);
     
-    double temp, temp2;
-    geoclue_position_current_velocity( &temp, &temp2 ) ;
-    printf("2d vel %f %f \n", temp, temp2);
-    temp = sqrt(temp * temp + temp2 * temp2);
-    printf("1d vel %f \n", temp);
-    geoclue_position_current_altitude( &temp ) ;   
-    printf("Altitude %f \n", temp);
-     
-     
+    if (argv[1] != NULL) {
+        g_debug ("Testing specified backend: %s\n", argv[1]);
+        
+        gchar* service = g_strdup_printf ("org.foinse_project.geoclue.position.%s", argv[1]);
+        gchar* path = g_strdup_printf ("/org/foinse_project/geoclue/position/%s", argv[1]);
+        if (geoclue_position_init_specific (service, path) == GEOCLUE_POSITION_SUCCESS){
+            init_ok = TRUE;
+        }    
+    } else {
+        g_debug ("Testing default backend\n");
+        
+        if (geoclue_position_init () == GEOCLUE_POSITION_SUCCESS){
+            init_ok = TRUE;
+        }
+    }
     
- 
+    if (!init_ok) {
+        g_printerr ("Initialization failed");
+        return 1;
+    }
+
+    g_debug ("Querying current position\n");
+    if (geoclue_position_current_position(&lat, &lon) != GEOCLUE_POSITION_SUCCESS) {
+        g_debug ("current position query failed");
+    } else {
+        g_debug ("current position query ok");
+        printf ("You are at %f %f\n\n", lat, lon);
+    }
+    
     return 0;   
 }

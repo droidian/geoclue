@@ -68,7 +68,14 @@ void geoclue_position_current_position_changed (GeocluePosition* obj, gdouble la
 /* callback for gpsd signals */
 static void gps_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
 {
-    g_signal_emit_by_name (obj, "current_position_changed", gpsdata->fix.latitude, gpsdata->fix.longitude);
+    if (gpsdata->set & LATLON_SET) {
+
+        /* FIXME: should only emit the signal if lat/lon have actually changed */
+        g_signal_emit_by_name (obj, "current_position_changed", gpsdata->fix.latitude, gpsdata->fix.longitude);
+        
+        /* clear the flag */
+        gpsdata->set &= ~LATLON_SET;
+    }
 }
 
 
@@ -152,8 +159,7 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     /* if everything is fine, we can just read obj->gpsdata */ 
     if (obj->gpsdata->status && 
         obj->gpsdata->online && 
-        obj->gpsdata->fix.mode > 1 &&
-        (obj->gpsdata->set & (LATLON_SET | ALTITUDE_SET))) {    
+        obj->gpsdata->fix.mode > 1) {
 
         *OUT_latitude = obj->gpsdata->fix.latitude;
         *OUT_longitude = obj->gpsdata->fix.longitude;

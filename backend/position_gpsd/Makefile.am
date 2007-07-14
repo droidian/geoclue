@@ -1,7 +1,8 @@
 bin_PROGRAMS = geoclue-position-server-gpsd
 
 geoclue_position_server_gpsd_SOURCES = geoclue_position_server_gpsd.c \
-				geoclue_position_signal_marshal.c
+				geoclue_position_signal_marshal.c \
+				../geoclue_position_error.c
 
 
 service_in_files = org.foinse_project.geoclue.position.gpsd.service.in

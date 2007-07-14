@@ -38,6 +38,8 @@
 #include <gpsbt.h>
 #endif
 
+#include "../geoclue_position_error.h"
+
 #define GPSBT_MAX_ERROR_BUF_LEN 255
 
 
@@ -156,74 +158,125 @@ gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GE
 
 gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
-    /* if everything is fine, we can just read obj->gpsdata */ 
-    if (obj->gpsdata->status && 
-        obj->gpsdata->online && 
-        obj->gpsdata->fix.mode > 1) {
-
-        *OUT_latitude = obj->gpsdata->fix.latitude;
-        *OUT_longitude = obj->gpsdata->fix.longitude;
-        
-        g_debug ("Sending back %f %f", *OUT_latitude, *OUT_longitude);
-        return TRUE;
-    } else {
+    if (obj->gpsdata->online == 0) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NOSERVICE,
+                     "GPS not online.");
         return FALSE;
     }
+    if (obj->gpsdata->status == STATUS_NO_FIX) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "GPS fix not aqcuired.");
+        return FALSE;
+    }
+
+    *OUT_latitude = obj->gpsdata->fix.latitude;
+    *OUT_longitude = obj->gpsdata->fix.longitude;
+        
+    g_debug ("Sending back %f %f", *OUT_latitude, *OUT_longitude);
+    return TRUE;
 }
 
 gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return TRUE;  
 }
 

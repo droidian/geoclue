@@ -29,6 +29,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "../geoclue_position_error.h"
 
 #define HOSTIP_API "http://api.hostip.info/"
 
@@ -150,25 +151,24 @@ static gboolean get_hostip_xml (gchar **xml)
     }
     
     if (!session) {
+        g_debug ("no libsoup session");
         return FALSE;
     }    
 
     msg = soup_message_new ("GET", HOSTIP_API);
     soup_session_send_message (session, msg);
-    *xml = g_strdup (msg->response.body);
-
-    if (!xml) {
+    if (msg->response.length == 0) {
+        g_debug ("no xml from libsoup, a connection problem perhaps?");
         return FALSE;
     }
 
+    *xml = g_strdup (msg->response.body);
     return TRUE;
 }
 
 gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
 {
-    gboolean success = FALSE;
     gchar *xml = NULL;
-    gchar *value;
     xmlDocPtr doc;
     xmlXPathContextPtr xpathCtx;   
     xmlXPathObjectPtr xpathObj; 
@@ -178,96 +178,159 @@ gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_la
     
     g_debug ("Getting xml from hostip.info...");
     if (!get_hostip_xml (&xml)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR, 
+                     GEOCLUE_POSITION_ERROR_NOSERVICE,
+                     "No position data was received from %s.", HOSTIP_API);
         return FALSE;
     }
+
     doc = xmlParseDoc (xml);
-    
     if (!doc) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR, 
+                     GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
+                     "Position data from %s could not be parsed.", HOSTIP_API);
         g_free (xml);
+        /* FIXME: set error here */
         return FALSE;
     }
     
+    gboolean success = FALSE;
     xpathCtx = xmlXPathNewContext(doc);
-    if (xpathCtx) {
-        // Register gml namespace and evaluate xpath
-        xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
-        xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);
-        
-        if(!xpathObj) {
-            // hostip probably does not have coordinates for this IP
-        } else {
-            if (xpathObj->nodesetval->nodeNr >= 1){
-                value = xpathObj->nodesetval->nodeTab[0]->children->content;
-                
-                printf ("%s\n", value);
-                // get first child (text node) of the only node in the nodeset
-                sscanf (value, "%lf,%lf", OUT_longitude , OUT_latitude);
-                g_free (value);
-                success = TRUE;
-            }
+    if (!xpathCtx) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "XPath context could not be created.");
+        /* xmlFreeDoc (doc); // see FIXME below */
+        return FALSE;
+    }
+
+    // Register gml namespace and evaluate xpath
+    xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
+    xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);    
+    xmlXPathFreeContext(xpathCtx);
+
+    if (!xpathObj || (xpathObj->nodesetval->nodeNr == 0)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "%s does not have position data for this IP address.", HOSTIP_API);
+        if (xpathObj) {
             xmlXPathFreeObject(xpathObj);
         }
-        xmlXPathFreeContext(xpathCtx);
+        /* xmlFreeDoc (doc); // see FIXME below */
+        return FALSE;
     }
-    //FIXME: as far as I know doc should be freed, but this segfaults...
-    //xmlFreeDoc (doc);
-    
+
+    sscanf (xpathObj->nodesetval->nodeTab[0]->children->content,
+            "%lf,%lf", OUT_longitude , OUT_latitude);
+    xmlXPathFreeObject(xpathObj);
+
+    /* FIXME: as far as I know doc should be freed, but this segfaults... */
+    /* xmlFreeDoc (doc); */
     g_free(xml);
-    return success;
+
+    return TRUE;
 }
 
 gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
     return FALSE;
 }
 
 
-
+/* TODO: Is this method sane? We have "GError**" in the call signatures:
+   This means calling current_position and checking return value 
+   (and reading error->message on FALSE) gives the exact same 
+   information as this method... */
+   
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {
     gdouble temp, temp2;
@@ -290,9 +353,6 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
     g_main_loop_quit (obj->loop);
     return TRUE;
 }
-
-
-
 
 
 

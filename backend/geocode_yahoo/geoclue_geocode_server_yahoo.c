@@ -1,4 +1,4 @@
-/* Geogeocode - A DBus api and wrapper for getting geography pictures
+/* Geoclue - A DBus api and wrapper for geography information
  * Copyright (C) 2006 Garmin
  * 
  * 

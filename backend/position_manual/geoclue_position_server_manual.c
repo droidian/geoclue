@@ -17,19 +17,20 @@
  * Boston, MA 02111-1307, USA.
  */
 
+#include <stdio.h>
+#include <string.h>
+
+#include <dbus/dbus-glib-bindings.h>
+#include <gtk/gtk.h>
+
 #include <geoclue_position_server_manual.h>
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
-#include <dbus/dbus-glib-bindings.h>
+
 //#include <geoclue/position.h>
-//#include <geomap/geomap_gtk_layout.h>
-
-
-#include <gtk/gtk.h>
 #include <geoclue/map.h>
 #include <geoclue/map_gtk_layout.h>
-#include <stdio.h>
-#include <string.h>
+
 
 #define PROGRAM_HEIGHT 640
 #define PROGRAM_WIDTH 480
@@ -269,7 +270,7 @@ int main(int argc, char **argv)
 
     if(geoclue_map_init())
     {   
-        g_print("Error Opening Geomap\n");       
+        g_print("Error initializing map backend\n");       
     }    
     
     GeocluePosition* obj = NULL;  

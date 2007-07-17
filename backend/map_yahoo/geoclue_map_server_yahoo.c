@@ -1,4 +1,4 @@
-/* Geomap - A DBus api and wrapper for getting geography pictures
+/* Geoclue - A DBus api and wrapper for geography information
  * Copyright (C) 2006 Garmin
  * 
  * 
@@ -125,7 +125,7 @@ geoclue_map_init (GeoclueMap *obj)
 			0, &request_ret,    /* See tutorial for more infos about these */
 			&error))
 	{
-		g_printerr("Unable to register geomap service: %s", error->message);
+		g_printerr("Unable to register Geoclue map service: %s", error->message);
 		g_error_free (error);
         exit(1);
 	}	

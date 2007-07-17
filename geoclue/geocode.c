@@ -85,7 +85,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_init()
     geoclue_geocode_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
     if (geoclue_geocode_connection == NULL)
     {
-        g_printerr ("Geomap failed to open connection to bus: %s\n", error->message);
+        g_printerr ("Failed to open connection to bus: %s\n", error->message);
         g_error_free (error);
         return GEOCLUE_GEOCODE_DBUS_ERROR;
     }

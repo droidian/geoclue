@@ -1,4 +1,4 @@
-/* Geomap - A DBus api and wrapper for getting geography pictures
+/* Geoclue - A DBus api and wrapper for geography information
  * Copyright (C) 2006 Garmin
  * 
  * 
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 
     if( geoclue_map_init())
     {   
-        g_print("Error Opening Geomap\n");
+        g_print("Error initializing map backend\n");
     }    
     
     latitude = gtk_entry_new(); 

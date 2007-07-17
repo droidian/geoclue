@@ -103,7 +103,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_init_specific(char* service, char* path)
     geoclue_find_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
     if (geoclue_find_connection == NULL)
     {
-        g_printerr ("Geomap failed to open connection to bus: %s\n", error->message);
+        g_printerr ("Failed to open connection to bus: %s\n", error->message);
         g_error_free (error);
         return GEOCLUE_FIND_DBUS_ERROR;
     }
@@ -140,7 +140,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_init()
     geoclue_find_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
     if (geoclue_find_connection == NULL)
     {
-        g_printerr ("Geomap failed to open connection to bus: %s\n", error->message);
+        g_printerr ("Failed to open connection to bus: %s\n", error->message);
         g_error_free (error);
         return GEOCLUE_FIND_DBUS_ERROR;
     }

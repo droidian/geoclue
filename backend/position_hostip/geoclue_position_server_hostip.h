@@ -22,9 +22,18 @@
 
 #define DBUS_API_SUBJECT_TO_CHANGE
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <glib.h>
+
+#ifdef HAVE_LIBCONIC
+#include <conicconnection.h>
+#endif
+
 #define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position.hostip"
 #define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position/hostip"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"
@@ -39,8 +48,15 @@ GType geoclue_position_get_type (void);
 struct GeocluePosition
 {
     GObject parent;
-
-    GMainLoop*  loop;     
+    GMainLoop* loop;
+    
+    gdouble current_lat;
+    gdouble current_lon;
+    gboolean is_current_valid;
+#ifdef HAVE_LIBCONIC
+    ConIcConnection* net_connection; 
+    DBusConnection* dbus_connection; 
+#endif
 };
 
 struct GeocluePositionClass

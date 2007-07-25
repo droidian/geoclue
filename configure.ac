@@ -64,9 +64,17 @@ if test "x$ac_cv_libgps" != xyes; then
     AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
 fi
 
-dnl check for libgpsbt
+dnl check for libgpsbt and libgpsmgr
 AC_CHECK_LIB(gpsmgr, gpsmgr_is_gpsd_running)
 AC_CHECK_LIB(gpsbt, gpsbt_start)
+
+dnl check for libconic
+PKG_CHECK_MODULES(CONIC, conic, [have_libconic=yes], [have_libconic=no])
+AC_SUBST(CONIC_CFLAGS)
+AC_SUBST(CONIC_LIBS)
+if test "x$have_libconic" = "xyes"; then
+    AC_DEFINE(HAVE_LIBCONIC, 1, [define if libconic is installed])
+fi
 
 
 PKG_CHECK_MODULES(HTTPXML, libsoup-2.2 libxml-2.0)

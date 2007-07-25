@@ -18,8 +18,8 @@ $(service_DATA): $(service_in_files) Makefile
 	done
 
 
-AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
+AM_CPPFLAGS = $(YAHOO_CFLAGS) $(CONIC_CFLAGS) -I$(top_srcdir)
+AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) ../../geoclue/libgeoclue.la
 
 EXTRA_DIST = \
 		geoclue_position_server_hostip.h \

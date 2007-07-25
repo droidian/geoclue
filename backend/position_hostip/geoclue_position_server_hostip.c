@@ -191,7 +191,7 @@ static gboolean get_hostip_xml (gchar **xml)
         return FALSE;
     }
 
-    *xml = g_strdup (msg->response.body);
+    *xml = g_strndup (msg->response.body, msg->response.length);
     return TRUE;
 }
 
@@ -223,7 +223,7 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR, 
                      GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
-                     "Position data from %s could not be parsed.", HOSTIP_API);
+                     "Position data from %s could not be parsed:\n\n%s", HOSTIP_API, xml);
         g_free (xml);
         /* FIXME: set error here */
         return FALSE;

@@ -18,8 +18,10 @@
  */
 
 #include "geoclue_position_server_hostip.h"
+#include "../geoclue_position_error.h"
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
+
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
 
@@ -30,16 +32,37 @@
 #include <libxml/xpath.h>
 #include <libxml/xpathInternals.h>
 #include <libsoup/soup.h>
-#include <fcntl.h>
 #include <stdlib.h>
-#include <math.h>
-#include <string.h>
-#include "../geoclue_position_error.h"
 
 
+#define HOSTIP_API "http://api.hostip.info/"
+
+
+
+G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
+
+enum {
+  CURRENT_POSITION_CHANGED,
+  LAST_SIGNAL
+};
+
+static guint signals[LAST_SIGNAL];
+
+/* Default handler */
+void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
+{   
+    g_print("Current Position Changed\n");
+}
+
+
+
+/*
+ * private function declarations 
+ */
 static void init_net_connection_monitoring (GeocluePosition* obj);
 static void close_net_connection_monitoring (GeocluePosition* obj);
-static gboolean get_hostip_xml (gchar **xml);
+static gboolean get_hostip_xml (xmlChar **xml);
+static xmlXPathContextPtr get_hostip_xpath_context (GError** error);
 static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon);
 
@@ -99,13 +122,6 @@ static void init_net_connection_monitoring (GeocluePosition* obj)
 
     /* setup the connection signal callback */
     obj->net_connection = con_ic_connection_new ();
-/*
-    GValue val = {0,};
-    g_value_init (&val, G_TYPE_BOOLEAN);
-    g_value_set_boolean (&val, TRUE);
-    g_object_set_property (G_OBJECT (obj->net_connection),
-                           "automatic-connection-events", &val);
-*/
     g_object_set (obj->net_connection, "automatic-connection-events", 
                   TRUE, NULL);
     g_signal_connect (obj->net_connection, "connection-event",
@@ -126,39 +142,14 @@ static void close_net_connection_monitoring (GeocluePosition* obj)
 
 #define OBSERVING_NET_CONNECTIONS FALSE
 /* empty functions for non-libconic platforms */
-static void init_net_connection_monitoring (GeocluePosition* obj) {g_debug("empty init_net_connection_monitoring");}
+static void init_net_connection_monitoring (GeocluePosition* obj) {}
 static void close_net_connection_monitoring (GeocluePosition* obj) {}
 
 #endif
 
 
 
-
-#define HOSTIP_API "http://api.hostip.info/"
-
-
-G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
-
-
-enum {
-  CURRENT_POSITION_CHANGED,
-  LAST_SIGNAL
-};
-
-static guint signals[LAST_SIGNAL];
-
-//Default handler
-void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
-{   
-    g_print("Current Position Changed\n");
-}
-
-
-
-
-/* some static helper functions */
-
-static gboolean get_hostip_xml (gchar **xml)
+static gboolean get_hostip_xml (xmlChar **xml)
 {
     SoupSession *session;
     SoupMessage *msg;
@@ -191,60 +182,73 @@ static gboolean get_hostip_xml (gchar **xml)
         return FALSE;
     }
 
-    *xml = g_strndup (msg->response.body, msg->response.length);
+    *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
     return TRUE;
 }
 
 
-
-
-static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
+/* builds an xpath context from hostip xml.
+   the context can be used in xpath evals */
+xmlXPathContextPtr get_hostip_xpath_context (GError** error)
 {
+    xmlChar* xml = NULL;
+    xmlDocPtr doc; /*should this be freed or does context take care of it?*/
+    xmlXPathContextPtr xpathCtx;
 
-    gchar *xml = NULL;
-    xmlDocPtr doc;
-    xmlXPathContextPtr xpathCtx;   
-    xmlXPathObjectPtr xpathObj; 
-    
-    *OUT_latitude = -999.99;
-    *OUT_longitude = -999.99;
-    
     g_debug ("Getting xml from hostip.info...");
     if (!get_hostip_xml (&xml)) {
         g_set_error (error,
-                     GEOCLUE_POSITION_ERROR, 
+                     GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NOSERVICE,
                      "No position data was received from %s.", HOSTIP_API);
-        return FALSE;
+        return NULL;
     }
 
     doc = xmlParseDoc (xml);
     if (!doc) {
         g_set_error (error,
-                     GEOCLUE_POSITION_ERROR, 
+                     GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
                      "Position data from %s could not be parsed:\n\n%s", HOSTIP_API, xml);
         g_free (xml);
-        /* FIXME: set error here */
-        return FALSE;
+        return NULL;
     }
-    
+
     xpathCtx = xmlXPathNewContext(doc);
     if (!xpathCtx) {
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_FAILED,
                      "XPath context could not be created.");
-        /* xmlFreeDoc (doc); // see FIXME below */
-        return FALSE;
+        g_free (xml);
+        return NULL;
     }
 
-    // Register gml namespace and evaluate xpath
-    xmlXPathRegisterNs (xpathCtx, "gml", "http://www.opengis.net/gml");
-    xpathObj = xmlXPathEvalExpression ("//gml:coordinates", xpathCtx);    
-    xmlXPathFreeContext(xpathCtx);
+    /* Register namespaces */
+    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
+    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
 
-    if (!xpathObj || (xpathObj->nodesetval->nodeNr == 0)) {
+    g_free(xml);
+    return xpathCtx;
+}
+
+
+static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
+{
+    xmlXPathObjectPtr xpathObj; 
+    xmlXPathContextPtr xpathCtx = get_hostip_xpath_context (error);
+    if (!xpathCtx) {
+        return FALSE;
+    }
+    
+    *OUT_latitude = -999.99;
+    *OUT_longitude = -999.99;
+    
+    /* evaluate xpath expression */
+    xpathObj = xmlXPathEvalExpression ((xmlChar*)"//gml:coordinates", xpathCtx);
+    xmlXPathFreeContext(xpathCtx);
+ 
+    if (!xpathObj || xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
@@ -252,20 +256,14 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
         if (xpathObj) {
             xmlXPathFreeObject(xpathObj);
         }
-        /* xmlFreeDoc (doc); // see FIXME below */
         return FALSE;
     }
 
-    sscanf (xpathObj->nodesetval->nodeTab[0]->children->content,
+    sscanf ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval), 
             "%lf,%lf", OUT_longitude , OUT_latitude);
     xmlXPathFreeObject(xpathObj);
 
-    /* FIXME: as far as I know doc should be freed, but this segfaults... */
-    /* xmlFreeDoc (doc); */
-    g_free(xml);
-
     return TRUE;
-
 }
 
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon)
@@ -278,7 +276,6 @@ static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon
 
     /* if net connection is monitored, the validity of position can be guaranteed */
     obj->is_current_valid = OBSERVING_NET_CONNECTIONS;
-
 }
 
 static void

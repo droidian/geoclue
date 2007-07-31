@@ -278,7 +278,7 @@ int main(int argc, char **argv)
 
     if(geoclue_map_init())
     {   
-        g_print("Error Opening Geomap\n");       
+        g_print("Error initializing map backend\n");       
     }    
     
     GeocluePosition* obj = NULL;  

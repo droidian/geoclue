@@ -40,7 +40,7 @@ int main (int argc, char** argv)
     g_thread_init (NULL);
     
     if (argv[1] != NULL) {
-        g_debug ("Testing specified backend: %s\n", argv[1]);
+        g_debug ("Testing specified backend: %s", argv[1]);
         
         gchar* service = g_strdup_printf ("org.foinse_project.geoclue.position.%s", argv[1]);
         gchar* path = g_strdup_printf ("/org/foinse_project/geoclue/position/%s", argv[1]);
@@ -48,7 +48,7 @@ int main (int argc, char** argv)
             init_ok = TRUE;
         }    
     } else {
-        g_debug ("Testing default backend\n");
+        g_debug ("Testing default backend");
         
         if (geoclue_position_init () == GEOCLUE_POSITION_SUCCESS){
             init_ok = TRUE;
@@ -60,12 +60,37 @@ int main (int argc, char** argv)
         return 1;
     }
 
-    g_debug ("Querying current position\n");
-    if (geoclue_position_current_position(&lat, &lon) != GEOCLUE_POSITION_SUCCESS) {
+    g_debug ("Querying current position");
+    if (geoclue_position_current_position (&lat, &lon) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("current position query failed");
     } else {
         g_debug ("current position query ok");
         printf ("You are at %f %f\n\n", lat, lon);
+    }
+    
+    gchar* locality = NULL;
+    gchar* country = NULL;
+
+    g_debug ("Querying civic location");
+    if (geoclue_position_civic_location (&country, NULL, &locality, NULL,NULL, NULL, NULL, NULL,NULL, NULL) != GEOCLUE_POSITION_SUCCESS) {
+        g_debug ("civic location query failed");
+    } else {
+        g_debug ("civic location query ok");
+
+        if (locality && country) {
+            printf("You are in %s, %s\n\n", locality, country);
+        }else if (country){
+            /*TODO: This is never reached. Investigate why pointers are non-null 
+                    when there's no data? */
+            printf("You are in %s\n\n", country);
+        }
+    }
+
+
+    if (geoclue_position_close () != GEOCLUE_POSITION_SUCCESS){
+        g_debug ("position_close failed");
+    } else {
+        g_debug ("position_close ok");
     }
     
     return 0;   

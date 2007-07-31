@@ -17,20 +17,17 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <stdio.h>
-#include <string.h>
-
-#include <dbus/dbus-glib-bindings.h>
-#include <gtk/gtk.h>
-
-#include <geoclue_position_server_manual.h>
+#include "geoclue_position_server_manual.h"
+#include "../geoclue_position_error.h"
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
-
-//#include <geoclue/position.h>
 #include <geoclue/map.h>
 #include <geoclue/map_gtk_layout.h>
 
+#include <dbus/dbus-glib-bindings.h>
+#include <gtk/gtk.h>
+#include <stdio.h>
+#include <string.h>
 
 #define PROGRAM_HEIGHT 640
 #define PROGRAM_WIDTH 480
@@ -198,13 +195,24 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
     return FALSE;
 }
 
-gboolean geoclue_position_geocode(GeocluePosition *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
-{
-    return FALSE;
-}
 
-gboolean geoclue_position_geocode_free_text(GeocluePosition *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
+gboolean geoclue_position_civic_location (GeocluePosition* obj,
+                                          char** OUT_country,
+                                          char** OUT_region,
+                                          char** OUT_locality,
+                                          char** OUT_area,
+                                          char** OUT_postalcode,
+                                          char** OUT_street,
+                                          char** OUT_building,
+                                          char** OUT_floor,
+                                          char** OUT_room,
+                                          char** OUT_text,
+                                          GError** error)
 {
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
@@ -270,7 +278,7 @@ int main(int argc, char **argv)
 
     if(geoclue_map_init())
     {   
-        g_print("Error initializing map backend\n");       
+        g_print("Error Opening Geomap\n");       
     }    
     
     GeocluePosition* obj = NULL;  

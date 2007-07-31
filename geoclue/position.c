@@ -19,6 +19,7 @@
 
 #define DBUS_API_SUBJECT_TO_CHANGE 
 
+#include <glib.h>
 #include <dbus/dbus-glib.h>
 #include <dbus/dbus-glib-lowlevel.h>
 #include <dbus/dbus.h>
@@ -344,7 +345,39 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn
 }
 
 
+GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location (char** OUT_country,
+                                                             char** OUT_region,
+                                                             char** OUT_locality,
+                                                             char** OUT_area,
+                                                             char** OUT_postalcode,
+                                                             char** OUT_street,
+                                                             char** OUT_building,
+                                                             char** OUT_floor,
+                                                             char** OUT_room,
+                                                             char** OUT_text)
+{
+    g_return_val_if_fail (geoclue_position_connection, GEOCLUE_POSITION_NOT_INITIALIZED);
+    g_return_val_if_fail (geoclue_position_proxy, GEOCLUE_POSITION_NOT_INITIALIZED);
 
-
-
+    GError* error = NULL;
+    org_foinse_project_geoclue_position_civic_location (geoclue_position_proxy,
+                                                        OUT_country,
+                                                        OUT_region,
+                                                        OUT_locality,
+                                                        OUT_area,
+                                                        OUT_postalcode,
+                                                        OUT_street,
+                                                        OUT_building,
+                                                        OUT_floor,
+                                                        OUT_room,
+                                                        OUT_text,
+                                                        &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting geoclue_position civic_location : %s\n", error->message);
+        g_error_free (error);
+        return GEOCLUE_POSITION_DBUS_ERROR;
+    }
+    return GEOCLUE_POSITION_SUCCESS;
+}
 

@@ -80,8 +80,20 @@
       <arg type="b" name="ephemeris" direction="out" />
     </method>
 
-
-
+    <method name="civic_location">
+      <arg type="s" name="country" direction="out" />
+      <arg type="s" name="region" direction="out" />
+      <arg type="s" name="locality" direction="out" />
+      <arg type="s" name="area" direction="out" />
+      <arg type="s" name="postalcode" direction="out" />
+      <arg type="s" name="street" direction="out" />
+      <arg type="s" name="building" direction="out" />
+      <arg type="s" name="floor" direction="out" />
+      <arg type="s" name="room" direction="out" />
+      <arg type="s" name="text" direction="out" />
+    </method>
+    
+    
     <method name="service_available">
       <arg type="b" name="available" direction="out" />
       <arg type="s" name="reason" direction="out" />

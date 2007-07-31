@@ -131,7 +131,19 @@ typedef enum _geoclue_position_fix
     GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_in_view ( GArray** OUT_prn_numbers );
     GEOCLUE_POSITION_RETURNCODE geoclue_position_satellites_data ( const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, gboolean* OUT_differential, gboolean* OUT_ephemeris );
     
-
+    /*
+     *  NOTE: civic location part of the API is definitely not stable yet!
+     */
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location (char** OUT_country, 
+                                                                 char** OUT_region,
+                                                                 char** OUT_locality,
+                                                                 char** OUT_area,
+                                                                 char** OUT_postalcode,
+                                                                 char** OUT_street,
+                                                                 char** OUT_building,
+                                                                 char** OUT_floor,
+                                                                 char** OUT_room,
+                                                                 char** OUT_text);
 
 G_END_DECLS
 

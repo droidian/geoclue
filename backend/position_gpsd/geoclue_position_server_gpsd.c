@@ -270,6 +270,26 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
     return FALSE;
 }
 
+gboolean geoclue_position_civic_location (GeocluePosition* obj,
+                                          char** OUT_country,
+                                          char** OUT_region,
+                                          char** OUT_locality,
+                                          char** OUT_area,
+                                          char** OUT_postalcode,
+                                          char** OUT_street,
+                                          char** OUT_building,
+                                          char** OUT_floor,
+                                          char** OUT_room,
+                                          char** OUT_text,
+                                          GError** error)
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
 
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {
@@ -282,6 +302,7 @@ gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_
 
 gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
 {
+    g_debug("position_shutdown");
     g_main_loop_quit (obj->loop);
     return TRUE;
 }
@@ -340,6 +361,7 @@ int main(int argc, char **argv)
     }
 
 #ifdef HAVE_LIBGPSBT
+    g_debug("gpsbt_stop...");
     gpsbt_stop (&bt_ctx);
 #endif
      

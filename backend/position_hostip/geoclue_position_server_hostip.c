@@ -50,7 +50,7 @@ static guint signals[LAST_SIGNAL];
 
 /* Default handler */
 void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
-{   
+{
     g_print("Current Position Changed\n");
 }
 
@@ -245,7 +245,7 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
     *OUT_longitude = -999.99;
     
     /* evaluate xpath expression */
-    xpathObj = xmlXPathEvalExpression ((xmlChar*)"//gml:coordinates", xpathCtx);
+    xpathObj = xmlXPathEvalExpression ((xmlChar*)"//gml:featureMember/hostip:Hostip//gml:coordinates", xpathCtx);
     xmlXPathFreeContext(xpathCtx);
  
     if (!xpathObj || xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
@@ -258,8 +258,8 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
         }
         return FALSE;
     }
-
-    sscanf ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval), 
+    
+    sscanf ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval),
             "%lf,%lf", OUT_longitude , OUT_latitude);
     xmlXPathFreeObject(xpathObj);
 
@@ -463,6 +463,67 @@ gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitu
                  GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
                  "Backend does not implement this method.");
     return FALSE;
+}
+
+
+gboolean geoclue_position_civic_location (GeocluePosition* obj,
+                                          char** OUT_country,
+                                          char** OUT_region,
+                                          char** OUT_locality,
+                                          char** OUT_area,
+                                          char** OUT_postalcode,
+                                          char** OUT_street,
+                                          char** OUT_building,
+                                          char** OUT_floor,
+                                          char** OUT_room,
+                                          char** OUT_text,
+                                          GError** error)
+{
+    *OUT_locality = NULL;
+    *OUT_country = NULL;
+
+    xmlXPathObjectPtr xpathObj = NULL; 
+    xmlXPathContextPtr xpathCtx = get_hostip_xpath_context (error);
+
+    xpathObj = xmlXPathEvalExpression ((xmlChar*)"//gml:featureMember/hostip:Hostip/gml:name", 
+                                       xpathCtx);
+    if (xpathObj) {
+        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
+            *OUT_locality = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
+
+            /* this seems to be the only way to check for missing ("guessed") data... */
+            if (g_ascii_strcasecmp (*OUT_locality, "(Unknown city)") == 0) {
+                g_free (*OUT_locality);
+                *OUT_locality = NULL; 
+            }
+        }
+        xmlXPathFreeObject(xpathObj);
+    }
+
+    xpathObj = xmlXPathEvalExpression ((xmlChar*)"//gml:featureMember/hostip:Hostip/hostip:countryName", 
+                                       xpathCtx);
+    if (xpathObj) {
+        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
+            *OUT_country = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
+        }
+        xmlXPathFreeObject(xpathObj);
+    }
+
+    xmlXPathFreeContext(xpathCtx);
+
+    if ((*OUT_locality == NULL) && (*OUT_country == NULL)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "%s does not have civic location data for this IP address.", HOSTIP_API);
+        if (xpathObj) {
+            xmlXPathFreeObject(xpathObj);
+        }
+        return FALSE;
+    }
+
+    g_debug ("civic_location done");
+    return TRUE;     
 }
 
 

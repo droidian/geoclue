@@ -37,7 +37,7 @@
 /* for mac address lookup */
 #include <stdio.h>
 
-#define PLAZES_API "http://plazes.com/suggestions.xml"
+#define WEBSERVICE_API "http://plazes.com/suggestions.xml"
 
 G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
@@ -59,7 +59,6 @@ void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat
 /*
  * Private internet connectivity monitoring functions
  */
-static void net_connection_event_cb (ConIcConnection *connection, ConIcConnectionEvent *event, gpointer user_data);
 static void init_net_connection_monitoring (GeocluePosition* obj);
 static void close_net_connection_monitoring (GeocluePosition* obj);
 
@@ -68,8 +67,8 @@ static void close_net_connection_monitoring (GeocluePosition* obj);
  * TODO: These could be moved to another file...
  */
 static gboolean get_mac_address (gchar** mac);
-static gboolean get_plazes_xml (xmlChar **xml, GError** error);
-static xmlXPathContextPtr get_plazes_xpath_context (GError** error);
+static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error);
+static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error);
 static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr);
 static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr);
 static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
@@ -187,32 +186,14 @@ static gboolean get_mac_address (gchar** mac)
 
 
 
-static gboolean get_plazes_xml (xmlChar **xml, GError** error)
+static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
 {
     SoupSession *session;
     SoupMessage *msg;
     const char *cafile = NULL;
     SoupUri *proxy = NULL;
     gchar *proxy_env;
-    gchar* mac_address;
-    gchar* query_url;
-
-
-    if (!get_mac_address (&mac_address)) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_FAILED,
-                     "Could not find out MAC address of the router");
-        return FALSE;
-    }
-
-/* DEBUG  -- testing to get some real data from plazes.com
-    mac_address = "00:0f:90:67:3b:f1";
-   DEBUG */
-
-    query_url = g_strdup_printf("%s?mac_address=%s", PLAZES_API, mac_address);
-    g_free (mac_address);
-
+    
     proxy_env = getenv ("http_proxy");
     if (proxy_env != NULL) {  
         proxy = soup_uri_new (proxy_env);
@@ -234,35 +215,33 @@ static gboolean get_plazes_xml (xmlChar **xml, GError** error)
                      "libsoup session creation failed");
         return FALSE;
     }    
-
-    msg = soup_message_new ("GET", query_url);
+    
+    msg = soup_message_new ("GET", url);
     soup_session_send_message (session, msg);
     if (msg->response.length == 0) {
         g_debug ("no xml from libsoup, a connection problem perhaps?");
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NOSERVICE,
-                     "No position data was received from %s.", PLAZES_API);
+                     "No position data was received from %s.", url);
         return FALSE;
     }
-
+    
     *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
     return TRUE;
 }
 
 
-
-/* builds an xpath context from plazes xml.
+/* builds an xpath context from xml.
    the context can be used in xpath evals */
-static xmlXPathContextPtr get_plazes_xpath_context (GError** error)
+static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error)
 {
     xmlChar* xml = NULL;
     xmlDocPtr doc; /*should this be freed or does context take care of it?*/
     xmlXPathContextPtr xpathCtx;
-
-
-    g_debug ("Getting xml from plazes.com...");
-    if (!get_plazes_xml (&xml, error)) {
+    
+    g_debug ("Getting xml from %s", url);
+    if (!get_webservice_xml (&xml, url, error)) {
         return NULL;
     }
     
@@ -271,11 +250,11 @@ static xmlXPathContextPtr get_plazes_xpath_context (GError** error)
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
-                     "Position data from %s could not be parsed:\n\n%s", PLAZES_API, xml);
+                     "Position data from %s could not be parsed:\n\n%s", WEBSERVICE_API, xml);
         g_free (xml);
         return NULL;
     }
-
+    
     xpathCtx = xmlXPathNewContext(doc);
     if (!xpathCtx) {
         g_set_error (error,
@@ -285,7 +264,7 @@ static xmlXPathContextPtr get_plazes_xpath_context (GError** error)
         g_free (xml);
         return NULL;
     }
-
+    
     g_free(xml);
     return xpathCtx;
 }
@@ -325,27 +304,38 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
 {
     xmlXPathContextPtr xpathCtx;
     gboolean valid = TRUE;
+    gchar* query_url;
+    gchar* mac_address;
     
-    if (!(xpathCtx = get_plazes_xpath_context (error))) {
+    if (!get_mac_address (&mac_address)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "Could not find out MAC address of the router");
+        return FALSE;
+    }
+    query_url = g_strdup_printf("%s?mac_address=%s", WEBSERVICE_API, mac_address);
+    g_free (mac_address);
+    
+    if (!(xpathCtx = get_xpath_context (query_url, error))) {
         return FALSE;
     }
     
     *OUT_latitude = -999.99;
     *OUT_longitude = -999.99;
-
+    
     valid = evaluate_xpath_number (OUT_latitude, xpathCtx, "//plaze/latitude") && valid;
     valid = evaluate_xpath_number (OUT_longitude, xpathCtx, "//plaze/longitude") && valid;
-
     xmlXPathFreeContext(xpathCtx);
-
+    
     if (!valid){
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have position data for this IP address.", PLAZES_API);
+                     "%s does not have position data for this IP address.", WEBSERVICE_API);
         return FALSE;
     }
-
+    
     g_debug ("position acquired: %f, %f", *OUT_latitude, *OUT_longitude);
     return TRUE;
 }
@@ -565,8 +555,20 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
 {
     xmlXPathContextPtr xpathCtx;
     gboolean valid = FALSE; /* consider location valid if any data type is present */
+    gchar* query_url;
+    gchar* mac_address;
 
-    if (!(xpathCtx = get_plazes_xpath_context (error))) {
+    if (!get_mac_address (&mac_address)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "Could not find out MAC address of the router");
+        return FALSE;
+    }
+    query_url = g_strdup_printf("%s?mac_address=%s", WEBSERVICE_API, mac_address);
+    g_free (mac_address);
+
+    if (!(xpathCtx = get_xpath_context (query_url, error))) {
         return FALSE;
     }
     
@@ -583,7 +585,7 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have civic location for this IP address.", PLAZES_API);
+                     "%s does not have civic location for this IP address.", WEBSERVICE_API);
         return FALSE;
     }
 

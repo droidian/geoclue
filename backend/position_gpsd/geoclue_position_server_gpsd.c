@@ -1,5 +1,6 @@
 /* Geoclue - A DBus api and wrapper for geography information
  * Copyright (C) 2006 Garmin
+ *               2007 Jussi Kukkonen
  * 
  * 
  * This library is free software; you can redistribute it and/or

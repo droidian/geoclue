@@ -105,8 +105,6 @@ static void net_connection_event_cb (ConIcConnection *connection,
     switch (con_ic_connection_event_get_status (event)) {
         case CON_IC_STATUS_CONNECTED:
 
-            /* TODO: maybe should save the name of the AP and only do this if it's changed */
-
             /* try to get a position */
             if (query_position (&lat, &lon, NULL)) {
                 set_current_position (obj, lat, lon);
@@ -169,7 +167,7 @@ static gboolean get_mac_address (gchar** mac)
     FILE *in;
     gint mac_len = sizeof (gchar) * 18;
     
-    if (!(in = popen ("AP_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$AP_IP \" /proc/net/arp | awk '{print $4}' | tr A-Z a-z", "r"))) {
+    if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}' | tr A-Z a-z", "r"))) {
         g_debug ("mac address lookup failed");
         return FALSE;
     }
@@ -332,7 +330,7 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have position data for this IP address.", WEBSERVICE_API);
+                     "%s does not have position data for this router MAC address.", WEBSERVICE_API);
         return FALSE;
     }
     
@@ -585,7 +583,7 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have civic location for this IP address.", WEBSERVICE_API);
+                     "%s does not have civic location for this router MAC address.", WEBSERVICE_API);
         return FALSE;
     }
 

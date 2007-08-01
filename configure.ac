@@ -114,6 +114,7 @@ AC_OUTPUT(
 	backend/geocode_yahoo/Makefile
 	backend/position_manual/Makefile
 	backend/position_hostip/Makefile
+	backend/position_plazes/Makefile
 	backend/position_gpsd/Makefile
 )
 

@@ -65,25 +65,25 @@ int main (int argc, char** argv)
         g_debug ("current position query failed");
     } else {
         g_debug ("current position query ok");
-        printf ("You are at %f %f\n\n", lat, lon);
+        printf ("You are at %f %f\n", lat, lon);
     }
     
-    gchar* locality = NULL;
     gchar* country = NULL;
+    gchar* locality = NULL;
+    gchar* postalcode = NULL;
+    gchar* street = NULL;
+    gchar* text = NULL;
 
     g_debug ("Querying civic location");
-    if (geoclue_position_civic_location (&country, NULL, &locality, NULL,NULL, NULL, NULL, NULL,NULL, NULL) != GEOCLUE_POSITION_SUCCESS) {
+    if (geoclue_position_civic_location (&country, NULL, &locality, NULL, &postalcode, &street, NULL, NULL,NULL, &text) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("civic location query failed");
     } else {
         g_debug ("civic location query ok");
-
-        if (locality && country) {
-            printf("You are in %s, %s\n\n", locality, country);
-        }else if (country){
-            /*TODO: This is never reached. Investigate why pointers are non-null 
-                    when there's no data? */
-            printf("You are in %s\n\n", country);
-        }
+        if (country) printf ("Country: %s\n", country);
+        if (locality) printf ("Locality: %s\n", locality);
+        if (postalcode) printf ("Postalcode: %s\n", postalcode);
+        if (street) printf ("Street: %s\n", street);
+        if (text) printf ("Text: %s\n", text);
     }
 
 

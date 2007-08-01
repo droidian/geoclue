@@ -17,39 +17,29 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include <geoclueserver-plazes.h>
-#include <geoclueserver_server_glue.h>
-#include <geoclueserver_signal_marshal.h>
+#include "geoclue_position_server_plazes.h"
+#include "../geoclue_position_error.h"
+#include <geoclue_position_server_glue.h>
+#include <geoclue_position_signal_marshal.h>
+
 #include <dbus/dbus-glib-bindings.h>
-#include <geoclue/geoclue.h>
-#include <geomap/geomap_gtk_layout.h>
+#include <dbus/dbus.h>
 
+#ifdef HAVE_LIBCONIC
+#include <conicconnectionevent.h>
+#endif
 
-#include <gtk/gtk.h>
-#include <geomap/geomap_gtk_layout.h>
+#include <libxml/xpath.h>
+#include <libxml/xpathInternals.h>
+#include <libsoup/soup.h>
+#include <stdlib.h>
+
+/* for mac address lookup */
 #include <stdio.h>
-#include <string.h>
 
-#define PROGRAM_HEIGHT 640
-#define PROGRAM_WIDTH 480
-#define DEFAULT_LAT 38.857
-#define DEFAULT_LON -94.8
-#define DEFAULT_ZOOM 8
-#define DEFAULT_LAT_STRING "38.857"
-#define DEFAULT_LON_STRING "-94.8"
-#define DEFAULT_ZOOM_STRING "8"
+#define PLAZES_API "http://plazes.com/suggestions.xml"
 
-
-GtkWidget *window;
-GtkWidget *latitude, *longitude,  *zoom, *vbox, *hbox, *button;
-GError* error;
-GtkWidget* layout;
-
-
-
-G_DEFINE_TYPE(GeoclueserverPlazes, geoclueserver_plazes, G_TYPE_OBJECT)
-
-
+G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
 enum {
   CURRENT_POSITION_CHANGED,
@@ -58,22 +48,322 @@ enum {
 
 static guint signals[LAST_SIGNAL];
 
-//Default handler
-void geoclueserver_current_position_changed(Geoclueserver* obj, gdouble lat, gdouble lon)
-{   
+/* Default handler */
+void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
+{
     g_print("Current Position Changed\n");
 }
 
+
+
+/*
+ * private function declarations 
+ */
+static void init_net_connection_monitoring (GeocluePosition* obj);
+static void close_net_connection_monitoring (GeocluePosition* obj);
+static gboolean get_plazes_xml (xmlChar **xml, GError** error);
+static xmlXPathContextPtr get_plazes_xpath_context (GError** error);
+static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
+static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon);
+
+
+/*
+ *  Define the following for both libconic-enabled and other platforms:
+ *    - OBSERVING_NET_CONNECTIONS
+ *    - init_net_connection_monitoring ()
+ *    - close_net_connection_monitoring ()
+ */
+#ifdef HAVE_LIBCONIC
+
+#define OBSERVING_NET_CONNECTIONS TRUE
+
+/* callback for libconic connection events */
+static void net_connection_event_cb (ConIcConnection *connection, 
+                                     ConIcConnectionEvent *event,
+                                     gpointer user_data)
+{
+    gdouble lat, lon;
+
+    g_return_if_fail (IS_GEOCLUE_POSITION (user_data));
+    /* NOTE: this macro is broken in libconic 0.12
+    g_return_if_fail (CON_IC_IS_CONNECTION_EVENT (event));
+    */
+
+
+    GeocluePosition* obj = (GeocluePosition*)user_data;
+
+    switch (con_ic_connection_event_get_status (event)) {
+        case CON_IC_STATUS_CONNECTED:
+
+            /* TODO: maybe should save the name of the AP and only do this if it's changed */
+
+            /* try to get a position */
+            if (query_position (&lat, &lon, NULL)) {
+                set_current_position (obj, lat, lon);
+            }
+            break;
+        case CON_IC_STATUS_DISCONNECTED:
+            obj->is_current_valid = FALSE;
+            break;
+        default:
+            break;
+    }
+}
+
+static void init_net_connection_monitoring (GeocluePosition* obj)
+{
+    g_return_if_fail (IS_GEOCLUE_POSITION (obj));
+
+    /* init dbus connection -- this needs to be done, 
+       connection signals do not work otherwise */
+    obj->dbus_connection = dbus_bus_get (DBUS_BUS_SYSTEM, NULL);
+    dbus_connection_setup_with_g_main(obj->dbus_connection, NULL);
+    /* TODO: dbus error handling */
+
+    /* setup the connection signal callback */
+    obj->net_connection = con_ic_connection_new ();
+    g_object_set (obj->net_connection, "automatic-connection-events", 
+                  TRUE, NULL);
+    g_signal_connect (obj->net_connection, "connection-event",
+                      G_CALLBACK(net_connection_event_cb), obj);
+
+    g_debug ("Internet connection event monitoring started");
+}
+
+static void close_net_connection_monitoring (GeocluePosition* obj)
+{
+    g_return_if_fail (IS_GEOCLUE_POSITION (obj));
+    g_object_unref (obj->net_connection);
+    dbus_connection_disconnect (obj->dbus_connection);
+    dbus_connection_unref (obj->dbus_connection);
+}
+
+#else
+
+#define OBSERVING_NET_CONNECTIONS FALSE
+/* empty functions for non-libconic platforms */
+static void init_net_connection_monitoring (GeocluePosition* obj) {}
+static void close_net_connection_monitoring (GeocluePosition* obj) {}
+
+#endif
+
+
+
+static gboolean get_mac_address (gchar** mac)
+{
+    /* this is fairly ugly, but it seems there is no easy ioctl-based way to get 
+       mac address of the router. This implementation expects the system to have
+       netstat, grep, awk and /proc/net/arp.
+     */
+
+    FILE *in;
+    gint mac_len = sizeof (gchar) * 18;
+
+    if (!(in = popen ("AP_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$AP_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
+        g_debug ("mac address lookup failed");
+        return FALSE;
+    }
+
+    *mac = g_malloc (mac_len);
+    if (fgets (*mac, mac_len, in) == NULL) {
+        g_debug ("mac address lookup returned nothing");
+        g_free (*mac);
+        return FALSE;
+    }
+    pclose(in);
+    return TRUE;
+}
+
+
+
+static gboolean get_plazes_xml (xmlChar **xml, GError** error)
+{
+    SoupSession *session;
+    SoupMessage *msg;
+    const char *cafile = NULL;
+    SoupUri *proxy = NULL;
+    gchar *proxy_env;
+    gchar* mac_address;
+    gchar* query_url;
+
+
+    if (!get_mac_address (&mac_address)) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "Could not find out MAC address of the router");
+        return FALSE;
+    }
+
+/* DEBUG  -- testing to get some real data from plazes.com
+    mac_address = "00:0f:90:67:3b:f1";
+   DEBUG */
+
+    query_url = g_strdup_printf("%s?mac_address=%s", PLAZES_API, mac_address);
+    g_free (mac_address);
+
+    proxy_env = getenv ("http_proxy");
+    if (proxy_env != NULL) {  
+        proxy = soup_uri_new (proxy_env);
+        session = soup_session_sync_new_with_options (
+            SOUP_SESSION_SSL_CA_FILE, cafile,
+            SOUP_SESSION_PROXY_URI, proxy,
+            NULL);
+        soup_uri_free (proxy);
+        g_free (proxy_env);
+    } else {
+        session = soup_session_sync_new ();
+    }
+    
+    if (!session) {
+        g_debug ("no libsoup session");
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "libsoup session creation failed");
+        return FALSE;
+    }    
+
+    msg = soup_message_new ("GET", query_url);
+    soup_session_send_message (session, msg);
+    if (msg->response.length == 0) {
+        g_debug ("no xml from libsoup, a connection problem perhaps?");
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NOSERVICE,
+                     "No position data was received from %s.", PLAZES_API);
+        return FALSE;
+    }
+
+    *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
+    return TRUE;
+}
+
+
+
+/* builds an xpath context from plazes xml.
+   the context can be used in xpath evals */
+static xmlXPathContextPtr get_plazes_xpath_context (GError** error)
+{
+    xmlChar* xml = NULL;
+    xmlDocPtr doc; /*should this be freed or does context take care of it?*/
+    xmlXPathContextPtr xpathCtx;
+
+
+    g_debug ("Getting xml from plazes.com...");
+    if (!get_plazes_xml (&xml, error)) {
+        return NULL;
+    }
+    
+    doc = xmlParseDoc (xml);
+    if (!doc) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
+                     "Position data from %s could not be parsed:\n\n%s", PLAZES_API, xml);
+        g_free (xml);
+        return NULL;
+    }
+
+    xpathCtx = xmlXPathNewContext(doc);
+    if (!xpathCtx) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_FAILED,
+                     "XPath context could not be created.");
+        g_free (xml);
+        return NULL;
+    }
+
+    g_free(xml);
+    return xpathCtx;
+}
+
+
+static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr)
+{
+    gboolean retval= FALSE;
+    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression ((xmlChar*)expr, xpathCtx);
+    if (xpathObj) {
+        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
+            *OUT_string = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
+            retval = TRUE;
+        }
+        xmlXPathFreeObject (xpathObj);
+    }
+    return retval;
+}
+
+
+static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr)
+{
+    gboolean retval= FALSE;
+    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression ((xmlChar*)expr, xpathCtx);
+    if (xpathObj) {
+        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
+            *OUT_double = xmlXPathCastNodeSetToNumber(xpathObj->nodesetval);
+            retval = TRUE;
+        }
+        xmlXPathFreeObject (xpathObj);
+    }
+    return retval;
+}
+
+
+static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
+{
+    xmlXPathObjectPtr xpathObj; 
+    xmlXPathContextPtr xpathCtx = get_plazes_xpath_context (error);
+    
+    if (!xpathCtx) {
+        return FALSE;
+    }
+    
+    *OUT_latitude = -999.99;
+    *OUT_longitude = -999.99;
+
+
+    /* evaluate xpath expressions */
+    
+    evaluate_xpath_number (OUT_latitude, xpathCtx, "//plaze/latitude");
+    evaluate_xpath_number (OUT_longitude, xpathCtx, "//plaze/longitude");
+
+    xmlXPathFreeContext(xpathCtx); 
+
+    if ((*OUT_latitude == -999.99) || (*OUT_latitude == -999.99)){ 
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "%s does not have position data for this IP address.", PLAZES_API);
+        return FALSE;
+    }
+
+    g_debug ("position acquired: %f, %f", *OUT_latitude, *OUT_longitude);
+    return TRUE;
+}
+
+static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon)
+{
+    if ((lat != obj->current_lat) || (lat != obj->current_lat)) {
+        obj->current_lat = lat;
+        obj->current_lon = lon;
+        geoclue_position_current_position_changed (obj, lat, lon);
+    }
+
+    /* if net connection is monitored, the validity of position can be guaranteed */
+    obj->is_current_valid = OBSERVING_NET_CONNECTIONS;
+}
+
 static void
-geoclueserver_init (Geoclueserver *obj)
+geoclue_position_init (GeocluePosition *obj)
 {
 	GError *error = NULL;
 	DBusGProxy *driver_proxy;
-	GeoclueserverClass *klass = GEOCLUESERVER_GET_CLASS(obj);
+	GeocluePositionClass *klass = GEOCLUE_POSITION_GET_CLASS(obj);
 	guint request_ret;
 	
 	dbus_g_connection_register_g_object (klass->connection,
-			GEOCLUESERVER_DBUS_PATH ,
+			GEOCLUE_POSITION_DBUS_PATH ,
 			G_OBJECT (obj));
 
 	driver_proxy = dbus_g_proxy_new_for_name (klass->connection,
@@ -83,19 +373,21 @@ geoclueserver_init (Geoclueserver *obj)
 
 
 	if(!org_freedesktop_DBus_request_name (driver_proxy,
-			GEOCLUESERVER_DBUS_SERVICE,
+			GEOCLUE_POSITION_DBUS_SERVICE,
 			0, &request_ret,    
 			&error))
 	{
 		g_printerr("Unable to register geoclue service: %s", error->message);
 		g_error_free (error);
 	}	
+	
+	init_net_connection_monitoring (obj);
 }
 
 
 
 static void
-geoclueserver_class_init (GeoclueserverClass *klass)
+geoclue_position_class_init (GeocluePositionClass *klass)
 {
 	GError *error = NULL;
 
@@ -103,15 +395,15 @@ geoclueserver_class_init (GeoclueserverClass *klass)
 
 	signals[CURRENT_POSITION_CHANGED] =
         g_signal_new ("current_position_changed",
-                TYPE_GEOCLUESERVER,
+                TYPE_GEOCLUE_POSITION,
                 G_SIGNAL_RUN_LAST,
-                G_STRUCT_OFFSET (GeoclueserverClass, current_position_changed),
+                G_STRUCT_OFFSET (GeocluePositionClass, current_position_changed),
                 NULL, 
                 NULL,
-                _geoclueserver_VOID__DOUBLE_DOUBLE,
+                _geoclue_position_VOID__DOUBLE_DOUBLE,
                 G_TYPE_NONE, 2 ,G_TYPE_DOUBLE, G_TYPE_DOUBLE);
   
-    klass->current_position_changed = geoclueserver_current_position_changed;
+    klass->current_position_changed = geoclue_position_current_position_changed;
  
 	if (klass->connection == NULL)
 	{
@@ -120,12 +412,12 @@ geoclueserver_class_init (GeoclueserverClass *klass)
 		return;
 	}	
 
-	dbus_g_object_type_install_info (TYPE_GEOCLUESERVER, &dbus_glib_geoclueserver_object_info);	
+	dbus_g_object_type_install_info (TYPE_GEOCLUE_POSITION, &dbus_glib_geoclue_position_object_info);	
     
 }
 
 
-gboolean geoclueserver_version (Geoclueserver *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
+gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
 {
     *OUT_major = 1;
     *OUT_minor = 0;
@@ -134,213 +426,224 @@ gboolean geoclueserver_version (Geoclueserver *obj, gint* OUT_major, gint* OUT_m
 }
 
 
-gboolean geoclueserver_service_provider(Geoclueserver *obj, char** name, GError **error)
+gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error)
 {
-    *name = "Yahoo and NMEA";
+    *name = "plazes.com";
     return TRUE;
 }
 
-gboolean geoclueserver_current_position(Geoclueserver *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error )
+
+gboolean geoclue_position_current_position (GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
 {
-    g_object_get(G_OBJECT(layout), "latitude", OUT_latitude , "longitude", OUT_longitude, NULL);   
+    if (obj->is_current_valid) 
+    {
+        *OUT_latitude = obj->current_lat;
+        *OUT_longitude = obj->current_lon;
+        return TRUE;
+    }
+    else if (query_position (OUT_latitude, OUT_longitude, error)) {
+        set_current_position (obj, *OUT_latitude, *OUT_longitude);
+        return TRUE;
+    }
+    else 
+    {
+        return FALSE;
+    }
+}
+
+gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
+    return FALSE;
+}
+
+gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
+{
+    g_set_error (error,
+                 GEOCLUE_POSITION_ERROR,
+                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
+                 "Backend does not implement this method.");
+    return FALSE;
+}
+
+
+gboolean geoclue_position_civic_location (GeocluePosition* obj,
+                                          char** OUT_country,
+                                          char** OUT_region,
+                                          char** OUT_locality,
+                                          char** OUT_area,
+                                          char** OUT_postalcode,
+                                          char** OUT_street,
+                                          char** OUT_building,
+                                          char** OUT_floor,
+                                          char** OUT_room,
+                                          char** OUT_text,
+                                          GError** error)
+{
+    xmlXPathObjectPtr xpathObj;
+    xmlXPathContextPtr xpathCtx = get_plazes_xpath_context (error);
+
+    if (!xpathCtx) {
+        return FALSE;
+    }
+
+    /* evaluate xpath expressions */
+
+    evaluate_xpath_string (OUT_country, xpathCtx, "//plaze/country");
+    evaluate_xpath_string (OUT_locality, xpathCtx, "//plaze/city");
+    evaluate_xpath_string (OUT_postalcode, xpathCtx, "//plaze/zip_code");
+    evaluate_xpath_string (OUT_street, xpathCtx, "//plaze/address");
+    evaluate_xpath_string (OUT_text, xpathCtx, "//plaze/name");
+
+    g_debug ("location: %s, %s, %s, %s, %s", *OUT_country, *OUT_locality, *OUT_postalcode, *OUT_street, *OUT_text);
+
+    xmlXPathFreeContext(xpathCtx);
+
+    if (*OUT_street == NULL){
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "%s does not have civic location for this IP address.", PLAZES_API);
+        return FALSE;
+    }
+
+    return TRUE;     
+}
+
+
+/* TODO: Is this method sane? We have "GError**" in the call signatures:
+   This means calling current_position and checking return value 
+   (and reading error->message on FALSE) gives the exact same 
+   information as this method... */
+   
+gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
+{
+    gdouble temp, temp2;
+    
+    geoclue_position_current_position(obj, &temp, &temp2, error);
+    if( temp == -999.99 || temp2 == -999.99)
+    {
+        *OUT_available = FALSE;
+        *OUT_reason = "Cannot Connect to api.plazes.com\n";
+    }
+    else
+    {
+        *OUT_available = TRUE;
+    }   
+    return TRUE;  
+}
+
+gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
+{
+    close_net_connection_monitoring (obj);
+    g_main_loop_quit (obj->loop);
     return TRUE;
-}
-
-gboolean geoclueserver_current_position_error(Geoclueserver *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_current_altitude(Geoclueserver *obj, gdouble* OUT_altitude, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_current_velocity(Geoclueserver *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_current_time(Geoclueserver *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_satellites_in_view(Geoclueserver *obj, GArray** OUT_prn_numbers, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_satellites_data(Geoclueserver *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_sun_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_sun_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_moon_rise(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_moon_set(Geoclueserver *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_geocode(Geoclueserver *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
-{
-    return FALSE;
-}
-
-gboolean geoclueserver_geocode_free_text(Geoclueserver *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
-{
-    return FALSE;
-}
-
-
-
-
-
-static void destroy( GtkWidget *widget, gpointer   data )
-{
-    gtk_main_quit ();
-}
-
-static void grab_map_clicked( GtkWidget *widget, gpointer  data )
-{
-    //Let's Grab the Values from Entries
-    double lat = 0.0, lon = 0.0;
-    gint zoo = 10;   
-    const char* temp;       
-    temp = gtk_entry_get_text(GTK_ENTRY(latitude));
-    g_print(temp);
-    sscanf(temp, "%lf", &lat);
-           
-    temp = gtk_entry_get_text(GTK_ENTRY(longitude));
-    g_print(temp);
-    sscanf(temp, "%lf", &lon);
-     
-    temp = gtk_entry_get_text(GTK_ENTRY(zoom));
-    g_print(temp);
-    sscanf(temp, "%d", &zoo);        
-    geomap_gtk_layout_zoom( GEOMAP_GTK_LAYOUT(layout),  zoo);
-    geomap_gtk_layout_lat_lon( GEOMAP_GTK_LAYOUT(layout),lat ,lon );
-}
-
-
-
-void zoom_in_clicked( GtkWidget *widget, gpointer   data )
-{
-    geomap_gtk_layout_zoom_in(GEOMAP_GTK_LAYOUT(layout));
-}
-
-void zoom_out_clicked( GtkWidget *widget, gpointer   data )
-{
-    geomap_gtk_layout_zoom_out(GEOMAP_GTK_LAYOUT(layout));
 }
 
 
 
 int main(int argc, char **argv) 
 {
-    gtk_init (&argc, &argv);
-
-    if(geomap_init())
-    {   
-        g_print("Error Opening Geomap\n");       
-    }    
-    
-    Geoclueserver* obj = NULL;  
-    obj = GEOCLUESERVER(g_type_create_instance (geoclueserver_get_type()));   
-    
-    latitude = gtk_entry_new(); 
-    longitude = gtk_entry_new();  
-    zoom = gtk_entry_new(); 
-    
-    gtk_entry_set_width_chars(GTK_ENTRY(latitude),6);
-    gtk_entry_set_width_chars(GTK_ENTRY(longitude),6);
-    gtk_entry_set_width_chars(GTK_ENTRY(zoom),2);
-   
-    gtk_entry_set_text(GTK_ENTRY(latitude),DEFAULT_LAT_STRING);
-    gtk_entry_set_text(GTK_ENTRY(longitude),DEFAULT_LON_STRING);
-    gtk_entry_set_text(GTK_ENTRY(zoom),DEFAULT_ZOOM_STRING);
-
-    window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-            g_signal_connect (G_OBJECT (window), "destroy",
-              G_CALLBACK (destroy), NULL);
-   
-    gtk_window_set_default_size(GTK_WINDOW(window),PROGRAM_HEIGHT,PROGRAM_WIDTH);
-    vbox =  gtk_vbox_new(FALSE, 2); 
-    hbox =  gtk_hbox_new(FALSE, 2);   
-    gtk_container_add (GTK_CONTAINER (window), vbox);
+    g_type_init ();
+    g_thread_init (NULL);
 
 
-    // This is a little weird to get the geomap layout widget to work
-    // You create an event box and use that for the constructor
-    // Then you add the eventbox to whatever widget you want the
-    // Geo layout to appear    
-    GtkWidget* eventbox = gtk_event_box_new();
-    gtk_box_pack_start(GTK_BOX (vbox),eventbox , TRUE,TRUE, 0);  
-    layout = geomap_gtk_layout_new( GTK_EVENT_BOX(eventbox), DEFAULT_LAT, DEFAULT_LON, DEFAULT_ZOOM );
+    /*
+     * this initialize the library and check potential ABI mismatches
+     * between the version it was compiled for and the actual shared
+     * library used.
+     */
+    xmlInitParser();
+    LIBXML_TEST_VERSION
+      
 
-    GtkWidget* tempvbox;
-    tempvbox =  gtk_vbox_new(TRUE, 2);
+    GeocluePosition* obj = NULL; 
+  
+    obj = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
+    obj->loop = g_main_loop_new(NULL,TRUE);
     
-    gtk_box_pack_start (GTK_BOX (vbox), GTK_WIDGET(hbox),FALSE, FALSE, 3);
     
-    gtk_container_add(GTK_CONTAINER (hbox), tempvbox);
+    g_main_loop_run(obj->loop);
     
-    GtkWidget* label =  gtk_label_new("latitude");
-    gtk_container_add (GTK_CONTAINER (tempvbox),label );  
-    gtk_container_add (GTK_CONTAINER (tempvbox),latitude );
+    g_object_unref(obj);   
+    g_main_loop_unref(obj->loop);
     
-    tempvbox =  gtk_vbox_new(TRUE, 2);
-    gtk_container_add(GTK_CONTAINER (hbox), tempvbox);
-    label =  gtk_label_new("longitude");
-    gtk_container_add (GTK_CONTAINER (tempvbox),label );
-    gtk_container_add (GTK_CONTAINER (tempvbox),longitude );
+    xmlCleanupParser();
     
-    tempvbox =  gtk_vbox_new(TRUE, 2);
-    gtk_container_add(GTK_CONTAINER (hbox), tempvbox);
-    label =  gtk_label_new("zoom");
-    gtk_container_add (GTK_CONTAINER (tempvbox),label );
-    gtk_container_add (GTK_CONTAINER (tempvbox),zoom);
-    button = gtk_button_new_with_label ("Grab Map");
-    g_signal_connect (G_OBJECT (button), "clicked",
-              G_CALLBACK (grab_map_clicked), NULL);
-    gtk_container_add (GTK_CONTAINER (hbox),button);
-
-    button = gtk_button_new_with_label ("+");
-    g_signal_connect (G_OBJECT (button), "clicked",
-              G_CALLBACK (zoom_in_clicked), NULL);
-    gtk_container_add (GTK_CONTAINER (hbox),button);
-    
-    button = gtk_button_new_with_label ("-");
-    g_signal_connect (G_OBJECT (button), "clicked",
-              G_CALLBACK (zoom_out_clicked), NULL);
-    gtk_container_add (GTK_CONTAINER (hbox),button);
-    
-    gtk_widget_show_all (window);
-
-
-    gtk_main ();
-
- 
     return(0);
 }
-
-
-
-
-
-
-

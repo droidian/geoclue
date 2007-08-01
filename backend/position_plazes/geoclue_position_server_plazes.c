@@ -163,13 +163,13 @@ static gboolean get_mac_address (gchar** mac)
 {
     /* this is fairly ugly, but it seems there is no easy ioctl-based way to get 
        mac address of the router. This implementation expects the system to have
-       netstat, grep, awk and /proc/net/arp.
+       netstat, grep, awk, tr and /proc/net/arp.
      */
     
     FILE *in;
     gint mac_len = sizeof (gchar) * 18;
     
-    if (!(in = popen ("AP_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$AP_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
+    if (!(in = popen ("AP_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$AP_IP \" /proc/net/arp | awk '{print $4}' | tr A-Z a-z", "r"))) {
         g_debug ("mac address lookup failed");
         return FALSE;
     }

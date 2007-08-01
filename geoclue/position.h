@@ -145,6 +145,17 @@ typedef enum _geoclue_position_fix
                                                                  char** OUT_room,
                                                                  char** OUT_text);
 
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location_supports (gboolean* OUT_country, 
+                                                                          gboolean* OUT_region,
+                                                                          gboolean* OUT_locality,
+                                                                          gboolean* OUT_area,
+                                                                          gboolean* OUT_postalcode,
+                                                                          gboolean* OUT_street,
+                                                                          gboolean* OUT_building,
+                                                                          gboolean* OUT_floor,
+                                                                          gboolean* OUT_room,
+                                                                          gboolean* OUT_text);
+
 G_END_DECLS
 
 

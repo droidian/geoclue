@@ -93,6 +93,18 @@
       <arg type="s" name="text" direction="out" />
     </method>
     
+    <method name="civic_location_supports">
+      <arg type="b" name="country" direction="out" />
+      <arg type="b" name="region" direction="out" />
+      <arg type="b" name="locality" direction="out" />
+      <arg type="b" name="area" direction="out" />
+      <arg type="b" name="postalcode" direction="out" />
+      <arg type="b" name="street" direction="out" />
+      <arg type="b" name="building" direction="out" />
+      <arg type="b" name="floor" direction="out" />
+      <arg type="b" name="room" direction="out" />
+      <arg type="b" name="text" direction="out" />
+    </method>
     
     <method name="service_available">
       <arg type="b" name="available" direction="out" />

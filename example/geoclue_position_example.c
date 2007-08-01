@@ -74,6 +74,7 @@ int main (int argc, char** argv)
     gchar* street = NULL;
     gchar* text = NULL;
 
+  
     g_debug ("Querying civic location");
     if (geoclue_position_civic_location (&country, NULL, &locality, NULL, &postalcode, &street, NULL, NULL,NULL, &text) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("civic location query failed");
@@ -85,7 +86,6 @@ int main (int argc, char** argv)
         if (street) printf ("Street: %s\n", street);
         if (text) printf ("Text: %s\n", text);
     }
-
 
     if (geoclue_position_close () != GEOCLUE_POSITION_SUCCESS){
         g_debug ("position_close failed");

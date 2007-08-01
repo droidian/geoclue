@@ -90,6 +90,19 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
                                           char** OUT_text,
                                           GError** error);
 
+gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
+                                                   gboolean* OUT_country,
+                                                   gboolean* OUT_region,
+                                                   gboolean* OUT_locality,
+                                                   gboolean* OUT_area,
+                                                   gboolean* OUT_postalcode,
+                                                   gboolean* OUT_street,
+                                                   gboolean* OUT_building,
+                                                   gboolean* OUT_floor,
+                                                   gboolean* OUT_room,
+                                                   gboolean* OUT_text,
+                                                   GError** error);
+
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
 gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error);
 

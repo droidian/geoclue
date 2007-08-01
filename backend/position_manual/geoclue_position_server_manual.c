@@ -216,6 +216,33 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
     return FALSE;
 }
 
+gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
+                                                   gboolean* OUT_country,
+                                                   gboolean* OUT_region,
+                                                   gboolean* OUT_locality,
+                                                   gboolean* OUT_area,
+                                                   gboolean* OUT_postalcode,
+                                                   gboolean* OUT_street,
+                                                   gboolean* OUT_building,
+                                                   gboolean* OUT_floor,
+                                                   gboolean* OUT_room,
+                                                   gboolean* OUT_text,
+                                                   GError** error)
+{
+
+/* TODO: update this data to reflect reality */
+    *OUT_country = TRUE;
+    *OUT_region = TRUE;
+    *OUT_locality = TRUE;
+    *OUT_area = TRUE;
+    *OUT_postalcode = TRUE;
+    *OUT_street = TRUE;
+    *OUT_building = TRUE;
+    *OUT_floor = TRUE;
+    *OUT_room = TRUE;
+    *OUT_text = TRUE;
+    return TRUE;
+}
 
 gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
 {

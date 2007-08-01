@@ -534,6 +534,31 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
     return TRUE;     
 }
 
+gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
+                                                   gboolean* OUT_country,
+                                                   gboolean* OUT_region,
+                                                   gboolean* OUT_locality,
+                                                   gboolean* OUT_area,
+                                                   gboolean* OUT_postalcode,
+                                                   gboolean* OUT_street,
+                                                   gboolean* OUT_building,
+                                                   gboolean* OUT_floor,
+                                                   gboolean* OUT_room,
+                                                   gboolean* OUT_text,
+                                                   GError** error)
+{
+    *OUT_country = TRUE;
+    *OUT_region = FALSE;
+    *OUT_locality = TRUE;
+    *OUT_area = FALSE;
+    *OUT_postalcode = FALSE;
+    *OUT_street = FALSE;
+    *OUT_building = FALSE;
+    *OUT_floor = FALSE;
+    *OUT_room = FALSE;
+    *OUT_text = FALSE;
+    return TRUE;
+}
 
 /* TODO: Is this method sane? We have "GError**" in the call signatures:
    This means calling current_position and checking return value 

@@ -381,3 +381,38 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location (char** OUT_country,
     return GEOCLUE_POSITION_SUCCESS;
 }
 
+GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location_supports (gboolean* OUT_country,
+                                                                      gboolean* OUT_region,
+                                                                      gboolean* OUT_locality,
+                                                                      gboolean* OUT_area,
+                                                                      gboolean* OUT_postalcode,
+                                                                      gboolean* OUT_street,
+                                                                      gboolean* OUT_building,
+                                                                      gboolean* OUT_floor,
+                                                                      gboolean* OUT_room,
+                                                                      gboolean* OUT_text)
+{
+    g_return_val_if_fail (geoclue_position_connection, GEOCLUE_POSITION_NOT_INITIALIZED);
+    g_return_val_if_fail (geoclue_position_proxy, GEOCLUE_POSITION_NOT_INITIALIZED);
+
+    GError* error = NULL;
+    org_foinse_project_geoclue_position_civic_location_supports (geoclue_position_proxy,
+                                                                 OUT_country,
+                                                                 OUT_region,
+                                                                 OUT_locality,
+                                                                 OUT_area,
+                                                                 OUT_postalcode,
+                                                                 OUT_street,
+                                                                 OUT_building,
+                                                                 OUT_floor,
+                                                                 OUT_room,
+                                                                 OUT_text,
+                                                                 &error);
+    if( error != NULL )
+    {
+        g_printerr ("Error getting geoclue_position civic_location_supports : %s\n", error->message);
+        g_error_free (error);
+        return GEOCLUE_POSITION_DBUS_ERROR;
+    }
+    return GEOCLUE_POSITION_SUCCESS;
+}

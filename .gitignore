@@ -4,7 +4,7 @@
 *.la
 
 
-*.in
+Makefile.in
 Makefile
 stamp-*
 config.*

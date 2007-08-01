@@ -57,14 +57,25 @@ void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat
 
 
 /*
- * private function declarations 
+ * Private internet connectivity monitoring functions
  */
+static void net_connection_event_cb (ConIcConnection *connection, ConIcConnectionEvent *event, gpointer user_data);
 static void init_net_connection_monitoring (GeocluePosition* obj);
 static void close_net_connection_monitoring (GeocluePosition* obj);
+
+/*
+ * Private helper functions for querying the web service and parsing the answer 
+ * TODO: These could be moved to another file...
+ */
+static gboolean get_mac_address (gchar** mac);
 static gboolean get_plazes_xml (xmlChar **xml, GError** error);
 static xmlXPathContextPtr get_plazes_xpath_context (GError** error);
+static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr);
+static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr);
 static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
+
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon);
+
 
 
 /*
@@ -155,15 +166,15 @@ static gboolean get_mac_address (gchar** mac)
        mac address of the router. This implementation expects the system to have
        netstat, grep, awk and /proc/net/arp.
      */
-
+    
     FILE *in;
     gint mac_len = sizeof (gchar) * 18;
-
+    
     if (!(in = popen ("AP_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$AP_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
         g_debug ("mac address lookup failed");
         return FALSE;
     }
-
+    
     *mac = g_malloc (mac_len);
     if (fgets (*mac, mac_len, in) == NULL) {
         g_debug ("mac address lookup returned nothing");
@@ -312,25 +323,22 @@ static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr x
 
 static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
 {
-    xmlXPathObjectPtr xpathObj; 
-    xmlXPathContextPtr xpathCtx = get_plazes_xpath_context (error);
+    xmlXPathContextPtr xpathCtx;
+    gboolean valid = TRUE;
     
-    if (!xpathCtx) {
+    if (!(xpathCtx = get_plazes_xpath_context (error))) {
         return FALSE;
     }
     
     *OUT_latitude = -999.99;
     *OUT_longitude = -999.99;
 
+    valid = evaluate_xpath_number (OUT_latitude, xpathCtx, "//plaze/latitude") && valid;
+    valid = evaluate_xpath_number (OUT_longitude, xpathCtx, "//plaze/longitude") && valid;
 
-    /* evaluate xpath expressions */
-    
-    evaluate_xpath_number (OUT_latitude, xpathCtx, "//plaze/latitude");
-    evaluate_xpath_number (OUT_longitude, xpathCtx, "//plaze/longitude");
+    xmlXPathFreeContext(xpathCtx);
 
-    xmlXPathFreeContext(xpathCtx); 
-
-    if ((*OUT_latitude == -999.99) || (*OUT_latitude == -999.99)){ 
+    if (!valid){
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
@@ -555,26 +563,23 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
                                           char** OUT_text,
                                           GError** error)
 {
-    xmlXPathObjectPtr xpathObj;
-    xmlXPathContextPtr xpathCtx = get_plazes_xpath_context (error);
+    xmlXPathContextPtr xpathCtx;
+    gboolean valid = FALSE; /* consider location valid if any data type is present */
 
-    if (!xpathCtx) {
+    if (!(xpathCtx = get_plazes_xpath_context (error))) {
         return FALSE;
     }
-
-    /* evaluate xpath expressions */
-
-    evaluate_xpath_string (OUT_country, xpathCtx, "//plaze/country");
-    evaluate_xpath_string (OUT_locality, xpathCtx, "//plaze/city");
-    evaluate_xpath_string (OUT_postalcode, xpathCtx, "//plaze/zip_code");
-    evaluate_xpath_string (OUT_street, xpathCtx, "//plaze/address");
-    evaluate_xpath_string (OUT_text, xpathCtx, "//plaze/name");
+    
+    valid = evaluate_xpath_string (OUT_country, xpathCtx, "//plaze/country") || valid;
+    valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//plaze/city") || valid;
+    valid = evaluate_xpath_string (OUT_postalcode, xpathCtx, "//plaze/zip_code") || valid;
+    valid = evaluate_xpath_string (OUT_street, xpathCtx, "//plaze/address") || valid;
+    valid = evaluate_xpath_string (OUT_text, xpathCtx, "//plaze/name") || valid;
+    xmlXPathFreeContext(xpathCtx);
 
     g_debug ("location: %s, %s, %s, %s, %s", *OUT_country, *OUT_locality, *OUT_postalcode, *OUT_street, *OUT_text);
 
-    xmlXPathFreeContext(xpathCtx);
-
-    if (*OUT_street == NULL){
+    if (!valid){
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
@@ -614,7 +619,6 @@ gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
     g_main_loop_quit (obj->loop);
     return TRUE;
 }
-
 
 
 int main(int argc, char **argv) 

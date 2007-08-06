@@ -64,12 +64,13 @@ void geoclue_position_civic_location_changed(void* userdata,
                                              char* building,
                                              char* floor,
                                              char* room,
+                                             char* description,
                                              char* text)
 {
     if (civic_loc_cb != NULL)
         civic_loc_cb (country, region, locality, area,
                       postalcode, street, building,
-                      floor, room, text,
+                      floor, room, description, text,
                       userdatastore);
 }
 
@@ -374,6 +375,7 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location (char** OUT_country,
                                                              char** OUT_building,
                                                              char** OUT_floor,
                                                              char** OUT_room,
+                                                             char** OUT_description,
                                                              char** OUT_text)
 {
     g_return_val_if_fail (geoclue_position_connection, GEOCLUE_POSITION_NOT_INITIALIZED);
@@ -390,6 +392,7 @@ GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location (char** OUT_country,
                                                         OUT_building,
                                                         OUT_floor,
                                                         OUT_room,
+                                                        OUT_description,
                                                         OUT_text,
                                                         &error);
     if( error != NULL )

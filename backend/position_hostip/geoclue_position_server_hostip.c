@@ -64,6 +64,7 @@ void geoclue_position_civic_location_changed(GeocluePosition* obj,
                                              char* OUT_building,
                                              char* OUT_floor,
                                              char* OUT_room,
+                                             char* OUT_description,
                                              char* OUT_text)
 {
     g_print("Civic location Changed\n");
@@ -96,6 +97,7 @@ static gboolean query_civic_location (char** OUT_country,
                                       char** OUT_building,
                                       char** OUT_floor,
                                       char** OUT_room,
+                                      char** OUT_description,
                                       char** OUT_text,
                                       GError **error);
 
@@ -110,6 +112,7 @@ static void set_civic_location (GeocluePosition *obj,
                                 char* OUT_building,
                                 char* OUT_floor,
                                 char* OUT_room,
+                                char* OUT_description,
                                 char* OUT_text);
 
 
@@ -130,7 +133,7 @@ static void net_connection_event_cb (ConIcConnection *connection,
                                      gpointer user_data)
 {
     gdouble lat, lon;
-    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *text;
+    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
 
     g_return_if_fail (IS_GEOCLUE_POSITION (user_data));
     /* NOTE: this macro is broken in libconic 0.12
@@ -152,12 +155,12 @@ static void net_connection_event_cb (ConIcConnection *connection,
 
             if (query_civic_location (&country, &region, &locality, &area, 
                                       &postalcode, &street, &building, 
-                                      &floor, &room, &text, 
+                                      &floor, &room, &description, &text, 
                                       NULL)) {
                 set_civic_location (obj,
                                     country, region, locality, area,
                                     postalcode, street, building,
-                                    floor, room, text);
+                                    floor, room, description, text);
             }
             break;
             
@@ -350,12 +353,13 @@ static gboolean query_civic_location (char** OUT_country,
                                       char** OUT_building,
                                       char** OUT_floor,
                                       char** OUT_room,
+                                      char** OUT_description,
                                       char** OUT_text,
                                       GError **error)
 {
     xmlXPathContextPtr xpathCtx;
     gboolean valid = FALSE;
-
+    
     *OUT_country = NULL;
     *OUT_region = NULL;
     *OUT_locality = NULL;
@@ -365,18 +369,18 @@ static gboolean query_civic_location (char** OUT_country,
     *OUT_building = NULL;
     *OUT_floor = NULL;
     *OUT_room = NULL;
+    *OUT_description = NULL;
     *OUT_text = NULL;
-
-
-
+    
+    
     if (!(xpathCtx = get_xpath_context (WEBSERVICE_API, error))) {
         return FALSE;
     }
-
+    
     /* Register namespaces and evaluate the expressions */
     xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
     xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
-
+    
     valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//gml:featureMember/hostip:Hostip/gml:name");
     /* deal with hostip's stupid missing data handling */
     if (valid && g_ascii_strcasecmp (*OUT_locality, "(Unknown city)") == 0) {
@@ -384,11 +388,12 @@ static gboolean query_civic_location (char** OUT_country,
         *OUT_locality = NULL;
         valid = FALSE;
     }
+    
     valid = evaluate_xpath_string (OUT_country, xpathCtx, "//gml:featureMember/hostip:Hostip/hostip:countryName") || valid;
     xmlXPathFreeContext(xpathCtx);
-
+    
     g_debug ("location: %s, %s", *OUT_country, *OUT_locality);
-
+    
     if (!valid) {
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
@@ -396,7 +401,7 @@ static gboolean query_civic_location (char** OUT_country,
                      "%s does not have civic location data for this IP address.", WEBSERVICE_API);
         return FALSE;
     }
-
+    
     return TRUE;
 }
 
@@ -436,6 +441,7 @@ static void set_civic_location (GeocluePosition *obj,
                                 char* building,
                                 char* floor,
                                 char* room,
+                                char* description,
                                 char* text)
 {
     if (!is_same_string (obj->civic_country, country) ||
@@ -447,6 +453,7 @@ static void set_civic_location (GeocluePosition *obj,
         !is_same_string (obj->civic_building, building) ||
         !is_same_string (obj->civic_floor, floor) ||
         !is_same_string (obj->civic_room, room) ||
+        !is_same_string (obj->civic_description, description) ||
         !is_same_string (obj->civic_text, text)) {
 
         obj->civic_country = g_strdup (country);
@@ -458,12 +465,13 @@ static void set_civic_location (GeocluePosition *obj,
         obj->civic_building = g_strdup (building);
         obj->civic_floor = g_strdup (floor);
         obj->civic_room = g_strdup (room);
+        obj->civic_description = g_strdup (description);
         obj->civic_text = g_strdup (text);
 
         geoclue_position_civic_location_changed (obj,
                                                  country, region, locality, area,
                                                  postalcode, street, building,
-                                                 floor, room, text);
+                                                 floor, room, description, text);
     }
 
     /* if net connection is monitored, the validity of location can be guaranteed */
@@ -530,8 +538,8 @@ geoclue_position_class_init (GeocluePositionClass *klass)
                 G_STRUCT_OFFSET (GeocluePositionClass, civic_location_changed),
                 NULL,
                 NULL,
-                _geoclue_position_VOID__STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING,
-                G_TYPE_NONE, 10, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+                _geoclue_position_VOID__STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING,
+                G_TYPE_NONE, 11, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
   
     klass->civic_location_changed = geoclue_position_civic_location_changed;
  
@@ -682,6 +690,7 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
                                           char** OUT_building,
                                           char** OUT_floor,
                                           char** OUT_room,
+                                          char** OUT_description,
                                           char** OUT_text,
                                           GError** error)
 {
@@ -697,16 +706,17 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
         *OUT_building = g_strdup (obj->civic_building);
         *OUT_floor = g_strdup (obj->civic_floor);
         *OUT_room = g_strdup (obj->civic_room);
+        *OUT_description = g_strdup (obj->civic_description);
         *OUT_text = g_strdup (obj->civic_text);
         return TRUE;
     } else if (query_civic_location (OUT_country, OUT_region, OUT_locality, OUT_area, 
                                      OUT_postalcode, OUT_street, OUT_building, 
-                                     OUT_floor, OUT_room, OUT_text, 
+                                     OUT_floor, OUT_room, OUT_description, OUT_text, 
                                      error)) {
         set_civic_location (obj,
                             *OUT_country, *OUT_region, *OUT_locality, *OUT_area,
                             *OUT_postalcode, *OUT_street, *OUT_building,
-                            *OUT_floor, *OUT_room, *OUT_text);
+                            *OUT_floor, *OUT_room, *OUT_description, *OUT_text);
         return TRUE;
     } else {
         return FALSE;
@@ -723,6 +733,7 @@ gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
                                                    gboolean* OUT_building,
                                                    gboolean* OUT_floor,
                                                    gboolean* OUT_room,
+                                                   gboolean* OUT_description,
                                                    gboolean* OUT_text,
                                                    GError** error)
 {
@@ -735,6 +746,7 @@ gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
     *OUT_building = FALSE;
     *OUT_floor = FALSE;
     *OUT_room = FALSE;
+    *OUT_description = FALSE;
     *OUT_text = FALSE;
     return TRUE;
 }

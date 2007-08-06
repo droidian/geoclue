@@ -62,6 +62,7 @@ struct GeocluePosition
     gchar* civic_building;
     gchar* civic_floor;
     gchar* civic_room;
+    gchar* civic_description;
     gchar* civic_text;
     gboolean is_civic_valid;
     
@@ -78,7 +79,7 @@ struct GeocluePositionClass
 
           /* Signals */
     void (*current_position_changed) (GeocluePosition*, gdouble, gdouble );
-    void (*civic_location_changed) (GeocluePosition*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*);
+    void (*civic_location_changed) (GeocluePosition*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*);
 };
 
 #define TYPE_GEOCLUE_POSITION              (geoclue_position_get_type ())
@@ -113,6 +114,7 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
                                           char** OUT_building,
                                           char** OUT_floor,
                                           char** OUT_room,
+                                          char** OUT_description,
                                           char** OUT_text,
                                           GError** error);
 
@@ -126,6 +128,7 @@ gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
                                                    gboolean* OUT_building,
                                                    gboolean* OUT_floor,
                                                    gboolean* OUT_room,
+                                                   gboolean* OUT_description,
                                                    gboolean* OUT_text,
                                                    GError** error);
 

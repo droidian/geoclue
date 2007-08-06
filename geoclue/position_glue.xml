@@ -89,6 +89,7 @@
       <arg type="s" name="building" direction="out" />
       <arg type="s" name="floor" direction="out" />
       <arg type="s" name="room" direction="out" />
+      <arg type="s" name="description" direction="out" />
       <arg type="s" name="text" direction="out" />
     </signal>
     
@@ -102,6 +103,7 @@
       <arg type="s" name="building" direction="out" />
       <arg type="s" name="floor" direction="out" />
       <arg type="s" name="room" direction="out" />
+      <arg type="s" name="description" direction="out" />
       <arg type="s" name="text" direction="out" />
     </method>
     

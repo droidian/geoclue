@@ -59,7 +59,8 @@ typedef enum _geoclue_position_fix
                                            char* building,
                                            char* floor,
                                            char* room,
-                                           char* text, 
+                                           char* description,
+                                           char* text,
                                            void* userdata);
  
     /*!
@@ -156,6 +157,7 @@ typedef enum _geoclue_position_fix
                                                                  char** OUT_street,
                                                                  char** OUT_building,
                                                                  char** OUT_floor,
+                                                                 char** OUT_description,
                                                                  char** OUT_room,
                                                                  char** OUT_text);
 

@@ -52,6 +52,19 @@ struct GeocluePosition
     gdouble current_lat;
     gdouble current_lon;
     gboolean is_current_valid;
+    
+    gchar* civic_country;
+    gchar* civic_region;
+    gchar* civic_locality;
+    gchar* civic_area;
+    gchar* civic_postalcode;
+    gchar* civic_street;
+    gchar* civic_building;
+    gchar* civic_floor;
+    gchar* civic_room;
+    gchar* civic_text;
+    gboolean is_civic_valid;
+    
 #ifdef HAVE_LIBCONIC
     ConIcConnection* net_connection; 
     DBusConnection* dbus_connection; 
@@ -65,6 +78,7 @@ struct GeocluePositionClass
 
           /* Signals */
     void (*current_position_changed) (GeocluePosition*, gdouble, gdouble );
+    void (*civic_location_changed) (GeocluePosition*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*, gchar*);
 };
 
 #define TYPE_GEOCLUE_POSITION              (geoclue_position_get_type ())

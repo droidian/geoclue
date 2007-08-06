@@ -38,7 +38,6 @@
       <arg type="d" name="longitude" direction="out" />
     </signal>
       
-    
     <method name="current_position">    
       <arg type="d" name="latitude" direction="out" />
       <arg type="d" name="longitude" direction="out" />
@@ -79,7 +78,20 @@
       <arg type="b" name="differential" direction="out" />
       <arg type="b" name="ephemeris" direction="out" />
     </method>
-
+    
+    <signal name="civic_location_changed">
+      <arg type="s" name="country" direction="out" />
+      <arg type="s" name="region" direction="out" />
+      <arg type="s" name="locality" direction="out" />
+      <arg type="s" name="area" direction="out" />
+      <arg type="s" name="postalcode" direction="out" />
+      <arg type="s" name="street" direction="out" />
+      <arg type="s" name="building" direction="out" />
+      <arg type="s" name="floor" direction="out" />
+      <arg type="s" name="room" direction="out" />
+      <arg type="s" name="text" direction="out" />
+    </signal>
+    
     <method name="civic_location">
       <arg type="s" name="country" direction="out" />
       <arg type="s" name="region" direction="out" />
@@ -93,18 +105,6 @@
       <arg type="s" name="text" direction="out" />
     </method>
     
-    <method name="civic_location_supports">
-      <arg type="b" name="country" direction="out" />
-      <arg type="b" name="region" direction="out" />
-      <arg type="b" name="locality" direction="out" />
-      <arg type="b" name="area" direction="out" />
-      <arg type="b" name="postalcode" direction="out" />
-      <arg type="b" name="street" direction="out" />
-      <arg type="b" name="building" direction="out" />
-      <arg type="b" name="floor" direction="out" />
-      <arg type="b" name="room" direction="out" />
-      <arg type="b" name="text" direction="out" />
-    </method>
     
     <method name="service_available">
       <arg type="b" name="available" direction="out" />

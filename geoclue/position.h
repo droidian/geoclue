@@ -50,6 +50,17 @@ typedef enum _geoclue_position_fix
 
     typedef void (*GEOCLUE_POSITION_CALLBACK)(gdouble lat, gdouble lon, void* userdata);
 
+    typedef void (*GEOCLUE_CIVIC_CALLBACK)(char* country, 
+                                           char* region,
+                                           char* locality,
+                                           char* area,
+                                           char* postalcode,
+                                           char* street,
+                                           char* building,
+                                           char* floor,
+                                           char* room,
+                                           char* text, 
+                                           void* userdata);
  
     /*!
      * \brief texttospeech version 
@@ -119,7 +130,10 @@ typedef enum _geoclue_position_fix
      * \return TRUE Version returned sucessfully
      *         FALSE Error
      */  
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_set_position_callback(GEOCLUE_POSITION_CALLBACK callback, void* userdata );    
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_set_position_callback(GEOCLUE_POSITION_CALLBACK callback, void* userdata );
+    
+    
+    GEOCLUE_POSITION_RETURNCODE geoclue_position_set_civic_callback (GEOCLUE_CIVIC_CALLBACK callback, void* userdata );
     
     
      /*!
@@ -144,17 +158,6 @@ typedef enum _geoclue_position_fix
                                                                  char** OUT_floor,
                                                                  char** OUT_room,
                                                                  char** OUT_text);
-
-    GEOCLUE_POSITION_RETURNCODE geoclue_position_civic_location_supports (gboolean* OUT_country, 
-                                                                          gboolean* OUT_region,
-                                                                          gboolean* OUT_locality,
-                                                                          gboolean* OUT_area,
-                                                                          gboolean* OUT_postalcode,
-                                                                          gboolean* OUT_street,
-                                                                          gboolean* OUT_building,
-                                                                          gboolean* OUT_floor,
-                                                                          gboolean* OUT_room,
-                                                                          gboolean* OUT_text);
 
 G_END_DECLS
 

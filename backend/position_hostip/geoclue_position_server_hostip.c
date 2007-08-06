@@ -42,15 +42,31 @@ G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
 enum {
   CURRENT_POSITION_CHANGED,
+  CIVIC_LOCATION_CHANGED,
   LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
 
-/* Default handler */
+/* Default handlers */
 void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
 {
     g_print("Current Position Changed\n");
+}
+
+void geoclue_position_civic_location_changed(GeocluePosition* obj,
+                                             char* OUT_country,
+                                             char* OUT_region,
+                                             char* OUT_locality,
+                                             char* OUT_area,
+                                             char* OUT_postalcode,
+                                             char* OUT_street,
+                                             char* OUT_building,
+                                             char* OUT_floor,
+                                             char* OUT_room,
+                                             char* OUT_text)
+{
+    g_print("Civic location Changed\n");
 }
 
 
@@ -69,9 +85,32 @@ static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error);
 static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error);
 static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr);
 static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr);
+
 static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
+static gboolean query_civic_location (char** OUT_country,
+                                      char** OUT_region,
+                                      char** OUT_locality,
+                                      char** OUT_area,
+                                      char** OUT_postalcode,
+                                      char** OUT_street,
+                                      char** OUT_building,
+                                      char** OUT_floor,
+                                      char** OUT_room,
+                                      char** OUT_text,
+                                      GError **error);
 
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon);
+static void set_civic_location (GeocluePosition *obj,
+                                char* OUT_country,
+                                char* OUT_region,
+                                char* OUT_locality,
+                                char* OUT_area,
+                                char* OUT_postalcode,
+                                char* OUT_street,
+                                char* OUT_building,
+                                char* OUT_floor,
+                                char* OUT_room,
+                                char* OUT_text);
 
 
 
@@ -91,6 +130,7 @@ static void net_connection_event_cb (ConIcConnection *connection,
                                      gpointer user_data)
 {
     gdouble lat, lon;
+    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *text;
 
     g_return_if_fail (IS_GEOCLUE_POSITION (user_data));
     /* NOTE: this macro is broken in libconic 0.12
@@ -103,15 +143,27 @@ static void net_connection_event_cb (ConIcConnection *connection,
     switch (con_ic_connection_event_get_status (event)) {
         case CON_IC_STATUS_CONNECTED:
 
-            /* TODO: maybe should save the name of the AP and only do this if it's changed */
+            /* TODO: there are two queries here for the same data -- not smart */
 
-            /* try to get a position */
             if (query_position (&lat, &lon, NULL)) {
                 set_current_position (obj, lat, lon);
             }
+
+
+            if (query_civic_location (&country, &region, &locality, &area, 
+                                      &postalcode, &street, &building, 
+                                      &floor, &room, &text, 
+                                      NULL)) {
+                set_civic_location (obj,
+                                    country, region, locality, area,
+                                    postalcode, street, building,
+                                    floor, room, text);
+            }
             break;
+            
         case CON_IC_STATUS_DISCONNECTED:
             obj->is_current_valid = FALSE;
+            obj->is_civic_valid = FALSE;
             break;
         default:
             break;
@@ -288,6 +340,67 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
     return TRUE;
 }
 
+
+static gboolean query_civic_location (char** OUT_country,
+                                      char** OUT_region,
+                                      char** OUT_locality,
+                                      char** OUT_area,
+                                      char** OUT_postalcode,
+                                      char** OUT_street,
+                                      char** OUT_building,
+                                      char** OUT_floor,
+                                      char** OUT_room,
+                                      char** OUT_text,
+                                      GError **error)
+{
+    xmlXPathContextPtr xpathCtx;
+    gboolean valid = FALSE;
+
+    *OUT_country = NULL;
+    *OUT_region = NULL;
+    *OUT_locality = NULL;
+    *OUT_area = NULL;
+    *OUT_postalcode = NULL;
+    *OUT_street = NULL;
+    *OUT_building = NULL;
+    *OUT_floor = NULL;
+    *OUT_room = NULL;
+    *OUT_text = NULL;
+
+
+
+    if (!(xpathCtx = get_xpath_context (WEBSERVICE_API, error))) {
+        return FALSE;
+    }
+
+    /* Register namespaces and evaluate the expressions */
+    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
+    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
+
+    valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//gml:featureMember/hostip:Hostip/gml:name");
+    /* deal with hostip's stupid missing data handling */
+    if (valid && g_ascii_strcasecmp (*OUT_locality, "(Unknown city)") == 0) {
+        g_free (*OUT_locality);
+        *OUT_locality = NULL;
+        valid = FALSE;
+    }
+    valid = evaluate_xpath_string (OUT_country, xpathCtx, "//gml:featureMember/hostip:Hostip/hostip:countryName") || valid;
+    xmlXPathFreeContext(xpathCtx);
+
+    g_debug ("location: %s, %s", *OUT_country, *OUT_locality);
+
+    if (!valid) {
+        g_set_error (error,
+                     GEOCLUE_POSITION_ERROR,
+                     GEOCLUE_POSITION_ERROR_NODATA,
+                     "%s does not have civic location data for this IP address.", WEBSERVICE_API);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon)
 {
     if ((lat != obj->current_lat) || (lat != obj->current_lat)) {
@@ -299,6 +412,65 @@ static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon
     /* if net connection is monitored, the validity of position can be guaranteed */
     obj->is_current_valid = OBSERVING_NET_CONNECTIONS;
 }
+
+/* compare strings that are allowed to be null */
+static gboolean is_same_string (char* a, char* b)
+{
+    if ((a != NULL) && (b == NULL)) return FALSE;
+    if ((a == NULL) && (b != NULL)) return FALSE;
+    if ((a != NULL) && (b != NULL)) {
+        if (g_ascii_strcasecmp (a, b) != 0) { 
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+static void set_civic_location (GeocluePosition *obj,
+                                char* country,
+                                char* region,
+                                char* locality,
+                                char* area,
+                                char* postalcode,
+                                char* street,
+                                char* building,
+                                char* floor,
+                                char* room,
+                                char* text)
+{
+    if (!is_same_string (obj->civic_country, country) ||
+        !is_same_string (obj->civic_region, region) ||
+        !is_same_string (obj->civic_locality, locality) ||
+        !is_same_string (obj->civic_area, area) ||
+        !is_same_string (obj->civic_postalcode, postalcode) ||
+        !is_same_string (obj->civic_street, street) ||
+        !is_same_string (obj->civic_building, building) ||
+        !is_same_string (obj->civic_floor, floor) ||
+        !is_same_string (obj->civic_room, room) ||
+        !is_same_string (obj->civic_text, text)) {
+
+        obj->civic_country = g_strdup (country);
+        obj->civic_region = g_strdup (region);
+        obj->civic_locality = g_strdup (locality);
+        obj->civic_area = g_strdup (area);
+        obj->civic_postalcode = g_strdup (postalcode);
+        obj->civic_street = g_strdup (street);
+        obj->civic_building = g_strdup (building);
+        obj->civic_floor = g_strdup (floor);
+        obj->civic_room = g_strdup (room);
+        obj->civic_text = g_strdup (text);
+
+        geoclue_position_civic_location_changed (obj,
+                                                 country, region, locality, area,
+                                                 postalcode, street, building,
+                                                 floor, room, text);
+    }
+
+    /* if net connection is monitored, the validity of location can be guaranteed */
+
+    obj->is_civic_valid = OBSERVING_NET_CONNECTIONS;
+}
+
 
 static void
 geoclue_position_init (GeocluePosition *obj)
@@ -348,8 +520,20 @@ geoclue_position_class_init (GeocluePositionClass *klass)
                 NULL,
                 _geoclue_position_VOID__DOUBLE_DOUBLE,
                 G_TYPE_NONE, 2 ,G_TYPE_DOUBLE, G_TYPE_DOUBLE);
-  
+
     klass->current_position_changed = geoclue_position_current_position_changed;
+
+	signals[CIVIC_LOCATION_CHANGED] =
+        g_signal_new ("civic_location_changed",
+                TYPE_GEOCLUE_POSITION,
+                G_SIGNAL_RUN_LAST,
+                G_STRUCT_OFFSET (GeocluePositionClass, civic_location_changed),
+                NULL,
+                NULL,
+                _geoclue_position_VOID__STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING,
+                G_TYPE_NONE, 10, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+  
+    klass->civic_location_changed = geoclue_position_civic_location_changed;
  
 	if (klass->connection == NULL)
 	{
@@ -501,38 +685,32 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
                                           char** OUT_text,
                                           GError** error)
 {
-    xmlXPathContextPtr xpathCtx;
-    gboolean valid = FALSE;
-    
-    if (!(xpathCtx = get_xpath_context (WEBSERVICE_API, error))) {
+
+    if (obj->is_civic_valid) {
+
+        *OUT_country = g_strdup (obj->civic_country);
+        *OUT_region = g_strdup (obj->civic_region);
+        *OUT_locality = g_strdup (obj->civic_locality);
+        *OUT_area = g_strdup (obj->civic_area);
+        *OUT_postalcode = g_strdup (obj->civic_postalcode);
+        *OUT_street = g_strdup (obj->civic_street);
+        *OUT_building = g_strdup (obj->civic_building);
+        *OUT_floor = g_strdup (obj->civic_floor);
+        *OUT_room = g_strdup (obj->civic_room);
+        *OUT_text = g_strdup (obj->civic_text);
+        return TRUE;
+    } else if (query_civic_location (OUT_country, OUT_region, OUT_locality, OUT_area, 
+                                     OUT_postalcode, OUT_street, OUT_building, 
+                                     OUT_floor, OUT_room, OUT_text, 
+                                     error)) {
+        set_civic_location (obj,
+                            *OUT_country, *OUT_region, *OUT_locality, *OUT_area,
+                            *OUT_postalcode, *OUT_street, *OUT_building,
+                            *OUT_floor, *OUT_room, *OUT_text);
+        return TRUE;
+    } else {
         return FALSE;
     }
-
-    /* Register namespaces and evaluate the expressions */
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
-    
-    valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//gml:featureMember/hostip:Hostip/gml:name");
-    /* deal with hostip's stupid missing data handling */
-    if (valid && g_ascii_strcasecmp (*OUT_locality, "(Unknown city)") == 0) {
-        g_free (*OUT_locality);
-        *OUT_locality = NULL; 
-        valid = FALSE;
-    }    
-    valid = evaluate_xpath_string (OUT_country, xpathCtx, "//gml:featureMember/hostip:Hostip/hostip:countryName") || valid;
-    xmlXPathFreeContext(xpathCtx);
-    
-    g_debug ("location: %s, %s", *OUT_country, *OUT_locality);
-
-    if (!valid) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have civic location data for this IP address.", WEBSERVICE_API);
-        return FALSE;
-    }
-
-    return TRUE;     
 }
 
 gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,

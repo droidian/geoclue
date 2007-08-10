@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -26,9 +26,9 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
-#define GEOCLUE_MAP_DBUS_SERVICE     "org.foinse_project.geoclue.map.yahoo"
-#define GEOCLUE_MAP_DBUS_PATH        "/org/foinse_project/geoclue/map/yahoo"
-#define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.map"
+#define GEOCLUE_MAP_DBUS_SERVICE     "org.freedesktop.geoclue.map.yahoo"
+#define GEOCLUE_MAP_DBUS_PATH        "/org/freedesktop/geoclue/map/yahoo"
+#define GEOCLUE_MAP_DBUS_INTERFACE   "org.freedesktop.geoclue.map"
 
 
 

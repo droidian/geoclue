@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -63,22 +63,22 @@ geoclueserver_add_backend(GeoclueMaster *obj, char* path)
         printf("Added %s\n", backendstrings[0]);
         
         
-        if(!strcmp(backendstrings[2], "org.foinse_project.geoclue.position\n") )
+        if(!strcmp(backendstrings[2], "org.freedesktop.geoclue.position\n") )
         {
             g_print("Found position provider: %s\n", backendstrings[2]);
             obj->position_backends = g_list_prepend(obj->position_backends, (void*)backendstrings);  
         }
-        else if(!strcmp(backendstrings[2], "org.foinse_project.geoclue.map\n") )
+        else if(!strcmp(backendstrings[2], "org.freedesktop.geoclue.map\n") )
         {
             g_print("Found mapping provider: %s\n", backendstrings[2]);
             obj->map_backends = g_list_prepend(obj->map_backends, (void*)backendstrings);  
         }
-        else if(!strcmp(backendstrings[2], "org.foinse_project.geoclue.geocode\n") )
+        else if(!strcmp(backendstrings[2], "org.freedesktop.geoclue.geocode\n") )
         {
             g_print("Found geocode provider: %s\n", backendstrings[2]);
             obj->geocode_backends = g_list_prepend(obj->geocode_backends, (void*)backendstrings);  
         }
-        else if(!strcmp(backendstrings[2], "org.foinse_project.geoclue.find\n") )
+        else if(!strcmp(backendstrings[2], "org.freedesktop.geoclue.find\n") )
         {
             g_print("Found find provider: %s\n", backendstrings[2]);
             obj->find_backends = g_list_prepend(obj->find_backends, (void*)backendstrings);  

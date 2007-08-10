@@ -1,4 +1,4 @@
-org.foinse_project.geoclue.map.yahoo
-/org/foinse_project/geoclue/map/yahoo
-org.foinse_project.geoclue.map
+org.freedesktop.geoclue.map.yahoo
+/org/freedesktop/geoclue/map/yahoo
+org.freedesktop.geoclue.map
 Yahoo Maps API

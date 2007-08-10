@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -19,8 +19,8 @@
  -->
 
 
-<node name="/org/foinse_project/geoclue/find">
-  <interface name="org.foinse_project.geoclue.find">
+<node name="/org/freedesktop/geoclue/find">
+  <interface name="org.freedesktop.geoclue.find">
 
     <method name="version">
       <arg type="i" name="major" direction="out" />

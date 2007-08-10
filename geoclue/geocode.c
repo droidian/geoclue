@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -28,9 +28,9 @@
 #include <stdio.h>
 #include <geoclue_master_client_glue.h>
 
-#define GEOCLUE_GEOCODE_DBUS_SERVICE     "org.foinse_project.geoclue.geocode.yahoo"
-#define GEOCLUE_GEOCODE_DBUS_PATH        "/org/foinse_project/geoclue/geocode/yahoo"
-#define GEOCLUE_GEOCODE_DBUS_INTERFACE   "org.foinse_project.geoclue.geocode"   
+#define GEOCLUE_GEOCODE_DBUS_SERVICE     "org.freedesktop.geoclue.geocode.yahoo"
+#define GEOCLUE_GEOCODE_DBUS_PATH        "/org/freedesktop/geoclue/geocode/yahoo"
+#define GEOCLUE_GEOCODE_DBUS_INTERFACE   "org.freedesktop.geoclue.geocode"   
  
         
 static  DBusGConnection*        geoclue_geocode_connection =   NULL;
@@ -46,7 +46,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_version(int* major, int* minor, int* 
         return GEOCLUE_GEOCODE_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_geocode_version ( geoclue_geocode_proxy, major, minor, micro, &error );
+    org_freedesktop_geoclue_geocode_version ( geoclue_geocode_proxy, major, minor, micro, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_geocode version: %s\n", error->message);
@@ -66,7 +66,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_service_provider(char** name)
         return GEOCLUE_GEOCODE_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_geocode_service_provider ( geoclue_geocode_proxy, name, &error );
+    org_freedesktop_geoclue_geocode_service_provider ( geoclue_geocode_proxy, name, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_geocode service provider: %s\n", error->message);
@@ -119,7 +119,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_to_lat_lon ( const char * IN_street, 
         return GEOCLUE_GEOCODE_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_geocode_to_lat_lon ( geoclue_geocode_proxy, IN_street , IN_city , IN_state , IN_zip , OUT_latitude , OUT_longitude , OUT_return_code , &error );
+    org_freedesktop_geoclue_geocode_to_lat_lon ( geoclue_geocode_proxy, IN_street , IN_city , IN_state , IN_zip , OUT_latitude , OUT_longitude , OUT_return_code , &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_geocode geocode: %s\n", error->message);
@@ -137,7 +137,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_free_text_to_lat_lon ( const char * I
         return GEOCLUE_GEOCODE_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_geocode_free_text_to_lat_lon ( geoclue_geocode_proxy, IN_free_text , OUT_latitude , OUT_longitude , OUT_return_code ,  &error );
+    org_freedesktop_geoclue_geocode_free_text_to_lat_lon ( geoclue_geocode_proxy, IN_free_text , OUT_latitude , OUT_longitude , OUT_return_code ,  &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_geocode geocode_free_text: %s\n", error->message);
@@ -155,7 +155,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_lat_lon_to_address ( gdouble IN_latit
         return GEOCLUE_GEOCODE_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_geocode_lat_lon_to_address  ( geoclue_geocode_proxy,  IN_latitude, IN_longitude, OUT_street, OUT_city, OUT_state, OUT_zip, OUT_return_code ,  &error );
+    org_freedesktop_geoclue_geocode_lat_lon_to_address  ( geoclue_geocode_proxy,  IN_latitude, IN_longitude, OUT_street, OUT_city, OUT_state, OUT_zip, OUT_return_code ,  &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_geocode geocode lat lon to addres: %s\n", error->message);

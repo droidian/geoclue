@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -18,8 +18,8 @@
  * Boston, MA 02111-1307, USA.
  *-->
 
-<node name="/org/foinse_project/geoclue/map">
-  <interface name="org.foinse_project.geoclue.map">
+<node name="/org/freedesktop/geoclue/map">
+  <interface name="org.freedesktop.geoclue.map">
 
 
     <method name="version">

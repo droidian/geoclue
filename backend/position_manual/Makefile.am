@@ -8,7 +8,7 @@ AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
 
 
-service_in_files = org.foinse_project.geoclue.position.manual.service.in
+service_in_files = org.freedesktop.geoclue.position.manual.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 

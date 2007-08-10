@@ -116,6 +116,7 @@ AC_OUTPUT(
 	backend/position_hostip/Makefile
 	backend/position_plazes/Makefile
 	backend/position_gpsd/Makefile
+	backend/position_baseclass/Makefile
 )
 
 fi
@@ -128,6 +129,8 @@ AC_OUTPUT(Makefile
 	geoclue/Makefile 
 	example/Makefile
 	data/Makefile
+    doxygen/Makefile
+    doxygen/doxygen.conf
 	geoclue.pc
 )
 

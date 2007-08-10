@@ -4,7 +4,7 @@ geoclue_position_server_hostip_SOURCES = geoclue_position_server_hostip.c \
 				geoclue_position_signal_marshal.c \
 				../geoclue_position_error.c
 
-service_in_files = org.foinse_project.geoclue.position.hostip.service.in
+service_in_files = org.freedesktop.geoclue.position.hostip.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 

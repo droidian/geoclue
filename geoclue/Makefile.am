@@ -5,7 +5,7 @@ geoclue_master_SOURCES = geoclue_master.c \
 						geoclue_master_signal_marshal.c	
 
 
-service_in_files = org.foinse_project.geoclue.master.service.in
+service_in_files = org.freedesktop.geoclue.master.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 
@@ -59,7 +59,8 @@ libgeoclue_la_HEADERS = 	position.h \
 				map.h \
 				map_gtk.h \
 				map_gtk_layout.h \
-				geocode.h
+				geocode.h \
+				geoclue.h
 
 
 

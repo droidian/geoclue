@@ -1,4 +1,4 @@
-org.foinse_project.geoclue.geocode.yahoo
-/org/foinse_project/geoclue/geocode/yahoo
-org.foinse_project.geoclue.geocode
+org.freedesktop.geoclue.geocode.yahoo
+/org/freedesktop/geoclue/geocode/yahoo
+org.freedesktop.geoclue.geocode
 Yahoo Geocoding API

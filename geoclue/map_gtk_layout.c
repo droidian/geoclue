@@ -1,5 +1,5 @@
 /* Geocluemap - A DBus api and wrapper for getting geography pictures
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or

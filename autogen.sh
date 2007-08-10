@@ -1,8 +1,8 @@
 #! /bin/sh
 
 LIBTOOLIZE=libtoolize
-AUTOMAKE=automake-1.8
-ACLOCAL=aclocal-1.8
+AUTOMAKE=automake
+ACLOCAL=aclocal
 AUTOCONF=autoconf
 AUTOHEADER=autoheader
 

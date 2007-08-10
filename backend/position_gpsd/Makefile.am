@@ -5,7 +5,7 @@ geoclue_position_server_gpsd_SOURCES = geoclue_position_server_gpsd.c \
 				../geoclue_position_error.c
 
 
-service_in_files = org.foinse_project.geoclue.position.gpsd.service.in
+service_in_files = org.freedesktop.geoclue.position.gpsd.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 

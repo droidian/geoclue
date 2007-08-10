@@ -1,4 +1,4 @@
-org.foinse_project.geoclue.position.gpsd
-/org/foinse_project/geoclue/position/gpsd
-org.foinse_project.geoclue.position
+org.freedesktop.geoclue.position.gpsd
+/org/freedesktop/geoclue/position/gpsd
+org.freedesktop.geoclue.position
 gpsd position API

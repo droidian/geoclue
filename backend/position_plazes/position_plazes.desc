@@ -1,4 +1,4 @@
-org.foinse_project.geoclue.position.plazes
-/org/foinse_project/geoclue/position/plazes
-org.foinse_project.geoclue.position
+org.freedesktop.geoclue.position.plazes
+/org/freedesktop/geoclue/position/plazes
+org.freedesktop.geoclue.position
 plazes.com position API

@@ -3,7 +3,7 @@ bin_PROGRAMS = geoclue-map-server-yahoo
 geoclue_map_server_yahoo_SOURCES = geoclue_map_server_yahoo.c \
 				geoclue_map_signal_marshal.c	
 
-service_in_files = org.foinse_project.geoclue.map.yahoo.service.in
+service_in_files = org.freedesktop.geoclue.map.yahoo.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 

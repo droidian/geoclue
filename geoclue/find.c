@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -30,11 +30,11 @@
 #include <find_signal_marshal.h>
 #include <geoclue_master_client_glue.h>
 
-#define GEOCLUE_FIND_DBUS_INTERFACE   "org.foinse_project.geoclue.find"   
+#define GEOCLUE_FIND_DBUS_INTERFACE   "org.freedesktop.geoclue.find"   
  
-#define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
-#define GEOCLUE_MASTER_DBUS_PATH        "/org/foinse_project/geoclue/master"
-#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.foinse_project.geoclue.master" 
+#define GEOCLUE_MASTER_DBUS_SERVICE     "org.freedesktop.geoclue.master"
+#define GEOCLUE_MASTER_DBUS_PATH        "/org/freedesktop/geoclue/master"
+#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.freedesktop.geoclue.master" 
  
         
 static  DBusGConnection*        geoclue_find_connection =   NULL;
@@ -66,7 +66,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_version(int* major, int* minor, int* micro)
         return GEOCLUE_FIND_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_find_version ( geoclue_find_proxy, major, minor, micro, &error );
+    org_freedesktop_geoclue_find_version ( geoclue_find_proxy, major, minor, micro, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_find version: %s\n", error->message);
@@ -86,7 +86,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_service_provider(char** name)
         return GEOCLUE_FIND_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_find_service_provider ( geoclue_find_proxy, name, &error );
+    org_freedesktop_geoclue_find_service_provider ( geoclue_find_proxy, name, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_find service provider: %s\n", error->message);
@@ -157,7 +157,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_init()
     char* service;
     char* path;
     char* desc;
-    org_foinse_project_geoclue_master_get_default_find_provider (master, &service, &path, &desc, &error);
+    org_freedesktop_geoclue_master_get_default_find_provider (master, &service, &path, &desc, &error);
     if( error != NULL )
     {
         g_printerr ("Error getting default find provider: %s\n", error->message);
@@ -224,7 +224,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_get_all_providers(char*** OUT_service, char
                                                     GEOCLUE_MASTER_DBUS_PATH,
                                                     GEOCLUE_MASTER_DBUS_INTERFACE);   
 
-    org_foinse_project_geoclue_master_get_all_find_providers (master, OUT_service, OUT_path, OUT_desc, &error);
+    org_freedesktop_geoclue_master_get_all_find_providers (master, OUT_service, OUT_path, OUT_desc, &error);
     if( error != NULL )
     {
         g_printerr ("Error getting all find provider: %s\n", error->message);
@@ -246,7 +246,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_top_level_categories (char *** OUT_names)
         return GEOCLUE_FIND_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_find_top_level_categories  ( geoclue_find_proxy, OUT_names, &error );
+    org_freedesktop_geoclue_find_top_level_categories  ( geoclue_find_proxy, OUT_names, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_find top level categories : %s\n", error->message);
@@ -264,7 +264,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_subcategories (const char * IN_category_nam
         return GEOCLUE_FIND_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_find_subcategories  ( geoclue_find_proxy, IN_category_name, OUT_subcategory_names, &error );
+    org_freedesktop_geoclue_find_subcategories  ( geoclue_find_proxy, IN_category_name, OUT_subcategory_names, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_find subcategories : %s\n", error->message);
@@ -285,7 +285,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_find_near (const gdouble IN_latitude, const
     userdatastore       = userdata;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_find_find_near  ( geoclue_find_proxy, IN_latitude, IN_longitude, IN_category_name, IN_name ,&current_search_id, &error );
+    org_freedesktop_geoclue_find_find_near  ( geoclue_find_proxy, IN_latitude, IN_longitude, IN_category_name, IN_name ,&current_search_id, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_find find near : %s\n", error->message);

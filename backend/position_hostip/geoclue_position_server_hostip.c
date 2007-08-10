@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  *               2007 Jussi Kukkonen
  * 
  * 
@@ -34,6 +34,7 @@
 #include <libxml/xpathInternals.h>
 #include <libsoup/soup.h>
 #include <stdlib.h>
+#include <time.h>
 
 
 #define WEBSERVICE_API "http://api.hostip.info/"
@@ -42,35 +43,45 @@ G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
 enum {
   CURRENT_POSITION_CHANGED,
+  SERVICE_STATUS_CHANGED,
   CIVIC_LOCATION_CHANGED,
   LAST_SIGNAL
 };
 
 static guint signals[LAST_SIGNAL];
 
-/* Default handlers */
-void geoclue_position_current_position_changed(GeocluePosition* obj, gdouble lat, gdouble lon)
-{
+//Default handler
+static void geoclue_position_current_position_changed(	GeocluePosition* server,
+														gint timestamp,
+														gdouble lat,
+														gdouble lon,
+														gdouble altitude )
+{   
     g_print("Current Position Changed\n");
 }
-
-void geoclue_position_civic_location_changed(GeocluePosition* obj,
-                                             char* OUT_country,
-                                             char* OUT_region,
-                                             char* OUT_locality,
-                                             char* OUT_area,
-                                             char* OUT_postalcode,
-                                             char* OUT_street,
-                                             char* OUT_building,
-                                             char* OUT_floor,
-                                             char* OUT_room,
-                                             char* OUT_description,
-                                             char* OUT_text)
-{
-    g_print("Civic location Changed\n");
+//Default handler
+static void geoclue_position_civic_location_changed(	GeocluePosition* server,
+														char* country, 
+												       	char* region,
+												       	char* locality,
+												       	char* area,
+												       	char* postalcode,
+												       	char* street,
+												       	char* building,
+												       	char* floor,
+												       	char* room,
+												       	char* description,
+												       	char* text )
+{   
+    g_print("civic_location_changed\n");
 }
-
-
+//Default handler
+static void geoclue_position_service_status_changed(	GeocluePosition* server,
+														gint status,
+														char* user_message )
+{
+    g_print("service_status_changed\n");
+}
 
 /*
  * Private internet connectivity monitoring functions
@@ -222,17 +233,16 @@ static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
     
     proxy_env = getenv ("http_proxy");
     if (proxy_env != NULL) {  
+    	g_debug("Using Proxy %s", proxy_env);
         proxy = soup_uri_new (proxy_env);
         session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
             SOUP_SESSION_PROXY_URI, proxy,
             NULL);
         soup_uri_free (proxy);
-        g_free (proxy_env);
+        /* You are not allowed to free something from getenv g_free (proxy_env);*/
     } else {
         session = soup_session_sync_new ();
     }
-    
     if (!session) {
         g_debug ("no libsoup session");
         g_set_error (error,
@@ -241,7 +251,6 @@ static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
                      "libsoup session creation failed");
         return FALSE;
     }    
-    
     msg = soup_message_new ("GET", url);
     soup_session_send_message (session, msg);
     if (msg->response.length == 0) {
@@ -252,7 +261,7 @@ static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
                      "No position data was received from %s.", url);
         return FALSE;
     }
-    
+    g_debug("Message : \"%s\"", msg->response.body);
     *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
     return TRUE;
 }
@@ -411,7 +420,9 @@ static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon
     if ((lat != obj->current_lat) || (lat != obj->current_lat)) {
         obj->current_lat = lat;
         obj->current_lon = lon;
-        geoclue_position_current_position_changed (obj, lat, lon);
+    	time_t ttime;
+    	time(&ttime);
+        g_signal_emit_by_name(obj, "current_position_changed", ttime, lat, lon, 0.0);
     }
 
     /* if net connection is monitored, the validity of position can be guaranteed */
@@ -526,22 +537,52 @@ geoclue_position_class_init (GeocluePositionClass *klass)
                 G_STRUCT_OFFSET (GeocluePositionClass, current_position_changed),
                 NULL, 
                 NULL,
-                _geoclue_position_VOID__DOUBLE_DOUBLE,
-                G_TYPE_NONE, 2 ,G_TYPE_DOUBLE, G_TYPE_DOUBLE);
-
-    klass->current_position_changed = geoclue_position_current_position_changed;
-
+                _geoclue_position_VOID__INT_DOUBLE_DOUBLE_DOUBLE,
+                G_TYPE_NONE, 
+                4, 
+                G_TYPE_INT,
+                G_TYPE_DOUBLE, 
+                G_TYPE_DOUBLE, 
+                G_TYPE_DOUBLE);
+	
+	signals[SERVICE_STATUS_CHANGED] =
+        g_signal_new ("service_status_changed",
+                TYPE_GEOCLUE_POSITION,
+                G_SIGNAL_RUN_LAST,
+                G_STRUCT_OFFSET (GeocluePositionClass, service_status_changed),
+                NULL, 
+                NULL,
+                _geoclue_position_VOID__INT_STRING,
+                G_TYPE_NONE,
+                2,
+                G_TYPE_INT,
+                G_TYPE_STRING);
+	
 	signals[CIVIC_LOCATION_CHANGED] =
         g_signal_new ("civic_location_changed",
                 TYPE_GEOCLUE_POSITION,
                 G_SIGNAL_RUN_LAST,
                 G_STRUCT_OFFSET (GeocluePositionClass, civic_location_changed),
-                NULL,
+                NULL, 
                 NULL,
                 _geoclue_position_VOID__STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING_STRING,
-                G_TYPE_NONE, 11, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+                G_TYPE_NONE,
+                11,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING,
+                G_TYPE_STRING);
   
-    klass->civic_location_changed = geoclue_position_civic_location_changed;
+	klass->current_position_changed = geoclue_position_current_position_changed;
+	klass->civic_location_changed = geoclue_position_civic_location_changed;
+	klass->service_status_changed = geoclue_position_service_status_changed;
  
 	if (klass->connection == NULL)
 	{
@@ -555,32 +596,47 @@ geoclue_position_class_init (GeocluePositionClass *klass)
 }
 
 
-gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
+
+gboolean geoclue_position_version(	GeocluePosition* server,
+									int* major,
+									int* minor,
+									int* micro, 
+									GError **error)
 {
-    *OUT_major = 1;
-    *OUT_minor = 0;
-    *OUT_micro = 0;   
+    *major = 1;
+    *minor = 0;
+    *micro = 0;   
     return TRUE;
 }
 
 
-gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error)
+gboolean geoclue_position_service_name(	GeocluePosition* server,
+										char** name, 
+										GError **error)
 {
     *name = "www.hostip.info";
     return TRUE;
 }
 
 
-gboolean geoclue_position_current_position (GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
+gboolean geoclue_position_current_position (	GeocluePosition* server,
+												gint* OUT_timestamp,
+												gdouble* OUT_latitude,
+												gdouble* OUT_longitude,
+												gdouble* OUT_altitude, 
+												GError **error)
 {
-    if (obj->is_current_valid) 
+	time_t ttime;
+	time(&ttime);
+	*OUT_timestamp = ttime;
+    if (server->is_current_valid) 
     {
-        *OUT_latitude = obj->current_lat;
-        *OUT_longitude = obj->current_lon;
+        *OUT_latitude = server->current_lat;
+        *OUT_longitude = server->current_lon;
         return TRUE;
     }
     else if (query_position (OUT_latitude, OUT_longitude, error)) {
-        set_current_position (obj, *OUT_latitude, *OUT_longitude);
+        set_current_position (server, *OUT_latitude, *OUT_longitude);
         return TRUE;
     }
     else 
@@ -589,7 +645,11 @@ gboolean geoclue_position_current_position (GeocluePosition *obj, gdouble* OUT_l
     }
 }
 
-gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error )
+gboolean geoclue_position_current_position_error(	GeocluePosition* server,
+													gdouble* OUT_latitude_error, 
+													gdouble* OUT_longitude_error, 
+													gdouble* OUT_altitude_error, 
+													GError **error)
 {
     g_set_error (error,
                  GEOCLUE_POSITION_ERROR,
@@ -598,84 +658,48 @@ gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* 
     return FALSE;
 }
 
-gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error )
+
+gboolean geoclue_position_current_velocity (	GeocluePosition* server,
+												gint* OUT_timestamp,
+												gdouble* OUT_north_velocity, 
+												gdouble* OUT_east_velocity,
+												gdouble* OUT_altitude_velocity, 
+												GError **error)
 {
     g_set_error (error,
                  GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
-gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error )
+
+
+gboolean geoclue_position_satellites_in_view (	GeocluePosition* server,
+												GArray** OUT_prn_numbers, 
+												GError **error)
 {
     g_set_error (error,
                  GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
-gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
 
-gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error )
+gboolean geoclue_position_satellites_data (	GeocluePosition* server,
+											const gint IN_prn_number,
+											gdouble* OUT_elevation, 
+											gdouble* OUT_azimuth, 
+											gdouble* OUT_signal_noise_ratio, 
+											gboolean* OUT_differential, 
+											gboolean* OUT_ephemeris, 
+											GError **error)
 {
     g_set_error (error,
                  GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
-
-gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
-
-gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
-
-gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
-
-gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
-    return FALSE;
-}
-
-gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error )
-{
-    g_set_error (error,
-                 GEOCLUE_POSITION_ERROR,
-                 GEOCLUE_POSITION_ERROR_NOTSUPPORTED,
-                 "Backend does not implement this method.");
+                 GEOCLUE_POSITION_ERROR_FAILED,
+                 "Method not implemented yet.");
     return FALSE;
 }
 
@@ -723,55 +747,34 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
     }
 }
 
-gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
-                                                   gboolean* OUT_country,
-                                                   gboolean* OUT_region,
-                                                   gboolean* OUT_locality,
-                                                   gboolean* OUT_area,
-                                                   gboolean* OUT_postalcode,
-                                                   gboolean* OUT_street,
-                                                   gboolean* OUT_building,
-                                                   gboolean* OUT_floor,
-                                                   gboolean* OUT_room,
-                                                   gboolean* OUT_description,
-                                                   gboolean* OUT_text,
-                                                   GError** error)
-{
-    *OUT_country = TRUE;
-    *OUT_region = FALSE;
-    *OUT_locality = TRUE;
-    *OUT_area = FALSE;
-    *OUT_postalcode = FALSE;
-    *OUT_street = FALSE;
-    *OUT_building = FALSE;
-    *OUT_floor = FALSE;
-    *OUT_room = FALSE;
-    *OUT_description = FALSE;
-    *OUT_text = FALSE;
-    return TRUE;
-}
+
 
 /* TODO: Is this method sane? We have "GError**" in the call signatures:
    This means calling current_position and checking return value 
    (and reading error->message on FALSE) gives the exact same 
    information as this method... */
-   
-gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error)
+
+gboolean geoclue_position_service_status	 (	GeocluePosition* server,
+												gint* OUT_status, 
+												char** OUT_string, 
+												GError **error)
 {
-    gdouble temp, temp2;
-    
-    geoclue_position_current_position(obj, &temp, &temp2, error);
+    gdouble temp, temp2, temp3;
+    gint time;
+    geoclue_position_current_position(server, &time, &temp, &temp2, &temp3, error);
     if( temp == -999.99 || temp2 == -999.99)
     {
-        *OUT_available = FALSE;
-        *OUT_reason = "Cannot Connect to api.hostip.info\n";
+    	*OUT_status = GEOCLUE_POSITION_NO_SERVICE_AVAILABLE;    
+    	*OUT_string = strdup("Cannot Connect to api.hostip.info\n");
     }
     else
     {
-        *OUT_available = TRUE;
+    	*OUT_status = GEOCLUE_POSITION_LONGITUDE_AVAILABLE | GEOCLUE_POSITION_LATITUDE_AVAILABLE;    
+    	*OUT_string = strdup("Hostip connection is working");
     }   
     return TRUE;  
 }
+
 
 gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
 {

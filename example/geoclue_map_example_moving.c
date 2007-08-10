@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -67,7 +67,7 @@ static void update_map(GdkPixbuf* map_buffer, void* userdata)
 
 
 
-void newpos(gdouble lat, gdouble lon, void* userdata)
+void newpos(gint timestamp,	gdouble lat, gdouble lon, gdouble altitude, void* userdata)
 {
     
     geoclue_map_gtk_get_gdk_pixbuf(lat,lon,PROGRAM_WIDTH,PROGRAM_HEIGHT,8,update_map,NULL);    
@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
         g_print("Error Opening geoclue map\n");
         
     }    
-    if( geoclue_position_init())
+    if( geoclue_position_init(NULL))
     {   
         g_print("Error Opening geoclue position\n");
         
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
    
     gtk_window_set_default_size(GTK_WINDOW(window),PROGRAM_WIDTH,PROGRAM_HEIGHT);
    
-    geoclue_position_set_position_callback( newpos, NULL );    
+    geoclue_position_add_position_callback(NULL, newpos, NULL );    
      
 
     /* and the window */

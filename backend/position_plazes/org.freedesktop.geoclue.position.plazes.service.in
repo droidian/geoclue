@@ -1,4 +1,4 @@
 [D-BUS Service]
-Name=org.foinse_project.geoclue.position.plazes
+Name=org.freedesktop.geoclue.position.plazes
 Exec=@execdir@/geoclue-position-server-plazes
 

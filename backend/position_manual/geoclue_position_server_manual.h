@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -25,9 +25,9 @@
 
 #include <dbus/dbus-glib.h>
 #include <glib.h>
-#define GEOCLUE_POSITION_DBUS_SERVICE     "org.foinse_project.geoclue.position.manual"
-#define GEOCLUE_POSITION_DBUS_PATH        "/org/foinse_project/geoclue/position/manual"
-#define GEOCLUE_POSITION_DBUS_INTERFACE   "org.foinse_project.geoclue.position"
+#define GEOCLUE_POSITION_DBUS_SERVICE     "org.freedesktop.geoclue.position.manual"
+#define GEOCLUE_POSITION_DBUS_PATH        "/org/freedesktop/geoclue/position/manual"
+#define GEOCLUE_POSITION_DBUS_INTERFACE   "org.freedesktop.geoclue.position"
 
 G_BEGIN_DECLS
 
@@ -47,8 +47,30 @@ struct GeocluePositionClass
   GObjectClass parent;
   DBusGConnection *connection;
 
-          /* Signals */
-    void (*current_position_changed) (GeocluePosition*, gdouble, gdouble );
+
+	/* Signals */
+	void (*current_position_changed) (	GeocluePosition* server,
+										gint timestamp,
+										gdouble lat,
+										gdouble lon,
+										gdouble altitude );
+	
+	void (*civic_location_changed) (	GeocluePosition* server,
+										char* country, 
+	                                   	char* region,
+	                                   	char* locality,
+	                                   	char* area,
+	                                   	char* postalcode,
+	                                   	char* street,
+	                                   	char* building,
+	                                   	char* floor,
+	                                   	char* room,
+	                                   	char* description,
+	                                   	char* text );
+	
+	void (*service_status_changed) (	GeocluePosition* server,
+										gint status,
+										char* user_message );
 };
 
 #define TYPE_GEOCLUE_POSITION              (geoclue_position_get_type ())
@@ -58,49 +80,79 @@ struct GeocluePositionClass
 #define IS_GEOCLUE_POSITION_CLASS(klass)   (G_TYPE_CHECK_CLASS_TYPE ((klass), TYPE_GEOCLUE_POSITION))
 #define GEOCLUE_POSITION_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_GEOCLUE_POSITION, GeocluePositionClass))
 
-gboolean geoclue_position_version (GeocluePosition *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
-gboolean geoclue_position_service_provider(GeocluePosition *obj, char** name, GError **error);   
+gboolean geoclue_position_version(	GeocluePosition* server,
+									int* major,
+									int* minor,
+									int* micro, 
+									GError **error);
 
-gboolean geoclue_position_current_position(GeocluePosition *obj, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error );
-gboolean geoclue_position_current_position_error(GeocluePosition *obj, gdouble* OUT_latitude_error, gdouble* OUT_longitude_error, GError **error );
-gboolean geoclue_position_current_altitude(GeocluePosition *obj, gdouble* OUT_altitude, GError **error );
-gboolean geoclue_position_current_velocity(GeocluePosition *obj, gdouble* OUT_north_velocity, gdouble* OUT_east_velocity, GError **error );
-gboolean geoclue_position_current_time(GeocluePosition *obj, gint* OUT_year, gint* OUT_month, gint* OUT_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclue_position_satellites_in_view(GeocluePosition *obj, GArray** OUT_prn_numbers, GError **error );
-gboolean geoclue_position_satellites_data(GeocluePosition *obj, const gint IN_prn_number, gdouble* OUT_elevation, gdouble* OUT_azimuth, gdouble* OUT_signal_noise_ratio, GError **error );
-gboolean geoclue_position_sun_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclue_position_sun_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclue_position_moon_rise(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
-gboolean geoclue_position_moon_set(GeocluePosition *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_year, const gint IN_month, const gint IN_day, gint* OUT_hours, gint* OUT_minutes, gint* OUT_seconds, GError **error );
+gboolean geoclue_position_service_name(	GeocluePosition* server,
+										char** name, 
+										GError **error);       
 
-gboolean geoclue_position_civic_location (GeocluePosition* obj,
-                                          char** OUT_country,
-                                          char** OUT_region,
-                                          char** OUT_locality,
-                                          char** OUT_area,
-                                          char** OUT_postalcode,
-                                          char** OUT_street,
-                                          char** OUT_building,
-                                          char** OUT_floor,
-                                          char** OUT_room,
-                                          char** OUT_text,
-                                          GError** error);
 
-gboolean geoclue_position_civic_location_supports (GeocluePosition* obj,
-                                                   gboolean* OUT_country,
-                                                   gboolean* OUT_region,
-                                                   gboolean* OUT_locality,
-                                                   gboolean* OUT_area,
-                                                   gboolean* OUT_postalcode,
-                                                   gboolean* OUT_street,
-                                                   gboolean* OUT_building,
-                                                   gboolean* OUT_floor,
-                                                   gboolean* OUT_room,
-                                                   gboolean* OUT_text,
-                                                   GError** error);
+gboolean geoclue_position_current_position (	GeocluePosition* server,
+												gint* OUT_timestamp,
+												gdouble* OUT_latitude,
+												gdouble* OUT_longitude,
+												gdouble* OUT_altitude, 
+												GError **error);
 
-gboolean geoclue_position_service_available(GeocluePosition *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
-gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error);
+
+
+gboolean geoclue_position_current_position_error(	GeocluePosition* server,
+													gdouble* OUT_latitude_error, 
+													gdouble* OUT_longitude_error, 
+													gdouble* OUT_altitude_error, 
+													GError **error);
+
+gboolean geoclue_position_service_status	 (	GeocluePosition* server,
+												gint* OUT_status, 
+												char** OUT_string, 
+												GError **error);    
+
+
+
+
+gboolean geoclue_position_current_velocity (	GeocluePosition* server,
+												gint* OUT_timestamp,
+												gdouble* OUT_north_velocity, 
+												gdouble* OUT_east_velocity,
+												gdouble* OUT_altitude_velocity, 
+												GError **error);
+
+
+
+gboolean geoclue_position_satellites_in_view (	GeocluePosition* server,
+												GArray** OUT_prn_numbers, 
+												GError **error);
+
+
+gboolean geoclue_position_satellites_data (	GeocluePosition* server,
+											const gint IN_prn_number,
+											gdouble* OUT_elevation, 
+											gdouble* OUT_azimuth, 
+											gdouble* OUT_signal_noise_ratio, 
+											gboolean* OUT_differential, 
+											gboolean* OUT_ephemeris, 
+											GError **error);
+
+gboolean geoclue_position_civic_location (	GeocluePosition* server, 
+											char** OUT_country, 
+						                    char** OUT_region,
+						                    char** OUT_locality,
+						                    char** OUT_area,
+						                    char** OUT_postalcode,
+						                    char** OUT_street,
+						                    char** OUT_building,
+						                    char** OUT_floor,
+						                    char** OUT_description,
+						                    char** OUT_room,
+						                    char** OUT_text, 
+						                    GError **error);
+
+gboolean geoclue_position_shutdown(	GeocluePosition *obj,
+									GError** error);
 
 
 

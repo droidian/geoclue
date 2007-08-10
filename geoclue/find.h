@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -16,8 +16,8 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#ifndef __ORG_FOINSE_PROJECT_GEOCLUE_FIND_GEOCLUE_FIND_H__
-#define __ORG_FOINSE_PROJECT_GEOCLUE_FIND_GEOCLUE_FIND_H__
+#ifndef __ORG_FREEDESKTOP_GEOCLUE_FIND_GEOCLUE_FIND_H__
+#define __ORG_FREEDESKTOP_GEOCLUE_FIND_GEOCLUE_FIND_H__
 
 #include <dbus/dbus-glib.h>
 
@@ -52,7 +52,7 @@ typedef enum _geoclue_find_fix
 
  
     /*!
-     * \brief texttospeech version 
+     * \brief geoclue version 
      * \param major placeholder for version return 
      * \param minor 
      * \param micro
@@ -62,14 +62,14 @@ typedef enum _geoclue_find_fix
     GEOCLUE_FIND_RETURNCODE geoclue_find_version(int* major, int* minor, int* micro);
     
      /*!
-     * \brief texttospeech init, must be called first.  Uses default provider 
+     * \brief geoclue init, must be called first.  Uses default provider 
      * \return TRUE Version returned sucessfully
      *         FALSE Error
      */
     GEOCLUE_FIND_RETURNCODE geoclue_find_init();
     
      /*!
-     * \brief texttospeech init, must be called first.  
+     * \brief geoclue init, must be called first.  
      * \param service DBUS service path 
      * \param path DBUS path to object
      * \return TRUE Version returned sucessfully
@@ -116,7 +116,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_find_near (const gdouble IN_latitude, const
 G_END_DECLS
 
 
-#endif // __ORG_FOINSE_PROJECT_GEOCLUE_FIND_GEOCLUE_FIND_H__
+#endif // __ORG_FREEDESKTOP_GEOCLUE_FIND_GEOCLUE_FIND_H__
 
 
 

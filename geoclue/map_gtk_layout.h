@@ -1,5 +1,5 @@
 /* Geocluemap - A DBus api and wrapper for getting geography pictures
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -16,8 +16,8 @@
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
  * Boston, MA 02111-1307, USA.
  */
-#ifndef __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_LAYOUT_H__
-#define __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_LAYOUT_H__
+#ifndef __ORG_FREEDESKTOP_GEOCLUE_MAP_GTK_LAYOUT_H__
+#define __ORG_FREEDESKTOP_GEOCLUE_MAP_GTK_LAYOUT_H__
 
 #include <gtk/gtklayout.h>
 #include <gtk/gtkeventbox.h>
@@ -71,4 +71,4 @@ gboolean       geoclue_map_gtk_layout_add_widget(GeocluemapGtkLayout* geoclue_ma
 
 G_END_DECLS
 
-#endif /* __ORG_FOINSE_PROJECT_GEOCLUE_MAP_GTK_LAYOUT_H__ */
+#endif /* __ORG_FREEDESKTOP_GEOCLUE_MAP_GTK_LAYOUT_H__ */

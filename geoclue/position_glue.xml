@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!-- Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -18,56 +18,69 @@
  * Boston, MA 02111-1307, USA.
  -->
 
-
-<node name="/org/foinse_project/geoclue/position">
-  <interface name="org.foinse_project.geoclue.position">
-
+<node name="/org/freedesktop/geoclue/position">
+  <interface name="org.freedesktop.geoclue.position">
+  
     <method name="version">
       <arg type="i" name="major" direction="out" />
       <arg type="i" name="minor" direction="out" />
       <arg type="i" name="micro" direction="out" />
     </method> 
 
-    <method name="service_provider">
+    <method name="service_name">
       <arg type="s" name="name" direction="out" />
     </method>  
-    
 
-    <signal name="current_position_changed">
-      <arg type="d" name="latitude" direction="out" />
-      <arg type="d" name="longitude" direction="out" />
-    </signal>
-      
     <method name="current_position">    
-      <arg type="d" name="latitude" direction="out" />
-      <arg type="d" name="longitude" direction="out" />
+      <arg type="i" name="timestamp" direction="out" /><!-- Unix time (seconds since the epoch) -->
+      <arg type="d" name="latitude" direction="out" /><!-- Degrees -->
+      <arg type="d" name="longitude" direction="out" /><!-- Degrees -->
+      <arg type="d" name="altitude" direction="out" /><!-- Meters above sea level -->
     </method>
 
+    <signal name="current_position_changed">
+      <arg type="i" name="timestamp" direction="out" /><!-- Unix time (seconds since the epoch) -->
+      <arg type="d" name="latitude" direction="out" /><!-- Degrees -->
+      <arg type="d" name="longitude" direction="out" /><!-- Degrees -->
+      <arg type="d" name="altitude" direction="out" /><!-- Meters -->
+    </signal>
 
     <method name="current_position_error">    
       <arg type="d" name="latitude_error" direction="out" /><!-- Meters -->
       <arg type="d" name="longitude_error" direction="out" /><!-- Meters -->
-      <arg type="i" name="fix_type" direction="out"/>
+      <arg type="d" name="altitude_error" direction="out" /><!-- Meters -->
     </method>
-    <!-- fix_type enum    GEOCLUE_POSITION_NO_FIX                         = -1,  
-    					GEOCLUE_POSITION_TWO_DIMENSION                  = 1,  
-    					GEOCLUE_POSITION_THREE_DIMENSION                = 2,  
-    					GEOCLUE_POSITION_TWO_DIMENSION_DIFFERENTIAL     = 3,  
-    					GEOCLUE_POSITION_THREE_DIMENSION_DIFFERENTIAL   = 4   -->
-    
+ 
+    <!-- status flag bit packed into an 32 bit integer (other bits are reserved for future use)
+                        GEOCLUE_POSITION_NO_SERVICE_AVAILABLE                = 0,  
+                        GEOCLUE_POSITION_ACQUIRING_ALTITUDE                  = 1,  
+                        GEOCLUE_POSITION_ACQUIRING_LONGITUDE                 = 2,  
+                        GEOCLUE_POSITION_ACQUIRING_LATITUDE                  = 4,  
+                        GEOCLUE_POSITION_ALTITUDE_AVAILABLE                  = 8,  
+                        GEOCLUE_POSITION_LONGITUDE_AVAILABLE                 = 16,  
+                        GEOCLUE_POSITION_LATITUDE_AVAILABLE                  = 32  
 
-    <method name="current_altitude">    
-      <arg type="d" name="altitude" direction="out" /><!-- Meters -->
+                           -->
+                           
+    <method name="service_status">    
+      <arg type="i" name="status" direction="out"/>
+      <arg type="s" name="user_message" direction="out"/> <!-- This message is a user readable string, generally used to explain why the backend cannot locate the current position  ("Weak GPS Signal, no internet connection available for lookup")-->      
     </method>
+
+    <signal name="service_status_changed">    
+      <arg type="i" name="status" direction="out"/>
+      <arg type="s" name="user_message" direction="out"/> <!-- This message is a user readable string, generally used to explain why the backend cannot locate the current position  ("Weak GPS Signal, no internet connection available for lookup")-->      
+    </signal> 
 
     <method name="current_velocity">    
+      <arg type="i" name="timestamp" direction="out" /><!-- This is the NMEA standard UTC time in the format 123456 with represents 12:34:56 hours:minutes:seconds -->
       <arg type="d" name="north_velocity" direction="out" /><!-- Meters per Second -->
       <arg type="d" name="east_velocity" direction="out" /><!-- Meters per Second -->
+      <arg type="d" name="altitude_velocity" direction="out" /><!-- Meters per Second  (away from the earth is defined as up)-->
     </method>
-
-
+    
     <method name="satellites_in_view">    	
-      <arg type="ai" name="prn_numbers" direction="out" />
+      <arg type="ai" name="prn_numbers" direction="out" />     
     </method>
 
     <method name="satellites_data">    	
@@ -78,21 +91,7 @@
       <arg type="b" name="differential" direction="out" />
       <arg type="b" name="ephemeris" direction="out" />
     </method>
-    
-    <signal name="civic_location_changed">
-      <arg type="s" name="country" direction="out" />
-      <arg type="s" name="region" direction="out" />
-      <arg type="s" name="locality" direction="out" />
-      <arg type="s" name="area" direction="out" />
-      <arg type="s" name="postalcode" direction="out" />
-      <arg type="s" name="street" direction="out" />
-      <arg type="s" name="building" direction="out" />
-      <arg type="s" name="floor" direction="out" />
-      <arg type="s" name="room" direction="out" />
-      <arg type="s" name="description" direction="out" />
-      <arg type="s" name="text" direction="out" />
-    </signal>
-    
+      
     <method name="civic_location">
       <arg type="s" name="country" direction="out" />
       <arg type="s" name="region" direction="out" />
@@ -106,17 +105,23 @@
       <arg type="s" name="description" direction="out" />
       <arg type="s" name="text" direction="out" />
     </method>
-    
-    
-    <method name="service_available">
-      <arg type="b" name="available" direction="out" />
-      <arg type="s" name="reason" direction="out" />
-    </method>        
-    
+
+    <signal name="civic_location_changed">
+      <arg type="s" name="country" direction="out" />
+      <arg type="s" name="region" direction="out" />
+      <arg type="s" name="locality" direction="out" />
+      <arg type="s" name="area" direction="out" />
+      <arg type="s" name="postalcode" direction="out" />
+      <arg type="s" name="street" direction="out" />
+      <arg type="s" name="building" direction="out" />
+      <arg type="s" name="floor" direction="out" />
+      <arg type="s" name="room" direction="out" />
+      <arg type="s" name="description" direction="out" />
+      <arg type="s" name="text" direction="out" />
+    </signal>    
+   
     <method name="shutdown">
     </method>    
-
-
 
   </interface>
 </node>

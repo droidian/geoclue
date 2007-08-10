@@ -2,7 +2,7 @@ bin_PROGRAMS = geoclue-geocode-server-yahoo
 
 geoclue_geocode_server_yahoo_SOURCES = geoclue_geocode_server_yahoo.c
 
-service_in_files = org.foinse_project.geoclue.geocode.yahoo.service.in
+service_in_files = org.freedesktop.geoclue.geocode.yahoo.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 

@@ -1,6 +1,6 @@
 bin_PROGRAMS = geoclue-position-server-plazes
 
-service_in_files = org.foinse_project.geoclue.position.plazes.service.in
+service_in_files = org.freedesktop.geoclue.position.plazes.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 geoclue_position_server_plazes_SOURCES = geoclue_position_server_plazes.c \

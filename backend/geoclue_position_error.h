@@ -18,5 +18,16 @@ typedef enum
 } GeocluePositionError;
 
 
+typedef enum position_status
+{
+    GEOCLUE_POSITION_NO_SERVICE_AVAILABLE    = 0,  
+    GEOCLUE_POSITION_ACQUIRING_ALTITUDE      = 1,  
+    GEOCLUE_POSITION_ACQUIRING_LONGITUDE     = 2,  
+    GEOCLUE_POSITION_ACQUIRING_LATITUDE      = 4,  
+    GEOCLUE_POSITION_ALTITUDE_AVAILABLE      = 8,  
+    GEOCLUE_POSITION_LONGITUDE_AVAILABLE     = 16,  
+    GEOCLUE_POSITION_LATITUDE_AVAILABLE      = 32     
+  
+} position_status;
 
 #endif /* __GEOCLUE_POSITION_ERROR_H__ */

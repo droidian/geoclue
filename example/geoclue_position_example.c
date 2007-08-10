@@ -1,5 +1,5 @@
 /* Geoclue - A DBus api and wrapper for geography information
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -21,7 +21,7 @@
 #include <geoclue/position.h>
 #include <glib.h>
 #include <math.h>
-
+#include <time.h>
 /**
  *
  * Call the test program with no arguments (default backend will be used),
@@ -33,39 +33,70 @@
 
 int main (int argc, char** argv)
 {
-    gdouble lat, lon;
-    gboolean init_ok = FALSE;
-    
+   
     g_type_init ();
     g_thread_init (NULL);
     
     if (argv[1] != NULL) {
         g_debug ("Testing specified backend: %s", argv[1]);
-        
-        gchar* service = g_strdup_printf ("org.foinse_project.geoclue.position.%s", argv[1]);
-        gchar* path = g_strdup_printf ("/org/foinse_project/geoclue/position/%s", argv[1]);
-        if (geoclue_position_init_specific (service, path) == GEOCLUE_POSITION_SUCCESS){
-            init_ok = TRUE;
+		position_provider* provider;
+        provider = g_malloc(sizeof(position_provider));	
+		provider->service = g_strdup_printf ("org.freedesktop.geoclue.position.%s", argv[1]);
+		provider->path = g_strdup_printf ("/org/freedesktop/geoclue/position/%s", argv[1]);
+		provider->connection = NULL;
+		provider->proxy = NULL;
+		provider->ref = 1;
+
+        if (geoclue_position_init (provider) != GEOCLUE_POSITION_SUCCESS){
+        	g_printerr ("Initialization failed");
+        	return 1;
         }    
     } else {
         g_debug ("Testing default backend");
         
-        if (geoclue_position_init () == GEOCLUE_POSITION_SUCCESS){
-            init_ok = TRUE;
+        if (geoclue_position_init (NULL) != GEOCLUE_POSITION_SUCCESS){
+        	g_printerr ("Initialization failed");
+        	return 1;
         }
     }
-    
-    if (!init_ok) {
-        g_printerr ("Initialization failed");
-        return 1;
-    }
 
+    gint status;
+    char* reason;
+    g_debug ("Querying geoclue_position_service_status");
+    if (geoclue_position_service_status (NULL, &status, &reason) != GEOCLUE_POSITION_SUCCESS) {
+        g_debug ("current status query failed");
+        return 1;
+    } else {
+        g_debug ("current status query ok");
+        printf ("The backend status is %d\n %d No service available\n %d acquiring altitude \n %d acquiring longitude \n %d acquiring latitude \n %d has alititude available \n %d  has longitude available  \n %d  has latitude available  \n for the reason %s\n", 
+        		status,
+        		(status) == GEOCLUE_POSITION_NO_SERVICE_AVAILABLE,
+        		(status & GEOCLUE_POSITION_ACQUIRING_ALTITUDE) == GEOCLUE_POSITION_ACQUIRING_ALTITUDE,
+        		(status & GEOCLUE_POSITION_ACQUIRING_LONGITUDE) == GEOCLUE_POSITION_ACQUIRING_LONGITUDE,
+        		(status & GEOCLUE_POSITION_ACQUIRING_LATITUDE) == GEOCLUE_POSITION_ACQUIRING_LATITUDE,
+        		(status & GEOCLUE_POSITION_ALTITUDE_AVAILABLE) == GEOCLUE_POSITION_ALTITUDE_AVAILABLE,
+        		(status & GEOCLUE_POSITION_LONGITUDE_AVAILABLE) == GEOCLUE_POSITION_LONGITUDE_AVAILABLE,
+        		(status & GEOCLUE_POSITION_LATITUDE_AVAILABLE) == GEOCLUE_POSITION_LATITUDE_AVAILABLE,
+        		reason);
+    }
+    
+    
+    gdouble lat, lon, altitude;
+    time_t current_time, timestamp;
+    struct tm ts;
+    char buf[100];   
     g_debug ("Querying current position");
-    if (geoclue_position_current_position (&lat, &lon) != GEOCLUE_POSITION_SUCCESS) {
+    if (geoclue_position_current_position (NULL, &timestamp, &lat, &lon, &altitude) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("current position query failed");
+        return 1;
     } else {
         g_debug ("current position query ok");
-        printf ("You are at %f %f\n", lat, lon);
+        
+        printf ("You are at %lf %lf with an altitude of %lf\n", lat, lon, altitude);
+        printf ("This reading was taken at ");
+        ts = *localtime(&timestamp);
+        strftime(buf, sizeof(buf), "%a %Y-%m-%d %H:%M:%S %Z", &ts);
+        printf("%s\n", buf);
     }
     
     gchar* country = NULL;
@@ -75,7 +106,7 @@ int main (int argc, char** argv)
     gchar* desc = NULL;
   
     g_debug ("Querying civic location");
-    if (geoclue_position_civic_location (&country, NULL, &locality, NULL, &postalcode, &street, NULL, NULL,NULL, &desc, NULL) != GEOCLUE_POSITION_SUCCESS) {
+    if (geoclue_position_civic_location (NULL, &country, NULL, &locality, NULL, &postalcode, &street, NULL, NULL,NULL, &desc, NULL) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("civic location query failed");
     } else {
         g_debug ("civic location query ok");
@@ -86,7 +117,7 @@ int main (int argc, char** argv)
         if (desc) printf ("Description: %s\n", desc);
     }
 
-    if (geoclue_position_close () != GEOCLUE_POSITION_SUCCESS){
+    if (geoclue_position_close (NULL) != GEOCLUE_POSITION_SUCCESS){
         g_debug ("position_close failed");
     } else {
         g_debug ("position_close ok");

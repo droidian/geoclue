@@ -1,5 +1,5 @@
 /* GEOCLUE_MAP - A DBus api and wrapper for getting geography pictures
- * Copyright (C) 2006 Garmin
+ * Copyright (C) 2006-2007 by Garmin Ltd. or its subsidiaries
  * 
  * 
  * This library is free software; you can redistribute it and/or
@@ -31,11 +31,11 @@
 #include <geoclue_master_client_glue.h>
 
 
-#define GEOCLUE_MAP_DBUS_INTERFACE   "org.foinse_project.geoclue.map"   
+#define GEOCLUE_MAP_DBUS_INTERFACE   "org.freedesktop.geoclue.map"   
  
-#define GEOCLUE_MASTER_DBUS_SERVICE     "org.foinse_project.geoclue.master"
-#define GEOCLUE_MASTER_DBUS_PATH        "/org/foinse_project/geoclue/master"
-#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.foinse_project.geoclue.master" 
+#define GEOCLUE_MASTER_DBUS_SERVICE     "org.freedesktop.geoclue.master"
+#define GEOCLUE_MASTER_DBUS_PATH        "/org/freedesktop/geoclue/master"
+#define GEOCLUE_MASTER_DBUS_INTERFACE   "org.freedesktop.geoclue.master" 
 
         
 static  DBusGConnection*        geoclue_map_connection =   NULL;
@@ -69,7 +69,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_version(int* major, int* minor, int* micro)
         return GEOCLUE_MAP_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_map_version ( geoclue_map_proxy, major, minor, micro, &error );
+    org_freedesktop_geoclue_map_version ( geoclue_map_proxy, major, minor, micro, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting version: %s\n", error->message);
@@ -87,7 +87,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_service_provider(char** name)
         return GEOCLUE_MAP_NOT_INITIALIZED;  
                                    
     GError* error = NULL;
-    org_foinse_project_geoclue_map_service_provider( geoclue_map_proxy, name, &error );
+    org_freedesktop_geoclue_map_service_provider( geoclue_map_proxy, name, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting service provider: %s\n", error->message);
@@ -147,7 +147,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_get_all_providers(char*** OUT_service, char**
                                                     GEOCLUE_MASTER_DBUS_PATH,
                                                     GEOCLUE_MASTER_DBUS_INTERFACE);   
 
-    org_foinse_project_geoclue_master_get_all_position_providers (master, OUT_service, OUT_path, OUT_desc, &error);
+    org_freedesktop_geoclue_master_get_all_position_providers (master, OUT_service, OUT_path, OUT_desc, &error);
     if( error != NULL )
     {
         g_printerr ("Error getting all position provider: %s\n", error->message);
@@ -183,7 +183,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_init()
     char* service;
     char* path;
     char* desc;
-    org_foinse_project_geoclue_master_get_default_map_provider (master, &service, &path, &desc, &error);
+    org_freedesktop_geoclue_master_get_default_map_provider (master, &service, &path, &desc, &error);
     if( error != NULL )
     {
         g_printerr ("Error getting default map provider: %s\n", error->message);
@@ -240,7 +240,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_get_map (const gdouble IN_latitude, const gdo
     //g_print("GEOCLUE_MAPping!\n");
     GError* error = NULL;
     int return_code;
-    if(!org_foinse_project_geoclue_map_get_map (geoclue_map_proxy, IN_latitude, IN_longitude, IN_width, IN_height, IN_zoom, &return_code, &error))
+    if(!org_freedesktop_geoclue_map_get_map (geoclue_map_proxy, IN_latitude, IN_longitude, IN_width, IN_height, IN_zoom, &return_code, &error))
     {
         if(error != NULL)
         {
@@ -262,7 +262,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_max_zoom(int* max_zoom)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_max_zoom(geoclue_map_proxy, max_zoom, &error))
+    if(!org_freedesktop_geoclue_map_max_zoom(geoclue_map_proxy, max_zoom, &error))
     {
         if(error != NULL)
         {
@@ -281,7 +281,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_min_zoom(int* min_zoom)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_min_zoom(geoclue_map_proxy, min_zoom, &error))
+    if(!org_freedesktop_geoclue_map_min_zoom(geoclue_map_proxy, min_zoom, &error))
     {
         if(error != NULL)
         {
@@ -301,7 +301,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_max_height(int* max_height)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_max_height(geoclue_map_proxy, max_height, &error))
+    if(!org_freedesktop_geoclue_map_max_height(geoclue_map_proxy, max_height, &error))
     {
         if(error != NULL)
         {
@@ -320,7 +320,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_min_height(int* min_height)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_min_height(geoclue_map_proxy, min_height, &error))
+    if(!org_freedesktop_geoclue_map_min_height(geoclue_map_proxy, min_height, &error))
     {
         if(error != NULL)
         {
@@ -339,7 +339,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_max_width(int* max_width)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_max_width(geoclue_map_proxy, max_width, &error))
+    if(!org_freedesktop_geoclue_map_max_width(geoclue_map_proxy, max_width, &error))
     {
         if(error != NULL)
         {
@@ -358,7 +358,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_min_width(int* min_width)
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_min_width(geoclue_map_proxy, min_width, &error))
+    if(!org_freedesktop_geoclue_map_min_width(geoclue_map_proxy, min_width, &error))
     {
         if(error != NULL)
         {
@@ -379,7 +379,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_latlong_to_offset(const gdouble IN_latitude, 
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_latlong_to_offset(geoclue_map_proxy, IN_latitude, IN_longitude, IN_zoom, IN_center_latitude,   IN_center_longitude, OUT_x_offset, OUT_y_offset, &error))
+    if(!org_freedesktop_geoclue_map_latlong_to_offset(geoclue_map_proxy, IN_latitude, IN_longitude, IN_zoom, IN_center_latitude,   IN_center_longitude, OUT_x_offset, OUT_y_offset, &error))
     {
         if(error != NULL)
         {
@@ -400,7 +400,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_offset_to_latlong(const int IN_x_offset,const
     GError* error = NULL;
     printf("offset to long\n");
     
-    if(!org_foinse_project_geoclue_map_offset_to_latlong(geoclue_map_proxy, IN_x_offset, IN_y_offset, IN_zoom, IN_center_latitude,   IN_center_longitude, OUT_latitude, OUT_longitude, &error))
+    if(!org_freedesktop_geoclue_map_offset_to_latlong(geoclue_map_proxy, IN_x_offset, IN_y_offset, IN_zoom, IN_center_latitude,   IN_center_longitude, OUT_latitude, OUT_longitude, &error))
     {
         if(error != NULL)
         {
@@ -422,7 +422,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_find_zoom_level (const gdouble IN_latitude_to
     if(geoclue_map_proxy == NULL)
         return GEOCLUE_MAP_NOT_INITIALIZED;     
     GError* error = NULL;
-    if(!org_foinse_project_geoclue_map_find_zoom_level (geoclue_map_proxy, IN_latitude_top_left, IN_longitude_top_left, IN_latitude_bottom_right, IN_width, IN_height, IN_longitude_bottom_right, OUT_zoom, &error))
+    if(!org_freedesktop_geoclue_map_find_zoom_level (geoclue_map_proxy, IN_latitude_top_left, IN_longitude_top_left, IN_latitude_bottom_right, IN_width, IN_height, IN_longitude_bottom_right, OUT_zoom, &error))
     {
         if(error != NULL)
         {

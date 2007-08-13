@@ -154,18 +154,14 @@ gboolean geoclue_position_current_velocity (	GeocluePosition* server,
 
 
 
-gboolean geoclue_position_satellites_in_view (	GeocluePosition* server,
-												GArray** OUT_prn_numbers, 
-												GError **error);
-
-
 gboolean geoclue_position_satellites_data (	GeocluePosition* server,
-											const gint IN_prn_number,
-											gdouble* OUT_elevation, 
-											gdouble* OUT_azimuth, 
-											gdouble* OUT_signal_noise_ratio, 
-											gboolean* OUT_differential, 
-											gboolean* OUT_ephemeris, 
+											gint* OUT_timestamp,
+											GArray** OUT_prn_number,
+											GArray** OUT_elevation, 
+											GArray** OUT_azimuth, 
+											GArray** OUT_signal_noise_ratio, 
+											GArray** OUT_differential, 
+											GArray** OUT_ephemeris,
 											GError **error);
 
 gboolean geoclue_position_civic_location (	GeocluePosition* server, 

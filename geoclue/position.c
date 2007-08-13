@@ -432,38 +432,16 @@ position_returncode geoclue_position_current_velocity (	position_provider* provi
 }
 
 
-position_returncode geoclue_position_satellites_in_view (	position_provider* provider,
-															GArray** OUT_prn_numbers )
-{
-	if(!provider)
-	{
-		if(!default_position_provider)
-		{
-	        return GEOCLUE_POSITION_NOT_INITIALIZED;			
-		}
-		else
-		{
-			provider = default_position_provider;
-		}
-	}                                 
-    GError* error = NULL;
-    org_freedesktop_geoclue_position_satellites_in_view ( provider->proxy, OUT_prn_numbers, &error );
-    if( error != NULL )
-    {
-        g_printerr ("Error getting geoclue_position satellites_in_view: %s\n", error->message);
-        g_error_free (error);  
-        return GEOCLUE_POSITION_DBUS_ERROR;        
-    }
-    return GEOCLUE_POSITION_SUCCESS;              
-}
+
 
 position_returncode geoclue_position_satellites_data (	position_provider* provider,
-														const gint IN_prn_number,
-														gdouble* OUT_elevation, 
-														gdouble* OUT_azimuth, 
-														gdouble* OUT_signal_noise_ratio, 
-														gboolean* OUT_differential, 
-														gboolean* OUT_ephemeris )
+														gint* OUT_timestamp,
+														GArray** OUT_prn_number,
+														GArray** OUT_elevation, 
+														GArray** OUT_azimuth, 
+														GArray** OUT_signal_noise_ratio, 
+														GArray** OUT_differential, 
+														GArray** OUT_ephemeris )
 {
 	if(!provider)
 	{
@@ -477,7 +455,7 @@ position_returncode geoclue_position_satellites_data (	position_provider* provid
 		}
 	}                                 
     GError* error = NULL;
-    org_freedesktop_geoclue_position_satellites_data  ( provider->proxy, IN_prn_number , OUT_elevation, OUT_azimuth , OUT_signal_noise_ratio , OUT_differential,  OUT_ephemeris, &error );
+    org_freedesktop_geoclue_position_satellites_data  ( provider->proxy, OUT_timestamp, OUT_prn_number , OUT_elevation, OUT_azimuth , OUT_signal_noise_ratio , OUT_differential,  OUT_ephemeris, &error );
     if( error != NULL )
     {
         g_printerr ("Error getting geoclue_position satellites_data : %s\n", error->message);

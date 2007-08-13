@@ -266,23 +266,24 @@ position_returncode geoclue_position_satellites_in_view (	position_provider* pro
 															GArray** OUT_prn_numbers );
 
 /*!
-* \brief This will return satellite information for the requested PRN number
+* \brief This will return satellite information for the requested PRN number.  This function return GArrays of it's outputs.   Each individual satellites data can be found by indexing through the GArray at the same index.   I.E. prn[0] elevation[0] will correspond to one satellite.
 * \param provider this will accept NULL and will use the default geoclue master position provider  
-* \param IN_prn_number PRN number of satellite
-* \param OUT_elevation satellite data
-* \param OUT_azimuth satellite data
-* \param OUT_signal_noise_ratio satellite data
-* \param OUT_differential satellite data
-* \param OUT_ephemeris satellite data
+* \param IN_prn_number PRN number of satellite (int)
+* \param OUT_elevation satellite data (double)
+* \param OUT_azimuth satellite data (double)
+* \param OUT_signal_noise_ratio satellite data (double)
+* \param OUT_differential satellite data (boolean)
+* \param OUT_ephemeris satellite data (boolean)
 * \return see position_returncode
 */      
 position_returncode geoclue_position_satellites_data (	position_provider* provider,
-														const gint IN_prn_number,
-														gdouble* OUT_elevation, 
-														gdouble* OUT_azimuth, 
-														gdouble* OUT_signal_noise_ratio, 
-														gboolean* OUT_differential, 
-														gboolean* OUT_ephemeris );
+														gint* OUT_timestamp,
+														GArray** OUT_prn_number,
+														GArray** OUT_elevation, 
+														GArray** OUT_azimuth, 
+														GArray** OUT_signal_noise_ratio, 
+														GArray** OUT_differential, 
+														GArray** OUT_ephemeris );
 /*!
 * \brief This will attempt to return string information about the current location.   Strings may be NULL!!!
 * NOTE: civic location part of the API is not stable !

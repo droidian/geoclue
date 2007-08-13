@@ -79,17 +79,15 @@
       <arg type="d" name="altitude_velocity" direction="out" /><!-- Meters per Second  (away from the earth is defined as up)-->
     </method>
     
-    <method name="satellites_in_view">    	
-      <arg type="ai" name="prn_numbers" direction="out" />     
-    </method>
 
-    <method name="satellites_data">    	
-      <arg type="i" name="prn_number" direction="in" />
-      <arg type="d" name="elevation" direction="out" /><!-- Degrees -->
-      <arg type="d" name="azimuth" direction="out" /><!-- Degrees -->
-      <arg type="d" name="signal_noise_ratio" direction="out" />
-      <arg type="b" name="differential" direction="out" />
-      <arg type="b" name="ephemeris" direction="out" />
+    <method name="satellites_data">   
+      <arg type="i" name="timestamp" direction="out" /><!-- This is the NMEA standard UTC time in the format 123456 with represents 12:34:56 hours:minutes:seconds -->	
+      <arg type="ai" name="prn_number" direction="out" />
+      <arg type="ad" name="elevation" direction="out" /><!-- Degrees -->
+      <arg type="ad" name="azimuth" direction="out" /><!-- Degrees -->
+      <arg type="ad" name="signal_noise_ratio" direction="out" />
+      <arg type="ab" name="differential" direction="out" />
+      <arg type="ab" name="ephemeris" direction="out" />
     </method>
       
     <method name="civic_location">

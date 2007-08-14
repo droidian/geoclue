@@ -36,8 +36,22 @@ AC_ARG_ENABLE(panel-applet,
 
 
 
+AC_ARG_ENABLE(system-bus,
+              [AC_HELP_STRING([--enable-system-bus],
+                              [Use the system bus instead of session bus])],
+              enable_system_bus="$enableval",
+              enable_system_bus=no)
+AM_CONDITIONAL(USE_SYSTEM_BUS, test x$enable_system_bus = xyes)
+if test x$enable_system_bus = xyes; then
+    AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SYSTEM, Use the system bus)
+else
+    AC_DEFINE(GEOCLUE_DBUS_BUS, GEOCLUE_DBUS_BUS, Use the session bus)
+fi
 
-PKG_CHECK_MODULES(DEPS,  gconf-2.0 dbus-glib-1 gtk+-2.0)
+DBUS_SYSTEM_POLICY_DIR=`pkg-config dbus-1 --variable=sysconfdir`/dbus-1/system.d
+AC_SUBST(DBUS_SYSTEM_POLICY_DIR)
+
+PKG_CHECK_MODULES(DEPS,  gconf-2.0 dbus-glib-1 gtk+-2.0 gthread-2.0)
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
 

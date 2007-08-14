@@ -100,7 +100,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_service_provider(char** name)
 GEOCLUE_FIND_RETURNCODE geoclue_find_init_specific(char* service, char* path)
 {
     GError* error = NULL;
-    geoclue_find_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    geoclue_find_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     if (geoclue_find_connection == NULL)
     {
         g_printerr ("Failed to open connection to bus: %s\n", error->message);
@@ -137,7 +137,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_init_specific(char* service, char* path)
 GEOCLUE_FIND_RETURNCODE geoclue_find_init()
 {
     GError* error = NULL;
-    geoclue_find_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    geoclue_find_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     if (geoclue_find_connection == NULL)
     {
         g_printerr ("Failed to open connection to bus: %s\n", error->message);
@@ -216,7 +216,7 @@ GEOCLUE_FIND_RETURNCODE geoclue_find_get_all_providers(char*** OUT_service, char
     GError* error = NULL;
     if (geoclue_find_connection == NULL)
     {
-        geoclue_find_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+        geoclue_find_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     }
     
     DBusGProxy* master = dbus_g_proxy_new_for_name (geoclue_find_connection,

@@ -71,7 +71,7 @@ position_returncode geoclue_position_init(	position_provider* provider )
 	if(!provider->connection)
 	{
 	    GError* error = NULL;
-	    provider->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+	    provider->connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
 	    if (!provider->connection)
 	    {
 	        g_printerr ("Failed to open connection to bus: %s\n", error->message);

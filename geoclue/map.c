@@ -100,7 +100,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_service_provider(char** name)
 GEOCLUE_MAP_RETURNCODE geoclue_map_init_specific(char* service, char* path)
 {
     GError* error = NULL;
-    geoclue_map_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    geoclue_map_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     if (geoclue_map_connection == NULL)
     {
         g_printerr ("GEOCLUE_MAP failed to open connection to bus: %s\n", error->message);
@@ -137,7 +137,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_get_all_providers(char*** OUT_service, char**
         
     if (geoclue_map_connection == NULL)
     {
-        geoclue_map_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+        geoclue_map_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     }
     
 
@@ -163,7 +163,7 @@ GEOCLUE_MAP_RETURNCODE geoclue_map_get_all_providers(char*** OUT_service, char**
 GEOCLUE_MAP_RETURNCODE geoclue_map_init()
 {
     GError* error = NULL;
-    geoclue_map_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    geoclue_map_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     if (geoclue_map_connection == NULL)
     {
         g_printerr ("GEOCLUE_MAP failed to open connection to bus: %s\n", error->message);

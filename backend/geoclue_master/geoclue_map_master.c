@@ -94,7 +94,7 @@ geoclue_map_class_init (GeoclueMapClass *klass)
 {
 	GError *error = NULL;
 
-    klass->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    klass->connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
 
 
 	signals[GET_MAP_FINISHED] =

@@ -110,7 +110,7 @@ geoclue_geocode_class_init (GeoclueGeocodeClass *klass)
 {
 	GError *error = NULL;
 
-    klass->connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    klass->connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     
     
 	if (klass->connection == NULL)

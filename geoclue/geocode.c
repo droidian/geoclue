@@ -82,7 +82,7 @@ GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_service_provider(char** name)
 GEOCLUE_GEOCODE_RETURNCODE geoclue_geocode_init()
 {
     GError* error = NULL;
-    geoclue_geocode_connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+    geoclue_geocode_connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
     if (geoclue_geocode_connection == NULL)
     {
         g_printerr ("Failed to open connection to bus: %s\n", error->message);

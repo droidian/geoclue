@@ -26,6 +26,8 @@
 #include <glib.h>
 #include <stdio.h>
 #include <string.h>
+#include <config.h>
+
 #define GEOCLUE_MAP_DBUS_SERVICE     "org.freedesktop.geoclue.map.yahoo"
 #define GEOCLUE_MAP_DBUS_PATH        "/org/freedesktop/geoclue/map/yahoo"
 #define GEOCLUE_MAP_DBUS_INTERFACE   "org.freedesktop.geoclue.map"

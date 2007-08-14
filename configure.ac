@@ -33,6 +33,12 @@ AC_ARG_ENABLE(panel-applet,
                               [Compile the panel applet])],
               [enable_panel_applet=yes],
               [enable_panel_applet=no])
+AC_ARG_ENABLE(gpsd,
+              [AC_HELP_STRING([--enable-gpsd],
+                              [Compile the gpsd backend])],
+              [enable_gpsd=yes],
+              [enable_gpsd=no])
+
 
 
 
@@ -41,11 +47,13 @@ AC_ARG_ENABLE(system-bus,
                               [Use the system bus instead of session bus])],
               enable_system_bus="$enableval",
               enable_system_bus=no)
+              
 AM_CONDITIONAL(USE_SYSTEM_BUS, test x$enable_system_bus = xyes)
+
 if test x$enable_system_bus = xyes; then
     AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SYSTEM, Use the system bus)
 else
-    AC_DEFINE(GEOCLUE_DBUS_BUS, GEOCLUE_DBUS_BUS, Use the session bus)
+    AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SESSION, Use the session bus)
 fi
 
 DBUS_SYSTEM_POLICY_DIR=`pkg-config dbus-1 --variable=sysconfdir`/dbus-1/system.d
@@ -67,6 +75,9 @@ then
 
 
 
+if test "x$enable_gpsd" = "xyes"
+then
+
 dnl Check for GPSD headers
 
 AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
@@ -81,6 +92,16 @@ fi
 dnl check for libgpsbt and libgpsmgr
 AC_CHECK_LIB(gpsmgr, gpsmgr_is_gpsd_running)
 AC_CHECK_LIB(gpsbt, gpsbt_start)
+
+BACKEND_SUBDIRS="position_gpsd"
+
+AC_OUTPUT(  
+    backend/position_gpsd/Makefile
+)
+
+
+fi #gpds
+
 
 dnl check for libconic
 PKG_CHECK_MODULES(CONIC, conic, [have_libconic=yes], [have_libconic=no])
@@ -118,7 +139,7 @@ AC_SUBST(YAHOO_LIBS)
 
 
 dnl substitute subdirs into makefiles
-EXTRA_SUBDIRS="${EXTRA_SUBDIRS} backend"
+BACKEND_SUBDIRS="${BACKEND_SUBDIRS} map_yahoo geocode_yahoo position_manual position_hostip position_plazes"
 
 
 
@@ -129,14 +150,15 @@ AC_OUTPUT(
 	backend/position_manual/Makefile
 	backend/position_hostip/Makefile
 	backend/position_plazes/Makefile
-	backend/position_gpsd/Makefile
 )
+EXTRA_SUBDIRS="${EXTRA_SUBDIRS} backend"
+
 
 fi
 
 dnl substitute subdirs into makefiles
 AC_SUBST(EXTRA_SUBDIRS)
-
+AC_SUBST(BACKEND_SUBDIRS)
 
 AC_OUTPUT(Makefile 
 	geoclue/Makefile 

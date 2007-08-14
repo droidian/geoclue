@@ -24,6 +24,7 @@
 #include <geoclue/geocode.h>
 #include <geoclue/map.h>
 #include <geoclue/find.h>
+#include <config.h>
 
 /** \mainpage
  *
@@ -49,6 +50,11 @@
 **/
 
 
+DBusBusType
+geoclue_get_dbus_bus_type ()
+{
+	return GEOCLUE_DBUS_BUS;
+}
 
 
 

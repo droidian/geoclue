@@ -20,7 +20,7 @@
 #define __ORG_FREEDESKTOP_GEOCLUE_FIND_GEOCLUE_FIND_H__
 
 #include <dbus/dbus-glib.h>
-
+#include <config.h>
 
 G_BEGIN_DECLS
 

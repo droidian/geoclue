@@ -29,7 +29,7 @@
 #include <map_signal_marshal.h>
 
 #include <geoclue_master_client_glue.h>
-
+#include <config.h>
 
 #define GEOCLUE_MAP_DBUS_INTERFACE   "org.freedesktop.geoclue.map"   
  

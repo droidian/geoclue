@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <position_signal_marshal.h>
 #include <string.h>
+#include <config.h>
 
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.freedesktop.geoclue.position"   
 #define GEOCLUE_MASTER_DBUS_SERVICE     "org.freedesktop.geoclue.master"

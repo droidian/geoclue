@@ -27,6 +27,7 @@
 #include <geocode_client_glue.h>
 #include <stdio.h>
 #include <geoclue_master_client_glue.h>
+#include <config.h>
 
 #define GEOCLUE_GEOCODE_DBUS_SERVICE     "org.freedesktop.geoclue.geocode.yahoo"
 #define GEOCLUE_GEOCODE_DBUS_PATH        "/org/freedesktop/geoclue/geocode/yahoo"

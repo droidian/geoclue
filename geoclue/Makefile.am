@@ -48,7 +48,8 @@ libgeoclue_la_SOURCES = 	position.c \
 				map_gtk.c \
 				map_gtk_layout.c \
 				map_signal_marshal.c \
-				geocode.c 
+				geocode.c \
+				geoclue.c
  
 libgeoclue_la_CFLAGS = $(DEPS_CFLAGS) -I$(top_srcdir)
 libgeoclue_la_LIBADD = $(DEPS_LIBS)

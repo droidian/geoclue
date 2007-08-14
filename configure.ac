@@ -2,7 +2,7 @@ AC_INIT(geoclue/position.c)
 
 PACKAGE=geoclue
 
-VERSION=0.7
+VERSION=0.8
 
 AM_INIT_AUTOMAKE($PACKAGE, $VERSION)
 

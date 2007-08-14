@@ -25,6 +25,8 @@
 
 #include <dbus/dbus-glib.h>
 #include <glib.h>
+#include <config.h>
+
 #define GEOCLUE_POSITION_DBUS_SERVICE     "org.freedesktop.geoclue.position.manual"
 #define GEOCLUE_POSITION_DBUS_PATH        "/org/freedesktop/geoclue/position/manual"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.freedesktop.geoclue.position"

@@ -20,7 +20,7 @@
 #define __ORG_FREEDESKTOP_GEOCLUE_POSITION_GEOCLUE_POSITION_H__
 
 #include <dbus/dbus-glib.h>
-#include <config.h>
+
 
 /** \page Position
  *

@@ -50,13 +50,15 @@
 **/
 
 
+
+#include <glib/gmacros.h>
+#include <dbus/dbus-shared.h>
+
+G_BEGIN_DECLS
+
 DBusBusType
-geoclue_get_dbus_bus_type ()
-{
-	return GEOCLUE_DBUS_BUS;
-}
+geoclue_get_dbus_bus_type ();
 
+G_END_DECLS
 
-
-
-#endif
+#endif /* __ORG_FREEDESKTOP_GEOCLUE_GEOCLUE_H__ */

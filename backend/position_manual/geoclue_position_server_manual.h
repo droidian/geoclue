@@ -25,7 +25,6 @@
 #include <config.h>
 #endif
 
-
 #include <dbus/dbus-glib.h>
 #include <glib.h>
 #include <gconf/gconf-client.h>

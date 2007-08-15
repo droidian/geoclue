@@ -20,7 +20,6 @@
 #define __ORG_FREEDESKTOP_GEOCLUE_GEOCODE_GEOCLUE_GEOCODE_H__
 
 #include <dbus/dbus-glib.h>
-#include <config.h>
 
 G_BEGIN_DECLS
 

@@ -44,6 +44,7 @@
 #define GCONF_POS_MANUAL_TEXT GCONF_POS_MANUAL"/text"
 #define GCONF_POS_MANUAL_LAT GCONF_POS_MANUAL"/latitude"
 #define GCONF_POS_MANUAL_LON GCONF_POS_MANUAL"/longitude"
+#define GCONF_POS_MANUAL_ALT GCONF_POS_MANUAL"/altitude"
 #define GCONF_POS_MANUAL_TIMESTAMP GCONF_POS_MANUAL"/timestamp"
 #define GCONF_POS_MANUAL_VALID_UNTIL GCONF_POS_MANUAL"/valid-until"
         
@@ -60,7 +61,7 @@ static guint signals[LAST_SIGNAL];
 
 /* Default handlers */
 static void geoclue_position_current_position_changed (GeocluePosition* server, 
-                                                       gdouble timestamp, 
+                                                       gint timestamp, 
                                                        gdouble lat, 
                                                        gdouble lon,
                                                        gdouble altitude)
@@ -128,7 +129,7 @@ static gboolean read_gconf_float (GeocluePosition *obj, const gchar *gconf_key, 
     if (!gconfval) {
         return FALSE;
     }
-    g_free (gconfval);
+    gconf_value_free (gconfval);
 
     GError *err = NULL;
     *value = gconf_client_get_float (obj->gconf, gconf_key, &err);
@@ -152,13 +153,15 @@ static void gconf_manual_position_changed (GConfClient* client,
                                            GConfEntry* entry,
                                            gpointer data)
 {
-    gdouble latitude, longitude;
+
+    gdouble latitude, longitude, altitude;
     gint valid_until;
     gchar *country, *region, *locality, *area, *postalcode, *street,
           *building, *floor, *room, *description, *text;
     gint ret_code;
     gboolean civic_available = FALSE;
     gboolean coords_available = TRUE;
+    gboolean alt_available = TRUE;
     
     GeocluePosition *obj = (GeocluePosition*)data;
     g_return_if_fail (obj);
@@ -177,6 +180,8 @@ static void gconf_manual_position_changed (GConfClient* client,
 
     coords_available = read_gconf_float (obj, GCONF_POS_MANUAL_LAT, &latitude) && coords_available;
     coords_available = read_gconf_float (obj, GCONF_POS_MANUAL_LON, &longitude) && coords_available;
+
+    alt_available = read_gconf_float (obj, GCONF_POS_MANUAL_ALT, &altitude);
 
     valid_until = gconf_client_get_int (obj->gconf, GCONF_POS_MANUAL_VALID_UNTIL, NULL);
 
@@ -253,11 +258,16 @@ static void gconf_manual_position_changed (GConfClient* client,
                                obj->building, obj->floor, obj->room, obj->description, obj->text);
     }
 
-    if (obj->latitude != latitude  || obj->longitude != longitude) {        
+    if (obj->latitude != latitude  || obj->longitude != longitude || obj->altitude != altitude) {
 
         obj->latitude = latitude;
         obj->longitude = longitude;
-        g_signal_emit_by_name (obj, "current_position_changed", obj->latitude, obj->longitude);
+        obj->altitude = altitude;
+        g_signal_emit_by_name (obj, "current_position_changed", 
+                               obj->timestamp,
+                               obj->latitude, 
+                               obj->longitude,
+                               obj->altitude);
     }
 }
 
@@ -409,7 +419,7 @@ gboolean geoclue_position_current_position (GeocluePosition *server,
     if (server->current_position_set && is_time_in_future (server->valid_until)) {
         *OUT_latitude = server->latitude;
         *OUT_longitude = server->longitude;
-/*        *OUT_altitude = server->altitude; */
+        *OUT_altitude = server->altitude;
         *OUT_timestamp = server->timestamp;
         g_debug ("valid position");
         return TRUE;

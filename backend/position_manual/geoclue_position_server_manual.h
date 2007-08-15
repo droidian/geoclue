@@ -46,7 +46,7 @@ struct GeocluePosition
     GMainLoop* loop;
     GConfClient* gconf;
     
-    gdouble latitude, longitude;
+    gdouble latitude, longitude, altitude;
     gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
     
     gboolean civic_location_set, current_position_set;

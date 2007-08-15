@@ -12,26 +12,30 @@
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the
- * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this library; if not, see
+ * <http://www.gnu.org/licenses/>.
  */
 
-#ifndef __GEOCLUE_POSITION_SERVER_H__
-#define __GEOCLUE_POSITION_SERVER_H__
+#ifndef __GEOCLUE_POSITION_MANUAL_SERVER_H__
+#define __GEOCLUE_POSITION_MANUAL_SERVER_H__
 
 #define DBUS_API_SUBJECT_TO_CHANGE
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 
 #include <dbus/dbus-glib.h>
 #include <glib.h>
+#include <gconf/gconf-client.h>
+
 #define GEOCLUE_POSITION_DBUS_SERVICE     "org.freedesktop.geoclue.position.manual"
 #define GEOCLUE_POSITION_DBUS_PATH        "/org/freedesktop/geoclue/position/manual"
 #define GEOCLUE_POSITION_DBUS_INTERFACE   "org.freedesktop.geoclue.position"
 
 G_BEGIN_DECLS
 
-//Let's create a geoclue_position object that has one method of geoclue_position
 typedef struct GeocluePosition GeocluePosition;
 typedef struct GeocluePositionClass GeocluePositionClass;
 
@@ -39,7 +43,18 @@ GType geoclue_position_get_type (void);
 struct GeocluePosition
 {
     GObject parent;
-
+    
+    GMainLoop* loop;
+    GConfClient* gconf;
+    
+    gdouble latitude, longitude;
+    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
+    
+    gboolean civic_location_set, current_position_set;
+    
+    /*secs after epoch*/
+    gint valid_until;
+    gint timestamp;
 };
 
 struct GeocluePositionClass
@@ -121,16 +136,17 @@ gboolean geoclue_position_current_velocity (	GeocluePosition* server,
 												gdouble* OUT_altitude_velocity, 
 												GError **error);
 
-
+gboolean geoclue_position_satellites_in_view (	GeocluePosition* server,
+												GArray** OUT_prn_numbers, 
+												GError **error);
 
 gboolean geoclue_position_satellites_data (	GeocluePosition* server,
-											gint* OUT_timestamp,
-											GArray** OUT_prn_number,
-											GArray** OUT_elevation, 
-											GArray** OUT_azimuth, 
-											GArray** OUT_signal_noise_ratio, 
-											GArray** OUT_differential, 
-											GArray** OUT_ephemeris,
+											const gint IN_prn_number,
+											gdouble* OUT_elevation, 
+											gdouble* OUT_azimuth, 
+											gdouble* OUT_signal_noise_ratio, 
+											gboolean* OUT_differential, 
+											gboolean* OUT_ephemeris, 
 											GError **error);
 
 gboolean geoclue_position_civic_location (	GeocluePosition* server, 

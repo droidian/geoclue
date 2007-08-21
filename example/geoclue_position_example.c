@@ -65,7 +65,6 @@ int main (int argc, char** argv)
     g_debug ("Querying geoclue_position_service_status");
     if (geoclue_position_service_status (NULL, &status, &reason) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("current status query failed");
-        return 1;
     } else {
         g_debug ("current status query ok");
         printf ("The backend status is %d\n %d No service available\n %d acquiring altitude \n %d acquiring longitude \n %d acquiring latitude \n %d has alititude available \n %d  has longitude available  \n %d  has latitude available  \n for the reason %s\n", 
@@ -88,7 +87,6 @@ int main (int argc, char** argv)
     g_debug ("Querying current position");
     if (geoclue_position_current_position (NULL, &timestamp, &lat, &lon, &altitude) != GEOCLUE_POSITION_SUCCESS) {
         g_debug ("current position query failed");
-        return 1;
     } else {
         g_debug ("current position query ok");
         

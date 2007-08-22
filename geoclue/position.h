@@ -88,13 +88,15 @@ typedef struct position_provider
 
 
 
-typedef void (*position_callback)(	gint timestamp,
+typedef void (*position_callback)(	void* ignore,
+									gint timestamp,
 									gdouble lat,
 									gdouble lon,
 									gdouble altitude,
 									void* userdata	);
 
-typedef void (*civic_callback)(	   char* country, 
+typedef void (*civic_callback)(	   void* ignore,
+								   char* country, 
                                    char* region,
                                    char* locality,
                                    char* area,
@@ -107,7 +109,8 @@ typedef void (*civic_callback)(	   char* country,
                                    char* text,
                                    void* userdata	);
 
-typedef void (*status_callback)(	gint status,
+typedef void (*status_callback)(	void* ignore,
+									gint status,
 									char* user_message,
 									void* userdata	);
 

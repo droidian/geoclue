@@ -478,11 +478,10 @@ static void set_civic_location (GeocluePosition *obj,
         obj->civic_room = g_strdup (room);
         obj->civic_description = g_strdup (description);
         obj->civic_text = g_strdup (text);
-
-        geoclue_position_civic_location_changed (obj,
-                                                 country, region, locality, area,
-                                                 postalcode, street, building,
-                                                 floor, room, description, text);
+        
+        g_signal_emit_by_name (obj, "civic_location_changed",
+                               country, region, locality, area, postalcode, street,
+                               building, floor, room, description, text);
     }
 
     /* if net connection is monitored, the validity of location can be guaranteed */

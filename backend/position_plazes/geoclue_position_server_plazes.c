@@ -539,11 +539,10 @@ static void set_civic_location (GeocluePosition *server,
         server->civic_room = g_strdup (room);
         server->civic_description = g_strdup (description);
         server->civic_text = g_strdup (text);
-
-        geoclue_position_civic_location_changed (server,
-                                                 country, region, locality, area,
-                                                 postalcode, street, building,
-                                                 floor, room, description, text);
+        
+        g_signal_emit_by_name (server, "civic_location_changed",
+                               country, region, locality, area, postalcode, street,
+                               building, floor, room, description, text);
     }
 
     /* if net connection is monitored, the validity of location can be guaranteed */

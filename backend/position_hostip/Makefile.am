@@ -1,8 +1,7 @@
 bin_PROGRAMS = geoclue-position-server-hostip
 
 geoclue_position_server_hostip_SOURCES = geoclue_position_server_hostip.c \
-				geoclue_position_signal_marshal.c \
-				../geoclue_position_error.c
+                                         geoclue_position_signal_marshal.c
 
 service_in_files = org.freedesktop.geoclue.position.hostip.service.in
 service_files = $(service_in_files:.service.in=.service)
@@ -19,7 +18,10 @@ $(service_DATA): $(service_in_files) Makefile
 
 
 AM_CPPFLAGS = $(YAHOO_CFLAGS) $(CONIC_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) ../../geoclue/libgeoclue.la ../common/geoclue_web_service.o
+AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) \
+             ../../geoclue/libgeoclue.la \
+             ../common/geoclue_web_service.o \
+             ../common/geoclue_position_error.o
 
 EXTRA_DIST = \
 		geoclue_position_server_hostip.h \

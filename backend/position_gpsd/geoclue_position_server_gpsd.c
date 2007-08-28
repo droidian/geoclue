@@ -40,7 +40,7 @@
 #include <gpsbt.h>
 #endif
 
-#include "../geoclue_position_error.h"
+#include "../common/geoclue_position_error.h"
 
 #define GPSBT_MAX_ERROR_BUF_LEN 255
 

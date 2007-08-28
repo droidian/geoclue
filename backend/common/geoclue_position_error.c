@@ -1,4 +1,5 @@
 #include <glib.h>
+#include "geoclue_position_error.h"
 
 /* Error domain for position backend errors */
 GQuark geoclue_position_error_quark () {

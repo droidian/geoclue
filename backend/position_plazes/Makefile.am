@@ -4,14 +4,16 @@ service_in_files = org.freedesktop.geoclue.position.plazes.service.in
 service_files = $(service_in_files:.service.in=.service)
 
 geoclue_position_server_plazes_SOURCES = geoclue_position_server_plazes.c \
-                                         geoclue_position_signal_marshal.c \
-                                         ../geoclue_position_error.c
+                                         geoclue_position_signal_marshal.c
 
 
 # TODO: Yahoo libs/cflags is wrong, fix these...
 
 AM_CPPFLAGS = $(YAHOO_CFLAGS) $(CONIC_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) ../../geoclue/libgeoclue.la ../common/geoclue_web_service.o
+AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) \
+             ../../geoclue/libgeoclue.la \
+             ../common/geoclue_web_service.o \
+             ../common/geoclue_position_error.o
 
 EXTRA_DIST = geoclue_position_server_plazes.h \
              position_plazes.desc \

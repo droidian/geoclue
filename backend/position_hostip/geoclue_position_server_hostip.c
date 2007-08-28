@@ -19,7 +19,7 @@
  */
 
 #include "geoclue_position_server_hostip.h"
-#include "../geoclue_position_error.h"
+#include "../common/geoclue_position_error.h"
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
 

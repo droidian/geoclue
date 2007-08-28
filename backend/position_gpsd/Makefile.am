@@ -1,8 +1,7 @@
 bin_PROGRAMS = geoclue-position-server-gpsd
 
 geoclue_position_server_gpsd_SOURCES = geoclue_position_server_gpsd.c \
-				geoclue_position_signal_marshal.c \
-				../geoclue_position_error.c
+                                       geoclue_position_signal_marshal.c
 
 
 service_in_files = org.freedesktop.geoclue.position.gpsd.service.in
@@ -20,7 +19,9 @@ $(service_DATA): $(service_in_files) Makefile
 
 
 AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la -lgps
+AM_LDFLAGS = $(YAHOO_LIBS) -lgps \
+             ../../geoclue/libgeoclue.la \
+             ../common/geclue_position_error.o
 
 EXTRA_DIST = \
 		geoclue_position_server_gpsd.h \

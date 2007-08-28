@@ -16,7 +16,7 @@
  * <http://www.gnu.org/licenses/>.
  */
 
-/* A GeoclueWebService is meant to be used in webservice based geoclue
+/* GeoclueWebService is meant to be used in webservice-based geoclue
  * provider implementations. It has two tasks:
  *   a) simplify interaction with webservices
  *   a) notify about connectivity changes
@@ -32,7 +32,7 @@
  * 	                    "base_url", "http://plazes.com/suggestions.xml",
  * 	                    NULL);
  * 
- *** CONNECTION-EVENT
+ *** CONNECTION EVENT
  * 
  * There's a "connection-event" signal for getting notified about 
  * connection events: 
@@ -70,6 +70,10 @@
  * but if the data is xml it's easier to use 
  * "geoclue_web_service_get_*" -methods to get specific data using 
  * simple xpath expressions.
+ * 
+ * If the xml data uses namespaces, they should be added with 
+ * geoclue_web_service_add_namespace before calling 
+ * geoclue_web_service_query.
  */
 
 #ifndef GEOCLUE_WEB_SERVICE_H
@@ -91,6 +95,12 @@
 
 G_BEGIN_DECLS
 
+typedef struct _XmlNamespace XmlNamespace;
+struct _XmlNamespace {
+	gchar *name;
+	gchar *uri;
+};
+
 #define GEOCLUE_TYPE_WEB_SERVICE            (geoclue_web_service_get_type ())
 #define GEOCLUE_WEB_SERVICE(obj)            (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_WEB_SERVICE, GeoclueWebService))
 #define GEOCLUE_WEB_SERVICE_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass), GEOCLUE_TYPE_WEB_SERVICE, GeoclueWebServiceClass))
@@ -107,6 +117,7 @@ struct _GeoclueWebService {
 	/* private */
 	gchar* base_url;
 	gchar *response;
+	GList *namespaces;
 	gboolean using_connection_events;
 	xmlXPathContext *xpath_ctx;
 	
@@ -130,6 +141,8 @@ GType geoclue_web_service_get_type (void);
 
 /* Public methods */
 gboolean geoclue_web_service_query (GeoclueWebService *self, ...);
+gboolean geoclue_web_service_add_namespace (GeoclueWebService *self, gchar *namespace, gchar *uri);
+
 gboolean geoclue_web_service_get_string (GeoclueWebService *self, gchar **OUT_value, gchar *xpath);
 gboolean geoclue_web_service_get_double (GeoclueWebService *self, gdouble *OUT_value, gchar *xpath);
 

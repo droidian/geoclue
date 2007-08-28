@@ -20,19 +20,14 @@
 #ifndef __GEOCLUE_POSITION_SERVER_H__
 #define __GEOCLUE_POSITION_SERVER_H__
 
-#define DBUS_API_SUBJECT_TO_CHANGE
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
 #include <glib.h>
 
-#ifdef HAVE_LIBCONIC
-#include <conicconnection.h>
-#endif
+#include "../common/geoclue_web_service.h"
 
 #define GEOCLUE_POSITION_DBUS_SERVICE     "org.freedesktop.geoclue.position.hostip"
 #define GEOCLUE_POSITION_DBUS_PATH        "/org/freedesktop/geoclue/position/hostip"
@@ -40,7 +35,6 @@
 
 G_BEGIN_DECLS
 
-//Let's create a geoclue_position object that has one method of geoclue_position
 typedef struct GeocluePosition GeocluePosition;
 typedef struct GeocluePositionClass GeocluePositionClass;
 
@@ -49,6 +43,8 @@ struct GeocluePosition
 {
     GObject parent;
     GMainLoop* loop;
+    
+    GeoclueWebService *web_service;
     
     gdouble current_lat;
     gdouble current_lon;
@@ -66,11 +62,6 @@ struct GeocluePosition
     gchar* civic_description;
     gchar* civic_text;
     gboolean is_civic_valid;
-    
-#ifdef HAVE_LIBCONIC
-    ConIcConnection* net_connection; 
-    DBusConnection* dbus_connection; 
-#endif
 };
 
 struct GeocluePositionClass
@@ -182,11 +173,7 @@ gboolean geoclue_position_shutdown(	GeocluePosition *obj,
 									GError** error);
 
 
-
 G_END_DECLS
-
-
-
 
 #endif
 

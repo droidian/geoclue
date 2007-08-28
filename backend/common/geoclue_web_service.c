@@ -167,11 +167,42 @@ geoclue_web_service_init (GTypeInstance *instance,
 	
 	self->response = NULL;
 	self->xpath_ctx = NULL;
+	self->namespaces = NULL;
 	self->base_url = NULL;
 	self->using_connection_events = FALSE;
 	
 	geoclue_web_service_connection_events_init (self);
 }
+
+/* A GFunc, use with g_list_foreach */
+static void
+geoclue_web_service_free_ns (gpointer data, gpointer user_data)
+{
+	XmlNamespace *ns = (XmlNamespace *)data;
+	g_free (ns->name);
+	g_free (ns->uri);
+	g_free (ns);
+}
+
+/* A GFunc, use with g_list_foreach */
+static void
+geoclue_web_service_register_ns (gpointer data, gpointer user_data)
+{
+	g_assert (GEOCLUE_IS_WEB_SERVICE (user_data));
+	GeoclueWebService *self = (GeoclueWebService *)user_data;
+	XmlNamespace *ns = (XmlNamespace *)data;
+	xmlXPathRegisterNs (self->xpath_ctx, 
+	                    (xmlChar*)ns->name, (xmlChar*)ns->uri);
+}
+
+static void
+geoclue_web_service_register_namespaces (GeoclueWebService *self)
+{
+	g_assert (GEOCLUE_IS_WEB_SERVICE (self));
+	g_assert (self->xpath_ctx);
+	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_register_ns, self);
+}
+
 
 static void
 geoclue_web_service_finalize (GObject *obj)
@@ -183,6 +214,10 @@ geoclue_web_service_finalize (GObject *obj)
 	geoclue_web_service_connection_events_deinit (self);
 	g_free (self->base_url);
 	g_free (self->response);
+	
+	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
+	g_list_free (self->namespaces);
+	
 	xmlXPathFreeContext (self->xpath_ctx);
 	
 	/*chain up*/
@@ -210,6 +245,8 @@ geoclue_web_service_set_property (GObject *object,
 		case GEOCLUE_WEB_SERVICE_URL:
 			g_free (self->base_url);
 			g_free (self->response);
+			g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
+			g_list_free (self->namespaces);
 			xmlXPathFreeContext (self->xpath_ctx);
 			self->base_url = g_value_dup_string (value);
 			g_debug ("set base_url: %s\n",self->base_url);
@@ -381,9 +418,26 @@ geoclue_web_service_query (GeoclueWebService *self, ...)
 	}
 	g_assert (self->response);
 	g_free (url);
-	return (geoclue_seb_service_build_xpath_context (self));
+	if (!geoclue_seb_service_build_xpath_context (self)) {
+		return FALSE;
+	}
+	g_assert (self->xpath_ctx);
+	geoclue_web_service_register_namespaces (self);
+	return TRUE;
 }
 
+
+gboolean
+geoclue_web_service_add_namespace (GeoclueWebService *self, gchar *namespace, gchar *uri)
+{
+	g_return_val_if_fail (GEOCLUE_IS_WEB_SERVICE (self), FALSE);
+	g_return_val_if_fail (self->base_url, FALSE);
+	
+	XmlNamespace *ns = g_new0(XmlNamespace,1);
+	ns->name = g_strdup (namespace);
+	ns->uri = g_strdup (uri);
+	self->namespaces = g_list_prepend (self->namespaces, ns);
+}
 gboolean
 geoclue_web_service_get_double (GeoclueWebService *self, gdouble *OUT_value, gchar *xpath)
 {

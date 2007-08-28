@@ -26,18 +26,10 @@
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
 
-#ifdef HAVE_LIBCONIC
-#include <conicconnectionevent.h>
-#endif
-
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <libsoup/soup.h>
 #include <stdlib.h>
 #include <time.h>
 
-
-#define WEBSERVICE_API "http://api.hostip.info/"
+#define HOSTIP_URL "http://api.hostip.info/"
 
 G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
@@ -83,35 +75,6 @@ static void geoclue_position_service_status_changed(	GeocluePosition* server,
     g_print("service_status_changed\n");
 }
 
-/*
- * Private internet connectivity monitoring functions
- */
-static void init_net_connection_monitoring (GeocluePosition* obj);
-static void close_net_connection_monitoring (GeocluePosition* obj);
-
-/*
- * Private helper functions for querying the web service and parsing the answer 
- * TODO: These could be moved to another file...
- */
-static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error);
-static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error);
-static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr);
-static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr);
-
-static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
-static gboolean query_civic_location (char** OUT_country,
-                                      char** OUT_region,
-                                      char** OUT_locality,
-                                      char** OUT_area,
-                                      char** OUT_postalcode,
-                                      char** OUT_street,
-                                      char** OUT_building,
-                                      char** OUT_floor,
-                                      char** OUT_room,
-                                      char** OUT_description,
-                                      char** OUT_text,
-                                      GError **error);
-
 static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon);
 static void set_civic_location (GeocluePosition *obj,
                                 char* OUT_country,
@@ -128,223 +91,28 @@ static void set_civic_location (GeocluePosition *obj,
 
 
 
-/*
- *  Define the following for both libconic-enabled and other platforms:
- *    - OBSERVING_NET_CONNECTIONS
- *    - init_net_connection_monitoring ()
- *    - close_net_connection_monitoring ()
- */
-#ifdef HAVE_LIBCONIC
-
-#define OBSERVING_NET_CONNECTIONS TRUE
-
-/* callback for libconic connection events */
-static void net_connection_event_cb (ConIcConnection *connection, 
-                                     ConIcConnectionEvent *event,
-                                     gpointer user_data)
+static gboolean query_position (GeocluePosition *self, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
 {
-    gdouble lat, lon;
-    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
-
-    g_return_if_fail (IS_GEOCLUE_POSITION (user_data));
-    /* NOTE: this macro is broken in libconic 0.12
-    g_return_if_fail (CON_IC_IS_CONNECTION_EVENT (event));
-    */
-
-
-    GeocluePosition* obj = (GeocluePosition*)user_data;
-
-    switch (con_ic_connection_event_get_status (event)) {
-        case CON_IC_STATUS_CONNECTED:
-
-            /* TODO: there are two queries here for the same data -- not smart */
-
-            if (query_position (&lat, &lon, NULL)) {
-                set_current_position (obj, lat, lon);
-            }
-
-
-            if (query_civic_location (&country, &region, &locality, &area, 
-                                      &postalcode, &street, &building, 
-                                      &floor, &room, &description, &text, 
-                                      NULL)) {
-                set_civic_location (obj,
-                                    country, region, locality, area,
-                                    postalcode, street, building,
-                                    floor, room, description, text);
-            }
-            break;
-            
-        case CON_IC_STATUS_DISCONNECTED:
-            obj->is_current_valid = FALSE;
-            obj->is_civic_valid = FALSE;
-            break;
-        default:
-            break;
-    }
-}
-
-static void init_net_connection_monitoring (GeocluePosition* obj)
-{
-    g_return_if_fail (IS_GEOCLUE_POSITION (obj));
-
-    /* init dbus connection -- this needs to be done, 
-       connection signals do not work otherwise */
-    obj->dbus_connection = dbus_bus_get (DBUS_BUS_SYSTEM, NULL);
-    dbus_connection_setup_with_g_main(obj->dbus_connection, NULL);
-    /* TODO: dbus error handling */
-
-    /* setup the connection signal callback */
-    obj->net_connection = con_ic_connection_new ();
-    g_object_set (obj->net_connection, "automatic-connection-events", 
-                  TRUE, NULL);
-    g_signal_connect (obj->net_connection, "connection-event",
-                      G_CALLBACK(net_connection_event_cb), obj);
-
-    g_debug ("Internet connection event monitoring started");
-}
-
-static void close_net_connection_monitoring (GeocluePosition* obj)
-{
-    g_return_if_fail (IS_GEOCLUE_POSITION (obj));
-    g_object_unref (obj->net_connection);
-    dbus_connection_disconnect (obj->dbus_connection);
-    dbus_connection_unref (obj->dbus_connection);
-}
-
-#else
-
-#define OBSERVING_NET_CONNECTIONS FALSE
-/* empty functions for non-libconic platforms */
-static void init_net_connection_monitoring (GeocluePosition* obj) {}
-static void close_net_connection_monitoring (GeocluePosition* obj) {}
-
-#endif
-
-
-
-static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
-{
-    SoupSession *session;
-    SoupMessage *msg;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    gchar *proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    if (proxy_env != NULL) {  
-    	g_debug("Using Proxy %s", proxy_env);
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
-        soup_uri_free (proxy);
-        /* You are not allowed to free something from getenv g_free (proxy_env);*/
-    } else {
-        session = soup_session_sync_new ();
-    }
-    if (!session) {
-        g_debug ("no libsoup session");
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_FAILED,
-                     "libsoup session creation failed");
-        return FALSE;
-    }    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message (session, msg);
-    if (msg->response.length == 0) {
-        g_debug ("no xml from libsoup, a connection problem perhaps?");
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_NOSERVICE,
-                     "No position data was received from %s.", url);
-        return FALSE;
-    }
-    g_debug("Message : \"%s\"", msg->response.body);
-    *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
-    return TRUE;
-}
-
-
-/* builds an xpath context from xml.
-   the context can be used in xpath evals */
-xmlXPathContextPtr get_xpath_context (gchar* url, GError** error)
-{
-    xmlChar* xml = NULL;
-    xmlDocPtr doc; /*should this be freed or does context take care of it?*/
-    xmlXPathContextPtr xpathCtx;
-    
-    g_debug ("Getting xml from %s", url);
-    if (!get_webservice_xml (&xml, url, error)) {
-        return NULL;
-    }
-    
-    doc = xmlParseDoc (xml);
-    if (!doc) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
-                     "Position data from %s could not be parsed:\n\n%s", WEBSERVICE_API, xml);
-        g_free (xml);
-        return NULL;
-    }
-    
-    xpathCtx = xmlXPathNewContext(doc);
-    if (!xpathCtx) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_FAILED,
-                     "XPath context could not be created.");
-        g_free (xml);
-        return NULL;
-    }
-    
-    g_free(xml);
-    return xpathCtx;
-}
-
-
-static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr)
-{
-    gboolean retval= FALSE;
-    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression ((xmlChar*)expr, xpathCtx);
-    if (xpathObj) {
-        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
-            *OUT_string = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
-            retval = TRUE;
-        }
-        xmlXPathFreeObject (xpathObj);
-    }
-    return retval;
-}
-
-
-static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
-{
-    xmlXPathContextPtr xpathCtx;
     gboolean valid = FALSE;
     gchar* coord_str;
     
-    if (!(xpathCtx = get_xpath_context (WEBSERVICE_API, error))) {
+    if (!geoclue_web_service_query (self->web_service, NULL)) {
+        /* TODO: error handling */
         return FALSE;
     }
     
     *OUT_latitude = -999.99;
     *OUT_longitude = -999.99;
     
-    /* Register namespaces and evaluate the expression*/
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
-    
-    valid = evaluate_xpath_string (&coord_str, xpathCtx, "//gml:featureMember/hostip:Hostip//gml:coordinates");
-    xmlXPathFreeContext(xpathCtx);
+    valid = geoclue_web_service_get_string (self->web_service, 
+                                            &coord_str,
+                                            "//gml:featureMember/hostip:Hostip//gml:coordinates");
     
     if (!valid || sscanf (coord_str, "%lf,%lf", OUT_longitude , OUT_latitude) != 2) {
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have position data for this IP address.", WEBSERVICE_API);
+                     "%s does not have position data for this IP address.", HOSTIP_URL);
         return FALSE;
     }
     
@@ -353,7 +121,8 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
 }
 
 
-static gboolean query_civic_location (char** OUT_country,
+static gboolean query_civic_location (GeocluePosition *self, 
+                                      char** OUT_country,
                                       char** OUT_region,
                                       char** OUT_locality,
                                       char** OUT_area,
@@ -366,7 +135,6 @@ static gboolean query_civic_location (char** OUT_country,
                                       char** OUT_text,
                                       GError **error)
 {
-    xmlXPathContextPtr xpathCtx;
     gboolean valid = FALSE;
     
     *OUT_country = NULL;
@@ -382,15 +150,14 @@ static gboolean query_civic_location (char** OUT_country,
     *OUT_text = NULL;
     
     
-    if (!(xpathCtx = get_xpath_context (WEBSERVICE_API, error))) {
+    if (!geoclue_web_service_query (self->web_service, NULL)) {
+        /* TODO: error handling */
         return FALSE;
     }
     
-    /* Register namespaces and evaluate the expressions */
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"gml", (xmlChar*)"http://www.opengis.net/gml");
-    xmlXPathRegisterNs (xpathCtx, (xmlChar*)"hostip", (xmlChar*)"http://www.hostip.info/api");
-    
-    valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//gml:featureMember/hostip:Hostip/gml:name");
+    valid = geoclue_web_service_get_string (self->web_service, 
+                                            OUT_locality,
+                                            "//gml:featureMember/hostip:Hostip/gml:name");
     /* deal with hostip's stupid missing data handling */
     if (valid && g_ascii_strcasecmp (*OUT_locality, "(Unknown city)") == 0) {
         g_free (*OUT_locality);
@@ -398,8 +165,9 @@ static gboolean query_civic_location (char** OUT_country,
         valid = FALSE;
     }
     
-    valid = evaluate_xpath_string (OUT_country, xpathCtx, "//gml:featureMember/hostip:Hostip/hostip:countryName") || valid;
-    xmlXPathFreeContext(xpathCtx);
+    valid = geoclue_web_service_get_string (self->web_service, 
+                                            OUT_country,
+                                            "//gml:featureMember/hostip:Hostip/hostip:countryName") || valid;
     
     g_debug ("location: %s, %s", *OUT_country, *OUT_locality);
     
@@ -407,10 +175,9 @@ static gboolean query_civic_location (char** OUT_country,
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have civic location data for this IP address.", WEBSERVICE_API);
+                     "%s does not have civic location data for this IP address.", HOSTIP_URL);
         return FALSE;
     }
-    
     return TRUE;
 }
 
@@ -426,7 +193,9 @@ static void set_current_position (GeocluePosition *obj, gdouble lat, gdouble lon
     }
 
     /* if net connection is monitored, the validity of position can be guaranteed */
-    obj->is_current_valid = OBSERVING_NET_CONNECTIONS;
+    g_object_get (obj->web_service, 
+                  "using-connection-events", &obj->is_current_valid, 
+                  NULL);
 }
 
 /* compare strings that are allowed to be null */
@@ -485,8 +254,41 @@ static void set_civic_location (GeocluePosition *obj,
     }
 
     /* if net connection is monitored, the validity of location can be guaranteed */
+    g_object_get (obj->web_service, 
+                  "using-connection-events", &obj->is_civic_valid, 
+                  NULL);
+}
 
-    obj->is_civic_valid = OBSERVING_NET_CONNECTIONS;
+static void
+geoclue_position_connection_event_callback (GeoclueWebService *web_service,
+                                            gboolean connected,
+                                            gpointer user_data)
+{
+	gdouble lat, lon;
+	gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
+	
+	g_return_if_fail (IS_GEOCLUE_POSITION (user_data));	
+	GeocluePosition *server = (GeocluePosition *)user_data;
+	
+	g_debug ("geoclue_position_connection_event_callback (%sconnected)", connected ? "":"not ");
+	if (connected) {
+		if (query_position (server, &lat, &lon, NULL)) {
+			set_current_position (server, lat, lon);
+		}
+		if (query_civic_location (server,
+		                          &country, &region, &locality, &area,
+		                          &postalcode, &street, &building,
+		                          &floor, &room, &description, &text,
+		                          NULL)) {
+			set_civic_location (server,
+			                    country, region, locality, area,
+			                    postalcode, street, building,
+			                    floor, room, description, text);
+		}
+	} else {
+		server->is_current_valid = FALSE;
+		server->is_civic_valid = FALSE;
+	}
 }
 
 
@@ -517,7 +319,17 @@ geoclue_position_init (GeocluePosition *obj)
 		g_error_free (error);
 	}	
 	
-	init_net_connection_monitoring (obj);
+	obj->web_service = g_object_new (GEOCLUE_TYPE_WEB_SERVICE, 
+	                                 "base_url", HOSTIP_URL,
+	                                 NULL);
+	geoclue_web_service_add_namespace(obj->web_service,
+	                                  "gml", "http://www.opengis.net/gml");
+	geoclue_web_service_add_namespace(obj->web_service,
+	                                  "hostip", "http://www.hostip.info/api");
+	
+	g_signal_connect (obj->web_service, "connection-event",
+	                  (GCallback)geoclue_position_connection_event_callback,
+	                  obj);
 }
 
 
@@ -634,7 +446,7 @@ gboolean geoclue_position_current_position (	GeocluePosition* server,
         *OUT_longitude = server->current_lon;
         return TRUE;
     }
-    else if (query_position (OUT_latitude, OUT_longitude, error)) {
+    else if (query_position (server, OUT_latitude, OUT_longitude, error)) {
         set_current_position (server, *OUT_latitude, *OUT_longitude);
         return TRUE;
     }
@@ -721,7 +533,8 @@ gboolean geoclue_position_civic_location (GeocluePosition* obj,
         *OUT_description = g_strdup (obj->civic_description);
         *OUT_text = g_strdup (obj->civic_text);
         return TRUE;
-    } else if (query_civic_location (OUT_country, OUT_region, OUT_locality, OUT_area, 
+    } else if (query_civic_location (obj,
+                                     OUT_country, OUT_region, OUT_locality, OUT_area, 
                                      OUT_postalcode, OUT_street, OUT_building, 
                                      OUT_floor, OUT_room, OUT_description, OUT_text, 
                                      error)) {
@@ -753,12 +566,12 @@ gboolean geoclue_position_service_status	 (	GeocluePosition* server,
     if( temp == -999.99 || temp2 == -999.99)
     {
     	*OUT_status = GEOCLUE_POSITION_NO_SERVICE_AVAILABLE;    
-    	*OUT_string = strdup("Cannot Connect to api.hostip.info\n");
+    	*OUT_string = g_strdup("Cannot Connect to api.hostip.info\n");
     }
     else
     {
     	*OUT_status = GEOCLUE_POSITION_LONGITUDE_AVAILABLE | GEOCLUE_POSITION_LATITUDE_AVAILABLE;    
-    	*OUT_string = strdup("Hostip connection is working");
+    	*OUT_string = g_strdup("Hostip connection is working");
     }   
     return TRUE;  
 }
@@ -766,7 +579,7 @@ gboolean geoclue_position_service_status	 (	GeocluePosition* server,
 
 gboolean geoclue_position_shutdown(GeocluePosition *obj, GError** error)
 {
-    close_net_connection_monitoring (obj);
+    g_object_unref (obj->web_service);
     g_main_loop_quit (obj->loop);
     return TRUE;
 }

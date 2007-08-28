@@ -59,9 +59,13 @@ fi
 DBUS_SYSTEM_POLICY_DIR=`pkg-config dbus-1 --variable=sysconfdir`/dbus-1/system.d
 AC_SUBST(DBUS_SYSTEM_POLICY_DIR)
 
-PKG_CHECK_MODULES(DEPS,  gconf-2.0 dbus-glib-1 gtk+-2.0 gthread-2.0)
+PKG_CHECK_MODULES(DEPS, gconf-2.0 dbus-glib-1 gtk+-2.0 gthread-2.0)
 AC_SUBST(DEPS_CFLAGS)
 AC_SUBST(DEPS_LIBS)
+
+PKG_CHECK_MODULES(GOBJECT, gobject-2.0)
+AC_SUBST(GOBJECT_CFLAGS)
+AC_SUBST(GOBJECT_LIBS)
 
 
 DBUS_SERVICES_DIR=`pkg-config dbus-1 --variable=exec_prefix`/share/dbus-1/services
@@ -104,7 +108,7 @@ fi #gpds
 
 
 dnl check for libconic
-PKG_CHECK_MODULES(CONIC, conic, [have_libconic=yes], [have_libconic=no])
+PKG_CHECK_MODULES(CONIC, conic dbus-1, [have_libconic=yes], [have_libconic=no])
 AC_SUBST(CONIC_CFLAGS)
 AC_SUBST(CONIC_LIBS)
 if test "x$have_libconic" = "xyes"; then
@@ -139,12 +143,13 @@ AC_SUBST(YAHOO_LIBS)
 
 
 dnl substitute subdirs into makefiles
-BACKEND_SUBDIRS="${BACKEND_SUBDIRS} map_yahoo geocode_yahoo position_manual position_hostip position_plazes"
+BACKEND_SUBDIRS="${BACKEND_SUBDIRS} common map_yahoo geocode_yahoo position_manual position_hostip position_plazes"
 
 
 
 AC_OUTPUT(	
 	backend/Makefile
+	backend/common/Makefile
 	backend/map_yahoo/Makefile
 	backend/geocode_yahoo/Makefile
 	backend/position_manual/Makefile

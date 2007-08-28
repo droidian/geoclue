@@ -25,20 +25,14 @@
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
 
-#ifdef HAVE_LIBCONIC
-#include <conicconnectionevent.h>
-#endif
-
-#include <libxml/xpath.h>
-#include <libxml/xpathInternals.h>
-#include <libsoup/soup.h>
 #include <stdlib.h>
 #include <time.h>
 
 /* for mac address lookup */
 #include <stdio.h>
 
-#define WEBSERVICE_API "http://plazes.com/suggestions.xml"
+#define PLAZES_URL "http://plazes.com/suggestions.xml"
+#define PLAZES_KEY_MAC "mac_address"
 
 G_DEFINE_TYPE(GeocluePosition, geoclue_position, G_TYPE_OBJECT)
 
@@ -85,26 +79,11 @@ static void geoclue_position_service_status_changed(	GeocluePosition* server,
     g_print("service_status_changed\n");
 }
 
-
-
-/*
- * Private internet connectivity monitoring functions
- */
-static void init_net_connection_monitoring (GeocluePosition* server);
-static void close_net_connection_monitoring (GeocluePosition* server);
-
-/*
- * Private helper functions for querying the web service and parsing the answer 
- * TODO: These could be moved to another file...
- */
 static gboolean get_mac_address (gchar** mac);
-static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error);
-static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error);
-static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr);
-static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr);
 
-static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
-static gboolean query_civic_location (char** OUT_country,
+static gboolean query_position (GeocluePosition *self, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error);
+static gboolean query_civic_location (GeocluePosition *self, 
+                                      char** OUT_country,
                                       char** OUT_region,
                                       char** OUT_locality,
                                       char** OUT_area,
@@ -130,100 +109,6 @@ static void set_civic_location (GeocluePosition *server,
                                 char* OUT_room,
                                 char* OUT_description,
                                 char* OUT_text);
-
-
-
-/*
- *  Define the following for both libconic-enabled and other platforms:
- *    - OBSERVING_NET_CONNECTIONS
- *    - init_net_connection_monitoring ()
- *    - close_net_connection_monitoring ()
- */
-#ifdef HAVE_LIBCONIC
-
-#define OBSERVING_NET_CONNECTIONS TRUE
-
-/* callback for libconic connection events */
-static void net_connection_event_cb (ConIcConnection *connection, 
-                                     ConIcConnectionEvent *event,
-                                     gpointer user_data)
-{
-    gdouble lat, lon;
-    gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
-
-    g_return_if_fail (IS_GEOCLUE_POSITION (user_data));
-    /* NOTE: this macro is broken in libconic 0.12
-    g_return_if_fail (CON_IC_IS_CONNECTION_EVENT (event));
-    */
-
-
-    GeocluePosition* server = (GeocluePosition*)user_data;
-
-    switch (con_ic_connection_event_get_status (event)) {
-        case CON_IC_STATUS_CONNECTED:
-
-            /* try to get a position */
-            if (query_position (&lat, &lon, NULL)) {
-                set_current_position (server, lat, lon);
-            }
-            
-            if (query_civic_location (&country, &region, &locality, &area,
-                                      &postalcode, &street, &building,
-                                      &floor, &room, &description, &text,
-                                      NULL)) {
-                set_civic_location (server,
-                                    country, region, locality, area,
-                                    postalcode, street, building,
-                                    floor, room, description, text);
-            }
-            break;
-            
-        case CON_IC_STATUS_DISCONNECTED:
-            server->is_current_valid = FALSE;
-            server->is_civic_valid = FALSE;
-            break;
-        default:
-            break;
-    }
-}
-
-static void init_net_connection_monitoring (GeocluePosition* server)
-{
-    g_return_if_fail (IS_GEOCLUE_POSITION (server));
-
-    /* init dbus connection -- this needs to be done, 
-       connection signals do not work otherwise */
-    server->dbus_connection = dbus_bus_get (DBUS_BUS_SYSTEM, NULL);
-    dbus_connection_setup_with_g_main(server->dbus_connection, NULL);
-    /* TODO: dbus error handling */
-
-    /* setup the connection signal callback */
-    server->net_connection = con_ic_connection_new ();
-    g_object_set (server->net_connection, "automatic-connection-events", 
-                  TRUE, NULL);
-    g_signal_connect (server->net_connection, "connection-event",
-                      G_CALLBACK(net_connection_event_cb), server);
-
-    g_debug ("Internet connection event monitoring started");
-}
-
-static void close_net_connection_monitoring (GeocluePosition* server)
-{
-    g_return_if_fail (IS_GEOCLUE_POSITION (server));
-    g_object_unref (server->net_connection);
-    dbus_connection_disconnect (server->dbus_connection);
-    dbus_connection_unref (server->dbus_connection);
-}
-
-#else
-
-#define OBSERVING_NET_CONNECTIONS FALSE
-/* empty functions for non-libconic platforms */
-static void init_net_connection_monitoring (GeocluePosition* server) {}
-static void close_net_connection_monitoring (GeocluePosition* server) {}
-
-#endif
-
 
 
 static gboolean get_mac_address (gchar** mac)
@@ -252,124 +137,8 @@ static gboolean get_mac_address (gchar** mac)
 }
 
 
-
-static gboolean get_webservice_xml (xmlChar **xml, gchar* url, GError** error)
+static gboolean query_position (GeocluePosition *self, gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
 {
-    SoupSession *session;
-    SoupMessage *msg;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    gchar *proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    if (proxy_env != NULL) {  
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
-        soup_uri_free (proxy);
-        /* You are not allowed to free something from getenv g_free (proxy_env);*/
-    } else {
-        session = soup_session_sync_new ();
-    }
-    
-    if (!session) {
-        g_debug ("no libsoup session");
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_FAILED,
-                     "libsoup session creation failed");
-        return FALSE;
-    }    
-    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message (session, msg);
-    if (msg->response.length == 0) {
-        g_debug ("no xml from libsoup, a connection problem perhaps?");
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_NOSERVICE,
-                     "No position data was received from %s.", url);
-        return FALSE;
-    }
-    
-    *xml = (xmlChar*)g_strndup (msg->response.body, msg->response.length);
-    return TRUE;
-}
-
-
-/* builds an xpath context from xml.
-   the context can be used in xpath evals */
-static xmlXPathContextPtr get_xpath_context (gchar* url, GError** error)
-{
-    xmlChar* xml = NULL;
-    xmlDocPtr doc; /*should this be freed or does context take care of it?*/
-    xmlXPathContextPtr xpathCtx;
-    
-    g_debug ("Getting xml from %s", url);
-    if (!get_webservice_xml (&xml, url, error)) {
-        return NULL;
-    }
-    
-    doc = xmlParseDoc (xml);
-    if (!doc) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_MALFORMEDDATA,
-                     "Position data from %s could not be parsed:\n\n%s", WEBSERVICE_API, xml);
-        g_free (xml);
-        return NULL;
-    }
-    
-    xpathCtx = xmlXPathNewContext(doc);
-    if (!xpathCtx) {
-        g_set_error (error,
-                     GEOCLUE_POSITION_ERROR,
-                     GEOCLUE_POSITION_ERROR_FAILED,
-                     "XPath context could not be created.");
-        g_free (xml);
-        return NULL;
-    }
-    
-    g_free(xml);
-    return xpathCtx;
-}
-
-
-static gboolean evaluate_xpath_string (gchar** OUT_string, xmlXPathContextPtr xpathCtx, gchar* expr)
-{
-    gboolean retval= FALSE;
-    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression ((xmlChar*)expr, xpathCtx);
-    if (xpathObj) {
-        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
-            *OUT_string = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
-            retval = TRUE;
-        }
-        xmlXPathFreeObject (xpathObj);
-    }
-    return retval;
-}
-
-
-static gboolean evaluate_xpath_number (gdouble* OUT_double, xmlXPathContextPtr xpathCtx, gchar* expr)
-{
-    gboolean retval= FALSE;
-    xmlXPathObjectPtr xpathObj = xmlXPathEvalExpression ((xmlChar*)expr, xpathCtx);
-    if (xpathObj) {
-        if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
-            *OUT_double = xmlXPathCastNodeSetToNumber(xpathObj->nodesetval);
-            retval = TRUE;
-        }
-        xmlXPathFreeObject (xpathObj);
-    }
-    return retval;
-}
-
-
-static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, GError **error)
-{
-    xmlXPathContextPtr xpathCtx;
     gboolean valid = TRUE;
     gchar* query_url;
     gchar* mac_address;
@@ -381,25 +150,31 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
                      "Could not find out MAC address of the router");
         return FALSE;
     }
-    query_url = g_strdup_printf("%s?mac_address=%s", WEBSERVICE_API, mac_address);
-    g_free (mac_address);
-    
-    if (!(xpathCtx = get_xpath_context (query_url, error))) {
+    if (!geoclue_web_service_query (self->web_service,
+                                    PLAZES_KEY_MAC, mac_address,
+                                    NULL)) {
+        g_free (mac_address);
+        /* TODO: error handling */
         return FALSE;
+        
     }
+    g_free (mac_address);
     
     *OUT_latitude = -999.99;
     *OUT_longitude = -999.99;
     
-    valid = evaluate_xpath_number (OUT_latitude, xpathCtx, "//plaze/latitude") && valid;
-    valid = evaluate_xpath_number (OUT_longitude, xpathCtx, "//plaze/longitude") && valid;
-    xmlXPathFreeContext(xpathCtx);
+    valid = geoclue_web_service_get_double (self->web_service,
+                                            OUT_latitude, "//plaze/latitude") 
+            && valid;
+    valid = geoclue_web_service_get_double (self->web_service,
+                                            OUT_longitude, "//plaze/longitude") 
+            && valid;
     
     if (!valid){
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have position data for this router MAC address.", WEBSERVICE_API);
+                     "%s does not have position data for this router MAC address.", PLAZES_URL);
         return FALSE;
     }
     
@@ -408,7 +183,8 @@ static gboolean query_position (gdouble* OUT_latitude, gdouble* OUT_longitude, G
 }
 
 
-static gboolean query_civic_location (char** OUT_country,
+static gboolean query_civic_location (GeocluePosition *self,
+                                      char** OUT_country,
                                       char** OUT_region,
                                       char** OUT_locality,
                                       char** OUT_area,
@@ -421,9 +197,7 @@ static gboolean query_civic_location (char** OUT_country,
                                       char** OUT_text,
                                       GError **error)
 {
-    xmlXPathContextPtr xpathCtx;
     gboolean valid = FALSE;
-    gchar* query_url;
     gchar* mac_address;
 
     *OUT_country = NULL;
@@ -446,19 +220,31 @@ static gboolean query_civic_location (char** OUT_country,
                      "Could not find out MAC address of the router");
         return FALSE;
     }
-    query_url = g_strdup_printf("%s?mac_address=%s", WEBSERVICE_API, mac_address);
+    if (!geoclue_web_service_query (self->web_service,
+                                    PLAZES_KEY_MAC, mac_address,
+                                    NULL)) {
+        g_free (mac_address);
+        /* TODO: error handling */
+        return FALSE;
+        
+    }
     g_free (mac_address);
 
-    if (!(xpathCtx = get_xpath_context (query_url, error))) {
-        return FALSE;
-    }
-
-    valid = evaluate_xpath_string (OUT_country, xpathCtx, "//plaze/country") || valid;
-    valid = evaluate_xpath_string (OUT_locality, xpathCtx, "//plaze/city") || valid;
-    valid = evaluate_xpath_string (OUT_postalcode, xpathCtx, "//plaze/zip_code") || valid;
-    valid = evaluate_xpath_string (OUT_street, xpathCtx, "//plaze/address") || valid;
-    valid = evaluate_xpath_string (OUT_description, xpathCtx, "//plaze/name") || valid;
-    xmlXPathFreeContext(xpathCtx);
+    valid = geoclue_web_service_get_string (self->web_service,
+                                            OUT_country, "//plaze/country") 
+            || valid;
+    valid = geoclue_web_service_get_string (self->web_service,
+                                            OUT_locality, "//plaze/city") 
+            || valid;
+    valid = geoclue_web_service_get_string (self->web_service,
+                                            OUT_postalcode, "//plaze/zip_code") 
+            || valid;
+    valid = geoclue_web_service_get_string (self->web_service,
+                                            OUT_street, "//plaze/address") 
+            || valid;
+    valid = geoclue_web_service_get_string (self->web_service,
+                                            OUT_description, "//plaze/name") 
+            || valid;
 
     g_debug ("location: %s, %s, %s, %s, %s", *OUT_country, *OUT_locality, *OUT_postalcode, *OUT_street, *OUT_description);
 
@@ -466,10 +252,9 @@ static gboolean query_civic_location (char** OUT_country,
         g_set_error (error,
                      GEOCLUE_POSITION_ERROR,
                      GEOCLUE_POSITION_ERROR_NODATA,
-                     "%s does not have civic location for this router MAC address.", WEBSERVICE_API);
+                     "%s does not have civic location for this router MAC address.", PLAZES_URL);
         return FALSE;
     }
-
     return TRUE;
 }
 
@@ -483,9 +268,11 @@ static void set_current_position (GeocluePosition *server, gdouble lat, gdouble 
     	time(&ttime);
         g_signal_emit_by_name(server, "current_position_changed", ttime, lat, lon, 0);
     }
-
+    
     /* if net connection is monitored, the validity of position can be guaranteed */
-    server->is_current_valid = OBSERVING_NET_CONNECTIONS;
+    g_object_get (server->web_service, 
+                  "using-connection-events", &server->is_current_valid, 
+                  NULL);
 }
 
 
@@ -544,12 +331,44 @@ static void set_civic_location (GeocluePosition *server,
                                country, region, locality, area, postalcode, street,
                                building, floor, room, description, text);
     }
-
-    /* if net connection is monitored, the validity of location can be guaranteed */
-
-    server->is_civic_valid = OBSERVING_NET_CONNECTIONS;
+    
+    /* if net connection is monitored, the validity of position can be guaranteed */
+    g_object_get (server->web_service, 
+                  "using-connection-events", &server->is_civic_valid, 
+                  NULL);
 }
 
+static void
+geoclue_position_connection_event_callback (GeoclueWebService *web_service,
+                                            gboolean connected,
+                                            gpointer user_data)
+{
+	gdouble lat, lon;
+	gchar *country, *region, *locality, *area, *postalcode, *street, *building, *floor, *room, *description, *text;
+	
+	g_return_if_fail (IS_GEOCLUE_POSITION (user_data));	
+	GeocluePosition *server = (GeocluePosition *)user_data;
+	
+	g_debug ("geoclue_position_connection_event_callback (%sconnected)", connected ? "":"not ");
+	if (connected) {
+		if (query_position (server, &lat, &lon, NULL)) {
+			set_current_position (server, lat, lon);
+		}
+		if (query_civic_location (server,
+		                          &country, &region, &locality, &area,
+		                          &postalcode, &street, &building,
+		                          &floor, &room, &description, &text,
+		                          NULL)) {
+			set_civic_location (server,
+			                    country, region, locality, area,
+			                    postalcode, street, building,
+			                    floor, room, description, text);
+		}
+	} else {
+		server->is_current_valid = FALSE;
+		server->is_civic_valid = FALSE;
+	}
+}
 
 static void
 geoclue_position_init (GeocluePosition *server)
@@ -578,9 +397,13 @@ geoclue_position_init (GeocluePosition *server)
 		g_error_free (error);
 	}	
 	
-	init_net_connection_monitoring (server);
+	server->web_service = g_object_new (GEOCLUE_TYPE_WEB_SERVICE, 
+	                                    "base_url", PLAZES_URL,
+	                                    NULL);
+	g_signal_connect (server->web_service, "connection-event",
+	                  (GCallback)geoclue_position_connection_event_callback,
+	                  server);
 }
-
 
 
 static void
@@ -695,7 +518,7 @@ gboolean geoclue_position_current_position (	GeocluePosition* server,
         *OUT_longitude = server->current_lon;
         return TRUE;
     }
-    else if (query_position (OUT_latitude, OUT_longitude, error)) {
+    else if (query_position (server, OUT_latitude, OUT_longitude, error)) {
         set_current_position (server, *OUT_latitude, *OUT_longitude);
         return TRUE;
     }
@@ -780,7 +603,8 @@ gboolean geoclue_position_civic_location (GeocluePosition* server,
         *OUT_description = g_strdup (server->civic_description);
         *OUT_text = g_strdup (server->civic_text);
         return TRUE;
-    } else if (query_civic_location (OUT_country, OUT_region, OUT_locality, OUT_area,
+    } else if (query_civic_location (server,
+                                     OUT_country, OUT_region, OUT_locality, OUT_area,
                                      OUT_postalcode, OUT_street, OUT_building,
                                      OUT_floor, OUT_room, OUT_description, OUT_text,
                                      error)) {
@@ -813,12 +637,12 @@ gboolean geoclue_position_service_status	 (	GeocluePosition* server,
     if( temp == -999.99 || temp2 == -999.99)
     {
     	*OUT_status = GEOCLUE_POSITION_NO_SERVICE_AVAILABLE;    
-    	*OUT_string = strdup("Cannot Connect to api.plazes.com\n");
+    	*OUT_string = g_strdup("Cannot Connect to api.plazes.com\n");
     }
     else
     {
     	*OUT_status = GEOCLUE_POSITION_LONGITUDE_AVAILABLE | GEOCLUE_POSITION_LATITUDE_AVAILABLE;    
-    	*OUT_string = strdup("Hostip connection is working");
+    	*OUT_string = g_strdup("Plazes connection is working");
     }   
     return TRUE;  
 }
@@ -826,7 +650,7 @@ gboolean geoclue_position_service_status	 (	GeocluePosition* server,
 
 gboolean geoclue_position_shutdown(GeocluePosition *server, GError** error)
 {
-    close_net_connection_monitoring (server);
+    g_object_unref (server->web_service);
     g_main_loop_quit (server->loop);
     return TRUE;
 }

@@ -19,19 +19,14 @@
 #ifndef __GEOCLUE_POSITION_SERVER_H__
 #define __GEOCLUE_POSITION_SERVER_H__
 
-#define DBUS_API_SUBJECT_TO_CHANGE
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
 #include <dbus/dbus-glib.h>
-#include <dbus/dbus-glib-lowlevel.h>
 #include <glib.h>
 
-#ifdef HAVE_LIBCONIC
-#include <conicconnection.h>
-#endif
+#include "../common/geoclue_web_service.h"
 
 #define GEOCLUE_POSITION_DBUS_SERVICE     "org.freedesktop.geoclue.position.plazes"
 #define GEOCLUE_POSITION_DBUS_PATH        "/org/freedesktop/geoclue/position/plazes"
@@ -49,9 +44,12 @@ struct GeocluePosition
     GObject parent;
     GMainLoop* loop;
     
+    GeoclueWebService *web_service;
+    
     gdouble current_lat;
     gdouble current_lon;
     gboolean is_current_valid;
+    gboolean is_civic_valid;
     
     gchar* civic_country;
     gchar* civic_region;
@@ -64,12 +62,6 @@ struct GeocluePosition
     gchar* civic_room;
     gchar* civic_description;
     gchar* civic_text;
-    gboolean is_civic_valid;
-    
-#ifdef HAVE_LIBCONIC
-    ConIcConnection* net_connection; 
-    DBusConnection* dbus_connection; 
-#endif
 };
 
 struct GeocluePositionClass

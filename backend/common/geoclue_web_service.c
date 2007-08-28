@@ -68,7 +68,7 @@ static void geoclue_web_service_connection_events_init (GeoclueWebService *self)
 	                  G_CALLBACK(geoclue_web_service_conic_callback),
 	                  self);
 	self->using_connection_events = TRUE;
-	g_debug ("Internet connection event monitoring started");
+	g_debug ("connection_events init");
 }
 
 static void geoclue_web_service_connection_events_deinit (GeoclueWebService *self)
@@ -133,7 +133,7 @@ geoclue_web_service_fetch (GeoclueWebService *self, gchar *url)
 	g_assert (url);
 	
 	xmlNanoHTTPInit();
-	g_debug ("GET DATA: %s", url);
+	g_debug ("fetch: %s", url);
 	ctxt = xmlNanoHTTPMethod (url, "GET", NULL, NULL, NULL, 0);
 	if (!ctxt) {
 		g_debug ("xmlNanoHTTPMethod did not get a response.");
@@ -348,7 +348,6 @@ geoclue_web_service_query (GeoclueWebService *self, ...)
 	gchar *key, *value,  *esc_value, *tmp, *url;
 	gboolean first_pair = TRUE;
 	
-	g_debug ("get_data");
 	g_return_val_if_fail (GEOCLUE_IS_WEB_SERVICE (self), FALSE);
 	g_return_val_if_fail (self->base_url, FALSE);
 	

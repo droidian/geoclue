@@ -19,25 +19,18 @@
 #ifndef __GEOCLUE_GEOCODE_SERVER_H__
 #define __GEOCLUE_GEOCODE_SERVER_H__
 
-#define DBUS_API_SUBJECT_TO_CHANGE
 
-
-#include <dbus/dbus-glib.h>
-#include <glib.h>
-#include <stdio.h>
-#include <string.h>
 #include <config.h>
+#include <dbus/dbus-glib.h>
+#include "../common/geoclue_web_service.h"
+
 #define GEOCLUE_GEOCODE_DBUS_SERVICE     "org.freedesktop.geoclue.geocode.yahoo"
 #define GEOCLUE_GEOCODE_DBUS_PATH        "/org/freedesktop/geoclue/geocode/yahoo"
 #define GEOCLUE_GEOCODE_DBUS_INTERFACE   "org.freedesktop.geoclue.geocode"
 
 
-
-
-
 G_BEGIN_DECLS
 
-//Let's create a geoclue_map object that has one method of geoclue_map
 typedef struct GeoclueGeocode GeoclueGeocode;
 typedef struct GeoclueGeocodeClass GeoclueGeocodeClass;
 
@@ -45,8 +38,8 @@ GType geoclue_map_get_type (void);
 struct GeoclueGeocode
 {
     GObject parent;
-
     GMainLoop*  loop;     
+    GeoclueWebService *web_service;
 };
 
 struct GeoclueGeocodeClass
@@ -64,8 +57,6 @@ struct GeoclueGeocodeClass
 #define GEOCLUE_GEOCODE_GET_CLASS(obj)    (G_TYPE_INSTANCE_GET_CLASS ((obj), TYPE_GEOCLUE_GEOCODE, GeoclueGeocodeClass))
 
 
-
-
 gboolean geoclue_geocode_version (GeoclueGeocode *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error);
 gboolean geoclue_geocode_service_provider(GeoclueGeocode *obj, char** name, GError **error);   
 gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error );
@@ -75,14 +66,7 @@ gboolean geoclue_geocode_lat_lon_to_address(GeoclueGeocode *obj, gdouble IN_lati
 gboolean geoclue_geocode_service_available(GeoclueGeocode *obj, gboolean* OUT_available, char** OUT_reason, GError** error);
 gboolean geoclue_geocode_shutdown(GeoclueGeocode *obj, GError** error);
 
-
-
-
-
 G_END_DECLS
 
 
-
-
 #endif
-

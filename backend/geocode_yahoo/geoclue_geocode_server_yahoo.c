@@ -20,32 +20,10 @@
 #include <geoclue_geocode_server_glue.h>
 #include <dbus/dbus-glib-bindings.h>
 
-
-
-#include <libxml/xmlreader.h>
-#include <libsoup/soup.h>
-#include <fcntl.h>
 #include <stdlib.h>
-#include <math.h>
 
 
-
-#define GEOCLUE_GEOCODE_MIN_HEIGHT 100
-#define GEOCLUE_GEOCODE_MAX_HEIGHT 2000
-#define GEOCLUE_GEOCODE_MIN_WIDTH 100
-#define GEOCLUE_GEOCODE_MAX_WIDTH 3000
-#define GEOCLUE_GEOCODE_MIN_ZOOM 1
-#define GEOCLUE_GEOCODE_MAX_ZOOM 12
-
-#define YAHOO_LAT "Latitude"
-#define YAHOO_LON "Longitude"
-#define YAHOO_ADDRESS "Address"
-#define YAHOO_CITY "City"
-#define YAHOO_STATE "State"
-#define YAHOO_ZIP "Zip"
-#define YAHOO_COUNTRY "Country"
-
-
+#define YAHOO_URL "http://api.local.yahoo.com/MapsService/V1/geocode"
 
 G_DEFINE_TYPE(GeoclueGeocode, geoclue_geocode, G_TYPE_OBJECT)
 
@@ -63,8 +41,6 @@ static guint signals[LAST_SIGNAL];
 static void
 geoclue_geocode_init (GeoclueGeocode *obj)
 {
-
-
 	GError *error = NULL;
 	DBusGProxy *driver_proxy;
 	GeoclueGeocodeClass *klass = GEOCLUE_GEOCODE_GET_CLASS(obj);
@@ -90,16 +66,21 @@ geoclue_geocode_init (GeoclueGeocode *obj)
 	{
 		g_printerr("Unable to register geogeocode service: %s", error->message);
 		g_error_free (error);
-        exit(1);
-	}	
-
-if (request_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-{ 
-    g_printerr("Yahoo geocodes service already running!\n");
-}
-
-  
-    g_print("registered geocodeping interface \n");
+		exit(1);
+	}
+	
+	if (request_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+	{ 
+		g_printerr("Yahoo geocodes service already running!\n");
+	}
+	
+	obj->web_service = g_object_new (GEOCLUE_TYPE_WEB_SERVICE, 
+	                                 "base_url", YAHOO_URL,
+	                                 NULL);
+	geoclue_web_service_add_namespace(obj->web_service,
+	                                  "yahoo", "urn:yahoo:maps");
+	
+	g_print("registered geocoding interface \n");
 
 }
 
@@ -145,218 +126,51 @@ gboolean geoclue_geocode_service_provider(GeoclueGeocode *obj, char** name, GErr
 }
 gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
 {
-
-    SoupSession *session;
-    SoupMessage *msg;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    
-    char* proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    
-    printf("found proxy %s:end\n", proxy_env); 
-        
-    
-    if (proxy_env != NULL) {  
-        printf("added proxy %s\n", proxy_env); 
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
-    }
-    else
-    {
-        session = soup_session_sync_new ();
-           
+    if (!geoclue_web_service_query (obj->web_service,
+                                    "appid", "YahooDemo",
+                                    "street", IN_street,
+                                    "city", IN_city,
+                                    "state", IN_state,
+                                    "zip", IN_zip,
+                                    NULL)) {
+        /* TODO: error handling */
+        return FALSE;
     }
     
+    geoclue_web_service_get_double (obj->web_service,
+                                    OUT_latitude, "//yahoo:Latitude");
+    geoclue_web_service_get_double (obj->web_service,
+                                    OUT_longitude, "//yahoo:Longitude");
     
-    char url[5000];
-
-    snprintf(url, 5000,"http://api.local.yahoo.com/MapsService/V1/geocode?appid=YahooDemo&street=%s&city=%s&state=%s&zip=&%s\n",IN_street, IN_city,  IN_state, IN_zip);
-    
-    g_print(url);
-    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message(session, msg);
-
-    char *name, *value;
-    xmlTextReaderPtr reader;
-    int ret;
-
-    
-    reader = xmlReaderForMemory (msg->response.body, 
-                         msg->response.length, 
-                         NULL, 
-                         NULL, 
-                         0);
-    
-    
-
-        ret = xmlTextReaderRead(reader);
-        
-        //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-        while (ret == 1) {
-            
-                name = (char*)xmlTextReaderConstName(reader);
-                
-                 printf("%s\n", name);
-
-                   if (!strcmp(name,YAHOO_LAT))
-                   {
-                        //read next and grab text value.   
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched latitude %s %s\n", name, value);
-                        sscanf(value, "%lf", OUT_latitude);   
-                        
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                              
-                   }
-                   if (!strcmp(name,YAHOO_LON))
-                   {
-                        //read next and grab text value.  
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched longitude %s %s\n", name, value);
-                        sscanf(value, "%lf", OUT_longitude);  
-                          
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                           
-                   }                
-            ret = xmlTextReaderRead(reader);
-        }
-        xmlFreeTextReader(reader);
-
-
-
-
-
-    
-    
-    
-    printf("Yahoo!!!\n");
+    g_debug ("geocoded to: %f, %f", *OUT_latitude, *OUT_longitude);
     return TRUE;
 }
 
 
 gboolean geoclue_geocode_free_text_to_lat_lon (GeoclueGeocode *obj, const char * IN_free_text, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
 {
-   SoupSession *session;
-    SoupMessage *msg;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    
-    
-    char* proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    
-    printf("found proxy %s:end\n", proxy_env); 
-        
-    
-    if (proxy_env != NULL) {  
-        printf("added proxy %s\n", proxy_env); 
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
+    if (!geoclue_web_service_query (obj->web_service,
+                                    "appid", "YahooDemo",
+                                    "location", IN_free_text,
+                                    NULL)) {
+        /* TODO: error handling */
+        return FALSE;
     }
-    else
-    {
-        session = soup_session_sync_new ();
-           
-    }
-    
-    
-    char url[5000];
-
-    snprintf(url, 5000,"http://api.local.yahoo.com/MapsService/V1/geocode?appid=YahooDemo&location=%s\n",IN_free_text);
-    
-    g_print(url);
-    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message(session, msg);
-
-    char *name, *value;
-    xmlTextReaderPtr reader;
-    int ret;
-    
-    
-    reader = xmlReaderForMemory (msg->response.body, 
-                         msg->response.length, 
-                         NULL, 
-                         NULL, 
-                         0);
-    
-    
-    
-        ret = xmlTextReaderRead(reader);
+    geoclue_web_service_get_double (obj->web_service,
+                                    OUT_latitude, "//yahoo:Latitude");
+    geoclue_web_service_get_double (obj->web_service,
+                                    OUT_longitude, "//yahoo:Longitude");
         
-        //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-        while (ret == 1) {
-            
-                name = (char*)xmlTextReaderConstName(reader);
-                
-                 printf("%s\n", name);
-                    
-                    if (!strcmp(name,YAHOO_LAT))
-                    {
-                        //read next and grab text value.   For some reason there is two so do it twice
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched latitude %s %s\n", name, value);
-                        sscanf(value, "%lf", OUT_latitude);   
-                        
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                              
-                    }
-                    if (!strcmp(name,YAHOO_LON))
-                    {
-                        //read next and grab text value.   For some reason there is two so do it twice
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                        
-                        value = (char*)xmlTextReaderConstValue(reader);
-                        printf("matched longitude %s %s\n", name, value);
-                        sscanf(value, "%lf", OUT_longitude);  
-                          
-                        //skip closing tag
-                        ret = xmlTextReaderRead(reader);
-                        name = (char*)xmlTextReaderConstName(reader);
-                           
-                    }                
-            ret = xmlTextReaderRead(reader);
-        }
-        xmlFreeTextReader(reader);
-    
-    
-    
-    printf("Yahoo!!!\n");
+    g_debug ("geocoded to: %f, %f", *OUT_latitude, *OUT_longitude);
     return TRUE;
 }
 
 gboolean geoclue_geocode_lat_lon_to_address(GeoclueGeocode *obj, gdouble IN_latitude, gdouble IN_longitude, char ** OUT_street, char ** OUT_city, char ** OUT_state, char ** OUT_zip, gint* OUT_return_code, GError **error )
 {
-    *OUT_street = strdup("Unknown");
-    *OUT_city = strdup("Unknown");
-    *OUT_state = strdup("Unknown");
-    *OUT_zip = strdup("Unknown");
+    *OUT_street = g_strdup("Unknown");
+    *OUT_city = g_strdup("Unknown");
+    *OUT_state = g_strdup("Unknown");
+    *OUT_zip = g_strdup("Unknown");
     
     printf("Yahoo!!!\n");
     return TRUE;
@@ -372,8 +186,9 @@ gboolean geoclue_geocode_service_available(GeoclueGeocode *obj, gboolean* OUT_av
 
 gboolean geoclue_geocode_shutdown(GeoclueGeocode *obj, GError** error)
 {
-    g_main_loop_quit (obj->loop);
-    return TRUE;  
+	g_object_unref (obj->web_service);
+	g_main_loop_quit (obj->loop);
+	return TRUE;  
 }
 
 

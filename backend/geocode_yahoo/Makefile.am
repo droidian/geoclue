@@ -19,7 +19,7 @@ $(service_DATA): $(service_in_files) Makefile
 
 
 AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) 
+AM_LDFLAGS = $(YAHOO_LIBS) ../common/geoclue_web_service.o
 
 EXTRA_DIST = \
 		geoclue_geocode_server_yahoo.h \

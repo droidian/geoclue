@@ -21,7 +21,7 @@
 #include <geoclue_map_signal_marshal.h>
 #include <dbus/dbus-glib-bindings.h>
 
-
+#include <math.h>
 
 typedef enum _geoclue_map_returncode
 {
@@ -41,14 +41,7 @@ typedef enum _geoclue_map_returncode
 } GEOCLUE_MAP_RETURNCODE;
 
 
-
-#include <libxml/xmlreader.h>
-#include <libsoup/soup.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <math.h>
-
-
+#define YAHOO_MAP_URL "http://api.local.yahoo.com/MapsService/V1/mapImage"
 
 #define GEOCLUE_MAP_MIN_HEIGHT 100
 #define GEOCLUE_MAP_MAX_HEIGHT 2000
@@ -127,17 +120,19 @@ geoclue_map_init (GeoclueMap *obj)
 	{
 		g_printerr("Unable to register Geoclue map service: %s", error->message);
 		g_error_free (error);
-        exit(1);
-	}	
-
-if (request_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
-{ 
-    g_printerr("Yahoo maps service already running!\n");
-}
-
-  
-    g_print("registered mapping interface \n");
-
+		exit(1);
+	}
+	
+	if (request_ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
+	{
+		g_printerr("Yahoo maps service already running!\n");
+	}
+	
+	obj->web_service = g_object_new (GEOCLUE_TYPE_WEB_SERVICE, 
+	                                 "base_url", YAHOO_MAP_URL,
+	                                 NULL);
+	
+	g_print("registered mapping interface \n");
 }
 
 
@@ -239,112 +234,66 @@ gboolean geoclue_map_min_width(GeoclueMap *obj, int* min_width, GError **error)
 
 void geoclue_map_map_thread(params *obj)
 {
-
-gdouble IN_latitude = obj->IN_latitude;
-gdouble IN_longitude = obj->IN_longitude;
-gint IN_width = obj->IN_width;
-gint IN_height = obj->IN_height;
-gint IN_zoom = obj->IN_zoom;
+    gchar *lat = g_strdup_printf ("%f", obj->IN_latitude);
+    gchar *lon = g_strdup_printf ("%f", obj->IN_longitude);
+    gchar *width = g_strdup_printf ("%d", obj->IN_width);
+    gchar *height = g_strdup_printf ("%d", obj->IN_height);
+    gchar *zoom = g_strdup_printf ("%d", obj->IN_zoom);
     
-
-    SoupSession *session;
-    SoupMessage *msg;
-    SoupMessage *msg2;
-    const char *cafile = NULL;
-    SoupUri *proxy = NULL;
-    SoupUri *base_uri = NULL;
+    gchar *png_url;
+    GeoclueWebService *png_service;
     
-    base_uri = soup_uri_new ("http://api.local.yahoo.com/MapsService/V1/mapImage?appid=libgeomap&latitude=38.0&longitude=-122.0&imagetype=png&image_height=800&image_width=800&zoom=7");
-    
-    
-    char* proxy_env;
-    
-    proxy_env = getenv ("http_proxy");
-    
-    printf("found proxy %s:end\n", proxy_env); 
-        
-    
-    if (proxy_env != NULL) {  
-        printf("added proxy %s\n", proxy_env); 
-        proxy = soup_uri_new (proxy_env);
-        session = soup_session_sync_new_with_options (
-            SOUP_SESSION_SSL_CA_FILE, cafile,
-            SOUP_SESSION_PROXY_URI, proxy,
-            NULL);
+    if (!geoclue_web_service_query (obj->server->web_service,
+                                    "appid", "YahooDemo",
+                                    "latitude", lat,
+                                    "longitude", lon,
+                                    "imagetype", "png",
+                                    "image_height", height,
+                                    "image_width", width,
+                                    "zoom", zoom,
+                                    NULL)) {
+        /* TODO: error handling */
+        return;
     }
-    else
-    {
-        session = soup_session_sync_new ();
-     
-        
+    g_free (lat);
+    g_free (lon);
+    g_free (width);
+    g_free (height);
+    g_free (zoom);
+    
+    geoclue_web_service_get_string (obj->server->web_service,
+                                    &png_url, "//Result");
+    
+    if (!g_str_has_prefix (png_url, "http://")) {
+        /* TODO: error handling */
+    	return;
     }
     
+    g_debug("Trying to grab image %s\n", png_url);
+    png_service = g_object_new (GEOCLUE_TYPE_WEB_SERVICE, 
+                                "base_url",png_url,
+                                NULL);
+    g_free (png_url);
     
-    char url[5000];
-
-    snprintf(url, 5000,"http://api.local.yahoo.com/MapsService/V1/mapImage?appid=YahooDemo&latitude=%f&longitude=%f&imagetype=png&image_height=%d&image_width=%d&zoom=%d", IN_latitude,  IN_longitude,  IN_height, IN_width, IN_zoom);
-    
-    g_print(url);
-    
-    msg = soup_message_new ("GET", url);
-    soup_session_send_message(session, msg);
-
-    char *name, *value;
-    xmlTextReaderPtr reader;
-    int ret;
-    char* pngurl;
-
-    //reader = xmlReaderForFile(argv[1], NULL, 0);
-    
-    reader = xmlReaderForMemory (msg->response.body, 
-                         msg->response.length, 
-                         NULL, 
-                         NULL, 
-                         0);
-    
-    
-    ret = xmlTextReaderRead(reader);
-    
-    //FIXME: super hack because I don't know how to use the XML libraries.  This just works for now
-    while (ret == 1) {
-        name = (char*)xmlTextReaderConstName(reader);
-        if (!strcmp(name,"#text"))
-        {
-            value = (char*)xmlTextReaderConstValue(reader);
-            printf("%s %s\n", name, value);
-            int size = strlen(value);
-            pngurl = malloc(size);
-            strcpy(pngurl, value);
-        }
-        ret = xmlTextReaderRead(reader);
+    if (!geoclue_web_service_query (png_service, NULL)) {
+        /* TODO: error handling */
+        return;
     }
-    xmlFreeTextReader(reader);
     
+    GArray *mydata;
+    mydata = g_array_new (FALSE, FALSE, sizeof (guint8));
+    g_object_get (png_service, 
+                  "response", &mydata->data,
+                  "response-length", &mydata->len,
+                  NULL);
+    g_debug ("map size: %d", mydata->len);
     
-    // A very bad rough sanity check
-    if(pngurl != NULL)
-    {
-        if(pngurl[0] == 'h')
-        {
-            
-            printf("Trying to grab image %s\n", pngurl);
-            msg2 = soup_message_new ("GET", pngurl);
-            soup_session_send_message(session, msg2);
-            printf("got message\n, parsing\n");
-            
-            GArray *mydata;
-            mydata = g_array_new(FALSE,FALSE, sizeof(guint8));
-            mydata->data = msg2->response.body;
-            mydata->len =  msg2->response.length;
+    g_object_unref (png_service);
         
-             g_signal_emit_by_name (obj->server,
-                                       "get_map_finished",
-                                       0, mydata, "image/png"); 
-        }
-    } 
-    
+    g_signal_emit_by_name (obj->server,
+                           "get_map_finished",
+                           0, mydata, "image/png");
 };
-
 
 
 gboolean geoclue_map_get_map (GeoclueMap *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_width, const gint IN_height, const gint IN_zoom, int* return_code, GError **error)
@@ -500,6 +449,7 @@ gboolean geoclue_map_service_available(GeoclueMap *obj, gboolean* OUT_available,
 
 gboolean geoclue_map_shutdown(GeoclueMap *obj, GError** error)
 {
+    g_object_unref (obj->web_service);
     g_main_loop_quit (obj->loop);
     return TRUE;
 }

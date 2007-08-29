@@ -62,12 +62,12 @@
  * 	}
  * 
  * So, geoclue_web_service_query takes a NULL-terminated list of 
- * key-value pairs that will be appended to base_url. The value part 
- * will be escaped. The example case query url will be:
+ * key-value pairs that will be used as GET params. The value part 
+ * of the pair will be escaped. The example case query url will be:
  * "http://plazes.com/suggestions.xml?mac_address=00%3A11%3A95%3A20%3Adf%3A11"
  * 
  * The actual response data is available (see "response"-property), 
- * but if the data is xml it's easier to use 
+ * but if the data is xml it's a lot easier to use 
  * "geoclue_web_service_get_*" -methods to get specific data using 
  * simple xpath expressions.
  * 
@@ -116,7 +116,8 @@ struct _GeoclueWebService {
 	
 	/* private */
 	gchar* base_url;
-	gchar *response;
+	guchar *response;
+	gint response_length;
 	GList *namespaces;
 	gboolean using_connection_events;
 	xmlXPathContext *xpath_ctx;

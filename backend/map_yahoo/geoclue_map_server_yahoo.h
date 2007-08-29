@@ -19,14 +19,10 @@
 #ifndef __GEOCLUE_MAP_SERVER_H__
 #define __GEOCLUE_MAP_SERVER_H__
 
-#define DBUS_API_SUBJECT_TO_CHANGE
-
-
-#include <dbus/dbus-glib.h>
-#include <glib.h>
-#include <stdio.h>
-#include <string.h>
 #include <config.h>
+#include <glib.h>
+#include <dbus/dbus-glib.h>
+#include "../common/geoclue_web_service.h"
 
 #define GEOCLUE_MAP_DBUS_SERVICE     "org.freedesktop.geoclue.map.yahoo"
 #define GEOCLUE_MAP_DBUS_PATH        "/org/freedesktop/geoclue/map/yahoo"
@@ -34,11 +30,8 @@
 
 
 
-
-
 G_BEGIN_DECLS
 
-//Let's create a geoclue_map object that has one method of geoclue_map
 typedef struct GeoclueMap GeoclueMap;
 typedef struct GeoclueMapClass GeoclueMapClass;
 
@@ -46,17 +39,16 @@ GType geoclue_map_get_type (void);
 struct GeoclueMap
 {
     GObject parent;
-   
+    GMainLoop*  loop;
+    
+    GeoclueWebService *web_service;
+    
     char* buffer;
     GArray* OUT_map_buffer;
     gint width;
     gint height;
     
-    
     gboolean pending_request;
-    
-    GMainLoop*  loop;
-     
 };
 
 struct GeoclueMapClass
@@ -94,10 +86,7 @@ gboolean geoclue_map_service_available(GeoclueMap *obj, gboolean* OUT_available,
 gboolean geoclue_map_shutdown(GeoclueMap *obj, GError** error);
 
 
-
 G_END_DECLS
-
-
 
 
 #endif

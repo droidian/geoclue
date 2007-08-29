@@ -95,7 +95,38 @@ geoclue_web_service_connection_events_deinit (GeoclueWebService *self) {}
 
 #endif /* HAVE_LIBCONIC */
 
+/* GFunc, use with g_list_foreach */
+static void
+geoclue_web_service_free_ns (gpointer data, gpointer user_data)
+{
+	XmlNamespace *ns = (XmlNamespace *)data;
+	g_free (ns->name);
+	g_free (ns->uri);
+	g_free (ns);
+}
 
+/* GFunc, use with g_list_foreach */
+static void
+geoclue_web_service_register_ns (gpointer data, gpointer user_data)
+{
+	g_assert (GEOCLUE_IS_WEB_SERVICE (user_data));
+	GeoclueWebService *self = (GeoclueWebService *)user_data;
+	XmlNamespace *ns = (XmlNamespace *)data;
+	xmlXPathRegisterNs (self->xpath_ctx, 
+	                    (xmlChar*)ns->name, (xmlChar*)ns->uri);
+}
+
+/* Register namespaces listed in self->namespaces */
+static void
+geoclue_web_service_register_namespaces (GeoclueWebService *self)
+{
+	g_assert (GEOCLUE_IS_WEB_SERVICE (self));
+	g_assert (self->xpath_ctx);
+	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_register_ns, self);
+}
+
+/* Parse data (self->response), build xpath context and register 
+ * namespaces. Nothing will be done if xpath context exists already. */
 static gboolean
 geoclue_seb_service_build_xpath_context (GeoclueWebService *self)
 {
@@ -104,32 +135,44 @@ geoclue_seb_service_build_xpath_context (GeoclueWebService *self)
 	g_assert (GEOCLUE_IS_WEB_SERVICE (self));
 	g_assert (self->response);
 	
-	xmlXPathFreeContext (self->xpath_ctx);
+	/* don't rebuild if there's no need */
+	if (self->xpath_ctx) {
+		return TRUE;
+	}
 	
-	doc = xmlParseDoc ((xmlChar *)self->response);
+	/*make sure response is NULL-terminated*/
+	xmlChar *tmp = (xmlChar *)g_strndup(self->response, self->response_length);
+	
+	g_debug ("parsing response: %s", tmp);
+	
+	doc = xmlParseDoc (tmp);
 	if (!doc) {
 		/* TODO: error handling */
+		g_free (tmp);
 		return FALSE;
 	}
+	g_free (tmp);
 	
 	self->xpath_ctx = xmlXPathNewContext(doc);
 	if (!self->xpath_ctx) {
 		/* TODO: error handling */
 		return FALSE;
 	}
+	geoclue_web_service_register_namespaces (self);
 	return TRUE;
 }
 
+/* fetch data from url, save into self->response */
 static gboolean
 geoclue_web_service_fetch (GeoclueWebService *self, gchar *url)
 {
 	void* ctxt = NULL;
 	gint len;
-	gint retval=0;
 	xmlChar buf[1024];
 	xmlBuffer *output;
 	
 	g_free (self->response);
+	xmlXPathFreeContext (self->xpath_ctx);
 	g_assert (url);
 	
 	xmlNanoHTTPInit();
@@ -144,17 +187,16 @@ geoclue_web_service_fetch (GeoclueWebService *self, gchar *url)
 	while ((len = xmlNanoHTTPRead (ctxt, buf, sizeof(buf))) > 0) {
 		if (xmlBufferAdd (output, buf, len) != 0) {
 			g_debug ("xmlBufferAdd failed.");
-			retval = -1;
 			break;
 		}
-		retval+=len;
 	}
 	xmlNanoHTTPClose(ctxt);
 	
-	self->response = g_strdup ((gchar *) xmlBufferContent (output));
+	self->response_length = xmlBufferLength (output);
+	self->response = g_memdup (xmlBufferContent (output), self->response_length);
 	xmlBufferFree (output);
-	/* TODO: do I need retval (the length) for something later?? */
-	return (retval > 0);
+	
+	return (self->response_length > 0);
 }
 
 static void
@@ -166,41 +208,13 @@ geoclue_web_service_init (GTypeInstance *instance,
 	g_debug ("web_service init");
 	
 	self->response = NULL;
+	self->response_length = 0;
 	self->xpath_ctx = NULL;
 	self->namespaces = NULL;
 	self->base_url = NULL;
 	self->using_connection_events = FALSE;
 	
 	geoclue_web_service_connection_events_init (self);
-}
-
-/* A GFunc, use with g_list_foreach */
-static void
-geoclue_web_service_free_ns (gpointer data, gpointer user_data)
-{
-	XmlNamespace *ns = (XmlNamespace *)data;
-	g_free (ns->name);
-	g_free (ns->uri);
-	g_free (ns);
-}
-
-/* A GFunc, use with g_list_foreach */
-static void
-geoclue_web_service_register_ns (gpointer data, gpointer user_data)
-{
-	g_assert (GEOCLUE_IS_WEB_SERVICE (user_data));
-	GeoclueWebService *self = (GeoclueWebService *)user_data;
-	XmlNamespace *ns = (XmlNamespace *)data;
-	xmlXPathRegisterNs (self->xpath_ctx, 
-	                    (xmlChar*)ns->name, (xmlChar*)ns->uri);
-}
-
-static void
-geoclue_web_service_register_namespaces (GeoclueWebService *self)
-{
-	g_assert (GEOCLUE_IS_WEB_SERVICE (self));
-	g_assert (self->xpath_ctx);
-	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_register_ns, self);
 }
 
 
@@ -214,6 +228,7 @@ geoclue_web_service_finalize (GObject *obj)
 	geoclue_web_service_connection_events_deinit (self);
 	g_free (self->base_url);
 	g_free (self->response);
+	self->response_length = 0;
 	
 	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
 	g_list_free (self->namespaces);
@@ -230,6 +245,7 @@ enum {
         GEOCLUE_WEB_SERVICE_URL = 1,
         GEOCLUE_WEB_SERVICE_USING_CONNECTION_EVENTS,
         GEOCLUE_WEB_SERVICE_RESPONSE,
+        GEOCLUE_WEB_SERVICE_RESPONSE_LENGTH,
 };
 
 static void
@@ -245,6 +261,7 @@ geoclue_web_service_set_property (GObject *object,
 		case GEOCLUE_WEB_SERVICE_URL:
 			g_free (self->base_url);
 			g_free (self->response);
+			self->response_length = 0;
 			g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
 			g_list_free (self->namespaces);
 			xmlXPathFreeContext (self->xpath_ctx);
@@ -252,13 +269,11 @@ geoclue_web_service_set_property (GObject *object,
 			g_debug ("set base_url: %s\n",self->base_url);
 			break;
 		case GEOCLUE_WEB_SERVICE_USING_CONNECTION_EVENTS:
-			self->using_connection_events = g_value_get_boolean (value);
-			g_debug ("set using-connection-events: %s\n",self->using_connection_events ? "TRUE": "FALSE");
-			break;
+			g_assert_not_reached();
 		case GEOCLUE_WEB_SERVICE_RESPONSE:
-			self->response = g_value_dup_string (value);
-			g_debug ("set response: %s\n",self->response);
-			break;
+			g_assert_not_reached();
+		case GEOCLUE_WEB_SERVICE_RESPONSE_LENGTH:
+			g_assert_not_reached();
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
 			break;
@@ -273,6 +288,7 @@ geoclue_web_service_get_property (GObject *object,
 {
 	g_return_if_fail (GEOCLUE_IS_WEB_SERVICE (object));
 	GeoclueWebService *self = (GeoclueWebService *) object;
+	gpointer copy;
 	
 	switch (property_id) {
 		case GEOCLUE_WEB_SERVICE_URL:
@@ -282,7 +298,11 @@ geoclue_web_service_get_property (GObject *object,
 			g_value_set_boolean (value, self->using_connection_events);
 			break;
 		case GEOCLUE_WEB_SERVICE_RESPONSE:
-			g_value_set_string (value, self->response);
+			copy = g_memdup (self->response, self->response_length);
+			g_value_set_pointer (value, copy);
+			break;
+		case GEOCLUE_WEB_SERVICE_RESPONSE_LENGTH:
+			g_value_set_int (value, self->response_length);
 			break;
 		default:
 			G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
@@ -291,7 +311,7 @@ geoclue_web_service_get_property (GObject *object,
 }
 
 static void
-connection_event_default_handler (GeoclueWebService *self, gboolean connected)
+geoclue_web_service_connection_event_default_handler (GeoclueWebService *self, gboolean connected)
 {
 	g_return_if_fail (GEOCLUE_IS_WEB_SERVICE (self));
 	g_debug ("connection event:%s connected", connected ? "" : " not");
@@ -330,17 +350,25 @@ geoclue_web_service_class_init (gpointer klass,
 	                                 GEOCLUE_WEB_SERVICE_USING_CONNECTION_EVENTS,
 	                                 param_spec);
 	
-	param_spec = g_param_spec_string ("response",
+	param_spec = g_param_spec_pointer ("response",
 	                                  "response",
-	                                  "Get the response of the last web service query",
-	                                  NULL,
+	                                  "Get copy of the response to the last web service query",
 	                                  G_PARAM_READABLE);
 	g_object_class_install_property (gobject_class,
 	                                 GEOCLUE_WEB_SERVICE_RESPONSE,
 	                                 param_spec);
-
+	                                 
+	param_spec = g_param_spec_int ("response-length",
+	                               "response-length",
+	                               "Get the response length of the last web service query",
+	                               0, G_MAXINT, 0,
+	                               G_PARAM_READABLE);
+	g_object_class_install_property (gobject_class,
+	                                 GEOCLUE_WEB_SERVICE_RESPONSE_LENGTH,
+	                                 param_spec);
+	
 	param_types[0] = G_TYPE_BOOLEAN;
-	web_service_class->connection_event = connection_event_default_handler;
+	web_service_class->connection_event = geoclue_web_service_connection_event_default_handler;
 	web_service_class->connection_event_signal_id =
 	    g_signal_newv ("connection-event",
 	                   G_TYPE_FROM_CLASS (klass),
@@ -418,11 +446,9 @@ geoclue_web_service_query (GeoclueWebService *self, ...)
 	}
 	g_assert (self->response);
 	g_free (url);
-	if (!geoclue_seb_service_build_xpath_context (self)) {
-		return FALSE;
-	}
-	g_assert (self->xpath_ctx);
-	geoclue_web_service_register_namespaces (self);
+	
+	g_debug ("response length: %d", self->response_length);
+	
 	return TRUE;
 }
 
@@ -438,14 +464,21 @@ geoclue_web_service_add_namespace (GeoclueWebService *self, gchar *namespace, gc
 	ns->uri = g_strdup (uri);
 	self->namespaces = g_list_prepend (self->namespaces, ns);
 }
+
+
 gboolean
 geoclue_web_service_get_double (GeoclueWebService *self, gdouble *OUT_value, gchar *xpath)
 {
 	g_return_val_if_fail (GEOCLUE_IS_WEB_SERVICE (self), FALSE);
+	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (OUT_value, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
 	
-	g_return_val_if_fail (self->xpath_ctx, FALSE);
+	/* parse the doc if not parsed yet and register namespaces */
+	if (!geoclue_seb_service_build_xpath_context (self)) {
+		return FALSE;
+	}
+	g_assert (self->xpath_ctx);
 	
 	gboolean retval = FALSE;
 	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
@@ -463,10 +496,15 @@ gboolean
 geoclue_web_service_get_string (GeoclueWebService *self, gchar **OUT_value, gchar* xpath)
 {
 	g_return_val_if_fail (GEOCLUE_IS_WEB_SERVICE (self), FALSE);
+	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (OUT_value, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
 	
-	g_return_val_if_fail (self->xpath_ctx, FALSE);
+	/* parse the doc if not parsed yet and register namespaces */
+	if (!geoclue_seb_service_build_xpath_context (self)) {
+		return FALSE;
+	}
+	g_assert (self->xpath_ctx);
 	
 	gboolean retval= FALSE;
 	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
@@ -477,6 +515,5 @@ geoclue_web_service_get_string (GeoclueWebService *self, gchar **OUT_value, gcha
 		}
 		xmlXPathFreeObject (xpathObj);
 	}
-	/*DEBUG*/
 	return retval;
 }

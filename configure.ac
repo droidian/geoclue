@@ -140,7 +140,7 @@ fi
 AC_SUBST(APPLET_CFLAGS)
 AC_SUBST(APPLET_LIBS)
 
-PKG_CHECK_MODULES(YAHOO, gconf-2.0 libsoup-2.2 libxml-2.0 dbus-glib-1 gtk+-2.0)
+PKG_CHECK_MODULES(YAHOO, gconf-2.0 libxml-2.0 dbus-glib-1 gtk+-2.0)
 AC_SUBST(YAHOO_CFLAGS)
 AC_SUBST(YAHOO_LIBS)
 

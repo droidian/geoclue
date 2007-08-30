@@ -172,7 +172,9 @@ geoclue_web_service_fetch (GeoclueWebService *self, gchar *url)
 	xmlBuffer *output;
 	
 	g_free (self->response);
+	self->response = NULL;
 	xmlXPathFreeContext (self->xpath_ctx);
+	self->xpath_ctx = NULL;
 	g_assert (url);
 	
 	xmlNanoHTTPInit();
@@ -227,7 +229,9 @@ geoclue_web_service_finalize (GObject *obj)
 	
 	geoclue_web_service_connection_events_deinit (self);
 	g_free (self->base_url);
+	self->base_url = NULL;
 	g_free (self->response);
+	self->response = NULL;
 	self->response_length = 0;
 	
 	g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
@@ -260,11 +264,14 @@ geoclue_web_service_set_property (GObject *object,
 	switch (property_id) {
 		case GEOCLUE_WEB_SERVICE_URL:
 			g_free (self->base_url);
+			self->base_url = NULL;
 			g_free (self->response);
+			self->response = NULL;
 			self->response_length = 0;
 			g_list_foreach (self->namespaces, (GFunc)geoclue_web_service_free_ns, NULL);
 			g_list_free (self->namespaces);
 			xmlXPathFreeContext (self->xpath_ctx);
+			self->xpath_ctx = NULL;
 			self->base_url = g_value_dup_string (value);
 			g_debug ("set base_url: %s\n",self->base_url);
 			break;

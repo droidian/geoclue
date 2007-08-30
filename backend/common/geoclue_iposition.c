@@ -1,7 +1,7 @@
-#include "geoclue_iposprovider.h"
+#include "geoclue_iposition.h"
 
 static void
-geoclue_iposprovider_base_init (gpointer g_class)
+geoclue_iposition_base_init (gpointer g_class)
 {
 	static gboolean initialized = FALSE;
 	if (!initialized) {
@@ -11,13 +11,13 @@ geoclue_iposprovider_base_init (gpointer g_class)
 }
 
 GType
-geoclue_iposprovider_get_type (void)
+geoclue_iposition_get_type (void)
 {
 	static GType type = 0;
 	if (type == 0) {
 		static const GTypeInfo info = {
-			sizeof (GeoclueIPosproviderInterface),
-			geoclue_iposprovider_base_init, /* base_init */
+			sizeof (GeoclueIPositionInterface),
+			geoclue_iposition_base_init, /* base_init */
 			NULL,                          /* base_finalize */
 			NULL,                          /* class_init */
 			NULL,                          /* class_finalize */
@@ -33,7 +33,7 @@ geoclue_iposprovider_get_type (void)
 	return type;
 }
 
-void geoclue_iposprovider_do_action (GeoclueIPosprovider *self)
+void geoclue_iposition_do_action (GeoclueIPosition *self)
 {
-	GEOCLUE_IPOSPROVIDER_GET_INTERFACE (self)->do_action (self);
+	GEOCLUE_IPOSITION_GET_INTERFACE (self)->do_action (self);
 }

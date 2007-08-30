@@ -17,11 +17,10 @@ $(service_DATA): $(service_in_files) Makefile
 		sed -e 's;@execdir@;$(execdir);' $< > $@ ;\
 	done
 
-
+LDADD = ../common/libgeoclue_position_error.a
 AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(YAHOO_LIBS) -lgps \
-             ../../geoclue/libgeoclue.la \
-             ../common/geclue_position_error.o
+             ../../geoclue/libgeoclue.la
 
 EXTRA_DIST = \
 		geoclue_position_server_gpsd.h \

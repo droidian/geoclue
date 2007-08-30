@@ -7,13 +7,10 @@ geoclue_position_server_plazes_SOURCES = geoclue_position_server_plazes.c \
                                          geoclue_position_signal_marshal.c
 
 
-# TODO: Yahoo libs/cflags is wrong, fix these...
-
+LDADD = ../common/libgeoclue_web_service.a ../common/libgeoclue_position_error.a
 AM_CPPFLAGS = $(YAHOO_CFLAGS) $(CONIC_CFLAGS) -I$(top_srcdir)
 AM_LDFLAGS = $(YAHOO_LIBS) $(CONIC_LIBS) \
-             ../../geoclue/libgeoclue.la \
-             ../common/geoclue_web_service.o \
-             ../common/geoclue_position_error.o
+             ../../geoclue/libgeoclue.la
 
 EXTRA_DIST = geoclue_position_server_plazes.h \
              position_plazes.desc \

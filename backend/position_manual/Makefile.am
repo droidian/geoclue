@@ -3,8 +3,9 @@ bin_PROGRAMS = geoclue-position-server-manual
 geoclue_position_server_manual_SOURCES = geoclue_position_server_manual.c \
                                          geoclue_position_signal_marshal.c
 
+LDADD = ../common/libgeoclue_position_error.a
 AM_CPPFLAGS = $(YAHOO_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la ../common/geoclue_position_error.o
+AM_LDFLAGS = $(YAHOO_LIBS) ../../geoclue/libgeoclue.la
 
 
 service_in_files = org.freedesktop.geoclue.position.manual.service.in

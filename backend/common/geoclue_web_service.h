@@ -68,12 +68,12 @@
  * 
  * The actual response data is available (see "response"-property), 
  * but if the data is xml it's a lot easier to use 
- * "geoclue_web_service_get_*" -methods to get specific data using 
- * simple xpath expressions.
+ * "geoclue_web_service_get_*" -methods to get specific elements using 
+ * simple xpath expressions, as in the example above.
  * 
  * If the xml data uses namespaces, they should be added with 
- * geoclue_web_service_add_namespace before calling 
- * geoclue_web_service_query.
+ * geoclue_web_service_add_namespace after object construction but
+ * before calling "geoclue_web_service_get_*" -functions.
  */
 
 #ifndef GEOCLUE_WEB_SERVICE_H

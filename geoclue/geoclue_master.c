@@ -218,14 +218,17 @@ gboolean geoclue_master_get_default_position_provider (GeoclueMaster *obj, char 
 gboolean geoclue_master_get_all_position_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error)
 {
     guint length =  g_list_length(obj->position_backends);
+    GList *l;
     *OUT_service        = malloc(length * sizeof(char*));
     *OUT_path           = malloc(length * sizeof(char*));
     *OUT_description    = malloc(length * sizeof(char*));    
     printf("length %d\n",length);
     int i;
-    for(i = 0; i < length; i++)
+
+    for(l = obj->position_backends, i = 0; l; l = l->next, i++)
     {
-        char** backend = g_list_nth_data(obj->position_backends, i);
+        char** backend = l->data;
+
         *OUT_service[i] = g_strdup(backend[0]);
         *OUT_path[i] = g_strdup(backend[1]);
         *OUT_description[i] = g_strdup(backend[3]);
@@ -261,14 +264,16 @@ gboolean geoclue_master_get_default_map_provider (GeoclueMaster *obj, char ** OU
 gboolean geoclue_master_get_all_map_providers (GeoclueMaster *obj, char *** OUT_service, char *** OUT_path, char *** OUT_description,  GError **error)
 {  
     guint length =  g_list_length(obj->map_backends);
+    GList *l;
     *OUT_service        = malloc(length * sizeof(char*));
     *OUT_path           = malloc(length * sizeof(char*));
     *OUT_description    = malloc(length * sizeof(char*));    
     printf("length %d\n",length);
     int i;
-    for(i = 0; i < length; i++)
-    {
-        char** backend = g_list_nth_data(obj->map_backends, i);
+
+    for(l = obj->map_backends, i = 0; l; l = l->next, i++) {
+        char** backend = l->data;
+
         *OUT_service[i] = g_strdup(backend[0]);
         *OUT_path[i] = g_strdup(backend[1]);
         *OUT_description[i] = g_strdup(backend[3]);

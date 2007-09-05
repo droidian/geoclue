@@ -366,8 +366,8 @@ gboolean geoclue_position_shutdown(GeocluePosition *server, GError** error)
 
 int main(int argc, char **argv) 
 {
-    //char* server = NULL;
-    char* port = DEFAULT_GPSD_PORT;
+    char* gps_server = NULL;
+    char* gps_port = DEFAULT_GPSD_PORT;
     pthread_t th_gps;
 
     g_type_init ();
@@ -396,8 +396,9 @@ int main(int argc, char **argv)
     server = GEOCLUE_POSITION(g_type_create_instance (geoclue_position_get_type()));
     server->loop = g_main_loop_new(NULL,TRUE);
     g_debug ("Starting GPSD\n");
-    server->gpsdata = gps_open(server, port);
-
+    
+    server->gpsdata = gps_open (gps_server, gps_port);
+    
     if(server->gpsdata)
     {  
         g_debug ("Attaching callback, running main loop...\n");

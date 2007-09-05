@@ -22,6 +22,7 @@
 #include <geoclue_position_server_glue.h>
 #include <geoclue_position_signal_marshal.h>
 
+#define DBUS_API_SUBJECT_TO_CHANGE
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
 

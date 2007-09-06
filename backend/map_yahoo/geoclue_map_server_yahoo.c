@@ -186,7 +186,7 @@ gboolean geoclue_map_version (GeoclueMap *obj, gint* OUT_major, gint* OUT_minor,
 
 gboolean geoclue_map_service_provider(GeoclueMap *obj, char** name, GError **error)
 {
-    *name = "Yahoo Maps";
+    *name = g_strdup ("Yahoo Maps");
     printf("Yahoo!!!\n");
     return TRUE;
 }
@@ -299,7 +299,7 @@ void geoclue_map_map_thread(params *obj)
 gboolean geoclue_map_get_map (GeoclueMap *obj, const gdouble IN_latitude, const gdouble IN_longitude, const gint IN_width, const gint IN_height, const gint IN_zoom, int* return_code, GError **error)
 {
 
-    if( IN_latitude > 180.0 || IN_latitude < -180.0)
+    if( IN_latitude > 90.0 || IN_latitude < -90.0)
     {
         *return_code = GEOCLUE_MAP_INVALID_LATITUDE;
         return TRUE;

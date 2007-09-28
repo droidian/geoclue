@@ -426,7 +426,7 @@ gboolean geoclue_position_service_name(	GeocluePosition* server,
 										char** name, 
 										GError **error)
 {
-    *name = "www.hostip.info";
+    *name = g_strdup("www.hostip.info");
     return TRUE;
 }
 

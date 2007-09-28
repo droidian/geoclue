@@ -82,7 +82,7 @@ static guint signals[LAST_SIGNAL];
 void geoclue_map_get_map_finished(GeoclueMap* obj, gint returncode, GArray* map_buffer, gchar* buffer_mime_type)
 {   
 
-printf("finished sending map\n");
+g_print("finished sending map\n");
 }
 
 
@@ -175,7 +175,7 @@ geoclue_map_class_init (GeoclueMapClass *klass)
 
 gboolean geoclue_map_version (GeoclueMap *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
 {
-        printf("Yahoo!!!\n");
+        g_print("Yahoo!!!\n");
     *OUT_major = 1;
     *OUT_minor = 0;
     *OUT_micro = 0;
@@ -187,13 +187,13 @@ gboolean geoclue_map_version (GeoclueMap *obj, gint* OUT_major, gint* OUT_minor,
 gboolean geoclue_map_service_provider(GeoclueMap *obj, char** name, GError **error)
 {
     *name = g_strdup ("Yahoo Maps");
-    printf("Yahoo!!!\n");
+    g_print("Yahoo!!!\n");
     return TRUE;
 }
 
 gboolean geoclue_map_max_zoom(GeoclueMap *obj, int* max_zoom, GError **error)
 {
-        printf("Yahoo!!!\n");
+        g_print("Yahoo!!!\n");
     *max_zoom = GEOCLUE_MAP_MAX_ZOOM;
     return TRUE;
 }
@@ -435,7 +435,7 @@ gboolean geoclue_map_find_zoom_level (GeoclueMap *obj, const gdouble IN_latitude
         make_me_one *= 2.0;       
     }
     
-    printf("Long offset \n");  
+    g_print("Long offset \n");  
 
 
     return TRUE;       

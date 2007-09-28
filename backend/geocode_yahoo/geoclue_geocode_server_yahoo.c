@@ -109,7 +109,7 @@ geoclue_geocode_class_init (GeoclueGeocodeClass *klass)
 
 gboolean geoclue_geocode_version (GeoclueGeocode *obj, gint* OUT_major, gint* OUT_minor, gint* OUT_micro, GError **error)
 {
-        printf("Yahoo!!!\n");
+        g_print("Yahoo!!!\n");
     *OUT_major = 1;
     *OUT_minor = 0;
     *OUT_micro = 0;
@@ -120,8 +120,8 @@ gboolean geoclue_geocode_version (GeoclueGeocode *obj, gint* OUT_major, gint* OU
 
 gboolean geoclue_geocode_service_provider(GeoclueGeocode *obj, char** name, GError **error)
 {
-    *name = "Yahoo Geocodes";
-    printf("Yahoo!!!\n");
+    *name = g_strdup("Yahoo Geocodes");
+    g_print("Yahoo!!!\n");
     return TRUE;
 }
 gboolean geoclue_geocode_to_lat_lon (GeoclueGeocode *obj, const char * IN_street, const char * IN_city, const char * IN_state, const char * IN_zip, gdouble* OUT_latitude, gdouble* OUT_longitude, gint* OUT_return_code, GError **error )
@@ -172,7 +172,7 @@ gboolean geoclue_geocode_lat_lon_to_address(GeoclueGeocode *obj, gdouble IN_lati
     *OUT_state = g_strdup("Unknown");
     *OUT_zip = g_strdup("Unknown");
     
-    printf("Yahoo!!!\n");
+    g_print("Yahoo!!!\n");
     return TRUE;
 }
 

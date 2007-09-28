@@ -229,7 +229,7 @@ gboolean geoclue_position_service_name(	GeocluePosition* server,
 										char** name, 
 										GError **error)
 {
-    *name = "gpsd";
+    *name = g_strdup("gpsd");
     return TRUE;
 }
 
@@ -339,16 +339,16 @@ gboolean geoclue_position_service_status	 (	GeocluePosition* server,
 {
 	  if (server->gpsdata->online == 0) {
 			*OUT_status =     GEOCLUE_POSITION_NO_SERVICE_AVAILABLE;    
-			*OUT_string = strdup("GPSD Error no GPS device available");
+			*OUT_string = g_strdup("GPSD Error no GPS device available");
 			return TRUE;
 	    }
 	    if (server->gpsdata->status == STATUS_NO_FIX) {
 	    	*OUT_status =     GEOCLUE_POSITION_ACQUIRING_LONGITUDE | GEOCLUE_POSITION_ACQUIRING_LATITUDE;    
-	    	*OUT_string = strdup("GPSD has not got a fix");
+	    	*OUT_string = g_strdup("GPSD has not got a fix");
 	    	return TRUE;
 	    }
 		*OUT_status =     GEOCLUE_POSITION_LONGITUDE_AVAILABLE | GEOCLUE_POSITION_LATITUDE_AVAILABLE;    
-		*OUT_string = strdup("GPSD has a locked on signal");
+		*OUT_string = g_strdup("GPSD has a locked on signal");
 		return TRUE;
 	
 	

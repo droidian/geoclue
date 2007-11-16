@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
 <node name="/">
-        <interface name="org.freedesktop.Geoclue">
-                <method name="GetVersion">
-                        <arg type="i" name="major" direction="out" />
-                        <arg type="i" name="minor" direction="out" />
-                        <arg type="i" name="micro" direction="out" />
-                </method>
+	<interface name="org.freedesktop.Geoclue">
+		<method name="GetVersion">
+			<arg type="i" name="major" direction="out" />
+			<arg type="i" name="minor" direction="out" />
+			<arg type="i" name="micro" direction="out" />
+		</method>
 
-                <property name="ServiceName" type="s" access="read" />
+		<property name="ServiceName" type="s" access="read" />
+		<property name="ServiceDescription" type="s" access="read" />
 
 		<method name="GetStatus">
 			<arg type="b" name="active" direction="out" />
@@ -19,6 +20,6 @@
 		</signal>
 
 		<method name="Shutdown" />
-        </interface>
+	</interface>
 </node>
 

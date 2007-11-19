@@ -28,10 +28,10 @@ struct _GcIfaceGeocodeClass {
 	/* vtable */
 	gboolean (*address_to_position) (GcIfaceGeocode        *gc,
 					 GHashTable            *address,
-					 GeocodePositionFields *fields,
+					 GeocluePositionFields *fields,
 					 double                *latitude,
 					 double                *longitude,
-					 double                *altitude
+					 double                *altitude,
 					 GeoclueAccuracy       *accuracy_level,
 					 double                *horizontal_accuracy,
 					 double                *vertical_accuracy,

@@ -66,7 +66,7 @@ gc_iface_reverse_geocode_position_to_address (GcIfaceReverseGeocode *gc,
 					      double         *vertical_accuracy,
 					      GError        **error)
 {
-	return GC_IFACE_ADDRESS_GET_CLASS (gc)->position_to_address 
+	return GC_IFACE_REVERSE_GEOCODE_GET_CLASS (gc)->position_to_address 
 		(gc, latitude, longitude, address,
 		 (GeoclueAccuracy *) accuracy_level, 
 		 horizontal_accuracy, vertical_accuracy, error);

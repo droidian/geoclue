@@ -15,8 +15,22 @@ AC_PROG_MAKE_SET
 AC_PROG_GCC_TRADITIONAL
 AM_PROG_LIBTOOL
 
+AC_ARG_ENABLE(system-bus,
+	      [AC_HELP_STRING([--enable-system-bus],
+			      [Use the system bus instead of session bus])],
+	      enable_system_bus="$enableval",
+	      enable_system_bus=no)
+
+AM_CONDITIONAL(USE_SYSTEM_BUS, test x$enable_system_bus = xyes)
+if test x$enable_system_bus = xyes; then
+	AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SYSTEM, Use the system bus)
+else
+	AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SESSION, Use the session bus)
+fi
+
 PKG_CHECK_MODULES(GEOCLUE, [
 		  glib-2.0
+		  gobject-2.0
 		  dbus-glib-1 >= 0.60
 ])
 AC_SUBST(GEOCLUE_LIBS)

@@ -19,13 +19,6 @@ G_BEGIN_DECLS
 #define GC_IS_IFACE_POSITION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GC_TYPE_IFACE_POSITION))
 #define GC_IFACE_POSITION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GC_TYPE_IFACE_POSITION, GcIfacePositionClass))
 
-typedef enum {
-	GEOCLUE_POSITION_FIELDS_NONE = 0,
-	GEOCLUE_POSITION_FIELDS_LATITUDE = 1 << 0,
-	GEOCLUE_POSITION_FIELDS_LONGITUDE = 1 << 1,
-	GEOCLUE_POSITION_FIELDS_ALTITUDE = 1 << 2
-} GeocluePositionFields;
-
 typedef struct _GcIfacePosition GcIfacePosition; /* Dummy typedef */
 typedef struct _GcIfacePositionClass GcIfacePositionClass;
 

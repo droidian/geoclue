@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.freedesktop.geoclue.geocode.yahoo
-Exec=@execdir@/geoclue-geocode-server-yahoo

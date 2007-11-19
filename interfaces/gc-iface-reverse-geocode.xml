@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/">
+	<interface name="org.freedesktop.Geoclue.ReverseGeocode"> 
+		<method name="PositionToAddress">
+        		<arg name="latitude" type="d" direction="in" /> 
+		        <arg name="longitude" type="d" direction="in" /> 
+
+		        <arg type="a{ss}" name="address" direction="out" />
+
+                        <arg name="accuracy_level" type="i" direction="out" />
+                        <arg name="horizontal_accuracy" type="d" direction="out" />
+                        <arg name="vertical_accuracy" type="d" direction="out" />
+		</method>
+	</interface>
+</node>

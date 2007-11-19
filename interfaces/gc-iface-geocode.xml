@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/">
+	<interface name="org.freedesktop.Geoclue.Geocode"> 
+		<method name="AddressToPosition">
+		        <arg type="a{ss}" name="address" direction="in" />
+
+		        <arg name="fields" type="i" direction="out" /> 
+		        <arg name="latitude" type="d" direction="out" /> 
+		        <arg name="longitude" type="d" direction="out" />
+		        <arg name="altitude" type="d" direction="out" />
+
+                        <arg name="accuracy_level" type="i" direction="out" />
+                        <arg name="horizontal_accuracy" type="d" direction="out" />
+                        <arg name="vertical_accuracy" type="d" direction="out" />
+		</method>
+	</interface>
+</node>

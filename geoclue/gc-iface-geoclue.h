@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * gc-iface-geoclue.c - GInterface for org.freedesktop.Geoclue
+ * gc-iface-geoclue.h - GInterface for org.freedesktop.Geoclue
  * 
  * Author: Iain Holmes <iain@openedhand.com>
  */

@@ -12,7 +12,7 @@ BUILT_SOURCES =			\
 
 libgeoclue_backend_la_SOURCES = \
 	$(BUILT_SOURCES)	\
-	gc-backend.c		\
+	gc-provider.c		\
 	gc-iface-address.c	\
 	gc-iface-geoclue.c      \
 	gc-iface-geocode.c	\

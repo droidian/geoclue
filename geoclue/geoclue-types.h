@@ -19,4 +19,8 @@ typedef enum {
 	GEOCLUE_POSITION_FIELDS_ALTITUDE = 1 << 2
 } GeocluePositionFields;
 
+typedef enum {
+	GEOCLUE_ERROR_NOT_IMPLEMENTED,
+} GeoclueError;
+
 #endif

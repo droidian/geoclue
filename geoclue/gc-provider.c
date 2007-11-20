@@ -13,9 +13,14 @@
 #include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
 
+#include <geoclue/geoclue-error.h>
 #include <geoclue/gc-provider.h>
 
-G_DEFINE_ABSTRACT_TYPE (GcProvider, gc_provider, G_TYPE_OBJECT)
+static void gc_provider_geoclue_init (GcIfaceGeoclueClass *iface);
+
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GcProvider, gc_provider, G_TYPE_OBJECT,
+				  G_IMPLEMENT_INTERFACE(GC_TYPE_IFACE_GEOCLUE,
+							gc_provider_geoclue_init))
 
 static void
 finalize (GObject *object)
@@ -49,6 +54,69 @@ gc_provider_init (GcProvider *provider)
 			   G_OBJECT_TYPE_NAME (provider), error->message);
 		g_error_free (error);
 	}
+}
+
+static gboolean 
+get_version (GcIfaceGeoclue *geoclue,
+	     int            *major,
+	     int            *minor,
+	     int            *micro,
+	     GError        **error)
+{
+	GcProviderClass *klass;
+
+	klass = GC_PROVIDER_GET_CLASS (geoclue);
+	if (klass->get_version) {
+		return klass->get_version (geoclue, major, minor, micro, error);
+	} else {
+		*error = g_error_new (GEOCLUE_ERROR,
+				      GEOCLUE_ERROR_NOT_IMPLEMENTED,
+				      "get_version is not implemented");
+		return FALSE;
+	}
+}
+
+static gboolean
+get_status (GcIfaceGeoclue *geoclue,
+	    gboolean       *available,
+	    GError        **error)
+{
+	GcProviderClass *klass;
+
+	klass = GC_PROVIDER_GET_CLASS (geoclue);
+	if (klass->get_status) {
+		return klass->get_status (geoclue, available, error);
+	} else {
+		*error = g_error_new (GEOCLUE_ERROR,
+				      GEOCLUE_ERROR_NOT_IMPLEMENTED,
+				      "get_status is not implemented");
+		return FALSE;
+	}
+}
+
+static gboolean
+shutdown (GcIfaceGeoclue *geoclue,
+	  GError        **error)
+{
+	GcProviderClass *klass;
+
+	klass = GC_PROVIDER_GET_CLASS (geoclue);
+	if (klass->shutdown) {
+		return klass->shutdown (geoclue, error);
+	} else {
+		*error = g_error_new (GEOCLUE_ERROR,
+				      GEOCLUE_ERROR_NOT_IMPLEMENTED,
+				      "shutdown is not implemented");
+		return FALSE;
+	}
+}
+
+static void
+gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
+{
+	iface->get_version = get_version;
+	iface->get_status = get_status;
+	iface->shutdown = shutdown;
 }
 
 /**

@@ -1,1 +1,1 @@
-SUBDIRS = interfaces geoclue
+SUBDIRS = interfaces geoclue providers

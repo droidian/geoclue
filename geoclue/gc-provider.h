@@ -14,12 +14,15 @@ G_BEGIN_DECLS
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
 
+#include <geoclue/gc-iface-geoclue.h>
+
 #define GC_TYPE_PROVIDER (gc_provider_get_type ())
 
 #define GC_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_PROVIDER, GcProvider))
 #define GC_PROVIDER_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), GC_TYPE_PROVIDER, GcProviderClass))
 #define GC_IS_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GC_TYPE_PROVIDER))
 #define GC_IS_PROVIDER_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GC_TYPE_PROVIDER))
+#define GC_PROVIDER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GC_TYPE_PROVIDER, GcProviderClass))
 
 typedef struct _GcProvider {
 	GObject parent_class;
@@ -29,6 +32,18 @@ typedef struct _GcProvider {
 
 typedef struct _GcProviderClass {
 	GObjectClass parent_class;
+
+	/* Implements the GcIfaceGeoclue interface */
+	gboolean (*get_version) (GcIfaceGeoclue *geoclue,
+				 int            *major,
+				 int            *minor,
+				 int            *micro,
+				 GError        **error);
+	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
+				gboolean       *available,
+				GError        **error);
+	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
+			      GError        **error);
 } GcProviderClass;
 
 GType gc_provider_get_type (void);

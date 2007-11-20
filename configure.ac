@@ -41,10 +41,15 @@ AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
+PROVIDER_SUBDIRS="example"
+AC_SUBST(PROVIDER_SUBDIRS)
+
 AC_CONFIG_FILES([
 Makefile
 interfaces/Makefile
 geoclue/Makefile
+providers/Makefile
+providers/example/Makefile
 ])
 
 AC_OUTPUT

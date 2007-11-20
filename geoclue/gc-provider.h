@@ -9,12 +9,12 @@
 #ifndef _GC_PROVIDER
 #define _GC_PROVIDER
 
-G_BEGIN_DECLS
-
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
 
 #include <geoclue/gc-iface-geoclue.h>
+
+G_BEGIN_DECLS
 
 #define GC_TYPE_PROVIDER (gc_provider_get_type ())
 

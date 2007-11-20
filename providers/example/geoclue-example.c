@@ -5,6 +5,8 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+#include <config.h>
+
 #include <geoclue/gc-provider.h>
 
 typedef struct {

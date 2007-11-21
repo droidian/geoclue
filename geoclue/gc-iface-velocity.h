@@ -52,6 +52,13 @@ struct _GcIfaceVelocityClass {
 
 GType gc_iface_velocity_get_type (void);
 
+void gc_iface_velocity_changed (GcIfaceVelocity      *gc,
+				GeoclueVelocityFields fields,
+				int                   timestamp,
+				double                speed,
+				double                direction,
+				double                climb);
+
 G_END_DECLS
 
 #endif

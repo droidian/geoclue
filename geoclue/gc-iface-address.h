@@ -45,6 +45,13 @@ struct _GcIfaceAddressClass {
 
 GType gc_iface_address_get_type (void);
 
+void gc_iface_address_changed (GcIfaceAddress *gc,
+			       int             timestamp,
+			       GHashTable     *address,
+			       GeoclueAccuracy accuracy_level,
+			       double          horizontal_accuracy,
+			       double          vertical_accuracy);
+
 G_END_DECLS
 
 #endif

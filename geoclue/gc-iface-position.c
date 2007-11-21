@@ -80,16 +80,16 @@ gc_iface_position_get_type (void)
 }
 
 static gboolean 
-gc_iface_position_get_position (GcIfacePosition       *gc,
-				int                   *fields,
-				int                   *timestamp,
-				double                *latitude,
-				double                *longitude,
-				double                *altitude,
-				int                   *accuracy_level,
-				double                *horizontal_accuracy,
-				double                *vertical_accuracy,
-				GError               **error)
+gc_iface_position_get_position (GcIfacePosition *gc,
+				int             *fields,
+				int             *timestamp,
+				double          *latitude,
+				double          *longitude,
+				double          *altitude,
+				int             *accuracy_level,
+				double          *horizontal_accuracy,
+				double          *vertical_accuracy,
+				GError         **error)
 {
 	return GC_IFACE_POSITION_GET_CLASS (gc)->get_position 
 		(gc, (GeocluePositionFields *) fields, timestamp,
@@ -99,3 +99,14 @@ gc_iface_position_get_position (GcIfacePosition       *gc,
 		 error);
 }
 
+void
+gc_iface_position_changed (GcIfacePosition      *gc,
+			   GeocluePositionFields fields,
+			   int                   timestamp,
+			   double                latitude,
+			   double                longitude,
+			   double                altitude)
+{
+	g_signal_emit (gc, signals[POSITION_CHANGED], timestamp,
+		       latitude, longitude, altitude);
+}

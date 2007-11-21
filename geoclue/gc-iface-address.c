@@ -85,3 +85,17 @@ gc_iface_address_get_address (GcIfaceAddress *gc,
 		 (GeoclueAccuracy *) accuracy_level, 
 		 horizontal_accuracy, vertical_accuracy, error);
 }
+
+void
+gc_iface_address_changed (GcIfaceAddress *gc,
+			  int             timestamp,
+			  GHashTable     *address,
+			  GeoclueAccuracy accuracy_level,
+			  double          horizontal_accuracy,
+			  double          vertical_accuracy)
+{
+	g_signal_emit (gc, signals[ADDRESS_CHANGED], 0, timestamp,
+		       address, accuracy_level, horizontal_accuracy,
+		       vertical_accuracy);
+}
+		       

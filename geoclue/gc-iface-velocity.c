@@ -74,16 +74,27 @@ gc_iface_velocity_get_type (void)
 }
 
 static gboolean 
-gc_iface_velocity_get_velocity (GcIfaceVelocity       *gc,
-				int                   *fields,
-				int                   *timestamp,
-				double                *speed,
-				double                *direction,
-				double                *climb,
-				GError               **error)
+gc_iface_velocity_get_velocity (GcIfaceVelocity *gc,
+				int             *fields,
+				int             *timestamp,
+				double          *speed,
+				double          *direction,
+				double          *climb,
+				GError         **error)
 {
 	return GC_IFACE_VELOCITY_GET_CLASS (gc)->get_velocity 
 		(gc, (GeoclueVelocityFields *) fields, timestamp,
 		 speed, direction, climb, error);
 }
 
+void
+gc_iface_velocity_changed (GcIfaceVelocity      *gc,
+			   GeoclueVelocityFields fields,
+			   int                   timestamp,
+			   double                speed,
+			   double                direction,
+			   double                climb)
+{
+	g_signal_emit (gc, signals[VELOCITY_CHANGED], 0, fields, timestamp,
+		       speed, direction, climb);
+}

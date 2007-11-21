@@ -42,6 +42,9 @@ struct _GcIfaceGeoclueClass {
 
 GType gc_iface_geoclue_get_type (void);
 
+void gc_iface_geoclue_emit_status_changed (GcIfaceGeoclue *gc,
+					   gboolean        available);
+
 G_END_DECLS
 
 #endif

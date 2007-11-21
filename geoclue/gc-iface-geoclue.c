@@ -98,3 +98,10 @@ gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
 {
 	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->shutdown (gc, error);
 }
+
+void
+gc_iface_geoclue_emit_status_changed (GcIfaceGeoclue *gc,
+				      gboolean        available)
+{
+	g_signal_emit (gc, signals[STATUS_CHANGED], 0, available);
+}

@@ -38,6 +38,11 @@ AC_ARG_ENABLE(gpsd,
                               [Compile the gpsd backend])],
               [enable_gpsd=yes],
               [enable_gpsd=no])
+AC_ARG_ENABLE(gypsy,
+              [AC_HELP_STRING([--enable-gypsy],
+                              [Compile the gypsy backend])],
+              [enable_gypsy=yes],
+              [enable_gypsy=no])
 
 
 
@@ -81,36 +86,6 @@ if test "x$enable_dev" = "xno"
 then
 
 
-
-
-if test "x$enable_gpsd" = "xyes"
-then
-
-dnl Check for GPSD headers
-
-AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
-if test "x$ac_cv_gps_h" != xyes; then
-    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
-fi
-AC_CHECK_LIB(gps, gps_open,[ac_cv_libgps=yes] )
-if test "x$ac_cv_libgps" != xyes; then
-    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
-fi
-
-dnl check for libgpsbt and libgpsmgr
-AC_CHECK_LIB(gpsmgr, gpsmgr_is_gpsd_running)
-AC_CHECK_LIB(gpsbt, gpsbt_start)
-
-BACKEND_SUBDIRS="position_gpsd"
-
-AC_OUTPUT(  
-    backend/position_gpsd/Makefile
-)
-
-
-fi #gpds
-
-
 dnl check for libconic
 PKG_CHECK_MODULES(CONIC, conic dbus-1, [have_libconic=yes], [have_libconic=no])
 AC_SUBST(CONIC_CFLAGS)
@@ -120,7 +95,7 @@ if test "x$have_libconic" = "xyes"; then
 fi
 
 
-PKG_CHECK_MODULES(HTTPXML, libsoup-2.2 libxml-2.0)
+PKG_CHECK_MODULES(HTTPXML, libxml-2.0)
 AC_SUBST(HTTPXML_CFLAGS)
 AC_SUBST(HTTPXML_LIBS)
 
@@ -148,10 +123,14 @@ AC_SUBST(YAHOO_LIBS)
 
 dnl substitute subdirs into makefiles
 BACKEND_SUBDIRS="${BACKEND_SUBDIRS} common map_yahoo geocode_yahoo position_manual position_hostip position_plazes"
-
-
-
-AC_OUTPUT(	
+AC_CONFIG_FILES([
+	Makefile 
+	geoclue/Makefile 
+	example/Makefile
+	data/Makefile
+    doxygen/Makefile
+    doxygen/doxygen.conf
+	geoclue.pc
 	backend/Makefile
 	backend/common/Makefile
 	backend/map_yahoo/Makefile
@@ -159,9 +138,52 @@ AC_OUTPUT(
 	backend/position_manual/Makefile
 	backend/position_hostip/Makefile
 	backend/position_plazes/Makefile
-)
-EXTRA_SUBDIRS="${EXTRA_SUBDIRS} backend"
+])
 
+
+
+if test "x$enable_gpsd" = "xyes"
+then
+
+dnl Check for GPSD headers
+
+AC_CHECK_HEADERS([gps.h], [ac_cv_gps_h=yes])
+if test "x$ac_cv_gps_h" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+AC_CHECK_LIB(gps, gps_open,[ac_cv_libgps=yes] )
+if test "x$ac_cv_libgps" != xyes; then
+    AC_MSG_ERROR([Install gpsd Debian package or its source-code equivalent])
+fi
+
+
+dnl check for libgpsbt and libgpsmgr
+AC_CHECK_LIB(gpsmgr, gpsmgr_is_gpsd_running)
+AC_CHECK_LIB(gpsbt, gpsbt_start)
+
+BACKEND_SUBDIRS="${BACKEND_SUBDIRS} position_gpsd"
+AC_CONFIG_FILES([
+	backend/position_gpsd/Makefile
+])
+
+fi #gpds
+
+
+if test "x$enable_gypsy" = "xyes"; then
+
+PKG_CHECK_MODULES(GYPSY, gypsy gobject-2.0 glib-2.0 gconf-2.0)
+AC_SUBST(GYPSY_CFLAGS)
+AC_SUBST(GYPSY_LIBS)
+
+BACKEND_SUBDIRS="${BACKEND_SUBDIRS} position_gypsy"
+AC_CONFIG_FILES([
+	backend/position_gypsy/Makefile
+])
+
+fi #gypsy
+
+
+EXTRA_SUBDIRS="${EXTRA_SUBDIRS} backend"
 
 fi
 
@@ -169,12 +191,4 @@ dnl substitute subdirs into makefiles
 AC_SUBST(EXTRA_SUBDIRS)
 AC_SUBST(BACKEND_SUBDIRS)
 
-AC_OUTPUT(Makefile 
-	geoclue/Makefile 
-	example/Makefile
-	data/Makefile
-    doxygen/Makefile
-    doxygen/doxygen.conf
-	geoclue.pc
-)
-
+AC_OUTPUT

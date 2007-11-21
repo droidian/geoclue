@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.freedesktop.geoclue.position.gypsy
+Exec=@execdir@/geoclue-position-server-gypsy

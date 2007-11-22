@@ -32,11 +32,14 @@ typedef struct _GcWebProviderClass {
 
 GType gc_web_provider_get_type (void);
 
-gboolean gc_web_provider_query (GcWebProvider *self, ...);
+gboolean gc_web_provider_set_base_url (GcWebProvider *self, gchar *url);
 gboolean gc_web_provider_add_namespace (GcWebProvider *self, gchar *namespace, gchar *uri);
 
+gboolean gc_web_provider_query (GcWebProvider *self, ...);
 gboolean gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar *xpath);
 gboolean gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpath);
+
+gboolean gc_web_provider_get_response (GcWebProvider *self, guchar **response, gint *response_length);
 
 G_END_DECLS
 

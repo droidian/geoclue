@@ -2,11 +2,13 @@
  * Geoclue
  * gc-provider-hostip.c - A hostip.info-based Address/Position provider
  *
+ * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  */
 
 #include <config.h>
 
+#include <time.h>
 #include <dbus/dbus-glib-bindings.h>
 
 #include <geoclue/gc-provider.h>
@@ -19,6 +21,9 @@
 
 #define GC_DBUS_SERVICE_HOSTIP "org.freedesktop.Geoclue.Providers.Hostip"
 #define GC_DBUS_PATH_HOSTIP "/org/freedesktop/Geoclue/Providers/Hostip"
+
+#define HOSTIP_URL "http://api.hostip.info/"
+
 
 static void gc_provider_hostip_init (GcProviderHostip *obj);
 static void gc_provider_hostip_position_init (GcIfacePositionClass  *iface);
@@ -76,9 +81,41 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
                                  GeoclueAccuracy       **accuracy,
                                  GError                **error)
 {
-	/* TODO */
+	GcWebProvider *obj = GC_WEB_PROVIDER (iface);
+	gchar *coord_str = NULL;
 	
-	return FALSE;
+	if (!gc_web_provider_query (obj, NULL)) {
+		/* TODO: error handling */
+		return FALSE;
+	}
+	
+	if (!gc_web_provider_get_string (obj,
+	                                 &coord_str,
+	                                 "//gml:featureMember/hostip:Hostip//gml:coordinates")) {
+		/* No data available */
+		/* TODO: error handling */
+		return FALSE;
+	}
+	
+	/* Hostip xml has to most idiotic format ever. lat and lon in one xml element? */
+	if (sscanf (coord_str, "%lf,%lf", longitude , latitude) != 2) {
+		/* No data available */
+		/* TODO: error handling */
+		g_free (coord_str);
+		return FALSE;
+	}
+	g_free (coord_str);
+	
+	*fields = GEOCLUE_POSITION_FIELDS_LONGITUDE;
+	*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+	
+	/* TODO this is going to bite us in 2038 with int timestamps */
+	time ((time_t *)timestamp);
+
+	/* TODO fix accuracy: city level */
+	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+	                                 20000, 20000);
+	return TRUE;
 }
 
 /* Address interface implementation */
@@ -90,7 +127,7 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
                                 GeoclueAccuracy **accuracy,
                                 GError          **error)
 {
-	/* TODO */
+	
 	
 	return FALSE;
 	
@@ -115,6 +152,12 @@ gc_provider_hostip_init (GcProviderHostip *obj)
 	gc_provider_set_details (GC_PROVIDER (obj), 
 	                         GC_DBUS_SERVICE_HOSTIP,
 	                         GC_DBUS_PATH_HOSTIP);
+	
+	gc_web_provider_set_base_url (GC_WEB_PROVIDER (obj), HOSTIP_URL);
+	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
+	                               "gml", "http://www.opengis.net/gml");
+	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
+	                               "hostip", "http://www.hostip.info/api");
 }
 
 static void

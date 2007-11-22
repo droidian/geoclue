@@ -32,6 +32,7 @@ PKG_CHECK_MODULES(GEOCLUE, [
 		  glib-2.0
 		  gobject-2.0
 		  dbus-glib-1 >= 0.60
+		  libxml-2.0
 ])
 AC_SUBST(GEOCLUE_LIBS)
 AC_SUBST(GEOCLUE_CFLAGS)
@@ -41,7 +42,7 @@ AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
-PROVIDER_SUBDIRS="example"
+PROVIDER_SUBDIRS="example hostip"
 AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
@@ -50,6 +51,7 @@ interfaces/Makefile
 geoclue/Makefile
 providers/Makefile
 providers/example/Makefile
+providers/hostip/Makefile
 ])
 
 AC_OUTPUT

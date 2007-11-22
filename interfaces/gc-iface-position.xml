@@ -10,9 +10,7 @@
 			<arg type="d" name="longitude" direction="out" />
 			<arg type="d" name="altitude" direction="out" />
 
-                        <arg name="accuracy_level" type="i" direction="out" />
-                        <arg name="horizontal_accuracy" type="d" direction="out" />
-                        <arg name="vertical_accuracy" type="d" direction="out" />
+                        <arg name="accuracy" type="a(idd)" direction="out" />
 		</method>
 
 		<signal name="PositionChanged">
@@ -22,9 +20,7 @@
 			<arg type="d" name="longitude" />
 			<arg type="d" name="altitude" />
 
-			<arg type="i" name="accuracy_level" />
-			<arg type="d" name="horizontal_accuracy" />
-			<arg type="d" name="vertical_accuracy" />
+			<arg type="a(idd)" name="accuracy" />
 		</signal>
 	</interface>
 </node>

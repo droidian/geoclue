@@ -32,9 +32,7 @@ struct _GcIfaceGeocodeClass {
 					 double                *latitude,
 					 double                *longitude,
 					 double                *altitude,
-					 GeoclueAccuracy       *accuracy_level,
-					 double                *horizontal_accuracy,
-					 double                *vertical_accuracy,
+					 GeoclueAccuracy      **accuracy,
 					 GError               **error);
 };
 

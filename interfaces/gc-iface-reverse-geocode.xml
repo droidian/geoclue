@@ -8,9 +8,7 @@
 
 		        <arg type="a{ss}" name="address" direction="out" />
 
-                        <arg name="accuracy_level" type="i" direction="out" />
-                        <arg name="horizontal_accuracy" type="d" direction="out" />
-                        <arg name="vertical_accuracy" type="d" direction="out" />
+                        <arg name="accuracy" type="a(idd)" direction="out" />
 		</method>
 	</interface>
 </node>

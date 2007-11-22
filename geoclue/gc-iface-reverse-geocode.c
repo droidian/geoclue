@@ -9,18 +9,16 @@
 
 #include <dbus/dbus-glib.h>
 
-#include <geoclue/geoclue-marshal.h>
+#include <geoclue/geoclue-accuracy.h>
 #include <geoclue/gc-iface-reverse-geocode.h>
 
 static gboolean 
 gc_iface_reverse_geocode_position_to_address (GcIfaceReverseGeocode *gc,
-					      double          latitude,
-					      double          longitude,
-					      GHashTable    **address,
-					      int            *accuracy_level,
-					      double         *horizontal_accuracy,
-					      double         *vertical_accuracy,
-					      GError        **error);
+					      double            latitude,
+					      double            longitude,
+					      GHashTable      **address,
+					      GeoclueAccuracy **accuracy,
+					      GError          **error);
 #include "gc-iface-reverse-geocode-glue.h"
 
 static void
@@ -58,16 +56,13 @@ gc_iface_reverse_geocode_get_type (void)
 
 static gboolean 
 gc_iface_reverse_geocode_position_to_address (GcIfaceReverseGeocode *gc,
-					      double          latitude,
-					      double          longitude,
-					      GHashTable    **address,
-					      int            *accuracy_level,
-					      double         *horizontal_accuracy,
-					      double         *vertical_accuracy,
-					      GError        **error)
+					      double            latitude,
+					      double            longitude,
+					      GHashTable      **address,
+					      GeoclueAccuracy **accuracy,
+					      GError          **error)
 {
 	return GC_IFACE_REVERSE_GEOCODE_GET_CLASS (gc)->position_to_address 
-		(gc, latitude, longitude, address,
-		 (GeoclueAccuracy *) accuracy_level, 
-		 horizontal_accuracy, vertical_accuracy, error);
+		(gc, latitude, longitude, address, accuracy, error);
+
 }

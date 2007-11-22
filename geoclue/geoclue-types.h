@@ -9,8 +9,8 @@
 #define _GEOCLUE_TYPES_H
 
 typedef enum {
-	GEOCLUE_ACCURACY_DETAILED,
-} GeoclueAccuracy;
+	GEOCLUE_ACCURACY_LEVEL_DETAILED,
+} GeoclueAccuracyLevel;
 
 typedef enum {
 	GEOCLUE_POSITION_FIELDS_NONE = 0,

@@ -9,6 +9,7 @@
 #define _GC_IFACE_POSITION_H
 
 #include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-accuracy.h>
 
 G_BEGIN_DECLS
 
@@ -31,7 +32,8 @@ struct _GcIfacePositionClass {
 				   int                   timestamp,
 				   double                latitude,
 				   double                longitude,
-				   double                altitude);
+				   double                altitude,
+				   GeoclueAccuracy      *accuracy);
 
 	/* vtable */
 	gboolean (* get_position) (GcIfacePosition       *gc,
@@ -40,9 +42,7 @@ struct _GcIfacePositionClass {
 				   double                *latitude,
 				   double                *longitude,
 				   double                *altitude,
-				   GeoclueAccuracy       *accuracy_level,
-				   double                *horizontal_accuracy,
-				   double                *vertical_accuracy,
+				   GeoclueAccuracy      **accuracy,
 				   GError               **error);
 };
 

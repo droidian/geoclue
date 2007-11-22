@@ -9,20 +9,18 @@
 
 #include <dbus/dbus-glib.h>
 
-#include <geoclue/geoclue-marshal.h>
+#include <geoclue/geoclue-accuracy.h>
 #include <geoclue/gc-iface-geocode.h>
 
 static gboolean 
-gc_iface_geocode_address_to_position (GcIfaceGeocode *gc,
-				      GHashTable     *address,
-				      int            *fields,
-				      double         *latitude,
-				      double         *longitude,
-				      double         *altitude,
-				      int            *accuracy_level,
-				      double         *horizontal_accuracy,
-				      double         *vertical_accuracy,
-				      GError        **error);
+gc_iface_geocode_address_to_position (GcIfaceGeocode   *gc,
+				      GHashTable       *address,
+				      int              *fields,
+				      double           *latitude,
+				      double           *longitude,
+				      double           *altitude,
+				      GeoclueAccuracy **accuracy,
+				      GError          **error);
 #include "gc-iface-geocode-glue.h"
 
 static void
@@ -59,20 +57,16 @@ gc_iface_geocode_get_type (void)
 }
 
 static gboolean 
-gc_iface_geocode_address_to_position (GcIfaceGeocode *gc,
-				      GHashTable     *address,
-				      int            *fields,
-				      double         *latitude,
-				      double         *longitude,
-				      double         *altitude,
-				      int            *accuracy_level,
-				      double         *horizontal_accuracy,
-				      double         *vertical_accuracy,
-				      GError        **error)
+gc_iface_geocode_address_to_position (GcIfaceGeocode   *gc,
+				      GHashTable       *address,
+				      int              *fields,
+				      double           *latitude,
+				      double           *longitude,
+				      double           *altitude,
+				      GeoclueAccuracy **accuracy,
+				      GError          **error)
 {
 	return GC_IFACE_GEOCODE_GET_CLASS (gc)->address_to_position 
 		(gc, address, (GeocluePositionFields *) fields,
-		 latitude, longitude, altitude,
-		 (GeoclueAccuracy *) accuracy_level, 
-		 horizontal_accuracy, vertical_accuracy, error);
+		 latitude, longitude, altitude, accuracy, error);
 }

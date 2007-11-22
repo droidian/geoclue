@@ -20,13 +20,11 @@ enum {
 static guint signals[LAST_SIGNAL] = {0};
 
 static gboolean 
-gc_iface_address_get_address (GcIfaceAddress *gc,
-			      int            *timestamp,
-			      GHashTable    **address,
-			      int            *accuracy_level,
-			      double         *horizontal_accuracy,
-			      double         *vertical_accuracy,
-			      GError        **error);
+gc_iface_address_get_address (GcIfaceAddress   *gc,
+			      int              *timestamp,
+			      GHashTable      **address,
+			      GeoclueAccuracy **accuracy,
+			      GError          **error);
 #include "gc-iface-address-glue.h"
 
 static void
@@ -43,11 +41,10 @@ gc_iface_address_base_init (gpointer klass)
 						 G_OBJECT_CLASS_TYPE (klass),
 						 G_SIGNAL_RUN_LAST, 0,
 						 NULL, NULL,
-						 geoclue_marshal_VOID__INT_POINTER_INT_DOUBLE_DOUBLE,
-						 G_TYPE_NONE, 5,
+						 geoclue_marshal_VOID__INT_POINTER_BOXED,
+						 G_TYPE_NONE, 3,
 						 G_TYPE_INT, G_TYPE_POINTER, 
-						 G_TYPE_INT,
-						 G_TYPE_DOUBLE, G_TYPE_DOUBLE);
+						 GEOCLUE_ACCURACY_TYPE);
 	dbus_g_object_type_install_info (gc_iface_address_get_type (),
 					 &dbus_glib_gc_iface_address_object_info);
 }
@@ -72,30 +69,23 @@ gc_iface_address_get_type (void)
 }
 
 static gboolean 
-gc_iface_address_get_address (GcIfaceAddress *gc,
-			      int            *timestamp,
-			      GHashTable    **address,
-			      int            *accuracy_level,
-			      double         *horizontal_accuracy,
-			      double         *vertical_accuracy,
-			      GError        **error)
+gc_iface_address_get_address (GcIfaceAddress   *gc,
+			      int              *timestamp,
+			      GHashTable      **address,
+			      GeoclueAccuracy **accuracy,
+			      GError          **error)
 {
 	return GC_IFACE_ADDRESS_GET_CLASS (gc)->get_address 
-		(gc, timestamp, address,
-		 (GeoclueAccuracy *) accuracy_level, 
-		 horizontal_accuracy, vertical_accuracy, error);
+		(gc, timestamp, address, accuracy, error);
 }
 
 void
-gc_iface_address_changed (GcIfaceAddress *gc,
-			  int             timestamp,
-			  GHashTable     *address,
-			  GeoclueAccuracy accuracy_level,
-			  double          horizontal_accuracy,
-			  double          vertical_accuracy)
+gc_iface_address_changed (GcIfaceAddress  *gc,
+			  int              timestamp,
+			  GHashTable      *address,
+			  GeoclueAccuracy *accuracy)
 {
 	g_signal_emit (gc, signals[ADDRESS_CHANGED], 0, timestamp,
-		       address, accuracy_level, horizontal_accuracy,
-		       vertical_accuracy);
+		       address, accuracy);
 }
 		       

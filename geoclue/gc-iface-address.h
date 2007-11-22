@@ -9,6 +9,7 @@
 #define _GC_IFACE_ADDRESS_H
 
 #include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-accuracy.h>
 
 G_BEGIN_DECLS
 
@@ -26,31 +27,25 @@ struct _GcIfaceAddressClass {
 	GTypeInterface base_iface;
 
 	/* signals */
-	void (* address_changed) (GcIfaceAddress *gc,
-				  int             timestamp,
-				  GHashTable     *address,
-				  GeoclueAccuracy accuracy_level,
-				  double          horizontal_accuracy,
-				  double          vertical_accuracy);
+	void (* address_changed) (GcIfaceAddress  *gc,
+				  int              timestamp,
+				  GHashTable      *address,
+				  GeoclueAccuracy *accuracy);
 
 	/* vtable */
-	gboolean (*get_address) (GcIfaceAddress  *gc,
-				 int             *timestamp,
-				 GHashTable     **address,
-				 GeoclueAccuracy *accuracy_level,
-				 double          *horizontal_accuracy,
-				 double          *vertical_accuracy,
-				 GError         **error);
+	gboolean (*get_address) (GcIfaceAddress   *gc,
+				 int              *timestamp,
+				 GHashTable      **address,
+				 GeoclueAccuracy **accuracy,
+				 GError          **error);
 };
 
 GType gc_iface_address_get_type (void);
 
-void gc_iface_address_changed (GcIfaceAddress *gc,
-			       int             timestamp,
-			       GHashTable     *address,
-			       GeoclueAccuracy accuracy_level,
-			       double          horizontal_accuracy,
-			       double          vertical_accuracy);
+void gc_iface_address_changed (GcIfaceAddress  *gc,
+			       int              timestamp,
+			       GHashTable      *address,
+			       GeoclueAccuracy *accuracy_level);
 
 G_END_DECLS
 

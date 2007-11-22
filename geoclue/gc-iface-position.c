@@ -10,6 +10,7 @@
 #include <dbus/dbus-glib.h>
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/geoclue-marshal.h>
+#include <geoclue/geoclue-accuracy.h>
 
 enum {
 	POSITION_CHANGED,
@@ -25,9 +26,7 @@ gc_iface_position_get_position (GcIfacePosition       *position,
 				double                *latitude,
 				double                *longitude,
 				double                *altitude,
-				int                   *accuracy_level,
-				double                *horizontal_accuracy,
-				double                *vertical_accuracy,
+				GeoclueAccuracy      **accuracy,
 				GError               **error);
 
 #include "gc-iface-position-glue.h"
@@ -46,16 +45,15 @@ gc_iface_position_base_init (gpointer klass)
 						  G_OBJECT_CLASS_TYPE (klass),
 						  G_SIGNAL_RUN_LAST, 0,
 						  NULL, NULL,
-						  geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_INT_DOUBLE_DOUBLE,
-						  G_TYPE_NONE, 8,
+						  geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_BOXED,
+						  G_TYPE_NONE, 6,
 						  G_TYPE_INT,
 						  G_TYPE_INT,
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
-						  G_TYPE_INT,
-						  G_TYPE_DOUBLE,
-						  G_TYPE_DOUBLE);
+						  GEOCLUE_ACCURACY_TYPE);
+	
 	dbus_g_object_type_install_info (gc_iface_position_get_type (),
 					 &dbus_glib_gc_iface_position_object_info);
 }
@@ -80,23 +78,18 @@ gc_iface_position_get_type (void)
 }
 
 static gboolean 
-gc_iface_position_get_position (GcIfacePosition *gc,
-				int             *fields,
-				int             *timestamp,
-				double          *latitude,
-				double          *longitude,
-				double          *altitude,
-				int             *accuracy_level,
-				double          *horizontal_accuracy,
-				double          *vertical_accuracy,
-				GError         **error)
+gc_iface_position_get_position (GcIfacePosition  *gc,
+				int              *fields,
+				int              *timestamp,
+				double           *latitude,
+				double           *longitude,
+				double           *altitude,
+				GeoclueAccuracy **accuracy,
+				GError          **error)
 {
 	return GC_IFACE_POSITION_GET_CLASS (gc)->get_position 
 		(gc, (GeocluePositionFields *) fields, timestamp,
-		 latitude, longitude, altitude,
-		 (GeoclueAccuracy *) accuracy_level,
-		 horizontal_accuracy, vertical_accuracy,
-		 error);
+		 latitude, longitude, altitude, accuracy, error);
 }
 
 void
@@ -105,8 +98,9 @@ gc_iface_position_changed (GcIfacePosition      *gc,
 			   int                   timestamp,
 			   double                latitude,
 			   double                longitude,
-			   double                altitude)
+			   double                altitude,
+			   GeoclueAccuracy      *accuracy)
 {
 	g_signal_emit (gc, signals[POSITION_CHANGED], timestamp,
-		       latitude, longitude, altitude);
+		       latitude, longitude, altitude, accuracy);
 }

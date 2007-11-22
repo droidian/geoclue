@@ -27,13 +27,11 @@ struct _GcIfaceReverseGeocodeClass {
 
 	/* vtable */
 	gboolean (*position_to_address) (GcIfaceReverseGeocode  *gc,
-					 double           latitude,
-					 double           longitude,
-					 GHashTable     **address,
-					 GeoclueAccuracy *accuracy_level,
-					 double          *horizontal_accuracy,
-					 double          *vertical_accuracy,
-					 GError         **error);
+					 double            latitude,
+					 double            longitude,
+					 GHashTable      **address,
+					 GeoclueAccuracy **accuracy,
+					 GError          **error);
 };
 
 GType gc_iface_reverse_geocode_get_type (void);

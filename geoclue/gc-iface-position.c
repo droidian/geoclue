@@ -93,13 +93,13 @@ gc_iface_position_get_position (GcIfacePosition  *gc,
 }
 
 void
-gc_iface_position_changed (GcIfacePosition      *gc,
-			   GeocluePositionFields fields,
-			   int                   timestamp,
-			   double                latitude,
-			   double                longitude,
-			   double                altitude,
-			   GeoclueAccuracy      *accuracy)
+gc_iface_position_emit_position_changed (GcIfacePosition      *gc,
+					 GeocluePositionFields fields,
+					 int                   timestamp,
+					 double                latitude,
+					 double                longitude,
+					 double                altitude,
+					 GeoclueAccuracy      *accuracy)
 {
 	g_signal_emit (gc, signals[POSITION_CHANGED], timestamp,
 		       latitude, longitude, altitude, accuracy);

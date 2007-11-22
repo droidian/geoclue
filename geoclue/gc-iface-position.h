@@ -48,6 +48,14 @@ struct _GcIfacePositionClass {
 
 GType gc_iface_position_get_type (void);
 
+void gc_iface_position_emit_position_changed (GcIfacePosition      *gc,
+					      GeocluePositionFields fields,
+					      int                   timestamp,
+					      double                latitude,
+					      double                longitude,
+					      double                altitude,
+					      GeoclueAccuracy      *accuracy);
+
 G_END_DECLS
 
 #endif

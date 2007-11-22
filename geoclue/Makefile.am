@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libgeoclue-backend.la
+lib_LTLIBRARIES = libgeoclue-provider.la
 
 BUILT_SOURCES =			\
 	geoclue-marshal.c	\
@@ -10,7 +10,7 @@ BUILT_SOURCES =			\
 	gc-iface-reverse-geocode-glue.h	\
 	gc-iface-velocity-glue.h
 
-libgeoclue_backend_la_SOURCES = \
+libgeoclue_provider_la_SOURCES = \
 	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
 	geoclue-error.c		\
@@ -22,7 +22,7 @@ libgeoclue_backend_la_SOURCES = \
 	gc-iface-reverse-geocode.c	\
 	gc-iface-velocity.c
 
-libgeoclue_backend_la_CFLAGS =	\
+libgeoclue_provider_la_CFLAGS =	\
 	-I$(top_srcdir)		\
 	-I$(top_builddir)	\
 	$(GEOCLUE_CFLAGS)

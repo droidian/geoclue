@@ -30,7 +30,7 @@ typedef struct _GcIfaceVelocity GcIfaceVelocity; /* Dummy typedef */
 typedef struct _GcIfaceVelocityClass GcIfaceVelocityClass;
 
 struct _GcIfaceVelocityClass {
-        GTypeInterface base_iface;
+	GTypeInterface base_iface;
 
 	/* signals */
 	void (* velocity_changed) (GcIfaceVelocity      *gc,

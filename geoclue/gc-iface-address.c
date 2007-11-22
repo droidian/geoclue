@@ -80,10 +80,10 @@ gc_iface_address_get_address (GcIfaceAddress   *gc,
 }
 
 void
-gc_iface_address_changed (GcIfaceAddress  *gc,
-			  int              timestamp,
-			  GHashTable      *address,
-			  GeoclueAccuracy *accuracy)
+gc_iface_address_emit_address_changed (GcIfaceAddress  *gc,
+				       int              timestamp,
+				       GHashTable      *address,
+				       GeoclueAccuracy *accuracy)
 {
 	g_signal_emit (gc, signals[ADDRESS_CHANGED], 0, timestamp,
 		       address, accuracy);

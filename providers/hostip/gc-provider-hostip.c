@@ -13,6 +13,7 @@
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-web-provider.h>
+#include <geoclue/geoclue-error.h>
 
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
@@ -65,8 +66,10 @@ gc_provider_hostip_get_status (GcIfaceGeoclue  *iface,
                                gboolean        *available,
                                GError         **error)
 {
-	/* TODO: if connection status info is in master, how do we do this? */
-	return TRUE;
+	/* TODO: if connection status info is only in master, how do we do this? */
+	g_set_error (error, GEOCLUE_ERROR, 
+	             GEOCLUE_ERROR_NOT_IMPLEMENTED, "Not implemented yet");
+	return FALSE;
 }
 
 static gboolean
@@ -93,36 +96,34 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
 	GcWebProvider *obj = GC_WEB_PROVIDER (iface);
 	gchar *coord_str = NULL;
 	
+	*fields = GEOCLUE_POSITION_FIELDS_NONE;
+	
 	if (!gc_web_provider_query (obj, NULL)) {
-		/* TODO: error handling */
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	
-	if (!gc_web_provider_get_string (obj,
-	                                 &coord_str,
-	                                 HOSTIP_LATLON_XPATH)) {
-		/* No data available */
-		/* TODO: error ? */
-		return FALSE;
-	}
 	
-	/* Hostip xml has to most idiotic format ever. lat and lon in one xml element? */
-	if (sscanf (coord_str, "%lf,%lf", longitude , latitude) != 2) {
-		/* No data available */
-		/* TODO: error ? */
+	if (gc_web_provider_get_string (obj, &coord_str, HOSTIP_LATLON_XPATH)) {
+		if (sscanf (coord_str, "%lf,%lf", longitude , latitude) == 2) {
+			*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
+			*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+		}
 		g_free (coord_str);
-		return FALSE;
 	}
-	g_free (coord_str);
 	
 	time ((time_t *)timestamp);
 	
-	*fields = GEOCLUE_POSITION_FIELDS_LONGITUDE;
-	*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
-	
-	/* TODO fix accuracy: city level */
-	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-	                                 20000, 20000);
+	if (*fields == GEOCLUE_POSITION_FIELDS_NONE) {
+		/* TODO: fix me */
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+		                                  20000, 20000);
+	} else {
+		/* TODO: fix me */
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+		                                  20000, 20000);
+	}
 	return TRUE;
 }
 
@@ -140,35 +141,33 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	gchar *country = NULL;
 	
 	if (!gc_web_provider_query (obj, NULL)) {
-		/* TODO: error handling */
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	
 	*address = g_hash_table_new(g_str_hash, g_str_equal);
 	
-	if (gc_web_provider_get_string (obj,
-	                                &locality,
-	                                HOSTIP_LOCALITY_XPATH)) {
+	if (gc_web_provider_get_string (obj, &locality, HOSTIP_LOCALITY_XPATH)) {
 		/* hostip "sctructured data" for the win... */
 		if (g_ascii_strcasecmp (locality, "(Unknown city)") == 0) {
 			g_free (locality);
 			locality = NULL;
 		} else {
+			
 			/* TODO: get the keys from geoclue-types.h */
 			g_hash_table_insert(*address, "locality", locality);
 		}
 	}
 	
-	if (gc_web_provider_get_string (obj,
-	                                &country,
-	                                HOSTIP_COUNTRYCODE_XPATH)) {
+	if (gc_web_provider_get_string (obj, &country, HOSTIP_COUNTRYCODE_XPATH)) {
+		
 		/* TODO: get the keys from geoclue-types.h */
 		g_hash_table_insert(*address, "countrycode", country);
 	}
 	
-	if (gc_web_provider_get_string (obj,
-	                                &country,
-	                                HOSTIP_COUNTRY_XPATH)) {
+	if (gc_web_provider_get_string (obj, &country, HOSTIP_COUNTRY_XPATH)) {
+		
 		/* TODO: get the keys from geoclue-types.h */
 		g_hash_table_insert(*address, "country", country);
 	}
@@ -177,15 +176,18 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	
 	/* TODO: fix accuracies */
 	if (locality && country) {
+		/* TODO: fix me */
 		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
 	 	                                  20000, 20000);
 	} else if (country) {
+		/* TODO: fix me */
 		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
 	 	                                  1000000, 1000000);
+	} else {
+		/* TODO: fix me */
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+		                                  20000, 20000);
 	}
-	
-	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-	                                 20000, 20000);
 	return TRUE;
 }
 

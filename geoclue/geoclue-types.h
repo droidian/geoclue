@@ -20,7 +20,8 @@ typedef enum {
 } GeocluePositionFields;
 
 typedef enum {
-	GEOCLUE_ERROR_NOT_IMPLEMENTED,
+	GEOCLUE_ERROR_NOT_IMPLEMENTED, /* This method is not implemented (yet) */
+	GEOCLUE_ERROR_NOT_AVAILABLE,   /* e.g. web service did not respond  */
 } GeoclueError;
 
 #endif

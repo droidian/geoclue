@@ -11,8 +11,8 @@
 G_DEFINE_ABSTRACT_TYPE (GcWebProvider, gc_web_provider, GC_TYPE_PROVIDER)
 
 typedef struct _XmlNamespace {
-    gchar *name;
-    gchar *uri;
+	gchar *name;
+	gchar *uri;
 }XmlNamespace;
 
 /* GFunc, use with g_list_foreach */
@@ -21,6 +21,7 @@ gc_web_provider_register_ns (gpointer data, gpointer user_data)
 {
 	GcWebProvider *self = (GcWebProvider *)user_data;
 	XmlNamespace *ns = (XmlNamespace *)data;
+	
 	xmlXPathRegisterNs (self->xpath_ctx, 
 	                    (xmlChar*)ns->name, (xmlChar*)ns->uri);
 }
@@ -30,6 +31,7 @@ static void
 gc_web_provider_free_ns (gpointer data, gpointer user_data)
 {
 	XmlNamespace *ns = (XmlNamespace *)data;
+	
 	g_free (ns->name);
 	g_free (ns->uri);
 	g_free (ns);
@@ -50,6 +52,7 @@ static gboolean
 gc_web_provider_build_xpath_context (GcWebProvider *self)
 {
 	xmlDocPtr doc;
+	xmlChar *tmp;
 	
 	g_assert (self->response);
 	
@@ -59,7 +62,7 @@ gc_web_provider_build_xpath_context (GcWebProvider *self)
 	}
 	
 	/* make sure response is NULL-terminated */
-	xmlChar *tmp = (xmlChar *)g_strndup((gchar *)self->response, self->response_length);
+	tmp = xmlStrndup(self->response, self->response_length);
 	doc = xmlParseDoc (tmp);
 	if (!doc) {
 		/* TODO: error handling */
@@ -162,6 +165,7 @@ gc_web_provider_set_base_url (GcWebProvider *self, gchar *url)
 	
 	g_list_foreach (self->namespaces, (GFunc)gc_web_provider_free_ns, NULL);
 	g_list_free (self->namespaces);
+	self->namespaces = NULL;
 	
 	xmlXPathFreeContext (self->xpath_ctx);
 	self->xpath_ctx = NULL;
@@ -218,9 +222,11 @@ gc_web_provider_query (GcWebProvider *self, ...)
 gboolean
 gc_web_provider_add_namespace (GcWebProvider *self, gchar *namespace, gchar *uri)
 {
+	XmlNamespace *ns;
+	
 	g_return_val_if_fail (self->base_url, FALSE);
 	
-	XmlNamespace *ns = g_new0(XmlNamespace,1);
+	ns = g_new0(XmlNamespace,1);
 	ns->name = g_strdup (namespace);
 	ns->uri = g_strdup (uri);
 	self->namespaces = g_list_prepend (self->namespaces, ns);
@@ -231,6 +237,8 @@ gc_web_provider_add_namespace (GcWebProvider *self, gchar *namespace, gchar *uri
 gboolean
 gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpath)
 {
+	gboolean retval = FALSE;
+	
 	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (OUT_value, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
@@ -241,7 +249,6 @@ gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpat
 	}
 	g_assert (self->xpath_ctx);
 	
-	gboolean retval = FALSE;
 	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
 	if (xpathObj) {
 		if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
@@ -256,6 +263,8 @@ gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpat
 gboolean
 gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar* xpath)
 {
+	gboolean retval= FALSE;
+	
 	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (OUT_value, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
@@ -266,7 +275,6 @@ gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar* xpath
 	}
 	g_assert (self->xpath_ctx);
 	
-	gboolean retval= FALSE;
 	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
 	if (xpathObj) {
 		if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {

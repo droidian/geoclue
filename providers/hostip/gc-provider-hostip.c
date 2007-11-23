@@ -116,12 +116,10 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
 	time ((time_t *)timestamp);
 	
 	if (*fields == GEOCLUE_POSITION_FIELDS_NONE) {
-		/* TODO: fix me */
-		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-		                                  20000, 20000);
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
+		                                  40000000, 40000000); 
 	} else {
-		/* TODO: fix me */
-		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
 		                                  20000, 20000);
 	}
 	return TRUE;
@@ -176,17 +174,16 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	
 	/* TODO: fix accuracies */
 	if (locality && country) {
-		/* TODO: fix me */
-		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
 	 	                                  20000, 20000);
 	} else if (country) {
-		/* TODO: fix me */
-		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-	 	                                  1000000, 1000000);
+		/*TODO: maybe a short list of largest countries in world to get this more correct */
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_COUNTRY,
+	 	                                  2000000, 2000000);
 	} else {
 		/* TODO: fix me */
-		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-		                                  20000, 20000);
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
+		                                  40000000, 40000000);
 	}
 	return TRUE;
 }

@@ -165,6 +165,7 @@ gc_web_provider_set_base_url (GcWebProvider *self, gchar *url)
 	
 	g_list_foreach (self->namespaces, (GFunc)gc_web_provider_free_ns, NULL);
 	g_list_free (self->namespaces);
+	self->namespaces = NULL;
 	
 	xmlXPathFreeContext (self->xpath_ctx);
 	self->xpath_ctx = NULL;

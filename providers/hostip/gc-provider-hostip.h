@@ -9,6 +9,7 @@
 #define _GC_PROVIDER_HOSTIP
 
 #include <glib-object.h>
+#include <geoclue/gc-web-service.h>
 
 G_BEGIN_DECLS
 
@@ -21,12 +22,13 @@ G_BEGIN_DECLS
 #define GC_IS_PROVIDER_HOSTIP_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GC_TYPE_PROVIDER_HOSTIP))
 
 typedef struct _GcProviderHostip {
-	GcWebProvider parent;
+	GcProvider parent;
 	GMainLoop *loop;
+	GcWebService *web_service;
 } GcProviderHostip;
 
 typedef struct _GcProviderHostipClass {
-	GcWebProviderClass parent_class;
+	GcProviderClass parent_class;
 } GcProviderHostipClass;
 
 GType gc_provider_hostip_get_type (void);

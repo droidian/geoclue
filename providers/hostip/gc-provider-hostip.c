@@ -2,6 +2,8 @@
  * Geoclue
  * gc-provider-hostip.c - A hostip.info-based Address/Position provider
  *
+ * TODO finalize: unref the web service
+ * 
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  */
@@ -12,7 +14,6 @@
 #include <dbus/dbus-glib-bindings.h>
 
 #include <geoclue/gc-provider.h>
-#include <geoclue/gc-web-provider.h>
 #include <geoclue/geoclue-error.h>
 
 #include <geoclue/gc-iface-position.h>
@@ -39,7 +40,7 @@ static void gc_provider_hostip_init (GcProviderHostip *obj);
 static void gc_provider_hostip_position_init (GcIfacePositionClass  *iface);
 static void gc_provider_hostip_address_init (GcIfaceAddressClass  *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GcProviderHostip, gc_provider_hostip, GC_TYPE_WEB_PROVIDER,
+G_DEFINE_TYPE_WITH_CODE (GcProviderHostip, gc_provider_hostip, GC_TYPE_PROVIDER,
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
                                                 gc_provider_hostip_position_init)
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
@@ -93,19 +94,20 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
                                  GeoclueAccuracy       **accuracy,
                                  GError                **error)
 {
-	GcWebProvider *obj = GC_WEB_PROVIDER (iface);
+	GcProviderHostip *obj = (GC_PROVIDER_HOSTIP (iface));
 	gchar *coord_str = NULL;
 	
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
 	
-	if (!gc_web_provider_query (obj, NULL)) {
+	if (!gc_web_service_query (obj->web_service, NULL)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	
 	
-	if (gc_web_provider_get_string (obj, &coord_str, HOSTIP_LATLON_XPATH)) {
+	if (gc_web_service_get_string (obj->web_service, 
+	                                &coord_str, HOSTIP_LATLON_XPATH)) {
 		if (sscanf (coord_str, "%lf,%lf", longitude , latitude) == 2) {
 			*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
 			*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
@@ -134,11 +136,11 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
                                 GeoclueAccuracy **accuracy,
                                 GError          **error)
 {
-	GcWebProvider *obj = GC_WEB_PROVIDER (iface);
+	GcProviderHostip *obj = GC_PROVIDER_HOSTIP (iface);
 	gchar *locality = NULL;
 	gchar *country = NULL;
 	
-	if (!gc_web_provider_query (obj, NULL)) {
+	if (!gc_web_service_query (obj->web_service, NULL)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
@@ -146,7 +148,8 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	
 	*address = g_hash_table_new(g_str_hash, g_str_equal);
 	
-	if (gc_web_provider_get_string (obj, &locality, HOSTIP_LOCALITY_XPATH)) {
+	if (gc_web_service_get_string (obj->web_service, 
+	                               &locality, HOSTIP_LOCALITY_XPATH)) {
 		/* hostip "sctructured data" for the win... */
 		if (g_ascii_strcasecmp (locality, "(Unknown city)") == 0) {
 			g_free (locality);
@@ -158,13 +161,15 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 		}
 	}
 	
-	if (gc_web_provider_get_string (obj, &country, HOSTIP_COUNTRYCODE_XPATH)) {
+	if (gc_web_service_get_string (obj->web_service, 
+	                               &country, HOSTIP_COUNTRYCODE_XPATH)) {
 		
 		/* TODO: get the keys from geoclue-types.h */
 		g_hash_table_insert(*address, "countrycode", country);
 	}
 	
-	if (gc_web_provider_get_string (obj, &country, HOSTIP_COUNTRY_XPATH)) {
+	if (gc_web_service_get_string (obj->web_service, 
+	                               &country, HOSTIP_COUNTRY_XPATH)) {
 		
 		/* TODO: get the keys from geoclue-types.h */
 		g_hash_table_insert(*address, "country", country);
@@ -208,11 +213,12 @@ gc_provider_hostip_init (GcProviderHostip *obj)
 	                         GC_DBUS_SERVICE_HOSTIP,
 	                         GC_DBUS_PATH_HOSTIP);
 	
-	gc_web_provider_set_base_url (GC_WEB_PROVIDER (obj), HOSTIP_URL);
-	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
-	                               HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);
-	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
-	                               HOSTIP_NS_HOSTIP_NAME, HOSTIP_NS_HOSTIP_URI);
+	obj->web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
+	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);
+	gc_web_service_add_namespace (obj->web_service,
+	                              HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);
+	gc_web_service_add_namespace (obj->web_service,
+	                              HOSTIP_NS_HOSTIP_NAME, HOSTIP_NS_HOSTIP_URI);
 }
 
 static void

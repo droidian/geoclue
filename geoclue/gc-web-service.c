@@ -5,10 +5,9 @@
 #include <libxml/xpathInternals.h>
 #include <libxml/uri.h>      /* for xmlURIEscapeStr */
 
-#include <geoclue/gc-provider.h>
-#include "gc-web-provider.h"
+#include "gc-web-service.h"
 
-G_DEFINE_ABSTRACT_TYPE (GcWebProvider, gc_web_provider, GC_TYPE_PROVIDER)
+G_DEFINE_TYPE (GcWebService, gc_web_service, G_TYPE_OBJECT)
 
 typedef struct _XmlNamespace {
 	gchar *name;
@@ -17,9 +16,9 @@ typedef struct _XmlNamespace {
 
 /* GFunc, use with g_list_foreach */
 static void
-gc_web_provider_register_ns (gpointer data, gpointer user_data)
+gc_web_service_register_ns (gpointer data, gpointer user_data)
 {
-	GcWebProvider *self = (GcWebProvider *)user_data;
+	GcWebService *self = (GcWebService *)user_data;
 	XmlNamespace *ns = (XmlNamespace *)data;
 	
 	xmlXPathRegisterNs (self->xpath_ctx, 
@@ -28,7 +27,7 @@ gc_web_provider_register_ns (gpointer data, gpointer user_data)
 
 /* GFunc, use with g_list_foreach */
 static void
-gc_web_provider_free_ns (gpointer data, gpointer user_data)
+gc_web_service_free_ns (gpointer data, gpointer user_data)
 {
 	XmlNamespace *ns = (XmlNamespace *)data;
 	
@@ -40,16 +39,16 @@ gc_web_provider_free_ns (gpointer data, gpointer user_data)
 
 /* Register namespaces listed in self->namespaces */
 static void
-gc_web_provider_register_namespaces (GcWebProvider *self)
+gc_web_service_register_namespaces (GcWebService *self)
 {
 	g_assert (self->xpath_ctx);
-	g_list_foreach (self->namespaces, (GFunc)gc_web_provider_register_ns, self);
+	g_list_foreach (self->namespaces, (GFunc)gc_web_service_register_ns, self);
 }
 
 /* Parse data (self->response), build xpath context and register 
  * namespaces. Nothing will be done if xpath context exists already. */
 static gboolean
-gc_web_provider_build_xpath_context (GcWebProvider *self)
+gc_web_service_build_xpath_context (GcWebService *self)
 {
 	xmlDocPtr doc;
 	xmlChar *tmp;
@@ -76,13 +75,13 @@ gc_web_provider_build_xpath_context (GcWebProvider *self)
 		/* TODO: error handling */
 		return FALSE;
 	}
-	gc_web_provider_register_namespaces (self);
+	gc_web_service_register_namespaces (self);
 	return TRUE;
 }
 
 /* fetch data from url, save into self->response */
 static gboolean
-gc_web_provider_fetch (GcWebProvider *self, gchar *url)
+gc_web_service_fetch (GcWebService *self, gchar *url)
 {
 	void* ctxt = NULL;
 	gint len;
@@ -119,7 +118,7 @@ gc_web_provider_fetch (GcWebProvider *self, gchar *url)
 }
 
 static void
-gc_web_provider_init (GcWebProvider *self)
+gc_web_service_init (GcWebService *self)
 {
 	self->response = NULL;
 	self->response_length = 0;
@@ -130,31 +129,31 @@ gc_web_provider_init (GcWebProvider *self)
 
 
 static void
-gc_web_provider_finalize (GObject *obj)
+gc_web_service_finalize (GObject *obj)
 {
-	GcWebProvider *self = (GcWebProvider *) obj;
+	GcWebService *self = (GcWebService *) obj;
 	
 	g_free (self->base_url);
 	g_free (self->response);
 	
-	g_list_foreach (self->namespaces, (GFunc)gc_web_provider_free_ns, NULL);
+	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
 	g_list_free (self->namespaces);
 	
 	xmlXPathFreeContext (self->xpath_ctx);
 	
-	((GObjectClass *) gc_web_provider_parent_class)->finalize (obj);
+	((GObjectClass *) gc_web_service_parent_class)->finalize (obj);
 }
 
 static void
-gc_web_provider_class_init (GcWebProviderClass *klass)
+gc_web_service_class_init (GcWebServiceClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
-	o_class->finalize = gc_web_provider_finalize;
+	o_class->finalize = gc_web_service_finalize;
 }
 
 
 gboolean
-gc_web_provider_set_base_url (GcWebProvider *self, gchar *url)
+gc_web_service_set_base_url (GcWebService *self, gchar *url)
 {
 	g_return_val_if_fail (url, FALSE);
 	
@@ -163,7 +162,7 @@ gc_web_provider_set_base_url (GcWebProvider *self, gchar *url)
 	self->response = NULL;
 	self->response_length = 0;
 	
-	g_list_foreach (self->namespaces, (GFunc)gc_web_provider_free_ns, NULL);
+	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
 	g_list_free (self->namespaces);
 	self->namespaces = NULL;
 	
@@ -176,7 +175,7 @@ gc_web_provider_set_base_url (GcWebProvider *self, gchar *url)
 }
  
 gboolean
-gc_web_provider_query (GcWebProvider *self, ...)
+gc_web_service_query (GcWebService *self, ...)
 {
 	va_list list;
 	gchar *key, *value, *esc_value, *tmp, *url;
@@ -208,7 +207,7 @@ gc_web_provider_query (GcWebProvider *self, ...)
 	}
 	va_end (list);
 	
-	if (!gc_web_provider_fetch (self, url)) {
+	if (!gc_web_service_fetch (self, url)) {
 		g_free (url);
 		return FALSE;
 	}
@@ -220,7 +219,7 @@ gc_web_provider_query (GcWebProvider *self, ...)
 
 
 gboolean
-gc_web_provider_add_namespace (GcWebProvider *self, gchar *namespace, gchar *uri)
+gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
 {
 	XmlNamespace *ns;
 	
@@ -235,7 +234,7 @@ gc_web_provider_add_namespace (GcWebProvider *self, gchar *namespace, gchar *uri
 
 
 gboolean
-gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpath)
+gc_web_service_get_double (GcWebService *self, gdouble *OUT_value, gchar *xpath)
 {
 	gboolean retval = FALSE;
 	
@@ -244,7 +243,7 @@ gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpat
 	g_return_val_if_fail (xpath, FALSE);
 	
 	/* parse the doc if not parsed yet and register namespaces */
-	if (!gc_web_provider_build_xpath_context (self)) {
+	if (!gc_web_service_build_xpath_context (self)) {
 		return FALSE;
 	}
 	g_assert (self->xpath_ctx);
@@ -261,7 +260,7 @@ gc_web_provider_get_double (GcWebProvider *self, gdouble *OUT_value, gchar *xpat
 }
 
 gboolean
-gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar* xpath)
+gc_web_service_get_string (GcWebService *self, gchar **OUT_value, gchar* xpath)
 {
 	gboolean retval= FALSE;
 	
@@ -270,7 +269,7 @@ gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar* xpath
 	g_return_val_if_fail (xpath, FALSE);
 	
 	/* parse the doc if not parsed yet and register namespaces */
-	if (!gc_web_provider_build_xpath_context (self)) {
+	if (!gc_web_service_build_xpath_context (self)) {
 		return FALSE;
 	}
 	g_assert (self->xpath_ctx);
@@ -287,7 +286,7 @@ gc_web_provider_get_string (GcWebProvider *self, gchar **OUT_value, gchar* xpath
 }
 
 gboolean
-gc_web_provider_get_response (GcWebProvider *self, guchar **response, gint *response_length)
+gc_web_service_get_response (GcWebService *self, guchar **response, gint *response_length)
 {
 	g_return_val_if_fail (self->response, FALSE);
 	

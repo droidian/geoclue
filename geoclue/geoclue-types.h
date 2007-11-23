@@ -9,6 +9,12 @@
 #define _GEOCLUE_TYPES_H
 
 typedef enum {
+	GEOCLUE_ACCURACY_LEVEL_NONE,
+	GEOCLUE_ACCURACY_LEVEL_COUNTRY,
+	GEOCLUE_ACCURACY_LEVEL_REGION,
+	GEOCLUE_ACCURACY_LEVEL_LOCALITY,
+	GEOCLUE_ACCURACY_LEVEL_POSTALCODE,
+	GEOCLUE_ACCURACY_LEVEL_STREET,
 	GEOCLUE_ACCURACY_LEVEL_DETAILED,
 } GeoclueAccuracyLevel;
 
@@ -20,8 +26,9 @@ typedef enum {
 } GeocluePositionFields;
 
 typedef enum {
-	GEOCLUE_ERROR_NOT_IMPLEMENTED, /* This method is not implemented (yet) */
-	GEOCLUE_ERROR_NOT_AVAILABLE,   /* e.g. web service did not respond  */
+	GEOCLUE_ERROR_NOT_IMPLEMENTED, /* method is not implemented (yet) */
+	GEOCLUE_ERROR_NOT_AVAILABLE,   /* e.g. web service did not respond */
+	GEOCLUE_ERROR_FAILED,          /* generic fatal error */
 } GeoclueError;
 
 #endif

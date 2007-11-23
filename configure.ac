@@ -43,6 +43,16 @@ AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
 PROVIDER_SUBDIRS="example hostip"
+
+PKG_CHECK_MODULES(GYPSY, [
+		  gypsy
+], HAVE_GYPSY=yes,HAVE_GYPSY=no)
+if test "x$HAVE_GYPSY" = "xyes"; then
+	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gypsy"
+fi
+AC_SUBST(GYPSY_LIBS)
+AC_SUBST(GYPSY_CFLAGS)
+
 AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
@@ -51,7 +61,16 @@ interfaces/Makefile
 geoclue/Makefile
 providers/Makefile
 providers/example/Makefile
+providers/gypsy/Makefile
 providers/hostip/Makefile
 ])
 
 AC_OUTPUT
+
+echo ""
+echo "Geoclue ${VERSION} has been configured as follows: "
+echo "---------------------------------------------------"
+echo "Source code location:   ${srcdir}"
+echo "Compiler:               ${CC}"
+echo "Providers:              ${PROVIDER_SUBDIRS}"
+echo ""

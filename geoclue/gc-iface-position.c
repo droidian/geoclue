@@ -52,7 +52,7 @@ gc_iface_position_base_init (gpointer klass)
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
-						  GEOCLUE_ACCURACY_TYPE);
+						  dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE));
 	
 	dbus_g_object_type_install_info (gc_iface_position_get_type (),
 					 &dbus_glib_gc_iface_position_object_info);
@@ -101,6 +101,6 @@ gc_iface_position_emit_position_changed (GcIfacePosition      *gc,
 					 double                altitude,
 					 GeoclueAccuracy      *accuracy)
 {
-	g_signal_emit (gc, signals[POSITION_CHANGED], timestamp,
+	g_signal_emit (gc, signals[POSITION_CHANGED], 0, fields, timestamp,
 		       latitude, longitude, altitude, accuracy);
 }

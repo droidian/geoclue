@@ -175,7 +175,7 @@ gboolean
 gc_web_provider_query (GcWebProvider *self, ...)
 {
 	va_list list;
-	gchar *key, *value,  *esc_value, *tmp, *url;
+	gchar *key, *value, *esc_value, *tmp, *url;
 	gboolean first_pair = TRUE;
 	
 	g_return_val_if_fail (self->base_url, FALSE);
@@ -183,11 +183,10 @@ gc_web_provider_query (GcWebProvider *self, ...)
 	url = g_strdup (self->base_url);
 	
 	/* read the arguments one key-value pair at a time,
-	   add the pairs to url */
+	   add the pairs to url as "?key1=value1&key2=value2&..." */
 	va_start (list, self);
 	key = va_arg (list, char*);
 	while (key) {
-		/*TODO: value should be cleaned...*/
 		value = va_arg (list, char*);
 		esc_value = (gchar *)xmlURIEscapeStr ((xmlChar *)value, NULL);
 		g_return_val_if_fail (esc_value, FALSE);
@@ -197,6 +196,7 @@ gc_web_provider_query (GcWebProvider *self, ...)
 		} else {
 			tmp = g_strdup_printf ("%s&%s=%s",  url, key, esc_value);
 		}
+		g_free (value);
 		g_free (esc_value);
 		g_free (url);
 		url = tmp;

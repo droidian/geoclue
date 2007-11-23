@@ -24,6 +24,15 @@
 
 #define HOSTIP_URL "http://api.hostip.info/"
 
+#define HOSTIP_NS_GML_NAME "gml"
+#define HOSTIP_NS_GML_URI "http://www.opengis.net/gml"
+#define HOSTIP_NS_HOSTIP_NAME "hostip"
+#define HOSTIP_NS_HOSTIP_URI "http://www.hostip.info/api"
+
+#define HOSTIP_COUNTRY_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryName"
+#define HOSTIP_COUNTRYCODE_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryAbbrev"
+#define HOSTIP_LOCALITY_XPATH "//gml:featureMember/hostip:Hostip/gml:name"
+#define HOSTIP_LATLON_XPATH "//gml:featureMember/hostip:Hostip//gml:coordinates"
 
 static void gc_provider_hostip_init (GcProviderHostip *obj);
 static void gc_provider_hostip_position_init (GcIfacePositionClass  *iface);
@@ -91,27 +100,26 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
 	
 	if (!gc_web_provider_get_string (obj,
 	                                 &coord_str,
-	                                 "//gml:featureMember/hostip:Hostip//gml:coordinates")) {
+	                                 HOSTIP_LATLON_XPATH)) {
 		/* No data available */
-		/* TODO: error handling */
+		/* TODO: error ? */
 		return FALSE;
 	}
 	
 	/* Hostip xml has to most idiotic format ever. lat and lon in one xml element? */
 	if (sscanf (coord_str, "%lf,%lf", longitude , latitude) != 2) {
 		/* No data available */
-		/* TODO: error handling */
+		/* TODO: error ? */
 		g_free (coord_str);
 		return FALSE;
 	}
 	g_free (coord_str);
 	
+	time ((time_t *)timestamp);
+	
 	*fields = GEOCLUE_POSITION_FIELDS_LONGITUDE;
 	*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
 	
-	/* TODO this is going to bite us in 2038 with int timestamps */
-	time ((time_t *)timestamp);
-
 	/* TODO fix accuracy: city level */
 	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
 	                                 20000, 20000);
@@ -127,10 +135,58 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
                                 GeoclueAccuracy **accuracy,
                                 GError          **error)
 {
+	GcWebProvider *obj = GC_WEB_PROVIDER (iface);
+	gchar *locality = NULL;
+	gchar *country = NULL;
 	
+	if (!gc_web_provider_query (obj, NULL)) {
+		/* TODO: error handling */
+		return FALSE;
+	}
 	
-	return FALSE;
+	*address = g_hash_table_new(g_str_hash, g_str_equal);
 	
+	if (gc_web_provider_get_string (obj,
+	                                &locality,
+	                                HOSTIP_LOCALITY_XPATH)) {
+		/* hostip "sctructured data" for the win... */
+		if (g_ascii_strcasecmp (locality, "(Unknown city)") == 0) {
+			g_free (locality);
+			locality = NULL;
+		} else {
+			/* TODO: get the keys from geoclue-types.h */
+			g_hash_table_insert(*address, "locality", locality);
+		}
+	}
+	
+	if (gc_web_provider_get_string (obj,
+	                                &country,
+	                                HOSTIP_COUNTRYCODE_XPATH)) {
+		/* TODO: get the keys from geoclue-types.h */
+		g_hash_table_insert(*address, "countrycode", country);
+	}
+	
+	if (gc_web_provider_get_string (obj,
+	                                &country,
+	                                HOSTIP_COUNTRY_XPATH)) {
+		/* TODO: get the keys from geoclue-types.h */
+		g_hash_table_insert(*address, "country", country);
+	}
+	
+	time ((time_t *)timestamp);
+	
+	/* TODO: fix accuracies */
+	if (locality && country) {
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+	 	                                  20000, 20000);
+	} else if (country) {
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+	 	                                  1000000, 1000000);
+	}
+	
+	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
+	                                 20000, 20000);
+	return TRUE;
 }
 
 /* Initialization */
@@ -155,9 +211,9 @@ gc_provider_hostip_init (GcProviderHostip *obj)
 	
 	gc_web_provider_set_base_url (GC_WEB_PROVIDER (obj), HOSTIP_URL);
 	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
-	                               "gml", "http://www.opengis.net/gml");
+	                               HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);
 	gc_web_provider_add_namespace (GC_WEB_PROVIDER (obj),
-	                               "hostip", "http://www.hostip.info/api");
+	                               HOSTIP_NS_HOSTIP_NAME, HOSTIP_NS_HOSTIP_URI);
 }
 
 static void

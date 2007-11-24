@@ -199,7 +199,6 @@ gc_web_service_query (GcWebService *self, ...)
 		} else {
 			tmp = g_strdup_printf ("%s&%s=%s",  url, key, esc_value);
 		}
-		g_free (value);
 		g_free (esc_value);
 		g_free (url);
 		url = tmp;

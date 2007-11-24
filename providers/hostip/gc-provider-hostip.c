@@ -1,9 +1,6 @@
 /*
  * Geoclue
  * gc-provider-hostip.c - A hostip.info-based Address/Position provider
- *
- * TODO finalize: unref the web service
- * 
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  */
@@ -119,10 +116,10 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
 	
 	if (*fields == GEOCLUE_POSITION_FIELDS_NONE) {
 		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-		                                  40000000, 40000000); 
+		                                  0, 0); 
 	} else {
 		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
-		                                  20000, 20000);
+		                                  20000, 0);
 	}
 	return TRUE;
 }
@@ -157,7 +154,7 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 		} else {
 			
 			/* TODO: get the keys from geoclue-types.h */
-			g_hash_table_insert(*address, "locality", locality);
+			g_hash_table_insert (*address, "locality", locality);
 		}
 	}
 	
@@ -165,14 +162,14 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	                               &country, HOSTIP_COUNTRYCODE_XPATH)) {
 		
 		/* TODO: get the keys from geoclue-types.h */
-		g_hash_table_insert(*address, "countrycode", country);
+		g_hash_table_insert (*address, "countrycode", country);
 	}
 	
 	if (gc_web_service_get_string (obj->web_service, 
 	                               &country, HOSTIP_COUNTRY_XPATH)) {
 		
 		/* TODO: get the keys from geoclue-types.h */
-		g_hash_table_insert(*address, "country", country);
+		g_hash_table_insert (*address, "country", country);
 	}
 	
 	time ((time_t *)timestamp);
@@ -193,17 +190,30 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 	return TRUE;
 }
 
+static void
+gc_provider_hostip_finalize (GObject *obj)
+{
+	GcProviderHostip *self = (GcProviderHostip *) obj;
+	
+	g_object_unref (self->web_service);
+	
+	((GObjectClass *) gc_provider_hostip_parent_class)->finalize (obj);
+}
+
+
 /* Initialization */
 
 static void
 gc_provider_hostip_class_init (GcProviderHostipClass *klass)
 {
 	GcProviderClass *p_class = (GcProviderClass *)klass;
+	GObjectClass *o_class = (GObjectClass *)klass;
 	
 	p_class->get_version = gc_provider_hostip_get_version;
 	p_class->get_status = gc_provider_hostip_get_status;
 	p_class->shutdown = gc_provider_hostip_shutdown;
 	
+	o_class->finalize = gc_provider_hostip_finalize;
 }
 
 static void

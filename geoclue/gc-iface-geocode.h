@@ -9,6 +9,7 @@
 #define _GC_IFACE_GEOCODE_H
 
 #include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-accuracy.h>
 
 G_BEGIN_DECLS
 

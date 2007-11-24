@@ -42,7 +42,7 @@ AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
-PROVIDER_SUBDIRS="example hostip"
+PROVIDER_SUBDIRS="example hostip geonames"
 AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
@@ -52,6 +52,7 @@ geoclue/Makefile
 providers/Makefile
 providers/example/Makefile
 providers/hostip/Makefile
+providers/geonames/Makefile
 ])
 
 AC_OUTPUT

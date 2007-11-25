@@ -117,6 +117,29 @@ gc_web_service_fetch (GcWebService *self, gchar *url)
 	return (self->response_length > 0);
 }
 
+static xmlXPathObject*
+gc_web_service_get_xpath_object (GcWebService *self, gchar* xpath)
+{
+	xmlXPathObject *obj = NULL;
+	
+	g_return_val_if_fail (self->response, FALSE);
+	g_return_val_if_fail (xpath, FALSE);
+	
+	/* parse the doc if not parsed yet and register namespaces */
+	if (!gc_web_service_build_xpath_context (self)) {
+		return FALSE;
+	}
+	g_assert (self->xpath_ctx);
+	
+	obj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
+	if (obj && 
+	    (!obj->nodesetval || xmlXPathNodeSetIsEmpty (obj->nodesetval))) {
+		xmlXPathFreeObject (obj);
+		obj = NULL;
+	}
+	return obj;
+}
+
 static void
 gc_web_service_init (GcWebService *self)
 {
@@ -224,7 +247,7 @@ gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
 	
 	g_return_val_if_fail (self->base_url, FALSE);
 	
-	ns = g_new0(XmlNamespace,1);
+	ns = g_new0 (XmlNamespace,1);
 	ns->name = g_strdup (namespace);
 	ns->uri = g_strdup (uri);
 	self->namespaces = g_list_prepend (self->namespaces, ns);
@@ -235,54 +258,32 @@ gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
 gboolean
 gc_web_service_get_double (GcWebService *self, gdouble *OUT_value, gchar *xpath)
 {
-	gboolean retval = FALSE;
+	xmlXPathObject *obj;
 	
-	g_return_val_if_fail (self->response, FALSE);
-	g_return_val_if_fail (OUT_value, FALSE);
-	g_return_val_if_fail (xpath, FALSE);
-	
-	/* parse the doc if not parsed yet and register namespaces */
-	if (!gc_web_service_build_xpath_context (self)) {
+	obj = gc_web_service_get_xpath_object (self, xpath);
+	if (!obj) {
 		return FALSE;
 	}
-	g_assert (self->xpath_ctx);
-	
-	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
-	if (xpathObj) {
-		if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
-			*OUT_value = xmlXPathCastNodeSetToNumber(xpathObj->nodesetval);
-			retval = TRUE;
-		}
-		xmlXPathFreeObject (xpathObj);
-	}
-	return retval;
+	*OUT_value = xmlXPathCastNodeSetToNumber (obj->nodesetval);
+	xmlXPathFreeObject (obj);
+	return TRUE;
 }
+
 
 gboolean
 gc_web_service_get_string (GcWebService *self, gchar **OUT_value, gchar* xpath)
 {
-	gboolean retval= FALSE;
+	xmlXPathObject *obj;
 	
-	g_return_val_if_fail (self->response, FALSE);
-	g_return_val_if_fail (OUT_value, FALSE);
-	g_return_val_if_fail (xpath, FALSE);
-	
-	/* parse the doc if not parsed yet and register namespaces */
-	if (!gc_web_service_build_xpath_context (self)) {
+	obj = gc_web_service_get_xpath_object (self, xpath);
+	if (!obj) {
 		return FALSE;
 	}
-	g_assert (self->xpath_ctx);
-	
-	xmlXPathObject *xpathObj = xmlXPathEvalExpression ((xmlChar*)xpath, self->xpath_ctx);
-	if (xpathObj) {
-		if (xpathObj->nodesetval && !xmlXPathNodeSetIsEmpty (xpathObj->nodesetval)) {
-			*OUT_value = g_strdup ((char*)xmlXPathCastNodeSetToString (xpathObj->nodesetval));
-			retval = TRUE;
-		}
-		xmlXPathFreeObject (xpathObj);
-	}
-	return retval;
+	*OUT_value = g_strdup ((char*)xmlXPathCastNodeSetToString (obj->nodesetval));
+	xmlXPathFreeObject (obj);
+	return TRUE;
 }
+
 
 gboolean
 gc_web_service_get_response (GcWebService *self, guchar **response, gint *response_length)

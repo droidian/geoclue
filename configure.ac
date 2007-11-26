@@ -42,7 +42,7 @@ AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
-PROVIDER_SUBDIRS="example hostip"
+PROVIDER_SUBDIRS="example hostip geonames"
 
 PKG_CHECK_MODULES(GYPSY, [
 		  gypsy
@@ -63,6 +63,7 @@ providers/Makefile
 providers/example/Makefile
 providers/gypsy/Makefile
 providers/hostip/Makefile
+providers/geonames/Makefile
 ])
 
 AC_OUTPUT

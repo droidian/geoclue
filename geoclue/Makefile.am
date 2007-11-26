@@ -15,7 +15,7 @@ libgeoclue_provider_la_SOURCES = \
 	geoclue-accuracy.c	\
 	geoclue-error.c		\
 	gc-provider.c		\
-	gc-web-provider.c	\
+	gc-web-service.c	\
 	gc-iface-address.c	\
 	gc-iface-geoclue.c      \
 	gc-iface-geocode.c	\

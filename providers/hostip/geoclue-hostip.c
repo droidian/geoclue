@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * gc-provider-hostip.c - A hostip.info-based Address/Position provider
+ * geoclue-hostip.c - A hostip.info-based Address/Position provider
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  */
@@ -10,16 +10,16 @@
 #include <time.h>
 #include <dbus/dbus-glib-bindings.h>
 
-#include <geoclue/gc-provider.h>
+#include <geoclue/geoclue.h>
 #include <geoclue/geoclue-error.h>
 
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
 
-#include "gc-provider-hostip.h"
+#include "geoclue-hostip.h"
 
-#define GC_DBUS_SERVICE_HOSTIP "org.freedesktop.Geoclue.Providers.Hostip"
-#define GC_DBUS_PATH_HOSTIP "/org/freedesktop/Geoclue/Providers/Hostip"
+#define GEOCLUE_DBUS_SERVICE_HOSTIP "org.freedesktop.Geoclue.Providers.Hostip"
+#define GEOCLUE_DBUS_PATH_HOSTIP "/org/freedesktop/Geoclue/Providers/Hostip"
 
 #define HOSTIP_URL "http://api.hostip.info/"
 
@@ -33,21 +33,21 @@
 #define HOSTIP_LOCALITY_XPATH "//gml:featureMember/hostip:Hostip/gml:name"
 #define HOSTIP_LATLON_XPATH "//gml:featureMember/hostip:Hostip//gml:coordinates"
 
-static void gc_provider_hostip_init (GcProviderHostip *obj);
-static void gc_provider_hostip_position_init (GcIfacePositionClass  *iface);
-static void gc_provider_hostip_address_init (GcIfaceAddressClass  *iface);
+static void geoclue_hostip_init (GeoclueHostip *obj);
+static void geoclue_hostip_position_init (GcIfacePositionClass  *iface);
+static void geoclue_hostip_address_init (GcIfaceAddressClass  *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GcProviderHostip, gc_provider_hostip, GC_TYPE_PROVIDER,
+G_DEFINE_TYPE_WITH_CODE (GeoclueHostip, geoclue_hostip, GC_TYPE_PROVIDER,
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
-                                                gc_provider_hostip_position_init)
+                                                geoclue_hostip_position_init)
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
-                                                gc_provider_hostip_address_init))
+                                                geoclue_hostip_address_init))
 
 
 /* Geoclue interface implementation */
 
 static gboolean
-gc_provider_hostip_get_version (GcIfaceGeoclue  *iface,
+geoclue_hostip_get_version (GcIfaceGeoclue  *iface,
                                 int             *major,
                                 int             *minor,
                                 int             *micro,
@@ -60,7 +60,7 @@ gc_provider_hostip_get_version (GcIfaceGeoclue  *iface,
 }
 
 static gboolean
-gc_provider_hostip_get_status (GcIfaceGeoclue  *iface,
+geoclue_hostip_get_status (GcIfaceGeoclue  *iface,
                                gboolean        *available,
                                GError         **error)
 {
@@ -71,10 +71,10 @@ gc_provider_hostip_get_status (GcIfaceGeoclue  *iface,
 }
 
 static gboolean
-gc_provider_hostip_shutdown (GcIfaceGeoclue  *iface,
+geoclue_hostip_shutdown (GcIfaceGeoclue  *iface,
                              GError         **error)
 {
-	GcProviderHostip *obj = GC_PROVIDER_HOSTIP (iface);
+	GeoclueHostip *obj = GEOCLUE_HOSTIP (iface);
 	g_main_loop_quit (obj->loop);
 	return TRUE;
 }
@@ -82,7 +82,7 @@ gc_provider_hostip_shutdown (GcIfaceGeoclue  *iface,
 /* Position interface implementation */
 
 static gboolean 
-gc_provider_hostip_get_position (GcIfacePosition        *iface,
+geoclue_hostip_get_position (GcIfacePosition        *iface,
                                  GeocluePositionFields  *fields,
                                  int                    *timestamp,
                                  double                 *latitude,
@@ -91,7 +91,7 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
                                  GeoclueAccuracy       **accuracy,
                                  GError                **error)
 {
-	GcProviderHostip *obj = (GC_PROVIDER_HOSTIP (iface));
+	GeoclueHostip *obj = (GEOCLUE_HOSTIP (iface));
 	gchar *coord_str = NULL;
 	
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
@@ -127,13 +127,13 @@ gc_provider_hostip_get_position (GcIfacePosition        *iface,
 /* Address interface implementation */
 
 static gboolean 
-gc_provider_hostip_get_address (GcIfaceAddress   *iface,
+geoclue_hostip_get_address (GcIfaceAddress   *iface,
                                 int              *timestamp,
                                 GHashTable      **address,
                                 GeoclueAccuracy **accuracy,
                                 GError          **error)
 {
-	GcProviderHostip *obj = GC_PROVIDER_HOSTIP (iface);
+	GeoclueHostip *obj = GEOCLUE_HOSTIP (iface);
 	gchar *locality = NULL;
 	gchar *country = NULL;
 	
@@ -191,37 +191,37 @@ gc_provider_hostip_get_address (GcIfaceAddress   *iface,
 }
 
 static void
-gc_provider_hostip_finalize (GObject *obj)
+geoclue_hostip_finalize (GObject *obj)
 {
-	GcProviderHostip *self = (GcProviderHostip *) obj;
+	GeoclueHostip *self = (GeoclueHostip *) obj;
 	
 	g_object_unref (self->web_service);
 	
-	((GObjectClass *) gc_provider_hostip_parent_class)->finalize (obj);
+	((GObjectClass *) geoclue_hostip_parent_class)->finalize (obj);
 }
 
 
 /* Initialization */
 
 static void
-gc_provider_hostip_class_init (GcProviderHostipClass *klass)
+geoclue_hostip_class_init (GeoclueHostipClass *klass)
 {
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->get_version = gc_provider_hostip_get_version;
-	p_class->get_status = gc_provider_hostip_get_status;
-	p_class->shutdown = gc_provider_hostip_shutdown;
+	p_class->get_version = geoclue_hostip_get_version;
+	p_class->get_status = geoclue_hostip_get_status;
+	p_class->shutdown = geoclue_hostip_shutdown;
 	
-	o_class->finalize = gc_provider_hostip_finalize;
+	o_class->finalize = geoclue_hostip_finalize;
 }
 
 static void
-gc_provider_hostip_init (GcProviderHostip *obj)
+geoclue_hostip_init (GeoclueHostip *obj)
 {
 	gc_provider_set_details (GC_PROVIDER (obj), 
-	                         GC_DBUS_SERVICE_HOSTIP,
-	                         GC_DBUS_PATH_HOSTIP);
+	                         GEOCLUE_DBUS_SERVICE_HOSTIP,
+	                         GEOCLUE_DBUS_PATH_HOSTIP);
 	
 	obj->web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);
@@ -232,15 +232,15 @@ gc_provider_hostip_init (GcProviderHostip *obj)
 }
 
 static void
-gc_provider_hostip_position_init (GcIfacePositionClass  *iface)
+geoclue_hostip_position_init (GcIfacePositionClass  *iface)
 {
-	iface->get_position = gc_provider_hostip_get_position;
+	iface->get_position = geoclue_hostip_get_position;
 }
 
 static void
-gc_provider_hostip_address_init (GcIfaceAddressClass  *iface)
+geoclue_hostip_address_init (GcIfaceAddressClass  *iface)
 {
-	iface->get_address = gc_provider_hostip_get_address;
+	iface->get_address = geoclue_hostip_get_address;
 }
 
 int 
@@ -248,7 +248,7 @@ main()
 {
 	g_type_init();
 	
-	GcProviderHostip *o = g_object_new (GC_TYPE_PROVIDER_HOSTIP, NULL);
+	GeoclueHostip *o = g_object_new (GEOCLUE_TYPE_HOSTIP, NULL);
 	o->loop = g_main_loop_new (NULL, TRUE);
 	
 	g_main_loop_run (o->loop);

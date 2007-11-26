@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * gc-provider-geonames.c - A geonames.org-based "Geocode" and
+ * geoclue-geonames.c - A geonames.org-based "Geocode" and
  *                          "Reverse geocode" provider
  * 
  * Copyright (C) 2007 OpenedHand Ltd
@@ -27,11 +27,11 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-geocode.h>
 #include <geoclue/gc-iface-reverse-geocode.h>
-#include "gc-provider-geonames.h"
+#include "geoclue-geonames.h"
 
 
-#define GC_DBUS_SERVICE_GEONAMES "org.freedesktop.Geoclue.Providers.Geonames"
-#define GC_DBUS_PATH_GEONAMES "/org/freedesktop/Geoclue/Providers/Geonames"
+#define GEOCLUE_GEONAMES_DBUS_SERVICE "org.freedesktop.Geoclue.Providers.Geonames"
+#define GEOCLUE_GEONAMES_DBUS_PATH "/org/freedesktop/Geoclue/Providers/Geonames"
 
 #define REV_GEOCODE_STREET_URL "http://ws.geonames.org/findNearestAddress"
 #define REV_GEOCODE_PLACE_URL "http://ws.geonames.org/findNearby"
@@ -57,21 +57,21 @@
 #define ADDRESS_COUNTRYCODE "//geonames/geoname/countryCode"
 
  
-static void gc_provider_geonames_init (GcProviderGeonames *obj);
-static void gc_provider_geonames_geocode_init (GcIfaceGeocodeClass *iface);
-static void gc_provider_geonames_reverse_geocode_init (GcIfaceReverseGeocodeClass *iface);
+static void geoclue_geonames_init (GeoclueGeonames *obj);
+static void geoclue_geonames_geocode_init (GcIfaceGeocodeClass *iface);
+static void geoclue_geonames_reverse_geocode_init (GcIfaceReverseGeocodeClass *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GcProviderGeonames, gc_provider_geonames, GC_TYPE_PROVIDER,
+G_DEFINE_TYPE_WITH_CODE (GeoclueGeonames, geoclue_geonames, GC_TYPE_PROVIDER,
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_GEOCODE,
-                                                gc_provider_geonames_geocode_init)
+                                                geoclue_geonames_geocode_init)
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_REVERSE_GEOCODE,
-                                                gc_provider_geonames_reverse_geocode_init))
+                                                geoclue_geonames_reverse_geocode_init))
 
 
 /* Geoclue interface implementation */
 
 static gboolean
-gc_provider_geonames_get_version (GcIfaceGeoclue  *iface,
+geoclue_geonames_get_version (GcIfaceGeoclue  *iface,
                                   int             *major,
                                   int             *minor,
                                   int             *micro,
@@ -84,7 +84,7 @@ gc_provider_geonames_get_version (GcIfaceGeoclue  *iface,
 }
 
 static gboolean
-gc_provider_geonames_get_status (GcIfaceGeoclue  *iface,
+geoclue_geonames_get_status (GcIfaceGeoclue  *iface,
                                  gboolean        *available,
                                  GError         **error)
 {
@@ -95,10 +95,10 @@ gc_provider_geonames_get_status (GcIfaceGeoclue  *iface,
 }
 
 static gboolean
-gc_provider_geonames_shutdown (GcIfaceGeoclue  *iface,
+geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
                              GError         **error)
 {
-	GcProviderGeonames *obj = GC_PROVIDER_GEONAMES (iface);
+	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	
 	g_main_loop_quit (obj->loop);
 	return TRUE;
@@ -108,7 +108,7 @@ gc_provider_geonames_shutdown (GcIfaceGeoclue  *iface,
 /* Geocode interface implementation */
 
 static gboolean
-gc_provider_geonames_address_to_position (GcIfaceGeocode        *iface,
+geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
                                           GHashTable            *address,
                                           GeocluePositionFields *fields,
                                           double                *latitude,
@@ -117,7 +117,7 @@ gc_provider_geonames_address_to_position (GcIfaceGeocode        *iface,
                                           GeoclueAccuracy      **accuracy,
                                           GError               **error)
 {
-	GcProviderGeonames *obj = GC_PROVIDER_GEONAMES (iface);
+	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	gchar *countrycode, *locality, *postalcode;
 	
 	countrycode = g_hash_table_lookup (address, "countrycode");
@@ -180,14 +180,14 @@ gc_provider_geonames_address_to_position (GcIfaceGeocode        *iface,
 /* ReverseGeocode interface implementation */
 
 static gboolean
-gc_provider_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
+geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
                                           double                  latitude,
                                           double                  longitude,
                                           GHashTable            **address,
                                           GeoclueAccuracy       **accuracy,
                                           GError                **error)
 {
-	GcProviderGeonames *obj = GC_PROVIDER_GEONAMES (iface);
+	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	gchar lat[G_ASCII_DTOSTR_BUF_SIZE];
 	gchar lon[G_ASCII_DTOSTR_BUF_SIZE];
 	gchar *locality = NULL;
@@ -239,39 +239,39 @@ gc_provider_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 }
 
 static void
-gc_provider_geonames_finalize (GObject *obj)
+geoclue_geonames_finalize (GObject *obj)
 {
-	GcProviderGeonames *self = (GcProviderGeonames *) obj;
+	GeoclueGeonames *self = (GeoclueGeonames *) obj;
 	
 	g_object_unref (self->place_geocoder);
 	g_object_unref (self->postalcode_geocoder);
 	g_object_unref (self->rev_place_geocoder);
 	g_object_unref (self->rev_street_geocoder);
 	
-	((GObjectClass *) gc_provider_geonames_parent_class)->finalize (obj);
+	((GObjectClass *) geoclue_geonames_parent_class)->finalize (obj);
 }
 
 /* Initialization */
 
 static void
-gc_provider_geonames_class_init (GcProviderGeonamesClass *klass)
+geoclue_geonames_class_init (GeoclueGeonamesClass *klass)
 {
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->get_version = gc_provider_geonames_get_version;
-	p_class->get_status = gc_provider_geonames_get_status;
-	p_class->shutdown = gc_provider_geonames_shutdown;
+	p_class->get_version = geoclue_geonames_get_version;
+	p_class->get_status = geoclue_geonames_get_status;
+	p_class->shutdown = geoclue_geonames_shutdown;
 	
-	o_class->finalize = gc_provider_geonames_finalize;
+	o_class->finalize = geoclue_geonames_finalize;
 }
 
 static void
-gc_provider_geonames_init (GcProviderGeonames *obj)
+geoclue_geonames_init (GeoclueGeonames *obj)
 {
 	gc_provider_set_details (GC_PROVIDER (obj), 
-	                         GC_DBUS_SERVICE_GEONAMES,
-	                         GC_DBUS_PATH_GEONAMES);
+	                         GEOCLUE_GEONAMES_DBUS_SERVICE,
+	                         GEOCLUE_GEONAMES_DBUS_PATH);
 	
 	obj->place_geocoder = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (obj->place_geocoder, 
@@ -292,24 +292,24 @@ gc_provider_geonames_init (GcProviderGeonames *obj)
 
 
 static void
-gc_provider_geonames_geocode_init (GcIfaceGeocodeClass *iface)
+geoclue_geonames_geocode_init (GcIfaceGeocodeClass *iface)
 {
-	iface->address_to_position = gc_provider_geonames_address_to_position;
+	iface->address_to_position = geoclue_geonames_address_to_position;
 }
 
 static void
-gc_provider_geonames_reverse_geocode_init (GcIfaceReverseGeocodeClass *iface)
+geoclue_geonames_reverse_geocode_init (GcIfaceReverseGeocodeClass *iface)
 {
-	iface->position_to_address = gc_provider_geonames_position_to_address;
+	iface->position_to_address = geoclue_geonames_position_to_address;
 }
 
 int 
 main()
 {
-	GcProviderGeonames *obj;
+	GeoclueGeonames *obj;
 	
 	g_type_init();
-	obj = g_object_new (GC_TYPE_PROVIDER_GEONAMES, NULL);
+	obj = g_object_new (GEOCLUE_TYPE_GEONAMES, NULL);
 	obj->loop = g_main_loop_new (NULL, TRUE);
 	
 	g_main_loop_run (obj->loop);

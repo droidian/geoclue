@@ -1,9 +1,20 @@
 /*
  * Geoclue
- * gc-provider-geonames.c - A geonames.org-based Geocode/Rev geocode provider
- *
+ * gc-provider-geonames.c - A geonames.org-based "Geocode" and
+ *                          "Reverse geocode" provider
+ * 
+ * Copyright (C) 2007 OpenedHand Ltd
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
+ */
+
+/*
+ * The used web service APIs are documented at 
+ * http://www.geonames.org/export/
+ * 
+ * Geonames currently does not support street level geocoding. There
+ * is a street level reverse geocoder in beta, but it's US only. 
+ * http://www.geonames.org/export/reverse-geocoding.html
  */
 
 #include <config.h>
@@ -93,6 +104,7 @@ gc_provider_geonames_shutdown (GcIfaceGeoclue  *iface,
 	return TRUE;
 }
 
+
 /* Geocode interface implementation */
 
 static gboolean
@@ -113,8 +125,6 @@ gc_provider_geonames_address_to_position (GcIfaceGeocode        *iface,
 	postalcode = g_hash_table_lookup (address, "postalcode");
 	
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
-	
-	/* TODO search on area name before trying locality*/
 	
 	if (countrycode && postalcode) {
 		if (!gc_web_service_query (obj->postalcode_geocoder,
@@ -166,7 +176,9 @@ gc_provider_geonames_address_to_position (GcIfaceGeocode        *iface,
 	return TRUE;
 }
 
-/* TODO: add support for street level geocoding */
+
+/* ReverseGeocode interface implementation */
+
 static gboolean
 gc_provider_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
                                           double                  latitude,
@@ -276,9 +288,6 @@ gc_provider_geonames_init (GcProviderGeonames *obj)
 	obj->rev_street_geocoder = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (obj->rev_street_geocoder, 
 	                             REV_GEOCODE_STREET_URL);
-	
-	/*TODO free these in finalize*/
-	
 }
 
 

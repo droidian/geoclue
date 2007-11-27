@@ -169,9 +169,11 @@ position_changed (GypsyPosition      *position,
 		changed = TRUE;
 	}
 
+	g_print ("%f - %f\n", gypsy->altitude, altitude);
 	if (compare_field (gypsy->position_fields, gypsy->altitude,
 			   fields, altitude, GYPSY_POSITION_FIELDS_ALTITUDE)) {
 		gypsy->position_fields |= GYPSY_POSITION_FIELDS_ALTITUDE;
+		g_print ("alt changed %f -> %f\n", gypsy->altitude, altitude);
 		gypsy->altitude = altitude;
 		changed = TRUE;
 	}
@@ -214,7 +216,8 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 
 	gc_provider_set_details (GC_PROVIDER (gypsy),
 				 "org.freedesktop.Geoclue.Providers.Gypsy",
-				 "/org/freedesktop/Geoclue/Providers/Gypsy");
+				 "/org/freedesktop/Geoclue/Providers/Gypsy",
+				 "Gypsy", "Gypsy provider");
 
 	gypsy->position_fields = GYPSY_POSITION_FIELDS_NONE;
 }

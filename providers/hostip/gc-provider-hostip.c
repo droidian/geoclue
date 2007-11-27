@@ -221,7 +221,8 @@ gc_provider_hostip_init (GcProviderHostip *obj)
 {
 	gc_provider_set_details (GC_PROVIDER (obj), 
 	                         GC_DBUS_SERVICE_HOSTIP,
-	                         GC_DBUS_PATH_HOSTIP);
+	                         GC_DBUS_PATH_HOSTIP,
+				 "Hostip", "Hostip provider");
 	
 	obj->web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);

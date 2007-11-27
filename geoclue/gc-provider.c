@@ -16,6 +16,19 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-provider.h>
 
+enum {
+	PROP_0,
+	PROP_NAME,
+	PROP_DESCRIPTION
+};
+
+typedef struct {
+	char *name;
+	char *description;
+} GcProviderPrivate;
+
+#define GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GC_TYPE_PROVIDER, GcProviderPrivate))
+
 static void gc_provider_geoclue_init (GcIfaceGeoclueClass *iface);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GcProvider, gc_provider, G_TYPE_OBJECT,
@@ -25,6 +38,11 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GcProvider, gc_provider, G_TYPE_OBJECT,
 static void
 finalize (GObject *object)
 {
+	GcProviderPrivate *priv = GET_PRIVATE (object);
+
+	g_free (priv->name);
+	g_free (priv->description);
+
 	((GObjectClass *) gc_provider_parent_class)->finalize (object);
 }
 
@@ -35,12 +53,46 @@ dispose (GObject *object)
 }
 
 static void
+set_property (GObject      *object,
+	      guint         prop_id,
+	      const GValue *value,
+	      GParamSpec   *pspec)
+{
+}
+
+static void
+get_property (GObject    *object,
+	      guint       prop_id,
+	      GValue     *value,
+	      GParamSpec *pspec)
+{
+	GcProviderPrivate *priv = GET_PRIVATE (object);
+
+	switch (prop_id) {
+	case PROP_NAME:
+		g_value_set_string (value, priv->name);
+		break;
+
+	case PROP_DESCRIPTION:
+		g_value_set_string (value, priv->description);
+		break;
+	}
+}
+
+static void
 gc_provider_class_init (GcProviderClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 
 	o_class->finalize = finalize;
 	o_class->dispose = dispose;
+	o_class->set_property = set_property;
+	o_class->get_property = get_property;
+
+	g_object_class_override_property (o_class, PROP_NAME, "service-name");
+	g_object_class_override_property (o_class, PROP_DESCRIPTION, "service-description");
+
+	g_type_class_add_private (klass, sizeof (GcProviderPrivate));
 }
 
 static void
@@ -131,8 +183,11 @@ gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 void
 gc_provider_set_details (GcProvider *provider,
 			 const char *service,
-			 const char *path)
+			 const char *path,
+			 const char *name,
+			 const char *description)
 {
+	GcProviderPrivate *priv = GET_PRIVATE (provider);
 	GError *error = NULL;
 	DBusGProxy *driver;
 	guint request_ret;
@@ -158,5 +213,8 @@ gc_provider_set_details (GcProvider *provider,
 
 	dbus_g_connection_register_g_object (provider->connection, 
 					     path, G_OBJECT (provider));
+
+	priv->name = g_strdup (name);
+	priv->description = g_strdup (description);
 }
 	

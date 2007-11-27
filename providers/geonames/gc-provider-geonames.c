@@ -259,7 +259,8 @@ gc_provider_geonames_init (GcProviderGeonames *obj)
 {
 	gc_provider_set_details (GC_PROVIDER (obj), 
 	                         GC_DBUS_SERVICE_GEONAMES,
-	                         GC_DBUS_PATH_GEONAMES);
+	                         GC_DBUS_PATH_GEONAMES,
+				 "Geonames", "Geonames provider");
 	
 	obj->place_geocoder = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (obj->place_geocoder, 

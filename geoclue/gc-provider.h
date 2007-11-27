@@ -50,7 +50,9 @@ GType gc_provider_get_type (void);
 
 void gc_provider_set_details (GcProvider *provider,
 			      const char *service,
-			      const char *path);
+			      const char *path,
+			      const char *name,
+			      const char *description);
 
 G_END_DECLS
 

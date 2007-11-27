@@ -73,7 +73,8 @@ geoclue_example_init (GeoclueExample *example)
 {
 	gc_provider_set_details (GC_PROVIDER (example),
 				 "org.freedesktop.Geoclue.Providers.Example",
-				 "/org/freedesktop/Geoclue/Providers/Example");
+				 "/org/freedesktop/Geoclue/Providers/Example",
+				 "Example", "Example provider");
 }
 
 int

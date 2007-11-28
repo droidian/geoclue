@@ -1,5 +1,5 @@
 libexec_PROGRAMS = \
-	geoclue_geonames
+	geoclue-geonames
 
 geoclue_geonames_SOURCES = \
 	geoclue-geonames.c

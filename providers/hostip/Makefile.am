@@ -1,5 +1,5 @@
 libexec_PROGRAMS =	\
-	geoclue_hostip
+	geoclue-hostip
 
 geoclue_hostip_SOURCES = \
 	geoclue-hostip.c

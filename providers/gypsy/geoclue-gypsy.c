@@ -141,7 +141,7 @@ compare_field (GypsyPositionFields fields_a,
 	}
 
 	/* Otherwise return if both the fields set are the same */
-	return ((fields_a & field) == (fields_b & field));
+	return ((fields_a & field) != (fields_b & field));
 }
 
 static void
@@ -169,11 +169,9 @@ position_changed (GypsyPosition      *position,
 		changed = TRUE;
 	}
 
-	g_print ("%f - %f\n", gypsy->altitude, altitude);
 	if (compare_field (gypsy->position_fields, gypsy->altitude,
 			   fields, altitude, GYPSY_POSITION_FIELDS_ALTITUDE)) {
 		gypsy->position_fields |= GYPSY_POSITION_FIELDS_ALTITUDE;
-		g_print ("alt changed %f -> %f\n", gypsy->altitude, altitude);
 		gypsy->altitude = altitude;
 		changed = TRUE;
 	}

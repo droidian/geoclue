@@ -270,8 +270,8 @@ static void
 geoclue_geonames_init (GeoclueGeonames *obj)
 {
 	gc_provider_set_details (GC_PROVIDER (obj), 
-	                         GEOCLUE_DBUS_SERVICE_GEONAMES,
-	                         GEOCLUE_DBUS_PATH_GEONAMES,
+	                         GEOCLUE_GEONAMES_DBUS_SERVICE,
+	                         GEOCLUE_GEONAMES_DBUS_PATH,
 				 "Geonames", "Geonames provider");
 	
 	obj->place_geocoder = g_object_new (GC_TYPE_WEB_SERVICE, NULL);

@@ -26,6 +26,13 @@ typedef enum {
 } GeocluePositionFields;
 
 typedef enum {
+	GEOCLUE_VELOCITY_FIELDS_NONE = 0,
+	GEOCLUE_VELOCITY_FIELDS_SPEED = 1 << 0,
+	GEOCLUE_VELOCITY_FIELDS_DIRECTION = 1 << 1,
+	GEOCLUE_VELOCITY_FIELDS_CLIMB = 1 << 2
+} GeoclueVelocityFields;
+
+typedef enum {
 	GEOCLUE_ERROR_NOT_IMPLEMENTED, /* method is not implemented (yet) */
 	GEOCLUE_ERROR_NOT_AVAILABLE,   /* e.g. web service did not respond */
 	GEOCLUE_ERROR_FAILED,          /* generic fatal error */

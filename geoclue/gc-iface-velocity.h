@@ -19,13 +19,6 @@ G_BEGIN_DECLS
 #define GC_IS_IFACE_VELOCITY_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), GC_TYPE_IFACE_VELOCITY))
 #define GC_IFACE_VELOCITY_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_INTERFACE ((obj), GC_TYPE_IFACE_VELOCITY, GcIfaceVelocityClass))
 
-typedef enum {
-	GEOCLUE_VELOCITY_FIELDS_NONE = 0,
-	GEOCLUE_VELOCITY_FIELDS_LATITUDE = 1 << 0,
-	GEOCLUE_VELOCITY_FIELDS_LONGITUDE = 1 << 1,
-	GEOCLUE_VELOCITY_FIELDS_ALTITUDE = 1 << 2
-} GeoclueVelocityFields;
-
 typedef struct _GcIfaceVelocity GcIfaceVelocity; /* Dummy typedef */
 typedef struct _GcIfaceVelocityClass GcIfaceVelocityClass;
 
@@ -52,12 +45,12 @@ struct _GcIfaceVelocityClass {
 
 GType gc_iface_velocity_get_type (void);
 
-void gc_iface_velocity_changed (GcIfaceVelocity      *gc,
-				GeoclueVelocityFields fields,
-				int                   timestamp,
-				double                speed,
-				double                direction,
-				double                climb);
+void gc_iface_velocity_emit_velocity_changed (GcIfaceVelocity      *gc,
+					      GeoclueVelocityFields fields,
+					      int                   timestamp,
+					      double                speed,
+					      double                direction,
+					      double                climb);
 
 G_END_DECLS
 

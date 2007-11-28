@@ -14,6 +14,7 @@
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-position.h>
+#include <geoclue/gc-iface-velocity.h>
 
 typedef struct {
 	GcProvider parent;
@@ -25,11 +26,18 @@ typedef struct {
 
 	GMainLoop *loop;
 
+	int timestamp;
+
 	/* Cached so we don't have to make D-Bus method calls all the time */
 	GypsyPositionFields position_fields;
 	double latitude;
 	double longitude;
 	double altitude;
+
+	GypsyCourseFields course_fields;
+	double speed;
+	double direction;
+	double climb;
 } GeoclueGypsy;
 
 typedef struct {
@@ -37,13 +45,16 @@ typedef struct {
 } GeoclueGypsyClass;
 
 static void geoclue_gypsy_position_init (GcIfacePositionClass *iface);
+static void geoclue_gypsy_velocity_init (GcIfaceVelocityClass *iface);
 
 #define GEOCLUE_TYPE_GYPSY (geoclue_gypsy_get_type ())
 #define GEOCLUE_GYPSY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_GYPSY, GeoclueGypsy))
 
 G_DEFINE_TYPE_WITH_CODE (GeoclueGypsy, geoclue_gypsy, GC_TYPE_PROVIDER,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
-						geoclue_gypsy_position_init))
+						geoclue_gypsy_position_init)
+			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_VELOCITY,
+						geoclue_gypsy_velocity_init))
 
 /* GcIfaceGeoclue methods */
 static gboolean
@@ -144,6 +155,30 @@ compare_field (GypsyPositionFields fields_a,
 	return ((fields_a & field) != (fields_b & field));
 }
 
+static GeocluePositionFields
+gypsy_position_to_geoclue (GypsyPositionFields fields)
+{
+	GeocluePositionFields gc_fields = GEOCLUE_POSITION_FIELDS_NONE;
+	
+	gc_fields |= (fields & GYPSY_POSITION_FIELDS_LATITUDE) ? GEOCLUE_POSITION_FIELDS_LATITUDE : 0;
+	gc_fields |= (fields & GYPSY_POSITION_FIELDS_LONGITUDE) ? GEOCLUE_POSITION_FIELDS_LONGITUDE : 0;
+	gc_fields |= (fields & GYPSY_POSITION_FIELDS_ALTITUDE) ? GEOCLUE_POSITION_FIELDS_ALTITUDE : 0;
+	
+	return gc_fields;
+}
+	      
+static GeoclueVelocityFields
+gypsy_course_to_geoclue (GypsyCourseFields fields)
+{
+	GeoclueVelocityFields gc_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
+
+	gc_fields |= (fields & GYPSY_COURSE_FIELDS_SPEED) ? GEOCLUE_VELOCITY_FIELDS_SPEED : 0;
+	gc_fields |= (fields & GYPSY_COURSE_FIELDS_DIRECTION) ? GEOCLUE_VELOCITY_FIELDS_DIRECTION : 0;
+	gc_fields |= (fields & GYPSY_COURSE_FIELDS_CLIMB) ? GEOCLUE_VELOCITY_FIELDS_CLIMB : 0;
+
+	return gc_fields;
+}
+
 static void
 position_changed (GypsyPosition      *position,
 		  GypsyPositionFields fields,
@@ -155,33 +190,43 @@ position_changed (GypsyPosition      *position,
 {
 	gboolean changed = FALSE;
 
+	gypsy->timestamp = timestamp;
 	if (compare_field (gypsy->position_fields, gypsy->latitude,
 			   fields, latitude, GYPSY_POSITION_FIELDS_LATITUDE)) {
-		gypsy->position_fields |= GYPSY_POSITION_FIELDS_LATITUDE;
-		gypsy->latitude = latitude;
-		changed = TRUE;
+		if (fields | GYPSY_POSITION_FIELDS_LATITUDE) {
+			gypsy->position_fields |= GYPSY_POSITION_FIELDS_LATITUDE;
+			gypsy->latitude = latitude;
+			changed = TRUE;
+		}
 	}
 
 	if (compare_field (gypsy->position_fields, gypsy->longitude,
 			   fields, longitude, GYPSY_POSITION_FIELDS_LONGITUDE)) {
-		gypsy->position_fields |= GYPSY_POSITION_FIELDS_LONGITUDE;
-		gypsy->longitude = longitude;
-		changed = TRUE;
+		if (fields | GYPSY_POSITION_FIELDS_LONGITUDE) {
+			gypsy->position_fields |= GYPSY_POSITION_FIELDS_LONGITUDE;
+			gypsy->longitude = longitude;
+			changed = TRUE;
+		}
 	}
 
 	if (compare_field (gypsy->position_fields, gypsy->altitude,
 			   fields, altitude, GYPSY_POSITION_FIELDS_ALTITUDE)) {
-		gypsy->position_fields |= GYPSY_POSITION_FIELDS_ALTITUDE;
-		gypsy->altitude = altitude;
-		changed = TRUE;
+		if (fields | GYPSY_POSITION_FIELDS_ALTITUDE) {
+			gypsy->position_fields |= GYPSY_POSITION_FIELDS_ALTITUDE;
+			gypsy->altitude = altitude;
+			changed = TRUE;
+		}
 	}
 
 	if (changed) {
 		GeoclueAccuracy *accuracy;
-		
+		GeocluePositionFields fields;
+
 		/* FIXME: get the real accuracy */
 		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
 						 0.0, 0.0);
+
+		fields = gypsy_position_to_geoclue (gypsy->position_fields);
 		gc_iface_position_emit_position_changed 
 			(GC_IFACE_POSITION (gypsy), gypsy->position_fields,
 			 timestamp, gypsy->latitude, gypsy->longitude, 
@@ -190,6 +235,55 @@ position_changed (GypsyPosition      *position,
 	}
 }
 
+static void
+course_changed (GypsyCourse      *course,
+		GypsyCourseFields fields,
+		int               timestamp,
+		double            speed,
+		double            direction,
+		double            climb,
+		GeoclueGypsy     *gypsy)
+{
+	gboolean changed = FALSE;
+
+	gypsy->timestamp = timestamp;
+	if (compare_field (gypsy->course_fields, gypsy->speed,
+			   fields, speed, GYPSY_COURSE_FIELDS_SPEED)) {
+		if (fields & GYPSY_COURSE_FIELDS_SPEED) {
+			gypsy->course_fields |= GYPSY_COURSE_FIELDS_SPEED;
+			gypsy->speed = speed;
+			changed = TRUE;
+		}
+	}
+
+	if (compare_field (gypsy->course_fields, gypsy->direction,
+			   fields, direction, GYPSY_COURSE_FIELDS_DIRECTION)) {
+		if (fields & GYPSY_COURSE_FIELDS_DIRECTION) {
+			gypsy->course_fields |= GYPSY_COURSE_FIELDS_DIRECTION;
+			gypsy->direction = direction;
+			changed = TRUE;
+		}
+	}
+
+	if (compare_field (gypsy->course_fields, gypsy->climb,
+			   fields, climb, GYPSY_COURSE_FIELDS_CLIMB)) {
+		if (fields & GYPSY_COURSE_FIELDS_CLIMB) {
+			gypsy->course_fields |= GYPSY_COURSE_FIELDS_CLIMB;
+			gypsy->climb = climb;
+			changed = TRUE;
+		}
+	}
+
+	if (changed) {
+		GeoclueVelocityFields fields;
+
+		fields = gypsy_course_to_geoclue (gypsy->course_fields);
+		gc_iface_velocity_emit_velocity_changed 
+			(GC_IFACE_VELOCITY (gypsy), fields,
+			 timestamp, gypsy->speed, gypsy->direction, gypsy->climb);
+	}
+}
+		
 static void
 geoclue_gypsy_init (GeoclueGypsy *gypsy)
 {
@@ -209,6 +303,9 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 	gypsy->position = gypsy_position_new (path);
 	g_signal_connect (gypsy->position, "position-changed",
 			  G_CALLBACK (position_changed), gypsy);
+	gypsy->course = gypsy_course_new (path);
+	g_signal_connect (gypsy->course, "course-changed",
+			  G_CALLBACK (course_changed), gypsy);
 
 	g_free (path);
 
@@ -230,6 +327,28 @@ get_position (GcIfacePosition       *gc,
 	      GeoclueAccuracy      **accuracy,
 	      GError               **error)
 {
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
+		
+	*timestamp = gypsy->timestamp;
+
+	*fields = GEOCLUE_POSITION_FIELDS_NONE;
+	if (gypsy->position_fields & GYPSY_POSITION_FIELDS_LATITUDE) {
+		*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+		*latitude = gypsy->latitude;
+	}
+	if (gypsy->position_fields & GYPSY_POSITION_FIELDS_LONGITUDE) {
+		*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
+		*longitude = gypsy->longitude;
+	}
+	if (gypsy->position_fields & GYPSY_POSITION_FIELDS_ALTITUDE) {
+		*fields |= GEOCLUE_POSITION_FIELDS_ALTITUDE;
+		*altitude = gypsy->altitude;
+	}
+
+	/* FIXME: get the real accuracy */
+	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
+					  0.0, 0.0);
+		
 	return TRUE;
 }
 
@@ -237,6 +356,24 @@ static void
 geoclue_gypsy_position_init (GcIfacePositionClass *iface)
 {
 	iface->get_position = get_position;
+}
+
+static gboolean
+get_velocity (GcIfaceVelocity       *gc,
+	      GeoclueVelocityFields *fields,
+	      int                   *timestamp,
+	      double                *speed,
+	      double                *direction,
+	      double                *climb,
+	      GError               **error)
+{
+	return TRUE;
+}
+
+static void
+geoclue_gypsy_velocity_init (GcIfaceVelocityClass *iface)
+{
+	iface->get_velocity = get_velocity;
 }
 
 int

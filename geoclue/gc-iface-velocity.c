@@ -88,12 +88,12 @@ gc_iface_velocity_get_velocity (GcIfaceVelocity *gc,
 }
 
 void
-gc_iface_velocity_changed (GcIfaceVelocity      *gc,
-			   GeoclueVelocityFields fields,
-			   int                   timestamp,
-			   double                speed,
-			   double                direction,
-			   double                climb)
+gc_iface_velocity_emit_velocity_changed (GcIfaceVelocity      *gc,
+					 GeoclueVelocityFields fields,
+					 int                   timestamp,
+					 double                speed,
+					 double                direction,
+					 double                climb)
 {
 	g_signal_emit (gc, signals[VELOCITY_CHANGED], 0, fields, timestamp,
 		       speed, direction, climb);

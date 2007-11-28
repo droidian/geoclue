@@ -38,4 +38,9 @@ typedef enum {
 	GEOCLUE_ERROR_FAILED,          /* generic fatal error */
 } GeoclueError;
 
+#define GEOCLUE_ADDRESS_KEY_COUNTRYCODE "countrycode"
+#define GEOCLUE_ADDRESS_KEY_COUNTRY "country"
+#define GEOCLUE_ADDRESS_KEY_LOCALITY "locality"
+#define GEOCLUE_ADDRESS_KEY_CITY "city"
+
 #endif

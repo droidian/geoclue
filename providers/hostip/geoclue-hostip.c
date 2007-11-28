@@ -153,23 +153,22 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 			locality = NULL;
 		} else {
 			
-			/* TODO: get the keys from geoclue-types.h */
-			g_hash_table_insert (*address, "locality", locality);
+			g_hash_table_insert (*address, 
+					     GEOCLUE_ADDRESS_KEY_LOCALITY, 
+					     locality);
 		}
 	}
 	
 	if (gc_web_service_get_string (obj->web_service, 
 	                               &country, HOSTIP_COUNTRYCODE_XPATH)) {
-		
-		/* TODO: get the keys from geoclue-types.h */
-		g_hash_table_insert (*address, "countrycode", country);
+		g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+				     country);
 	}
 	
 	if (gc_web_service_get_string (obj->web_service, 
 	                               &country, HOSTIP_COUNTRY_XPATH)) {
-		
-		/* TODO: get the keys from geoclue-types.h */
-		g_hash_table_insert (*address, "country", country);
+		g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRY, 
+				     country);
 	}
 	
 	time ((time_t *)timestamp);

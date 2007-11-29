@@ -145,9 +145,6 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 			*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE; 
 			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_POSTALCODE,
 			                                  2000, 0);
-		} else {
-			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-			                                  0, 0);
 		}
 	} else if (countrycode && locality) {
 		if (!gc_web_service_query (obj->place_geocoder,
@@ -168,10 +165,10 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 			*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE; 
 			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
 			                                  20000, 0);
-		} else {
-			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-			                                  0, 0);
 		}
+	}
+	if (*accuracy == NULL) {
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
 	}
 	return TRUE;
 }

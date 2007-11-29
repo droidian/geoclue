@@ -16,11 +16,6 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-provider.h>
 
-enum {
-	PROP_0,
-	PROP_NAME,
-	PROP_DESCRIPTION
-};
 
 typedef struct {
 	char *name;
@@ -53,45 +48,13 @@ dispose (GObject *object)
 }
 
 static void
-set_property (GObject      *object,
-	      guint         prop_id,
-	      const GValue *value,
-	      GParamSpec   *pspec)
-{
-}
-
-static void
-get_property (GObject    *object,
-	      guint       prop_id,
-	      GValue     *value,
-	      GParamSpec *pspec)
-{
-	GcProviderPrivate *priv = GET_PRIVATE (object);
-
-	switch (prop_id) {
-	case PROP_NAME:
-		g_value_set_string (value, priv->name);
-		break;
-
-	case PROP_DESCRIPTION:
-		g_value_set_string (value, priv->description);
-		break;
-	}
-}
-
-static void
 gc_provider_class_init (GcProviderClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 
 	o_class->finalize = finalize;
 	o_class->dispose = dispose;
-	o_class->set_property = set_property;
-	o_class->get_property = get_property;
-
-	g_object_class_override_property (o_class, PROP_NAME, "service-name");
-	g_object_class_override_property (o_class, PROP_DESCRIPTION, "service-description");
-
+	
 	g_type_class_add_private (klass, sizeof (GcProviderPrivate));
 }
 
@@ -126,6 +89,21 @@ get_version (GcIfaceGeoclue *geoclue,
 				      "get_version is not implemented");
 		return FALSE;
 	}
+}
+
+static gboolean 
+get_provider_info (GcIfaceGeoclue *geoclue,
+		   gchar          **name,
+		   gchar          **description,
+		   GError        **error)
+{
+	GcProvider *provider = GC_PROVIDER (geoclue);
+	GcProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	*name = g_strdup (priv->name);
+	*description = g_strdup (priv->description);
+	
+	return TRUE;
 }
 
 static gboolean
@@ -167,6 +145,7 @@ static void
 gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 {
 	iface->get_version = get_version;
+	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
 	iface->shutdown = shutdown;
 }
@@ -217,4 +196,3 @@ gc_provider_set_details (GcProvider *provider,
 	priv->name = g_strdup (name);
 	priv->description = g_strdup (description);
 }
-	

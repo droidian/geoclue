@@ -23,6 +23,10 @@ static gboolean gc_iface_geoclue_get_version (GcIfaceGeoclue *gc,
 					      int            *minor,
 					      int            *micro,
 					      GError        **error);
+static gboolean gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
+						    gchar          **name,
+						    gchar          **description,
+						    GError         **error);
 static gboolean gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
 					     gboolean       *status,
 					     GError        **error);
@@ -30,6 +34,7 @@ static gboolean gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
 					   GError        **error);
 
 #include "gc-iface-geoclue-glue.h"
+
 
 static void
 gc_iface_geoclue_base_init (gpointer klass)
@@ -40,25 +45,6 @@ gc_iface_geoclue_base_init (gpointer klass)
 		return;
 	}
 	initialized = TRUE;
-	
-	g_object_interface_install_property (klass,
-					     g_param_spec_string ("service-name",
-								  "Service Name", 
-								  "Name of the service",
-								  "",
-								  G_PARAM_READABLE |
-								  G_PARAM_STATIC_NAME |
-								  G_PARAM_STATIC_NICK |
-								  G_PARAM_STATIC_BLURB));
-	g_object_interface_install_property (klass,
-					     g_param_spec_string ("service-description",
-								  "Service Description",
-								  "Description of the service",
-								  "",
-								  G_PARAM_READABLE |
-								  G_PARAM_STATIC_NAME |
-								  G_PARAM_STATIC_NICK |
-								  G_PARAM_STATIC_BLURB));
 	
 	signals[STATUS_CHANGED] = g_signal_new ("status-changed",
 						G_OBJECT_CLASS_TYPE (klass),
@@ -101,6 +87,18 @@ gc_iface_geoclue_get_version (GcIfaceGeoclue *gc,
 	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->get_version (gc, major, 
 							     minor, micro,
 							     error);
+}
+
+static gboolean
+gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
+				    gchar          **name,
+				    gchar          **description,
+				    GError         **error)
+{
+	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->get_provider_info (gc, 
+								   name,
+								   description,
+								   error);
 }
 
 static gboolean

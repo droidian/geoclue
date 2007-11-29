@@ -33,6 +33,10 @@ struct _GcIfaceGeoclueClass {
 				 int            *minor,
 				 int            *micro,
 				 GError        **error);
+	gboolean (*get_provider_info) (GcIfaceGeoclue  *gc,
+				       gchar          **name,
+				       gchar          **description,
+				       GError         **error);
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
 				gboolean       *available,
 				GError        **error);

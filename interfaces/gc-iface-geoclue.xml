@@ -7,10 +7,12 @@
 			<arg type="i" name="minor" direction="out" />
 			<arg type="i" name="micro" direction="out" />
 		</method>
-
-		<property name="ServiceName" type="s" access="read" />
-		<property name="ServiceDescription" type="s" access="read" />
-
+		
+		<method name="GetProviderInfo">
+			<arg type="s" name="Name" direction="out" />
+			<arg type="s" name="Description" direction="out" />
+		</method>
+		
 		<method name="GetStatus">
 			<arg type="b" name="active" direction="out" />
 		</method>

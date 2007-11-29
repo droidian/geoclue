@@ -3,12 +3,10 @@
 <node name="/">
 	<interface name="org.freedesktop.Geoclue.ReverseGeocode"> 
 		<method name="PositionToAddress">
-        		<arg name="latitude" type="d" direction="in" /> 
-		        <arg name="longitude" type="d" direction="in" /> 
-
-		        <arg type="a{ss}" name="address" direction="out" />
-
-                        <arg name="accuracy" type="a(idd)" direction="out" />
+			<arg name="latitude" type="d" direction="in" /> 
+			<arg name="longitude" type="d" direction="in" /> 
+			
+			<arg type="a{ss}" name="address" direction="out" />
 		</method>
 	</interface>
 </node>

@@ -72,8 +72,8 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGeonames, geoclue_geonames, GC_TYPE_PROVIDER,
 
 static gboolean
 geoclue_geonames_get_status (GcIfaceGeoclue  *iface,
-                                 gboolean        *available,
-                                 GError         **error)
+                             gboolean        *available,
+                             GError         **error)
 {
 	/* TODO: if connection status info is only in master, how do we do this? */
 	g_set_error (error, GEOCLUE_ERROR, 
@@ -83,7 +83,7 @@ geoclue_geonames_get_status (GcIfaceGeoclue  *iface,
 
 static gboolean
 geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
-                             GError         **error)
+                           GError         **error)
 {
 	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	
@@ -96,13 +96,13 @@ geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
 
 static gboolean
 geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
-                                          GHashTable            *address,
-                                          GeocluePositionFields *fields,
-                                          double                *latitude,
-                                          double                *longitude,
-                                          double                *altitude,
-                                          GeoclueAccuracy      **accuracy,
-                                          GError               **error)
+                                      GHashTable            *address,
+                                      GeocluePositionFields *fields,
+                                      double                *latitude,
+                                      double                *longitude,
+                                      double                *altitude,
+                                      GeoclueAccuracy      **accuracy,
+                                      GError               **error)
 {
 	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	gchar *countrycode, *locality, *postalcode;
@@ -165,11 +165,10 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 
 static gboolean
 geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
-                                          double                  latitude,
-                                          double                  longitude,
-                                          GHashTable            **address,
-                                          GeoclueAccuracy       **accuracy,
-                                          GError                **error)
+                                      double                  latitude,
+                                      double                  longitude,
+                                      GHashTable            **address,
+                                      GError                **error)
 {
 	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	gchar lat[G_ASCII_DTOSTR_BUF_SIZE];
@@ -225,8 +224,6 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 		                     GEOCLUE_ADDRESS_KEY_LOCALITY, 
 		                     locality);
 	}
-	
-	/* TODO: accuracy does not make sense here, does it? */
 	return TRUE;
 }
 

@@ -120,9 +120,9 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
 	gchar *countrycode, *locality, *postalcode;
 	
-	countrycode = g_hash_table_lookup (address, "countrycode");
-	locality = g_hash_table_lookup (address, "locality");
-	postalcode = g_hash_table_lookup (address, "postalcode");
+	countrycode = g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE);
+	locality = g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_LOCALITY);
+	postalcode = g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_POSTALCODE);
 	
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
 	
@@ -219,19 +219,27 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 	
 	if (gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &countrycode, GEONAME_COUNTRYCODE)) {
-		g_hash_table_insert (*address, "countrycode", countrycode);
+		g_hash_table_insert (*address, 
+		                     GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+		                     countrycode);
 	}
 	if (gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &country, GEONAME_COUNTRY)) {
-		g_hash_table_insert (*address, "country", country);
+		g_hash_table_insert (*address, 
+		                     GEOCLUE_ADDRESS_KEY_COUNTRY, 
+		                     country);
 	}
 	if (gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &region, GEONAME_ADMIN1)) {
-		g_hash_table_insert (*address, "region", region);
+		g_hash_table_insert (*address, 
+		                     GEOCLUE_ADDRESS_KEY_REGION, 
+		                     region);
 	}
 	if (gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &locality, GEONAME_NAME)) {
-		g_hash_table_insert (*address, "locality", locality);
+		g_hash_table_insert (*address, 
+		                     GEOCLUE_ADDRESS_KEY_LOCALITY, 
+		                     locality);
 	}
 	
 	/* TODO: accuracy does not make sense here, does it? */

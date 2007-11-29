@@ -38,9 +38,18 @@ typedef enum {
 	GEOCLUE_ERROR_FAILED,          /* generic fatal error */
 } GeoclueError;
 
+/** Address keys from XEP-0080: http://www.xmpp.org/extensions/xep-0080.html
+ * region    = province, US state
+ * locality  = city, town 
+ * area      = neighborhood, campus
+ * street    = street name or full street address
+ **/
 #define GEOCLUE_ADDRESS_KEY_COUNTRYCODE "countrycode"
 #define GEOCLUE_ADDRESS_KEY_COUNTRY "country"
+#define GEOCLUE_ADDRESS_KEY_REGION "region" 
 #define GEOCLUE_ADDRESS_KEY_LOCALITY "locality"
-#define GEOCLUE_ADDRESS_KEY_CITY "city"
+#define GEOCLUE_ADDRESS_KEY_AREA "area"
+#define GEOCLUE_ADDRESS_KEY_POSTALCODE "postalcode"
+#define GEOCLUE_ADDRESS_KEY_STREET "street"
 
 #endif

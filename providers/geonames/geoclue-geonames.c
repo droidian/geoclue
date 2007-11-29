@@ -71,19 +71,6 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGeonames, geoclue_geonames, GC_TYPE_PROVIDER,
 /* Geoclue interface implementation */
 
 static gboolean
-geoclue_geonames_get_version (GcIfaceGeoclue  *iface,
-                                  int             *major,
-                                  int             *minor,
-                                  int             *micro,
-                                  GError         **error)
-{
-	*major = 1;
-	*minor = 0;
-	*micro = 0;
-	return TRUE;
-}
-
-static gboolean
 geoclue_geonames_get_status (GcIfaceGeoclue  *iface,
                                  gboolean        *available,
                                  GError         **error)
@@ -264,7 +251,6 @@ geoclue_geonames_class_init (GeoclueGeonamesClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->get_version = geoclue_geonames_get_version;
 	p_class->get_status = geoclue_geonames_get_status;
 	p_class->shutdown = geoclue_geonames_shutdown;
 	

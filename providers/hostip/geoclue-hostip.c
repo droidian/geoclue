@@ -47,19 +47,6 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueHostip, geoclue_hostip, GC_TYPE_PROVIDER,
 /* Geoclue interface implementation */
 
 static gboolean
-geoclue_hostip_get_version (GcIfaceGeoclue  *iface,
-                                int             *major,
-                                int             *minor,
-                                int             *micro,
-                                GError         **error)
-{
-	*major = 1;
-	*minor = 0;
-	*micro = 0;
-	return TRUE;
-}
-
-static gboolean
 geoclue_hostip_get_status (GcIfaceGeoclue  *iface,
                                gboolean        *available,
                                GError         **error)
@@ -208,7 +195,6 @@ geoclue_hostip_class_init (GeoclueHostipClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->get_version = geoclue_hostip_get_version;
 	p_class->get_status = geoclue_hostip_get_status;
 	p_class->shutdown = geoclue_hostip_shutdown;
 	

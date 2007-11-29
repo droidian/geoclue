@@ -56,20 +56,8 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGypsy, geoclue_gypsy, GC_TYPE_PROVIDER,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_VELOCITY,
 						geoclue_gypsy_velocity_init))
 
-/* GcIfaceGeoclue methods */
-static gboolean
-get_version (GcIfaceGeoclue *gc,
-             int            *major,
-             int            *minor,
-             int            *micro,
-             GError        **error)
-{
-        *major = 1;
-        *minor = 0;
-        *micro = 0;
 
-        return TRUE;
-}
+/* GcIfaceGeoclue methods */
 
 static gboolean
 get_status (GcIfaceGeoclue *gc,
@@ -129,7 +117,6 @@ geoclue_gypsy_class_init (GeoclueGypsyClass *klass)
 	o_class->finalize = finalize;
 	o_class->dispose = dispose;
 
-	p_class->get_version = get_version;
 	p_class->get_status = get_status;
 	p_class->shutdown = shutdown;
 }

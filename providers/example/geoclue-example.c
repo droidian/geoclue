@@ -24,19 +24,6 @@ typedef struct {
 
 G_DEFINE_TYPE (GeoclueExample, geoclue_example, GC_TYPE_PROVIDER)
 
-static gboolean
-get_version (GcIfaceGeoclue *gc,
-	     int            *major,
-	     int            *minor,
-	     int            *micro,
-	     GError        **error)
-{
-	*major = 1;
-	*minor = 0;
-	*micro = 0;
-
-	return TRUE;
-}
 
 static gboolean
 get_status (GcIfaceGeoclue *gc,
@@ -63,7 +50,6 @@ geoclue_example_class_init (GeoclueExampleClass *klass)
 {
 	GcProviderClass *p_class = (GcProviderClass *) klass;
 
-	p_class->get_version = get_version;
 	p_class->get_status = get_status;
 	p_class->shutdown = shutdown;
 }

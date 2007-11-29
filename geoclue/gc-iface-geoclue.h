@@ -28,11 +28,6 @@ struct _GcIfaceGeoclueClass {
 				 gboolean        available);
 
 	/* vtable */
-	gboolean (*get_version) (GcIfaceGeoclue *geoclue,
-				 int            *major,
-				 int            *minor,
-				 int            *micro,
-				 GError        **error);
 	gboolean (*get_provider_info) (GcIfaceGeoclue  *gc,
 				       gchar          **name,
 				       gchar          **description,

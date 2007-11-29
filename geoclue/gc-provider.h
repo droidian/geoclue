@@ -34,11 +34,6 @@ typedef struct _GcProviderClass {
 	GObjectClass parent_class;
 
 	/* Implements the GcIfaceGeoclue interface */
-	gboolean (*get_version) (GcIfaceGeoclue *geoclue,
-				 int            *major,
-				 int            *minor,
-				 int            *micro,
-				 GError        **error);
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
 				gboolean       *available,
 				GError        **error);

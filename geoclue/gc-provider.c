@@ -72,26 +72,6 @@ gc_provider_init (GcProvider *provider)
 }
 
 static gboolean 
-get_version (GcIfaceGeoclue *geoclue,
-	     int            *major,
-	     int            *minor,
-	     int            *micro,
-	     GError        **error)
-{
-	GcProviderClass *klass;
-
-	klass = GC_PROVIDER_GET_CLASS (geoclue);
-	if (klass->get_version) {
-		return klass->get_version (geoclue, major, minor, micro, error);
-	} else {
-		*error = g_error_new (GEOCLUE_ERROR,
-				      GEOCLUE_ERROR_NOT_IMPLEMENTED,
-				      "get_version is not implemented");
-		return FALSE;
-	}
-}
-
-static gboolean 
 get_provider_info (GcIfaceGeoclue *geoclue,
 		   gchar          **name,
 		   gchar          **description,
@@ -144,7 +124,6 @@ shutdown (GcIfaceGeoclue *geoclue,
 static void
 gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 {
-	iface->get_version = get_version;
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
 	iface->shutdown = shutdown;

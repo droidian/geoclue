@@ -18,11 +18,6 @@ enum {
 
 static guint signals[LAST_SIGNAL] = {0};
 
-static gboolean gc_iface_geoclue_get_version (GcIfaceGeoclue *gc,
-					      int            *major,
-					      int            *minor,
-					      int            *micro,
-					      GError        **error);
 static gboolean gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
 						    gchar          **name,
 						    gchar          **description,
@@ -75,18 +70,6 @@ gc_iface_geoclue_get_type (void)
 	}
 
 	return type;
-}
-
-static gboolean
-gc_iface_geoclue_get_version (GcIfaceGeoclue *gc,
-			      int            *major,
-			      int            *minor,
-			      int            *micro,
-			      GError        **error)
-{
-	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->get_version (gc, major, 
-							     minor, micro,
-							     error);
 }
 
 static gboolean

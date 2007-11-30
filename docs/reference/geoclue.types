@@ -1,3 +1,5 @@
 #include <geoclue/gc-web-service.h>
+#include <geoclue/gc-provider.h>
 
 gc_web_service_get_type
+gc_provider_get_type

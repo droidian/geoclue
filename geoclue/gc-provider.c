@@ -6,6 +6,19 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:gc-provider
+ * @short_description: Abstract class to derive Geoclue providers from.
+ * 
+ * #GcProvider is an abstract class that all Geoclue providers should 
+ * derive from. It takes care of setting up the provider D-Bus service,
+ * and also implements #GcIfaceGeoclue interface (derived classes still 
+ * need to implement the functionality).
+ * 
+ * Derived classes should define the #GcIfaceGeoclue methods in their 
+ * class_init() and call gc_provider_set_details() in init()
+ * 
+ */
 #include <config.h>
 
 #include <glib-object.h>
@@ -132,11 +145,16 @@ gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 /**
  * gc_provider_set_details:
  * @provider: A #GcProvider object
- * @service: The service that the object implements
- * @path: The path that the object should be registered at
+ * @service: The service name to be requested
+ * @path: The path the object should be registered at
+ * @name: The provider name
+ * @description: The description of the provider
  *
  * Requests ownership of the @service name, and if that succeeds registers
- * @provider at @path.
+ * @provider at @path. @name should be the name of the provider (e.g. 
+ * "Hostip"), @description should be a shortdescription of the provider 
+ * (e.g. "Web service based Position & Address provider, at best accurate
+ * within the city")
  */
 void
 gc_provider_set_details (GcProvider *provider,

@@ -5,6 +5,7 @@ AUTOMAKE=automake
 ACLOCAL=aclocal
 AUTOCONF=autoconf
 AUTOHEADER=autoheader
+GTKDOCIZE=gtkdocize
 
 # Check for binaries
 
@@ -27,6 +28,13 @@ AUTOHEADER=autoheader
     echo "${AUTOCONF} not found. Please install it."
     exit 1
 }
+
+[ "x$(which ${GTKDOCIZE})x" = "xx" ] && {
+    echo "${GTKDOCIZE} not found. Please install it."
+    exit 1
+}
+
+gtkdocize || exit 1
 
 "${ACLOCAL}" \
 && "${LIBTOOLIZE}" \

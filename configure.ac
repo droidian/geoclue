@@ -15,6 +15,8 @@ AC_PROG_MAKE_SET
 AC_PROG_GCC_TRADITIONAL
 AM_PROG_LIBTOOL
 
+GTK_DOC_CHECK(1.0)
+
 AC_ARG_ENABLE(system-bus,
 	      [AC_HELP_STRING([--enable-system-bus],
 			      [Use the system bus instead of session bus])],
@@ -57,6 +59,8 @@ AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
 Makefile
+docs/Makefile
+docs/reference/Makefile
 interfaces/Makefile
 geoclue/Makefile
 providers/Makefile

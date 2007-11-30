@@ -6,6 +6,7 @@ BUILT_SOURCES =			\
 	gc-iface-address-glue.h	\
 	gc-iface-geoclue-glue.h \
 	gc-iface-geocode-glue.h	\
+	gc-iface-position-bindings.h	\
 	gc-iface-position-glue.h	\
 	gc-iface-reverse-geocode-glue.h	\
 	gc-iface-velocity-glue.h
@@ -14,6 +15,7 @@ libgeoclue_provider_la_SOURCES = \
 	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
 	geoclue-error.c		\
+	geoclue-position.c	\
 	geoclue-provider.c	\
 	gc-provider.c		\
 	gc-web-service.c	\
@@ -82,6 +84,14 @@ stamp-gc-iface-reverse-geocode-glue.h: ../interfaces/gc-iface-reverse-geocode.xm
 
 stamp-gc-iface-velocity-glue.h: ../interfaces/gc-iface-velocity.xml
 	$(DBUS_BINDING_TOOL) --prefix=gc_iface_velocity --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
+
+%-bindings.h: stamp-%-bindings.h
+	@true
+stamp-%-bindings.h: ../interfaces/%.xml
+	$(DBUS_BINDING_TOOL) --mode=glib-client --prefix=geoclue $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)

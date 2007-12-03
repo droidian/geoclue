@@ -38,6 +38,18 @@ typedef struct _GeocluePositionClass {
 
 GType geoclue_position_get_type (void);
 
+GeocluePosition *geoclue_position_new (const char *service,
+				       const char *path);
+
+GeocluePositionFields geoclue_position_get_position (GeocluePosition  *position,
+						     int              *timestamp,
+						     double           *latitude,
+						     double           *longitude,
+						     double           *altitude,
+						     GeoclueAccuracy **accuracy,
+						     GError          **error);
+
+
 G_END_DECLS
 
 #endif

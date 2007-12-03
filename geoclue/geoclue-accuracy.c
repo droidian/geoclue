@@ -89,7 +89,13 @@ geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 	GPtrArray *arr = (GPtrArray *) accuracy;
 	GValueArray *vals = arr->pdata[0];
 
-	*level = g_value_get_int (g_value_array_get_nth (vals, 0));
-	*horizontal_accuracy = g_value_get_double (g_value_array_get_nth (vals, 1));
-	*vertical_accuracy = g_value_get_double (g_value_array_get_nth (vals, 2));
+	if (level != NULL) {
+		*level = g_value_get_int (g_value_array_get_nth (vals, 0));
+	}
+	if (horizontal_accuracy != NULL) {
+		*horizontal_accuracy = g_value_get_double (g_value_array_get_nth (vals, 1));
+	}
+	if (vertical_accuracy != NULL) {
+		*vertical_accuracy = g_value_get_double (g_value_array_get_nth (vals, 2));
+	}
 }

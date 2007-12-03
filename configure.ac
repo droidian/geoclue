@@ -63,6 +63,7 @@ docs/Makefile
 docs/reference/Makefile
 interfaces/Makefile
 geoclue/Makefile
+example/Makefile
 providers/Makefile
 providers/example/Makefile
 providers/gypsy/Makefile

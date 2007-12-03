@@ -5,10 +5,30 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:geoclue-accuracy
+ * @short_description: Methods for manipulating #GeoclueAccuracy structure
+ * 
+ * A #GeoclueAccuracy holds accuracy information: a 
+ * #GeoclueAccuracyLevel and metric values for horizontal and vertical
+ * accuracy. These values should be set and queried using provided 
+ * functions.
+ **/
+
 #include <glib-object.h>
 
 #include <geoclue/geoclue-accuracy.h>
 
+/**
+ * geoclue_accuracy_new:
+ * @level: The #GeoclueAccuracyLevel
+ * @horizontal_accuracy: The horizontal accuracy in meters
+ * @vertical_accuracy: The vertical accuracy in meters
+ *
+ * Creates a new #GeoclueAccuracy with given values.
+ * 
+ * Return value: New #GeoclueAccuracy.
+ */
 GeoclueAccuracy *
 geoclue_accuracy_new (GeoclueAccuracyLevel level,
 		      double               horizontal_accuracy,
@@ -33,6 +53,12 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 	return (GeoclueAccuracy *) accuracy;
 }
 
+/**
+ * geoclue_accuracy_free:
+ * @accuracy: A #GeoclueAccuracy
+ *
+ * Frees the #GeoclueAccuracy.
+ */
 void
 geoclue_accuracy_free (GeoclueAccuracy *accuracy)
 {
@@ -46,6 +72,14 @@ geoclue_accuracy_free (GeoclueAccuracy *accuracy)
 	g_ptr_array_free (arr, TRUE);
 }
 
+/**
+ * geoclue_accuracy_get_details:
+ * @accuracy: A #GeoclueAccuracy
+ * @level: The returned #GeoclueAccuracyLevel
+ * @horizontal_accuracy: The returned horizontal accuracy in meters
+ * @vertical_accuracy: The returned vertical accuracy in meters
+ *
+ */
 void
 geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 			      GeoclueAccuracyLevel *level,

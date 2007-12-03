@@ -1,0 +1,63 @@
+<refentry id="implementating-providers">
+
+<refmeta>
+<refentrytitle>Implementing providers</refentrytitle>
+</refmeta>
+
+<refnamediv>
+<refname>Implementing providers</refname>
+<refpurpose>How to write a Geoclue provider.</refpurpose>
+</refnamediv>
+
+<refsect1>
+<para>
+Geoclue is built in two layers of interfaces: the client API and the 
+provider API. This document is about the latter and should contain
+the information needed to write a provider for Geoclue.
+</para>
+
+<para>
+...TODO...
+
+<para>
+<variablelist>
+
+<varlistentry>
+<term>Geoclue</term>
+<listitem><para>Methods and signals common to all providers.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>Position</term>
+<listitem><para>Methods and signals for acquiring the current position
+(latitude, longitude and altitude).</para></listitem>
+</varlistentry>
+<varlistentry>
+
+<term>Velocity</term>
+<listitem><para>Methods and signals for acquiring the current velocity.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>Address</term>
+<listitem><para>Methods and signals for acquiring current address 
+(e.g. country, city, street address).</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>Geocode</term>
+<listitem><para>Method for geocoding a known address to position.</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term>ReverseGeocode</term>
+<listitem><para>Method for reverse geocoding a known position to an address.</para></listitem>
+</varlistentry>
+
+</variablelist>
+</para>
+
+</para>
+
+</refsect1>
+</refentry>

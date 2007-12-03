@@ -289,11 +289,12 @@ gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
 /**
  * gc_web_service_query:
  * @self: The #GcWebService object
- * @...: NULL-terminated list of key-value gchar* pairs
+ * @Varargs: NULL-terminated list of key-value gchar* pairs
  * 
  * Fetches data from the web. The url is constructed using the 
- * optional arguments as GET parameters. Data should be read
- * using gc_web_service_get_* -functions.
+ * optional arguments as GET parameters (see example in the 
+ * Description-section). Data should be read using 
+ * gc_web_service_get_* -functions.
  *
  * Return value: %TRUE on success.
  */

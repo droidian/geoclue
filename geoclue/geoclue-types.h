@@ -8,6 +8,12 @@
 #ifndef _GEOCLUE_TYPES_H
 #define _GEOCLUE_TYPES_H
 
+/**
+ * GeoclueAccuracyLevel:
+ *
+ * Enum values used to define the approximate accuracy of 
+ * Position or Address information.
+ **/
 typedef enum {
 	GEOCLUE_ACCURACY_LEVEL_NONE,
 	GEOCLUE_ACCURACY_LEVEL_COUNTRY,
@@ -18,6 +24,12 @@ typedef enum {
 	GEOCLUE_ACCURACY_LEVEL_DETAILED,
 } GeoclueAccuracyLevel;
 
+/**
+ * GeocluePositionFields:
+ *
+ * Enum values can be used in a bitfield that defines the validity of 
+ * Position values.
+ **/
 typedef enum {
 	GEOCLUE_POSITION_FIELDS_NONE = 0,
 	GEOCLUE_POSITION_FIELDS_LATITUDE = 1 << 0,
@@ -25,6 +37,12 @@ typedef enum {
 	GEOCLUE_POSITION_FIELDS_ALTITUDE = 1 << 2
 } GeocluePositionFields;
 
+/**
+ * GeoclueVelocityFields:
+ *
+ * Enum values can be used in a bitfield that defines the validity of 
+ * Velocity values.
+ **/
 typedef enum {
 	GEOCLUE_VELOCITY_FIELDS_NONE = 0,
 	GEOCLUE_VELOCITY_FIELDS_SPEED = 1 << 0,
@@ -32,10 +50,19 @@ typedef enum {
 	GEOCLUE_VELOCITY_FIELDS_CLIMB = 1 << 2
 } GeoclueVelocityFields;
 
+/**
+ * GeoclueError:
+ * @GEOCLUE_ERROR_NOT_IMPLEMENTED: Method is not implemented
+ * @GEOCLUE_ERROR_NOT_AVAILABLE: Needed information is not currently
+ * available (e.g. web service did not respond)
+ * @GEOCLUE_ERROR_FAILED: Generic fatal error
+ * 
+ * Error values for providers.
+ **/
 typedef enum {
-	GEOCLUE_ERROR_NOT_IMPLEMENTED, /* method is not implemented (yet) */
-	GEOCLUE_ERROR_NOT_AVAILABLE,   /* e.g. web service did not respond */
-	GEOCLUE_ERROR_FAILED,          /* generic fatal error */
+	GEOCLUE_ERROR_NOT_IMPLEMENTED,
+	GEOCLUE_ERROR_NOT_AVAILABLE,
+	GEOCLUE_ERROR_FAILED,
 } GeoclueError;
 
 /* Address keys from XEP-0080: http://www.xmpp.org/extensions/xep-0080.html

@@ -15,7 +15,7 @@ G_BEGIN_DECLS
 
 #define GEOCLUE_TYPE_PROVIDER (geoclue_provider_get_type ())
 #define GEOCLUE_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_PROVIDER, GeoclueProvider))
-#define GEOCLUE_IS_POSITION(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GEOCLUE_TYPE_PROVIDER))
+#define GEOCLUE_IS_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GEOCLUE_TYPE_PROVIDER))
 
 typedef struct _GeoclueProvider {
 	GObject object;

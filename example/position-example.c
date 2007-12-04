@@ -8,12 +8,9 @@
 #include <glib.h>
 #include <geoclue/geoclue-position.h>
 
-#define EXAMPLE_SERVICE "org.freedesktop.Geoclue.Providers.Hostip"
-#define EXAMPLE_PATH    "/org/freedesktop/Geoclue/Providers/Hostip"
-
-
 int main (int argc, char** argv)
 {
+	gchar *service, *path;
 	GeocluePosition *pos = NULL;
 	GeocluePositionFields fields;
 	int timestamp;
@@ -23,11 +20,24 @@ int main (int argc, char** argv)
 	
 	g_type_init();
 	
-	pos = geoclue_position_new (EXAMPLE_SERVICE, EXAMPLE_PATH);
+	if (argc != 2) {
+		g_printerr ("Usage:\n  position-example <provider_name>\n");
+		return 1;
+	}
+	g_print ("Using provider '%s'", argv[1]);
+	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
+	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
+	
+	
+	/* Create new GeocluePosition */
+	pos = geoclue_position_new (service, path);
+	g_free (service);
+	g_free (path);
 	if (pos == NULL) {
 		g_printerr ("Error while creating GeocluePosition object.\n");
 		return 1;
 	}
+	
 	
 	/* Query current position. We're not interested in altitude 
 	   this time, so leave it NULL. Same can be done with all other
@@ -36,7 +46,7 @@ int main (int argc, char** argv)
 	                                        &lat, &lon, NULL, 
 	                                        &accuracy, &error);
 	if (error) {
-		g_printerr ("Error getting position: %s", error->message);
+		g_printerr ("Error getting position: %s\n", error->message);
 		g_error_free (error);
 		return 1;
 	}

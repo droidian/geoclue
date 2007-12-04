@@ -6,6 +6,7 @@
  */
 
 #include <geoclue/geoclue-provider.h>
+#include <geoclue/geoclue-types.h>
 
 typedef struct _GeoclueProviderPrivate {
 	char *service;
@@ -22,7 +23,7 @@ enum {
 
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GEOCLUE_TYPE_PROVIDER, GeoclueProviderPrivate))
 
-G_DEFINE_ABSTRACT_TYPE (GeoclueProvider, geoclue_provider, G_TYPE_OBJECT);
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GeoclueProvider, geoclue_provider, G_TYPE_OBJECT, geoclue_types_init (););
 
 static void
 finalize (GObject *object)

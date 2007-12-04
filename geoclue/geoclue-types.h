@@ -79,4 +79,6 @@ typedef enum {
 #define GEOCLUE_ADDRESS_KEY_POSTALCODE "postalcode"
 #define GEOCLUE_ADDRESS_KEY_STREET "street"
 
+void geoclue_types_init (void);
+
 #endif

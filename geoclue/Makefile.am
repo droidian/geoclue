@@ -26,6 +26,7 @@ libgeoclue_provider_la_SOURCES = \
 	geoclue-position.c	\
 	geoclue-provider.c	\
 	geoclue-reverse-geocode.c	\
+	geoclue-types.c		\
 	geoclue-velocity.c	\
 	gc-provider.c		\
 	gc-web-service.c	\

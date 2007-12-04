@@ -48,6 +48,7 @@ int main (int argc, char** argv)
 	if (error) {
 		g_printerr ("Error getting position: %s\n", error->message);
 		g_error_free (error);
+		g_free (pos);
 		return 1;
 	}
 	

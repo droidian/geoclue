@@ -11,7 +11,6 @@
 		</method>
 
 		<signal name="AddressChanged">
-			<arg type="i" name="fields" />
 		        <arg type="i" name="timestamp" />
 		        <arg type="a{ss}" name="address" />
 			<arg type="a(idd)" name="accuracy" />

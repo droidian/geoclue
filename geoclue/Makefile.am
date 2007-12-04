@@ -3,20 +3,30 @@ lib_LTLIBRARIES = libgeoclue-provider.la
 BUILT_SOURCES =			\
 	geoclue-marshal.c	\
 	geoclue-marshal.h	\
+	gc-iface-address-bindings.h	\
 	gc-iface-address-glue.h	\
+	gc-iface-geoclue-bindings.h	\
 	gc-iface-geoclue-glue.h \
+	gc-iface-geocode-bindings.h	\
 	gc-iface-geocode-glue.h	\
 	gc-iface-position-bindings.h	\
 	gc-iface-position-glue.h	\
+	gc-iface-reverse-geocode-bindings.h	\
 	gc-iface-reverse-geocode-glue.h	\
+	gc-iface-velocity-bindings.h	\
 	gc-iface-velocity-glue.h
 
 libgeoclue_provider_la_SOURCES = \
 	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
+	geoclue-address.c	\
+	geoclue-common.c	\
 	geoclue-error.c		\
+	geoclue-geocode.c	\
 	geoclue-position.c	\
 	geoclue-provider.c	\
+	geoclue-reverse-geocode.c	\
+	geoclue-velocity.c	\
 	gc-provider.c		\
 	gc-web-service.c	\
 	gc-iface-address.c	\

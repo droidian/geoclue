@@ -96,7 +96,8 @@ geoclue_position_class_init (GeocluePositionClass *klass)
 						  G_TYPE_NONE, 6,
 						  G_TYPE_INT, G_TYPE_INT,
 						  G_TYPE_DOUBLE, G_TYPE_DOUBLE,
-						  G_TYPE_DOUBLE, G_TYPE_POINTER);
+						  G_TYPE_DOUBLE, 
+						  dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE));
 }
 
 static void

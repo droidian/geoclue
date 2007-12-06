@@ -215,7 +215,7 @@ position_changed (GypsyPosition      *position,
 
 		fields = gypsy_position_to_geoclue (gypsy->position_fields);
 		gc_iface_position_emit_position_changed 
-			(GC_IFACE_POSITION (gypsy), gypsy->position_fields,
+			(GC_IFACE_POSITION (gypsy), fields,
 			 timestamp, gypsy->latitude, gypsy->longitude, 
 			 gypsy->altitude, accuracy);
 		geoclue_accuracy_free (accuracy);

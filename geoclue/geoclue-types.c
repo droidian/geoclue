@@ -12,15 +12,14 @@
 void
 geoclue_types_init (void)
 {
-	dbus_g_type_specialized_init ();
-	dbus_g_object_register_marshaller (geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_BOXED,
+	dbus_g_object_register_marshaller (geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_POINTER,
 					   G_TYPE_NONE,
 					   G_TYPE_INT,
 					   G_TYPE_INT,
 					   G_TYPE_DOUBLE,
 					   G_TYPE_DOUBLE,
 					   G_TYPE_DOUBLE,
-					   dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
+					   G_TYPE_POINTER,
 					   G_TYPE_INVALID);
 	dbus_g_object_register_marshaller (geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE,
 					   G_TYPE_NONE,

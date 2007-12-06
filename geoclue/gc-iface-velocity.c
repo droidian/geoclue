@@ -44,7 +44,7 @@ gc_iface_velocity_base_init (gpointer klass)
 						  G_SIGNAL_RUN_LAST, 0,
 						  NULL, NULL,
 						  geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE,
-						  G_TYPE_NONE, 8,
+						  G_TYPE_NONE, 5,
 						  G_TYPE_INT,
 						  G_TYPE_INT,
 						  G_TYPE_DOUBLE,

@@ -38,6 +38,7 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 	GValue accuracy_struct = {0, };
 
 	accuracy = g_ptr_array_new ();
+
 	g_value_init (&accuracy_struct, GEOCLUE_ACCURACY_TYPE);
 	g_value_take_boxed (&accuracy_struct,
 			    dbus_g_type_specialized_construct

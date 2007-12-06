@@ -146,7 +146,7 @@ geoclue_address_new (const char *service,
  * 
  * Obtains the current address. @timestamp will contain the time of 
  * the actual address measurement. @accuracy is a rough estimate of the
- * accuracy of the current address information. details is a hashtable 
+ * accuracy of the current address information. @details is a hashtable 
  * with the address data, see geoclue-types.h for the hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 

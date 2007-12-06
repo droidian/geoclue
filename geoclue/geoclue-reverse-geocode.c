@@ -6,6 +6,20 @@
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
+/**
+ * SECTION:geoclue-reverse-geocode
+ * @short_description: Geoclue reverse geocode client API
+ *
+ * #GeoclueReverseGeocode contains reverse geocoding methods. 
+ * It is part of the Geoclue public client API which uses the D-Bus 
+ * API to communicate with the actual provider.
+ * 
+ * After a #GeoclueReverseGeocode is created with 
+ * geoclue_reverse_geocode_new(), the 
+ * geoclue_reverse_geocode_position_to_address() method can be used to 
+ * obtain the address of a known position.
+ */
+
 #include <geoclue/geoclue-reverse-geocode.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -47,6 +61,15 @@ geoclue_reverse_geocode_init (GeoclueReverseGeocode *geocode)
 {
 }
 
+/**
+ * geoclue_reverse_geocode_new:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
+ *
+ * Creates a #GeoclueReverseGeocode with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeoclueReverseGeocode
+ */
 GeoclueReverseGeocode *
 geoclue_reverse_geocode_new (const char *service,
 			     const char *path)
@@ -58,6 +81,23 @@ geoclue_reverse_geocode_new (const char *service,
 			     NULL);
 }
 
+/**
+ * geoclue_reverse_geocode_position_to_address:
+ * @geocode: A #GeoclueReverseGeocode object
+ * @latitude: latitude in degrees
+ * @longitude: longitude in degrees
+ * @details: Pointer to returned hashtable with address details
+ * @error: Pointer to returned #Gerror
+ * 
+ * Obtains an address for the position defined by @latitude and @longitude.
+ * @details is a hashtable with the returned address data, see 
+ * geoclue-types.h for the hashtable keys.
+ * 
+ * If the caller is not interested in some values, the pointers can be 
+ * left %NULL.
+ * 
+ * Return value: %TRUE if there is no @error
+ */
 gboolean
 geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *geocode,
 					     double                   latitude,

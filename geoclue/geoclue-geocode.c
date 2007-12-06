@@ -10,7 +10,7 @@
  * SECTION:geoclue-geocode
  * @short_description: Geoclue geocode client API
  *
- * #GeoclueGeocode contains the geocoding method. 
+ * #GeoclueGeocode contains geocoding methods. 
  * It is part of the Geoclue public client API which uses the D-Bus 
  * API to communicate with the actual provider.
  * 

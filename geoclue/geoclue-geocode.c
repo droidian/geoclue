@@ -5,6 +5,19 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:geoclue-geocode
+ * @short_description: Geoclue geocode client API
+ *
+ * #GeoclueGeocode contains the geocoding method. 
+ * It is part of the Geoclue public client API which uses the D-Bus 
+ * API to communicate with the actual provider.
+ * 
+ * After a #GeoclueGeocode is created with geoclue_geocode_new(), the 
+ * geoclue_geocode_address_to_position() method can be used to 
+ * get the position of a known address.
+ */
+
 #include <geoclue/geoclue-geocode.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -46,6 +59,15 @@ geoclue_geocode_init (GeoclueGeocode *geocode)
 {
 }
 
+/**
+ * geoclue_geocode_new:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
+ *
+ * Creates a #GeoclueGeocode with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeoclueGeocode
+ */
 GeoclueGeocode *
 geoclue_geocode_new (const char *service,
 		     const char *path)
@@ -57,6 +79,25 @@ geoclue_geocode_new (const char *service,
 			     NULL);
 }
 
+/**
+ * geoclue_geocode_address_to_position:
+ * @geocode: A #GeoclueGeocode object
+ * @details: Hashtable with address data
+ * @latitude: Pointer to returned latitude in degrees
+ * @longitude: Pointer to returned longitude in degrees
+ * @altitude: Pointer to returned altitude in meters
+ * @accuracy: Pointer to returned #GeoclueAccuracy
+ * @error: Pointer to returned #Gerror
+ * 
+ * Geocodes given address to a position. @accuracy is a rough estimate 
+ * of the accuracy of the returned position.
+ * 
+ * If the caller is not interested in some values, the pointers can be 
+ * left %NULL.
+ * 
+ * Return value: A #GeocluePositionFields bitfield representing the 
+ * validity of the position values.
+ */
 GeocluePositionFields
 geoclue_geocode_address_to_position (GeoclueGeocode   *geocode,
 				     GHashTable       *details,

@@ -9,7 +9,7 @@
  * SECTION:geoclue-position
  * @short_description: Geoclue position client API
  *
- * #GeocluePosition contains the Position-related methods and signals. 
+ * #GeocluePosition contains position-related methods and signals. 
  * It is part of the Geoclue public client API which uses the D-Bus 
  * API to communicate with the actual provider.
  * 

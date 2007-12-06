@@ -27,6 +27,10 @@ void geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 				   GeoclueAccuracyLevel *level,
 				   double               *horizontal_accuracy,
 				   double               *vertical_accuracy);
+void geoclue_accuracy_set_details (GeoclueAccuracy      *accuracy,
+				   GeoclueAccuracyLevel  level,
+				   double                horizontal_accuracy,
+				   double                vertical_accuracy);
 
 G_END_DECLS
 

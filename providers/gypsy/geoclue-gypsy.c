@@ -3,6 +3,7 @@
  * geoclue-gypsy.c - Geoclue backend for Gypsy
  *
  * Authors: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <config.h>
@@ -11,6 +12,7 @@
 #include <gypsy/gypsy-device.h>
 #include <gypsy/gypsy-position.h>
 #include <gypsy/gypsy-course.h>
+#include <gypsy/gypsy-accuracy.h>
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-position.h>
@@ -23,6 +25,7 @@ typedef struct {
 	GypsyDevice *device;
 	GypsyPosition *position;
 	GypsyCourse *course;
+	GypsyAccuracy *acc;
 
 	GMainLoop *loop;
 
@@ -38,6 +41,8 @@ typedef struct {
 	double speed;
 	double direction;
 	double climb;
+
+	GeoclueAccuracy *accuracy;
 } GeoclueGypsy;
 
 typedef struct {
@@ -82,6 +87,10 @@ shutdown (GcIfaceGeoclue *gc,
 static void
 finalize (GObject *object)
 {
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (object);
+
+	geoclue_accuracy_free (gypsy->accuracy);
+
 	((GObjectClass *) geoclue_gypsy_parent_class)->finalize (object);
 }
 
@@ -206,19 +215,13 @@ position_changed (GypsyPosition      *position,
 	}
 
 	if (changed) {
-		GeoclueAccuracy *accuracy;
 		GeocluePositionFields fields;
-
-		/* FIXME: get the real accuracy */
-		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-						 0.0, 0.0);
 
 		fields = gypsy_position_to_geoclue (gypsy->position_fields);
 		gc_iface_position_emit_position_changed 
 			(GC_IFACE_POSITION (gypsy), fields,
 			 timestamp, gypsy->latitude, gypsy->longitude, 
-			 gypsy->altitude, accuracy);
-		geoclue_accuracy_free (accuracy);
+			 gypsy->altitude, gypsy->accuracy);
 	}
 }
 
@@ -272,6 +275,52 @@ course_changed (GypsyCourse      *course,
 }
 		
 static void
+accuracy_changed (GypsyAccuracy      *accuracy,
+		  GypsyAccuracyFields fields,
+		  double              pdop,
+		  double              hdop,
+		  double              vdop,
+		  GeoclueGypsy       *gypsy)
+{
+	gboolean changed = FALSE;
+	GeoclueAccuracyLevel level;
+	double horiz, vert;
+
+	geoclue_accuracy_get_details (gypsy->accuracy, &level, &horiz, &vert);
+	if (fields & (GYPSY_ACCURACY_FIELDS_HORIZONTAL | 
+		      GYPSY_ACCURACY_FIELDS_VERTICAL)){
+		if (level != GEOCLUE_ACCURACY_LEVEL_DETAILED ||
+		    horiz != hdop || vert != vdop) {
+			changed = TRUE;
+		}
+
+		geoclue_accuracy_set_details (gypsy->accuracy,
+					      GEOCLUE_ACCURACY_LEVEL_DETAILED,
+					      hdop, vdop);
+	} else {
+
+		if (level != GEOCLUE_ACCURACY_LEVEL_NONE ||
+		    horiz != 0.0 || vert != 0.0) {
+			changed = TRUE;
+		}
+
+		geoclue_accuracy_set_details (gypsy->accuracy,
+					      GEOCLUE_ACCURACY_LEVEL_NONE,
+					      0.0, 0.0);
+	}
+
+	if (changed) {
+		GeocluePositionFields fields;
+		
+		fields = gypsy_position_to_geoclue (gypsy->position_fields);
+		gc_iface_position_emit_position_changed 
+			(GC_IFACE_POSITION (gypsy), fields,
+			 gypsy->timestamp, gypsy->latitude, gypsy->longitude, 
+			 gypsy->altitude, gypsy->accuracy);
+	}
+}
+
+static void
 geoclue_gypsy_init (GeoclueGypsy *gypsy)
 {
 	GError *error = NULL;
@@ -293,6 +342,9 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 	gypsy->course = gypsy_course_new (path);
 	g_signal_connect (gypsy->course, "course-changed",
 			  G_CALLBACK (course_changed), gypsy);
+	gypsy->acc = gypsy_accuracy_new (path);
+	g_signal_connect (gypsy->acc, "accuracy-changed",
+			  G_CALLBACK (accuracy_changed), gypsy);
 
 	g_free (path);
 
@@ -302,6 +354,9 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 				 "Gypsy", "Gypsy provider");
 
 	gypsy->position_fields = GYPSY_POSITION_FIELDS_NONE;
+
+	gypsy->accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
+						0.0, 0.0);
 }
 
 static gboolean
@@ -315,7 +370,9 @@ get_position (GcIfacePosition       *gc,
 	      GError               **error)
 {
 	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
-		
+	GeoclueAccuracyLevel level;
+	double horizontal, vertical;
+	
 	*timestamp = gypsy->timestamp;
 
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
@@ -332,9 +389,9 @@ get_position (GcIfacePosition       *gc,
 		*altitude = gypsy->altitude;
 	}
 
-	/* FIXME: get the real accuracy */
-	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-					  0.0, 0.0);
+	geoclue_accuracy_get_details (gypsy->accuracy, &level,
+				      &horizontal, &vertical);
+	*accuracy = geoclue_accuracy_new (level, horizontal, vertical);
 		
 	return TRUE;
 }

@@ -100,3 +100,27 @@ geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 		*vertical_accuracy = g_value_get_double (g_value_array_get_nth (vals, 2));
 	}
 }
+
+/**
+ * geoclue_accuracy_set_details:
+ * @accuracy: A #GeoclueAccuracy
+ * @level:
+ * @horizontal_accuracy:
+ * @vertical_accuracy:
+ *
+ */
+void
+geoclue_accuracy_set_details (GeoclueAccuracy     *accuracy,
+			      GeoclueAccuracyLevel level,
+			      double               horizontal_accuracy,
+			      double               vertical_accuracy)
+{
+	GPtrArray *arr = (GPtrArray *) accuracy;
+	GValueArray *vals = arr->pdata[0];
+
+	g_value_set_int (g_value_array_get_nth (vals, 0), level);
+	g_value_set_double (g_value_array_get_nth (vals, 1), 
+			    horizontal_accuracy);
+	g_value_set_double (g_value_array_get_nth (vals, 2),
+			    vertical_accuracy);
+}

@@ -1,5 +1,15 @@
+#include <geoclue/geoclue-common.h>
+#include <geoclue/geoclue-position.h>
+#include <geoclue/geoclue-address.h>
+#include <geoclue/geoclue-geocode.h>
+
 #include <geoclue/gc-web-service.h>
 #include <geoclue/gc-provider.h>
+
+geoclue_common_get_type
+geoclue_position_get_type
+geoclue_address_get_type
+geoclue_geocode_get_type
 
 gc_web_service_get_type
 gc_provider_get_type

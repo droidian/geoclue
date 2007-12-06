@@ -5,6 +5,19 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:geoclue-position
+ * @short_description: Geoclue position client API
+ *
+ * #GeocluePosition contains position-related methods and signals. 
+ * It is part of the Geoclue public client API which uses the D-Bus 
+ * API to communicate with the actual provider.
+ * 
+ * After a #GeocluePosition is created with geoclue_position_new(), the 
+ * geoclue_position_get_position() method and the PositionChanged signal
+ * can be used to obtain the current position.
+ */
+
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -105,6 +118,15 @@ geoclue_position_init (GeocluePosition *position)
 {
 }
 
+/**
+ * geoclue_position_new:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
+ *
+ * Creates a #GeocluePosition with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeocluePosition
+ */
 GeocluePosition *
 geoclue_position_new (const char *service,
 		      const char *path)
@@ -116,6 +138,26 @@ geoclue_position_new (const char *service,
 			     NULL);
 }
 
+/**
+ * geoclue_position_get_position:
+ * @position: A #GeocluePosition object
+ * @timestamp: Pointer to returned Unix timestamp
+ * @latitude: Pointer to returned latitude in degrees
+ * @longitude: Pointer to returned longitude in degrees
+ * @altitude: Pointer to returned altitude in meters
+ * @accuracy: Pointer to returned #GeoclueAccuracy
+ * @error: Pointer to returned #Gerror
+ * 
+ * Obtains the current position. @timestamp will contain the time of 
+ * the actual position measurement. @accuracy is a rough estimate of the
+ * accuracy of the current position.
+ * 
+ * If the caller is not interested in some values, the pointers can be 
+ * left %NULL.
+ * 
+ * Return value: A #GeocluePositionFields bitfield representing the 
+ * validity of the position values.
+ */
 GeocluePositionFields
 geoclue_position_get_position (GeocluePosition  *position,
 			       int              *timestamp,

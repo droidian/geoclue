@@ -5,6 +5,19 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:geoclue-common
+ * @short_description: Geoclue common client API
+ *
+ * #GeoclueCommon contains the methods and signals common to all Geoclue 
+ * providers. It is part of the public client API which uses the D-Bus 
+ * API to communicate with the actual provider.
+ * 
+ * After a #GeoclueCommon is created with geoclue_common_new(), it can 
+ * be used to obtain information about the provider and to shut the 
+ * provider down.
+ */
+
 #include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -94,11 +107,12 @@ geoclue_common_init (GeoclueCommon *common)
 
 /**
  * geoclue_common_new:
- * @service:
- * @path:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
  *
- *
- * Return value:
+ * Creates a new #GeoclueCommon with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeoclueCommon
  */
 GeoclueCommon *
 geoclue_common_new (const char *service,
@@ -111,6 +125,17 @@ geoclue_common_new (const char *service,
 			     NULL);
 }
 
+/**
+ * geoclue_common_get_provider_info:
+ * @common: A #GeoclueCommon object
+ * @name: Pointer for returned provider name
+ * @description: Pointer for returned provider description
+ * @error:  Pointer for returned #GError
+ * 
+ * Obtains name and a short description of the provider.
+ * 
+ * Return value: #TRUE if D-Bus call succeeded
+ */
 gboolean
 geoclue_common_get_provider_info (GeoclueCommon *common,
 				  char         **name,
@@ -128,6 +153,16 @@ geoclue_common_get_provider_info (GeoclueCommon *common,
 	return TRUE;
 }
 
+/**
+ * geoclue_common_get_status:
+ * @common: A #GeoclueCommon object
+ * @active: Pointer for returned status (active or not)
+ * @error:  Pointer for returned #GError
+ * 
+ * Obtains the current status of the provider.
+ * 
+ * Return value: #TRUE if D-Bus call succeeded
+ */
 gboolean
 geoclue_common_get_status (GeoclueCommon *common,
 			   gboolean      *active,
@@ -143,6 +178,15 @@ geoclue_common_get_status (GeoclueCommon *common,
 	return TRUE;
 }
 
+/**
+ * geoclue_common_shutdown:
+ * @common: A #GeoclueCommon object
+ * @error:  Pointer for returned #GError
+ * 
+ * Shuts the provider down.
+ * 
+ * Return value: #TRUE if D-Bus call succeeded
+ */
 gboolean
 geoclue_common_shutdown (GeoclueCommon *common,
 			 GError       **error)

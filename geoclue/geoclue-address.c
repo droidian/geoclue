@@ -5,6 +5,19 @@
  * Author: Iain Holmes <iain@openedhand.com>
  */
 
+/**
+ * SECTION:geoclue-address
+ * @short_description: Geoclue address client API
+ *
+ * #GeoclueAddress contains Address-related methods and signals. 
+ * It is part of the Geoclue public client API which uses the D-Bus 
+ * API to communicate with the actual provider.
+ * 
+ * After a #GeoclueAddress is created with geoclue_address_new(), the 
+ * geoclue_address_get_address() method and the AddressChanged signal
+ * can be used to obtain the current address.
+ */
+
 #include <geoclue/geoclue-address.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -102,6 +115,15 @@ geoclue_address_init (GeoclueAddress *address)
 {
 }
 
+/**
+ * geoclue_address_new:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
+ *
+ * Creates a #GeoclueAddress with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeoclueAddress
+ */
 GeoclueAddress *
 geoclue_address_new (const char *service,
 		     const char *path)
@@ -113,6 +135,24 @@ geoclue_address_new (const char *service,
 			     NULL);
 }
 
+/**
+ * geoclue_address_get_address:
+ * @address: A #GeoclueAddress object
+ * @timestamp: Pointer to returned Unix timestamp
+ * @details: Pointer to returned hashtable with address details
+ * @accuracy: Pointer to returned #GeoclueAccuracy
+ * @error: Pointer to returned #Gerror
+ * 
+ * Obtains the current address. @timestamp will contain the time of 
+ * the actual address measurement. @accuracy is a rough estimate of the
+ * accuracy of the current address information. details is a hashtable 
+ * with the address data, see geoclue-types.h for the hashtable keys.
+ * 
+ * If the caller is not interested in some values, the pointers can be 
+ * left %NULL.
+ * 
+ * Return value: #TRUE if there is no @error
+ */
 gboolean
 geoclue_address_get_address (GeoclueAddress   *address,
 			     int              *timestamp,

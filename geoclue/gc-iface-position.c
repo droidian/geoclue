@@ -3,6 +3,7 @@
  * gc-iface-position.c - GInterface for org.freedesktop.Geoclue.Position
  *
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>

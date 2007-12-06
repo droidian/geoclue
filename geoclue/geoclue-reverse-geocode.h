@@ -3,6 +3,7 @@
  * geoclue-reverse-geocode.h - 
  *
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #ifndef _GEOCLUE_REVERSE_GEOCODE_H

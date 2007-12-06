@@ -3,6 +3,7 @@
  * common-example.c - Example using the Geoclue common client API
  *
  * Author: Jussi Kukkonen <jku@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>

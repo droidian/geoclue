@@ -1,3 +1,9 @@
+/*
+ * Geoclue
+ * gc-web-service.h
+ *
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ */
 #ifndef GC_WEB_SERVICE_H
 #define GC_WEB_SERVICE_H
 

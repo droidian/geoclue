@@ -3,6 +3,7 @@
  * address-example.c - Example using the Address client API
  *
  * Author: Jussi Kukkonen <jku@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>

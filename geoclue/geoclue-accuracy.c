@@ -3,6 +3,7 @@
  * geoclue-accuracy.c - Code for manipulating the GeoclueAccuracy structure
  * 
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 /**

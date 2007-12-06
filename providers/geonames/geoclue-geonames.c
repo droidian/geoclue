@@ -3,7 +3,7 @@
  * geoclue-geonames.c - A geonames.org-based "Geocode" and
  *                          "Reverse geocode" provider
  * 
- * Copyright (C) 2007 OpenedHand Ltd
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  */

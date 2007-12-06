@@ -3,6 +3,7 @@
  * gc-iface-geocode.h - GInterface for org.freedesktop.Geocode
  * 
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #ifndef _GC_IFACE_GEOCODE_H

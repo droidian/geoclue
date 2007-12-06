@@ -3,6 +3,7 @@
  * gc-iface-address.c - GInterface for org.freedesktop.Address
  * 
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>

@@ -1,3 +1,9 @@
+/*
+ * Geoclue
+ * gc-web-service.c
+ *
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ */
 /**
  * SECTION:gc-web-service
  * @short_description: Web service helper object for Geoclue providers.

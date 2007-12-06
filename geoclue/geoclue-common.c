@@ -3,6 +3,7 @@
  * geoclue-common.c - Client API for accessing GcIfaceGeoclue
  *
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 /**

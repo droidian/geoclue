@@ -3,6 +3,7 @@
  * geoclue-types.c - 
  *
  * Author: Iain Holmes <iain@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <geoclue/geoclue-marshal.h>

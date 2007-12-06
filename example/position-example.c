@@ -3,6 +3,7 @@
  * position-example.c - Example using the Position client API
  *
  * Author: Jussi Kukkonen <jku@openedhand.com>
+ * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>

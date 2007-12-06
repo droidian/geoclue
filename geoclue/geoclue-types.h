@@ -27,8 +27,21 @@ typedef enum {
 /**
  * GeocluePositionFields:
  *
- * Enum values can be used in a bitfield that defines the validity of 
+ * #GeocluePositionFields is a bitfield that defines the validity of 
  * Position values.
+ * 
+ * Example:
+ * <informalexample>
+ * <programlisting>
+ * GeocluePositionFields fields;
+ * fields = geoclue_position_get_position (. . .);
+ * 
+ * if (fields & GEOCLUE_POSITION_FIELDS_LATITUDE &&
+ *     fields & GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+ * 	g_print("latitude and longitude are valid");
+ * }
+ * </programlisting>
+ * </informalexample>
  **/
 typedef enum {
 	GEOCLUE_POSITION_FIELDS_NONE = 0,
@@ -40,7 +53,7 @@ typedef enum {
 /**
  * GeoclueVelocityFields:
  *
- * Enum values can be used in a bitfield that defines the validity of 
+ * GeoclueVelocityFields is a bitfield that defines the validity of 
  * Velocity values.
  **/
 typedef enum {
@@ -65,18 +78,59 @@ typedef enum {
 	GEOCLUE_ERROR_FAILED,
 } GeoclueError;
 
-/* Address keys from XEP-0080: http://www.xmpp.org/extensions/xep-0080.html
- * region    = province, US state
- * locality  = city, town 
- * area      = neighborhood, campus
- * street    = street name or full street address
- **/
+/**
+ * GEOCLUE_ADDRESS_KEY_COUNTRYCODE:
+ * 
+ * A key for address hashtables. The hash value should be a ISO 3166 two 
+ * letter country code. 
+ * 
+ * The used hash keys match the elements of XEP-0080 (XMPP protocol 
+ * extension for user location), see 
+ * <ulink url="http://www.xmpp.org/extensions/xep-0080.html">
+ * http://www.xmpp.org/extensions/xep-0080.html</ulink>
+ */
 #define GEOCLUE_ADDRESS_KEY_COUNTRYCODE "countrycode"
+/**
+ * GEOCLUE_ADDRESS_KEY_COUNTRY:
+ * 
+ * A key for address hashtables. The hash value should be a name of a country. 
+ */
 #define GEOCLUE_ADDRESS_KEY_COUNTRY "country"
+/**
+ * GEOCLUE_ADDRESS_KEY_REGION:
+ * 
+ * A key for address hashtables. The hash value should be a name of an 
+ * administrative region of a nation, e.g. province or
+ * US state. 
+ */
 #define GEOCLUE_ADDRESS_KEY_REGION "region" 
+/**
+ * GEOCLUE_ADDRESS_KEY_LOCALITY:
+ * 
+ * A key for address hashtables. The hash value should be a name of a town 
+ * or city. 
+ */
 #define GEOCLUE_ADDRESS_KEY_LOCALITY "locality"
+/**
+ * GEOCLUE_ADDRESS_KEY_AREA:
+ * 
+ * A key for address hashtables. The hash value should be a name of an 
+ * area, such as neighborhood or campus. 
+ */
 #define GEOCLUE_ADDRESS_KEY_AREA "area"
+/**
+ * GEOCLUE_ADDRESS_KEY_POSTALCODE:
+ * 
+ * A key for address hashtables. The hash value should be a code used for 
+ * postal delivery.
+ */
 #define GEOCLUE_ADDRESS_KEY_POSTALCODE "postalcode"
+/**
+ * GEOCLUE_ADDRESS_KEY_STREET:
+ * 
+ * A key for address hashtables. The hash value should be a full street 
+ * address.
+ */
 #define GEOCLUE_ADDRESS_KEY_STREET "street"
 
 void geoclue_types_init (void);

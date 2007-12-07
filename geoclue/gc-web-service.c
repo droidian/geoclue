@@ -1,9 +1,13 @@
 /*
  * Geoclue
- * gc-web-service.c
+ * gc-web-service.c - A web service helper object for geoclue providers
  *
+ * Author: Jussi Kukkonen <jku@o-hand.com>
+ * 
+ * Copyright 2007 Jussi Kukkonen (from old geoclue_web_service.c)
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
+
 /**
  * SECTION:gc-web-service
  * @short_description: Web service helper object for Geoclue providers.

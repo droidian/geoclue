@@ -48,17 +48,38 @@ CFILE_GLOB=$(top_srcdir)/geoclue/*.c
 # Header files to ignore when scanning.
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h
 IGNORE_HFILES= \
-	*-marshal.[ch] \
-	*-glue.c
+	geoclue-marshal.h \
+	gc-iface-address-bindings.h \
+	gc-iface-reverse-geocode-bindings.h \
+	gc-iface-geoclue-bindings.h \
+	gc-iface-velocity-bindings.h \
+	gc-iface-geocode-bindings.h \
+	gc-iface-position-bindings.h \
+	gc-iface-address-glue.h \
+	gc-iface-reverse-geocode-glue.h \
+	gc-iface-geoclue-glue.h \
+	gc-iface-velocity-glue.h \     
+	gc-iface-geocode-glue.h \
+	gc-iface-position-glue.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
 HTML_IMAGES=
 
+dbus_docs = \
+	gc-iface-geoclue-ref.xml \
+	gc-iface-position-ref.xml \
+	gc-iface-address-ref.xml \
+	gc-iface-geocode-ref.xml \
+	gc-iface-reverse-geocode-ref.xml \
+	gc-iface-velocity-ref.xml
+
+
 # Extra SGML files that are included by $(DOC_MAIN_SGML_FILE).
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
 content_files= \
-	implementing-providers.xml
+	implementing-providers.xml \
+	$(dbus_docs)
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded
 # These files must be listed here *and* in content_files
@@ -79,3 +100,9 @@ include $(top_srcdir)/gtk-doc.make
 # Other files to distribute
 # e.g. EXTRA_DIST += version.xml.in
 EXTRA_DIST += 
+
+CLEAN_FILES = $(dbus_docs)
+
+%-ref.xml: $(top_srcdir)/interfaces/%-full.xml
+	$(XSLT) -o $@ $(top_srcdir)/docs/tools/spec-to-docbook.xsl $<
+

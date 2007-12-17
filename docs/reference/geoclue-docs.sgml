@@ -9,10 +9,7 @@
 	<reference>
 		<title>Geoclue for clients</title>
 		<chapter>
-			<title>Using Geoclue</title>
-		</chapter>
-		<chapter>
-			<title>Geoclue API</title>
+			<title>Geoclue C API</title>
 			<xi:include href="xml/geoclue-common.xml"/>
 			<xi:include href="xml/geoclue-position.xml"/>
 			<xi:include href="xml/geoclue-address.xml"/>
@@ -28,7 +25,7 @@
 		<title>Geoclue for providers</title>
 		<xi:include href="implementing-providers.xml"/>
 		<chapter>
-			<title>Geoclue provider API</title>
+			<title>Geoclue provider C API</title>
 			<xi:include href="xml/gc-provider.xml"/>
 			<xi:include href="xml/gc-web-service.xml"/>
 			<xi:include href="xml/gc-iface-geocode.xml"/>
@@ -39,4 +36,15 @@
 			<xi:include href="xml/gc-iface-reverse-geocode.xml"/>
 		</chapter>
 	</reference>
+	
+	<reference>
+		<title>D-Bus API</title>
+		<xi:include href="gc-iface-geoclue-ref.xml"/>
+		<xi:include href="gc-iface-position-ref.xml"/>
+		<xi:include href="gc-iface-address-ref.xml"/>
+		<xi:include href="gc-iface-geocode-ref.xml"/>
+		<xi:include href="gc-iface-reverse-geocode-ref.xml"/>
+		<xi:include href="gc-iface-velocity-ref.xml"/>
+	</reference>
+	
 </book>

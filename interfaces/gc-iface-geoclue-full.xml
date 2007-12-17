@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	
+	<interface name="org.freedesktop.Geoclue">
+		<doc:doc>
+			<doc:para>Geoclue interface contains methods 
+			and signals common to all providers (and all providers
+			must implement at least this interface).</doc:para>
+		</doc:doc>
+		
+		<method name="GetProviderInfo">
+			<arg type="s" name="Name" direction="out">
+				<doc:doc>
+					<doc:summary>The provider name</doc:summary>
+				</doc:doc>
+			</arg>
+			<arg type="s" name="Description" direction="out">
+				<doc:doc>
+					<doc:summary>Short description of the provider</doc:summary>
+				</doc:doc>
+			</arg>
+		</method>
+		
+		<method name="GetStatus">
+			<arg type="b" name="active" direction="out" >
+				<doc:doc>
+					<doc:summary>Current provider status</doc:summary>
+				</doc:doc>
+			</arg>
+		</method>
+
+		<signal name="StatusChanged">
+			<arg type="b" name="active" direction="out">
+				<doc:doc>
+					<doc:summary>Current provider status</doc:summary>
+				</doc:doc>
+			</arg>
+		</signal>
+
+		<method name="Shutdown">
+			<doc:doc>
+				<doc:description>Shut down the provider</doc:description>
+			</doc:doc>
+		</method>
+	</interface>
+</node>
+

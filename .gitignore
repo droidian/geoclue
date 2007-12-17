@@ -26,6 +26,7 @@ missing
 *.service
 *.pc
 *-glue.h
+*-bindings.h
 
 doxygen.conf
 

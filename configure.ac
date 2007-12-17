@@ -16,6 +16,7 @@ AC_PROG_GCC_TRADITIONAL
 AM_PROG_LIBTOOL
 
 GTK_DOC_CHECK(1.0)
+AC_CHECK_PROGS(XSLT, xsltproc)
 
 AC_ARG_ENABLE(system-bus,
 	      [AC_HELP_STRING([--enable-system-bus],
@@ -61,6 +62,7 @@ AC_CONFIG_FILES([
 Makefile
 docs/Makefile
 docs/reference/Makefile
+docs/tools/Makefile
 interfaces/Makefile
 geoclue/Makefile
 example/Makefile

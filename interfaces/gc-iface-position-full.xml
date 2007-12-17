@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<node name="/">
-        <interface name="org.freedesktop.Geoclue.Position">
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	
+	<interface name="org.freedesktop.Geoclue.Position">
+		<doc:doc>
+			<doc:para>Position interface contains a method 
+			and a signal for querying current coordinates.</doc:para>
+		</doc:doc>
+		
 		<method name="GetPosition">
 			<arg type="i" name="fields" direction="out" />
 			<arg type="i" name="timestamp" direction="out" />

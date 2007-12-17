@@ -11,4 +11,4 @@ geoclue_hostip_CFLAGS = \
 
 geoclue_hostip_LDADD = \
 	$(GEOCLUE_LIBS) \
-	$(top_builddir)/geoclue/libgeoclue-provider.la 
+	$(top_builddir)/geoclue/libgeoclue.la 

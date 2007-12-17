@@ -9,7 +9,7 @@ geoclue_gypsy_CFLAGS =		\
 geoclue_gypsy_LDADD =		\
 	$(GEOCLUE_LIBS)		\
 	$(GYPSY_LIBS)		\
-	$(top_builddir)/geoclue/libgeoclue-provider.la
+	$(top_builddir)/geoclue/libgeoclue.la
 
 geoclue_gypsy_SOURCES =		\
 	geoclue-gypsy.c

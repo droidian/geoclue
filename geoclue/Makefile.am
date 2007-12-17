@@ -1,4 +1,4 @@
-lib_LTLIBRARIES = libgeoclue-provider.la
+lib_LTLIBRARIES = libgeoclue.la
 
 BUILT_SOURCES =			\
 	geoclue-marshal.c	\
@@ -16,7 +16,7 @@ BUILT_SOURCES =			\
 	gc-iface-velocity-bindings.h	\
 	gc-iface-velocity-glue.h
 
-libgeoclue_provider_la_SOURCES = \
+libgeoclue_la_SOURCES = 	\
 	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
 	geoclue-address.c	\
@@ -37,11 +37,35 @@ libgeoclue_provider_la_SOURCES = \
 	gc-iface-reverse-geocode.c	\
 	gc-iface-velocity.c
 
-libgeoclue_provider_la_CFLAGS =	\
+libgeoclue_la_CFLAGS =		\
 	-I$(top_srcdir)		\
 	-I$(top_builddir)	\
 	$(GEOCLUE_CFLAGS)
 	
+geoclue_headers =		\
+	gc-iface-address.h	\
+	gc-iface-geoclue.h	\
+	gc-iface-geocode.h	\
+	gc-iface-position.h	\
+	gc-iface-reverse-geocode.h	\
+	gc-iface-velocity.h	\
+	gc-provider.h		\
+	gc-web-service.h	\
+	geoclue-accuracy.h	\
+	geoclue-address.h	\
+	geoclue-common.h	\
+	geoclue-error.h		\
+	geoclue-geocode.h	\
+	geoclue-position.h	\
+	geoclue-provider.h	\
+	geoclue-reverse-geocode.h	\
+	geoclue-types.h		\
+	geoclue-velocity.h
+
+libgeoclue_includedir = $(includedir)/geoclue
+libgeoclue_include_HEADERS =	\
+	$(geoclue_headers)
+
 EXTRA_DIST =			\
 	geoclue-marshal.list	\
 	$(BUILT_SOURCES)

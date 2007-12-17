@@ -7,7 +7,7 @@ geoclue_example_CFLAGS = 	\
 
 geoclue_example_LDADD =		\
 	$(GEOCLUE_LIBS)		\
-	$(top_builddir)/geoclue/libgeoclue-provider.la
+	$(top_builddir)/geoclue/libgeoclue.la
 
 geoclue_example_SOURCES =	\
 	geoclue-example.c

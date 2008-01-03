@@ -80,8 +80,8 @@ constructor (GType                  type,
 	dbus_g_proxy_add_signal (provider->proxy, "PositionChanged",
 				 G_TYPE_INT, G_TYPE_INT, G_TYPE_DOUBLE,
 				 G_TYPE_DOUBLE, G_TYPE_DOUBLE, 
-/* 				 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE), */
-				 G_TYPE_POINTER,
+ 				 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
+/* 				 G_TYPE_POINTER, */
 				 G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "PositionChanged",
 				     G_CALLBACK (position_changed),

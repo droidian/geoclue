@@ -11,7 +11,7 @@
 #include <time.h>
 #include <dbus/dbus-glib-bindings.h>
 
-#include <geoclue/geoclue.h>
+#include <geoclue/geoclue-provider.h>
 #include <geoclue/geoclue-error.h>
 
 #include <geoclue/gc-iface-position.h>

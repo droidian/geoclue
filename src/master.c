@@ -16,9 +16,12 @@
 #include "master.h"
 #include "client.h"
 
+#define POSITION_IFACE "org.freedesktop.Geoclue.Position"
+#define VELOCITY_IFACE "org.freedesktop.Geoclue.Velocity"
+
 typedef enum _InterfaceType {
 	POSITION_INTERFACE,
-	COURSE_INTERFACE,
+	VELOCITY_INTERFACE,
 } InterfaceType;
 
 typedef enum _GeoclueRequireFlags {
@@ -53,7 +56,7 @@ struct _ProviderInterface {
 			double speed;
 			double direction;
 			double climb;
-		} course;
+		} velocity;
 	} details;
 };
 
@@ -145,6 +148,36 @@ parse_provide_strings (GeoclueMaster *master,
 	return provides;
 }
 
+static GPtrArray *
+parse_interface_strings (GeoclueMaster *master,
+			 char         **interfaces,
+			 guint          n_interfaces)
+{
+	GPtrArray *ifaces;
+	int i;
+
+	g_print ("number interfaces: %d\n", n_interfaces);
+	ifaces = g_ptr_array_sized_new (n_interfaces);
+	for (i = 0; interfaces[i]; i++) {
+		struct _ProviderInterface *iface;
+
+		iface = g_new0 (struct _ProviderInterface, 1);
+
+		if (strcmp (interfaces[i], POSITION_IFACE) == 0) {
+			iface->type = POSITION_INTERFACE;
+		} else if (strcmp (interfaces[i], VELOCITY_IFACE) == 0) {
+			iface->type = VELOCITY_INTERFACE;
+		} else {
+			g_free (iface);
+			continue;
+		}
+
+		g_ptr_array_add (ifaces, iface);
+	}
+
+	return ifaces;
+}
+			
 static void
 dump_requires (struct _ProviderDetails *details)
 {
@@ -168,6 +201,38 @@ dump_provides (struct _ProviderDetails *details)
 }
 
 static void
+dump_interfaces (struct _ProviderDetails *details)
+{
+	int i;
+
+	g_print ("   Interfaces");
+	if (details->interfaces == NULL) {
+		g_print (" - None\n");
+		return;
+	}
+
+	g_print ("\n");
+	for (i = 0; i < details->interfaces->len; i++) {
+		struct _ProviderInterface *iface;
+
+		iface = details->interfaces->pdata[i];
+		switch (iface->type) {
+		case POSITION_INTERFACE:
+			g_print ("      Position Interface\n");
+			break;
+
+		case VELOCITY_INTERFACE:
+			g_print ("      Velocity Interface\n");
+			break;
+
+		default:
+			g_print ("      Unknown Interface\n");
+			break;
+		}
+	}
+}
+
+static void
 dump_provider_details (struct _ProviderDetails *details)
 {
 	g_print ("   Name - %s\n", details->name);
@@ -176,6 +241,7 @@ dump_provider_details (struct _ProviderDetails *details)
 
 	dump_requires (details);
 	dump_provides (details);
+	dump_interfaces (details);
 }
 
 /* Load the provider details out of a keyfile */
@@ -187,7 +253,8 @@ new_provider (GeoclueMaster *master,
 	GKeyFile *keyfile;
 	GError *error = NULL;
 	gboolean ret;
-	char **flags;
+	char **flags, **interfaces;
+	guint n_interfaces;
 
 	keyfile = g_key_file_new ();
 	ret = g_key_file_load_from_file (keyfile, filename, 
@@ -224,6 +291,18 @@ new_provider (GeoclueMaster *master,
 		g_strfreev (flags);
 	} else {
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
+	}
+
+	interfaces = g_key_file_get_string_list (keyfile, "Geoclue Provider",
+						 "Interfaces", 
+						 &n_interfaces, NULL);
+	if (interfaces != NULL) {
+		provider->interfaces = parse_interface_strings (master, 
+								interfaces,
+								n_interfaces);
+		g_strfreev (interfaces);
+	} else {
+		provider->interfaces = NULL;
 	}
 
 	dump_provider_details (provider);

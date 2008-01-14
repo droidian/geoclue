@@ -2,3 +2,4 @@
 Name=Example Provider
 Service=org.freedesktop.Geoclue.Providers.Example
 Path=/org/freedesktop/Geoclue/Provider/Example
+Interfaces=org.freedesktop.Geoclue.Position

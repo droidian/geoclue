@@ -3,3 +3,4 @@ Name=Hostip Provider
 Service=org.freedesktop.Geoclue.Providers.Hostip
 Path=/org/freedesktop/Geoclue/Providers/Hostip
 Requires=RequiresNetwork
+Interfaces=org.freedesktop.Geoclue.Position

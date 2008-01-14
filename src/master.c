@@ -145,6 +145,39 @@ parse_provide_strings (GeoclueMaster *master,
 	return provides;
 }
 
+static void
+dump_requires (struct _ProviderDetails *details)
+{
+	g_print ("   Requires\n");
+	if (details->requires & GEOCLUE_REQUIRE_FLAGS_GPS) {
+		g_print ("      - GPS\n");
+	}
+
+	if (details->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) {
+		g_print ("      - Network\n");
+	}
+}
+
+static void
+dump_provides (struct _ProviderDetails *details)
+{
+	g_print ("   Provides\n");
+	if (details->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
+		g_print ("      - Updates\n");
+	}
+}
+
+static void
+dump_provider_details (struct _ProviderDetails *details)
+{
+	g_print ("   Name - %s\n", details->name);
+	g_print ("   Service - %s\n", details->service);
+	g_print ("   Path - %s\n", details->path);
+
+	dump_requires (details);
+	dump_provides (details);
+}
+
 /* Load the provider details out of a keyfile */
 static struct _ProviderDetails *
 new_provider (GeoclueMaster *master,
@@ -165,7 +198,8 @@ new_provider (GeoclueMaster *master,
 		g_key_file_free (keyfile);
 		return NULL;
 	}
-	
+
+	g_print ("Loaded %s\n", filename);
 	provider = g_new (struct _ProviderDetails, 1);
 	provider->name = g_key_file_get_value (keyfile, "Geoclue Provider",
 					       "Name", NULL);
@@ -192,6 +226,7 @@ new_provider (GeoclueMaster *master,
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
 
+	dump_provider_details (provider);
 	return provider;
 }
 
@@ -219,14 +254,17 @@ load_providers (GeoclueMaster *master)
 		struct _ProviderDetails *provider;
 		char *fullname, *ext;
 
+		g_print ("Found %s", filename);
 		ext = strrchr (filename, '.');
 		if (ext == NULL || strcmp (ext, PROVIDER_EXTENSION) != 0) {
+			g_print (" - Ignored\n");
 			filename = g_dir_read_name (dir);
 			continue;
 		}
 
 		fullname = g_build_filename (GEOCLUE_PROVIDERS_DIR, 
 					     filename, NULL);
+		g_print (" - %s\n", fullname);
 		provider = new_provider (master, fullname);
 		g_free (fullname);
 

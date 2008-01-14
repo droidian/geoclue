@@ -11,3 +11,6 @@ geoclue_example_LDADD =		\
 
 geoclue_example_SOURCES =	\
 	geoclue-example.c
+
+providersdir = $(datadir)/geoclue-providers
+providers_DATA = geoclue-example.provider

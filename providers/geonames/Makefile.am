@@ -12,3 +12,6 @@ geoclue_geonames_CFLAGS = \
 geoclue_geonames_LDADD = \
 	$(GEOCLUE_LIBS) \
 	$(top_builddir)/geoclue/libgeoclue.la 
+
+providersdir = $(datadir)/geoclue-providers
+providers_DATA = geoclue-geonames.provider

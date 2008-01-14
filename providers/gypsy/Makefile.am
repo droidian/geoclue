@@ -13,3 +13,6 @@ geoclue_gypsy_LDADD =		\
 
 geoclue_gypsy_SOURCES =		\
 	geoclue-gypsy.c
+
+providersdir = $(datadir)/geoclue-providers
+providers_DATA = geoclue-gypsy.provider

@@ -71,6 +71,7 @@ providers/example/Makefile
 providers/gypsy/Makefile
 providers/hostip/Makefile
 providers/geonames/Makefile
+src/Makefile
 ])
 
 AC_OUTPUT

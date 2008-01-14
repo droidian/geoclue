@@ -10,14 +10,25 @@
 #include <config.h>
 #endif
 
-GMainLoop *mainloop;
+#include <glib.h>
+#include <dbus/dbus-protocol.h>
+#include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-bindings.h>
 
+#include "master.h"
+
+static GMainLoop *mainloop;
+
+#define GEOCLUE_MASTER_NAME "org.freedesktop.Geoclue.Master"
 int
 main (int    argc,
       char **argv)
 {
+	GeoclueMaster *master;
 	DBusGConnection *conn;
+	DBusGProxy *proxy;
 	GError *error = NULL;
+	guint32 request_name_ret;
 
 	g_type_init ();
 

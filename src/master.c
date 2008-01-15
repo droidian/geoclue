@@ -33,6 +33,8 @@ typedef enum _GeoclueRequireFlags {
 typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
 	GEOCLUE_PROVIDE_FLAGS_UPDATES = 1 << 0,
+	GEOCLUE_PROVIDE_FLAGS_DETAILED = 1 << 1,
+	GEOCLUE_PROVIDE_FLAGS_FUZZY = 1 << 2,
 } GeoclueProvideFlags;
 
 struct _ProviderInterface {
@@ -142,6 +144,10 @@ parse_provide_strings (GeoclueMaster *master,
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "ProvidesUpdates") == 0) {
 			provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+		} else if (strcmp (flags[i], "ProvidesDetailedAccuracy") == 0) {
+			provides |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
+		} else if (strcmp (flags[i], "ProvidesFuzzyAccuracy") == 0) {
+			provides |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
 		}
 	}
 
@@ -156,7 +162,6 @@ parse_interface_strings (GeoclueMaster *master,
 	GPtrArray *ifaces;
 	int i;
 
-	g_print ("number interfaces: %d\n", n_interfaces);
 	ifaces = g_ptr_array_sized_new (n_interfaces);
 	for (i = 0; interfaces[i]; i++) {
 		struct _ProviderInterface *iface;
@@ -197,6 +202,14 @@ dump_provides (struct _ProviderDetails *details)
 	g_print ("   Provides\n");
 	if (details->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
 		g_print ("      - Updates\n");
+	}
+
+	if (details->provides & GEOCLUE_PROVIDE_FLAGS_DETAILED) {
+		g_print ("      - Detailed Accuracy\n");
+	} else if (details->provides & GEOCLUE_PROVIDE_FLAGS_FUZZY) {
+		g_print ("      - Fuzzy Accuracy\n");
+	} else {
+		g_print ("      - No Accuracy\n");
 	}
 }
 
@@ -343,7 +356,7 @@ load_providers (GeoclueMaster *master)
 
 		fullname = g_build_filename (GEOCLUE_PROVIDERS_DIR, 
 					     filename, NULL);
-		g_print (" - %s\n", fullname);
+		g_print ("\n");
 		provider = new_provider (master, fullname);
 		g_free (fullname);
 

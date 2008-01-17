@@ -6,6 +6,20 @@
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
+/** TODO
+ * 
+ * *status
+ *   maybe this would work?
+ *   * status FALSE on startup
+ *   * status TRUE on first gpsd event
+ *   * status FALSE if no updates for 10 secs
+ * 
+ * init
+ *   what to do if gpsd is not there?
+ * 
+ * */
+
+
 #include <config.h>
 
 #include <math.h>
@@ -17,12 +31,17 @@
 #include <geoclue/gc-iface-velocity.h>
 
 typedef struct gps_data_t gps_data;
+typedef struct gps_fix_t gps_fix;
 
 typedef struct {
 	GcProvider parent;
 	
 	gps_data *gpsdata;
-	gps_data *last_gpsdata;
+	
+	gps_fix *last_fix;
+	GeocluePositionFields last_pos_fields;
+	GeoclueAccuracy *last_accuracy;
+	GeoclueVelocityFields last_velo_fields;
 	
 	GMainLoop *loop;
 } GeoclueGpsd;
@@ -50,8 +69,7 @@ GeoclueGpsd *gpsd;
 
 
 
-/* GcIfaceGeoclue methods */
-
+/* Geoclue interface */
 static gboolean
 get_status (GcIfaceGeoclue *gc,
             gboolean       *available,
@@ -71,6 +89,19 @@ shutdown (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
+
+
+static void
+finalize (GObject *object)
+{
+	GeoclueGpsd *self = GEOCLUE_GPSD (object);
+	
+	g_free (self->last_fix);
+	geoclue_accuracy_free (self->last_accuracy);
+	
+	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
+}
+
 static void
 dispose (GObject *object)
 {
@@ -78,9 +109,6 @@ dispose (GObject *object)
 	
 	if (self->gpsdata) {
 		gps_close (self->gpsdata);     
-	}
-	if (self->last_gpsdata) {
-		g_free (self->last_gpsdata);
 	}
 	
 	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
@@ -92,11 +120,13 @@ geoclue_gpsd_class_init (GeoclueGpsdClass *klass)
 	GObjectClass *o_class = (GObjectClass *) klass;
 	GcProviderClass *p_class = (GcProviderClass *) klass;
 
+	o_class->finalize = finalize;
 	o_class->dispose = dispose;
 
 	p_class->get_status = get_status;
 	p_class->shutdown = shutdown;
 }
+
 
 static gboolean
 equal_or_nan (double a, double b)
@@ -107,100 +137,123 @@ equal_or_nan (double a, double b)
 	return a == b;
 }
 
+static void
+geoclue_gpsd_update_position (GeoclueGpsd *gpsd)
+{
+	gps_fix *fix = &gpsd->gpsdata->fix;
+	gps_fix *last_fix = gpsd->last_fix;
+	
+	last_fix->time = fix->time;
+	
+	/* If a flag is not set, bail out.*/
+	if (!((gpsd->gpsdata->set & LATLON_SET) || (gpsd->gpsdata->set & ALTITUDE_SET))) {
+		return;
+	}
+	gpsd->gpsdata->set &= ~(LATLON_SET | ALTITUDE_SET);
+	
+	if (equal_or_nan (fix->latitude, last_fix->latitude) &&
+	    equal_or_nan (fix->longitude, last_fix->longitude) &&
+	    equal_or_nan (fix->altitude, last_fix->altitude)) {
+		/* position has not changed */
+		return;
+	}
+	
+	/* save values */
+	last_fix->latitude = fix->latitude;
+	last_fix->longitude = fix->longitude;
+	last_fix->altitude = fix->altitude;
+	
+	/* Could use fix.eph for accuracy, but eph is 
+	 * often NaN... what then? */
+	geoclue_accuracy_set_details (gpsd->last_accuracy,
+	                              GEOCLUE_ACCURACY_LEVEL_DETAILED,
+	                              24, 60);
+	
+	gpsd->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
+	gpsd->last_pos_fields |= (isnan (fix->latitude)) ? 
+	                         0 : GEOCLUE_POSITION_FIELDS_LATITUDE;
+	gpsd->last_pos_fields |= (isnan (fix->longitude)) ? 
+	                         0 : GEOCLUE_POSITION_FIELDS_LONGITUDE;
+	gpsd->last_pos_fields |= (isnan (fix->altitude)) ? 
+	                         0 : GEOCLUE_POSITION_FIELDS_ALTITUDE;
+	
+	gc_iface_position_emit_position_changed 
+		(GC_IFACE_POSITION (gpsd), gpsd->last_pos_fields,
+		 (int)(last_fix->time+0.5), 
+		 last_fix->latitude, last_fix->longitude, last_fix->altitude, 
+		 gpsd->last_accuracy);
+	
+}
+
+static void
+geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd)
+{
+	gps_fix *fix = &gpsd->gpsdata->fix;
+	gps_fix *last_fix = gpsd->last_fix;
+	gboolean changed = FALSE;
+	
+	/* gpsd updates
+	 *  - climb on GGA, GSA and GSV messages (speed and track are set to NaN).
+	 *  - speed and track on RMC message (climb is set to NaN).
+	 * 
+	 * couldn't think of an smart way to handle this, I don't think there is one
+	 */
+	
+	if (((gpsd->gpsdata->set & TRACK_SET) || (gpsd->gpsdata->set & SPEED_SET)) &&
+	    g_strcasecmp (gpsd->gpsdata->tag, "RMC") == 0) {
+		
+		gpsd->gpsdata->set &= ~(TRACK_SET | SPEED_SET);
+		
+		last_fix->time = fix->time;
+		
+		if (!equal_or_nan (fix->track, last_fix->track) ||
+		    !equal_or_nan (fix->speed, last_fix->speed)){
+			
+			/* velocity has changed */
+			changed = TRUE;
+			last_fix->track = fix->track;
+			last_fix->speed = fix->speed;
+		}
+	} else if ((gpsd->gpsdata->set & CLIMB_SET) &&
+	           (g_strcasecmp (gpsd->gpsdata->tag, "GGA") == 0 ||
+	            g_strcasecmp (gpsd->gpsdata->tag, "GSA") == 0 ||
+	            g_strcasecmp (gpsd->gpsdata->tag, "GSV") == 0)) {
+		
+		gpsd->gpsdata->set &= ~(CLIMB_SET);
+		
+		last_fix->time = fix->time;
+		
+		if (!equal_or_nan (fix->climb, last_fix->climb)){
+			
+			/* velocity has changed */
+			changed = TRUE;
+			last_fix->climb = fix->climb;
+		}
+	}
+	
+	if (changed) {
+		gpsd->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
+		gpsd->last_velo_fields |= (isnan (last_fix->track)) ?
+			0 : GEOCLUE_VELOCITY_FIELDS_DIRECTION;
+		gpsd->last_velo_fields |= (isnan (last_fix->speed)) ?
+			0 : GEOCLUE_VELOCITY_FIELDS_SPEED;
+		gpsd->last_velo_fields |= (isnan (last_fix->climb)) ?
+			0 : GEOCLUE_VELOCITY_FIELDS_CLIMB;
+		
+		gc_iface_velocity_emit_velocity_changed 
+			(GC_IFACE_VELOCITY (gpsd), gpsd->last_velo_fields,
+			 (int)(last_fix->time+0.5),
+			 last_fix->speed, last_fix->track, last_fix->climb);
+	}
+}
+
 static void 
 gpsd_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
 {
 	/* TODO: how to figure we're offline? */
-	/* FIXME: move the psoitionupdate and vel update to own functions*/
 	
-	/* Position */
-	if ((gpsdata->set & LATLON_SET) || (gpsdata->set & ALTITUDE_SET)) {
-		GeocluePositionFields fields = GEOCLUE_POSITION_FIELDS_NONE;
-		GeoclueAccuracy *accuracy;
-		
-		/* clear the flag */
-		gpsdata->set &= ~(LATLON_SET | ALTITUDE_SET);
-		
-		if (equal_or_nan (gpsdata->fix.latitude, gpsd->last_gpsdata->fix.latitude) &&
-		    equal_or_nan (gpsdata->fix.longitude, gpsd->last_gpsdata->fix.longitude) &&
-		    equal_or_nan (gpsdata->fix.altitude, gpsd->last_gpsdata->fix.altitude)) {
-			/* don't emit if no position change */
-			return;
-		}
-		
-		/* save values */
-		gpsd->last_gpsdata->fix.latitude = gpsdata->fix.latitude;
-		gpsd->last_gpsdata->fix.longitude = gpsdata->fix.longitude;
-		gpsd->last_gpsdata->fix.altitude = gpsdata->fix.altitude;
-		
-		
-		/* Could use fix.eph for accuracy, but eph is 
-		 * often NaN... what then? */
-		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-		                                 24, 60);
-		
-		fields |= (isnan (gpsdata->fix.latitude)) ? 
-		          0 : GEOCLUE_POSITION_FIELDS_LATITUDE;
-		fields |= (isnan (gpsdata->fix.longitude)) ? 
-		          0 : GEOCLUE_POSITION_FIELDS_LONGITUDE;
-		fields |= (isnan (gpsdata->fix.altitude)) ? 
-		          0 : GEOCLUE_POSITION_FIELDS_ALTITUDE;
-		
-		gc_iface_position_emit_position_changed 
-			(GC_IFACE_POSITION (gpsd), fields,
-			 (int)(gpsdata->fix.time+0.5), 
-			 gpsdata->fix.latitude, gpsdata->fix.longitude, 
-			 gpsdata->fix.altitude, accuracy);
-		
-		geoclue_accuracy_free (accuracy);
-	}
-	
-	
-	/* Velocity */
-	/* gpsd seems to send two alternating messages:
-	 * one has valid climb, other has valid track/speed
-	 * */
-	if ((gpsdata->set & TRACK_SET) || (gpsdata->set & SPEED_SET) ||
-	    (gpsdata->set & CLIMB_SET)) {
-		
-		GeoclueVelocityFields fields = GEOCLUE_VELOCITY_FIELDS_NONE;
-		GeoclueAccuracy *accuracy;
-		
-		/* clear the flags */
-		gpsdata->set &= ~(TRACK_SET | SPEED_SET | CLIMB_SET);
-		
-		if (equal_or_nan (gpsdata->fix.track, gpsd->last_gpsdata->fix.track) &&
-		    equal_or_nan (gpsdata->fix.speed, gpsd->last_gpsdata->fix.speed) &&
-		    equal_or_nan (gpsdata->fix.climb, gpsd->last_gpsdata->fix.climb)) {
-			/* don't emit if no velocity change */
-			return;
-		}
-		gpsd->last_gpsdata->fix.track = gpsdata->fix.track;
-		gpsd->last_gpsdata->fix.speed = gpsdata->fix.speed;
-		gpsd->last_gpsdata->fix.climb = gpsdata->fix.climb;
-		
-		
-		/* Could fix.epd/fix.eps for accuracy... */
-		/* FIXME: what does accuracy represent here? degrees / meters*/
-		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-		                                 24, 60);
-		                                 
-		fields |= (isnan (gpsdata->fix.track)) ?
-		          0 : GEOCLUE_VELOCITY_FIELDS_DIRECTION;
-		fields |= (isnan (gpsdata->fix.speed)) ?
-		          0 : GEOCLUE_VELOCITY_FIELDS_SPEED;
-		fields |= (isnan (gpsdata->fix.climb)) ?
-		          0 : GEOCLUE_VELOCITY_FIELDS_CLIMB;
-		
-		gc_iface_velocity_emit_velocity_changed 
-			(GC_IFACE_VELOCITY (gpsd), fields,
-			 (int)(gpsdata->fix.time+0.5),
-			 gpsdata->fix.speed, gpsdata->fix.speed, 
-			 gpsdata->fix.climb);
-		 
-		geoclue_accuracy_free (accuracy);
- 		g_debug ("vel %f, %f, %f (%d)", gpsdata->fix.speed, gpsdata->fix.track, gpsdata->fix.climb, fields);
-	}
+	geoclue_gpsd_update_position (gpsd);
+	geoclue_gpsd_update_velocity (gpsd);
 }
 
 
@@ -209,7 +262,10 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 {
 	pthread_t gps_thread;
 	
-	self->last_gpsdata = g_new0 (gps_data, 1);
+	self->last_fix = g_new0 (gps_fix, 1);
+	self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
+	self->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
+	self->last_accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
 	
 	/* init gpsd (localhost, default port) */
 	self->gpsdata = gps_open (NULL, DEFAULT_GPSD_PORT);
@@ -217,13 +273,14 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 		gps_set_callback (self->gpsdata, gpsd_callback, &gps_thread);
 	} else {
 		g_printerr("Cannot find gpsd!\n");
-		/* TODO: What now? */
+		
+		/* TODO: What now? emit status change?  exit?*/
 	}
 	
 	gc_provider_set_details (GC_PROVIDER (self),
-				 "org.freedesktop.Geoclue.Providers.gpsd",
-				 "/org/freedesktop/Geoclue/Providers/gpsd",
-				 "gpsd", "gpsd provider");
+				 "org.freedesktop.Geoclue.Providers.Gpsd",
+				 "/org/freedesktop/Geoclue/Providers/Gpsd",
+				 "Gpsd", "Gpsd provider");
 }
 
 static gboolean
@@ -236,6 +293,22 @@ get_position (GcIfacePosition       *gc,
               GeoclueAccuracy      **accuracy,
               GError               **error)
 {
+	GeoclueAccuracyLevel level;
+	double hor, ver;
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
+	
+	/* return last position from gpsd (could be too old?) */
+	*timestamp = (int)(gpsd->last_fix->time+0.5);
+	*latitude = gpsd->last_fix->latitude;
+	*longitude = gpsd->last_fix->longitude;
+	*altitude = gpsd->last_fix->altitude;
+	
+	*fields = gpsd->last_pos_fields;
+	
+	geoclue_accuracy_get_details (gpsd->last_accuracy, &level,
+				      &hor, &ver);
+	*accuracy = geoclue_accuracy_new (level, hor, ver);
+	
 	return TRUE;
 }
 
@@ -254,6 +327,16 @@ get_velocity (GcIfaceVelocity       *gc,
               double                *climb,
               GError               **error)
 {
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
+	
+	/* return last velocity from gpsd (could be too old?) */
+	*timestamp = (int)(gpsd->last_fix->time+0.5);
+	*speed = gpsd->last_fix->speed;
+	*direction = gpsd->last_fix->track;
+	*climb = gpsd->last_fix->climb;
+	
+	*fields = gpsd->last_velo_fields;
+	
 	return TRUE;
 }
 

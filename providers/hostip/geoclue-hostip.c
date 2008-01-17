@@ -124,6 +124,7 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 	GeoclueHostip *obj = GEOCLUE_HOSTIP (iface);
 	gchar *locality = NULL;
 	gchar *country = NULL;
+	gchar *country_code = NULL;
 	
 	if (!gc_web_service_query (obj->web_service, NULL)) {
 		g_set_error (error, GEOCLUE_ERROR, 
@@ -136,11 +137,12 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 	if (gc_web_service_get_string (obj->web_service, 
 	                               &locality, HOSTIP_LOCALITY_XPATH)) {
 		/* hostip "sctructured data" for the win... */
-		if (g_ascii_strcasecmp (locality, "(Unknown city)") == 0) {
+		if (g_ascii_strcasecmp (locality, "(Unknown city)") == 0 ||
+		    g_ascii_strcasecmp (locality, "(Unknown City?)") == 0) {
+
 			g_free (locality);
 			locality = NULL;
 		} else {
-			
 			g_hash_table_insert (*address, 
 					     GEOCLUE_ADDRESS_KEY_LOCALITY, 
 					     locality);
@@ -148,15 +150,25 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 	}
 	
 	if (gc_web_service_get_string (obj->web_service, 
-	                               &country, HOSTIP_COUNTRYCODE_XPATH)) {
-		g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
-				     country);
+	                               &country_code, HOSTIP_COUNTRYCODE_XPATH)) {
+		if (g_ascii_strcasecmp (country_code, "XX") == 0) {
+			g_free (country_code);
+			country_code = NULL;
+		} else {
+			g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+			                     country_code);
+		}
 	}
 	
 	if (gc_web_service_get_string (obj->web_service, 
 	                               &country, HOSTIP_COUNTRY_XPATH)) {
-		g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRY, 
-				     country);
+		if (g_ascii_strcasecmp (country, "(Unknown Country?)") == 0) {
+			g_free (country);
+			country = NULL;
+		} else {
+			g_hash_table_insert (*address, GEOCLUE_ADDRESS_KEY_COUNTRY, 
+			                     country);
+		}
 	}
 	
 	time ((time_t *)timestamp);

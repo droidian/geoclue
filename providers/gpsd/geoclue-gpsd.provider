@@ -1,0 +1,6 @@
+[Geoclue Provider]
+Name=gpsd Provider
+Service=org.freedesktop.Geoclue.Providers.gpsd
+Path=/org/freedesktop/Geoclue/Providers/gpsd
+Requires=RequiresGPS
+Provides=ProvidesUpdates

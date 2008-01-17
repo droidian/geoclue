@@ -56,6 +56,14 @@ fi
 AC_SUBST(GYPSY_LIBS)
 AC_SUBST(GYPSY_CFLAGS)
 
+AC_CHECK_LIB(gps, gps_open,[libgps=yes] )
+if test "x$libgps" = xyes; then
+	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gpsd"
+    GPSD_LIBS="-lgps"
+fi
+AC_SUBST(GPSD_LIBS)
+AC_SUBST(GPSD_CFLAGS)
+
 AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
@@ -69,6 +77,7 @@ example/Makefile
 providers/Makefile
 providers/example/Makefile
 providers/gypsy/Makefile
+providers/gpsd/Makefile
 providers/hostip/Makefile
 providers/geonames/Makefile
 src/Makefile

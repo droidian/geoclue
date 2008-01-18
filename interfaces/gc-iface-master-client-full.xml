@@ -3,7 +3,7 @@
 <node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
 
         <interface name="org.freedesktop.Geoclue.Master.Control">
-		<method name="SetMinimumAccuracy">
+		<method name="SetAccuracy">
 			<arg name="accuracy" type="a(idd)" direction="in" />
 		</method>
 

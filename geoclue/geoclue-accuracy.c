@@ -125,3 +125,21 @@ geoclue_accuracy_set_details (GeoclueAccuracy     *accuracy,
 	g_value_set_double (g_value_array_get_nth (vals, 2),
 			    vertical_accuracy);
 }
+
+/**
+ * geoclue_accuracy_copy:
+ * @accuracy: A #GeoclueAccuracy
+ *
+ * Creates a copy of @accuracy.
+ *
+ * Return value: A newly allocated #GeoclueAccuracy
+ */
+GeoclueAccuracy *
+geoclue_accuracy_copy (GeoclueAccuracy *accuracy)
+{
+	GeoclueAccuracyLevel level;
+	double hor, ver;
+	
+	geoclue_accuracy_get_details (accuracy, &level, &hor, &ver);
+	return geoclue_accuracy_new (level, hor, ver);
+}

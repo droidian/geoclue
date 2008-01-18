@@ -20,10 +20,61 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueMasterClient, geoclue_master_client,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
 						geoclue_master_client_position_init))
 
+static gboolean
+gc_iface_master_client_set_accuracy (GeoclueMasterClient *client,
+				     GeoclueAccuracy     *accuracy,
+				     GError             **error);
+static gboolean
+gc_iface_master_client_set_minimum_time (GeoclueMasterClient *client,
+					 int                  min_time,
+					 GError             **error);
+static gboolean 
+gc_iface_master_client_start_updates (GeoclueMasterClient *client,
+				      GError             **error);
+static gboolean
+gc_iface_master_client_stop_updates (GeoclueMasterClient *client,
+				     GError             **error);
+
+#include "gc-iface-master-client-glue.h"
+
 static void
 finalize (GObject *object)
 {
 	((GObjectClass *) geoclue_master_client_parent_class)->finalize (object);
+}
+
+static gboolean
+gc_iface_master_client_set_accuracy (GeoclueMasterClient *client,
+				     GeoclueAccuracy     *accuracy,
+				     GError             **error)
+{
+	client->desired_accuracy = geoclue_accuracy_copy (accuracy);
+	return TRUE;
+}
+
+static gboolean
+gc_iface_master_client_set_minimum_time (GeoclueMasterClient *client,
+					 int                  min_time,
+					 GError             **error)
+{
+	client->time_gap = min_time;
+	return TRUE;
+}
+
+static gboolean 
+gc_iface_master_client_start_updates (GeoclueMasterClient *client,
+				      GError             **error)
+{
+	client->update = TRUE;
+	return TRUE;
+}
+
+static gboolean
+gc_iface_master_client_stop_updates (GeoclueMasterClient *client,
+				     GError             **error)
+{
+	client->update = FALSE;
+	return TRUE;
 }
 
 static void
@@ -32,6 +83,9 @@ geoclue_master_client_class_init (GeoclueMasterClientClass *klass)
 	GObjectClass *o_class = (GObjectClass *) klass;
 
 	o_class->finalize = finalize;
+
+	dbus_g_object_type_install_info (geoclue_master_client_get_type (),
+					 &dbus_glib_gc_iface_master_client_object_info);
 }
 
 static void

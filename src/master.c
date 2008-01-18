@@ -12,6 +12,8 @@
 
 #include <geoclue/geoclue-types.h>
 #include <geoclue/geoclue-accuracy.h>
+#include <geoclue/geoclue-position.h>
+#include <geoclue/geoclue-velocity.h>
 
 #include "master.h"
 #include "client.h"
@@ -43,6 +45,7 @@ struct _ProviderInterface {
 
 	union {
 		struct {
+			GeocluePosition *position;
 			GeocluePositionFields fields;
 
 			double latitude;
@@ -53,6 +56,7 @@ struct _ProviderInterface {
 		} position;
 
 		struct {
+			GeoclueVelocity *velocity;
 			GeoclueVelocityFields fields;
 
 			double speed;

@@ -33,6 +33,8 @@ void geoclue_accuracy_set_details (GeoclueAccuracy      *accuracy,
 				   double                horizontal_accuracy,
 				   double                vertical_accuracy);
 
+GeoclueAccuracy *geoclue_accuracy_copy (GeoclueAccuracy *accuracy);
+
 G_END_DECLS
 
 #endif

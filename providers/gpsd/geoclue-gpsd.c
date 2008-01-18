@@ -33,12 +33,28 @@
 typedef struct gps_data_t gps_data;
 typedef struct gps_fix_t gps_fix;
 
+/* only listing used tags */
+typedef enum {
+	NMEA_NONE,
+	NMEA_GSA,
+	NMEA_GGA,
+	NMEA_GSV,
+	NMEA_RMC
+} NmeaTag;
+
+typedef enum {
+	GPS_STATUS_OFFLINE,
+	GPS_STATUS_NO_FIX,
+	GPS_STATUS_FIX
+} GpsStatus;
+
 typedef struct {
 	GcProvider parent;
 	
 	gps_data *gpsdata;
 	
 	gps_fix *last_fix;
+	GpsStatus last_status;
 	GeocluePositionFields last_pos_fields;
 	GeoclueAccuracy *last_accuracy;
 	GeoclueVelocityFields last_velo_fields;
@@ -138,7 +154,7 @@ equal_or_nan (double a, double b)
 }
 
 static void
-geoclue_gpsd_update_position (GeoclueGpsd *gpsd)
+geoclue_gpsd_update_position (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 {
 	gps_fix *fix = &gpsd->gpsdata->fix;
 	gps_fix *last_fix = gpsd->last_fix;
@@ -186,7 +202,7 @@ geoclue_gpsd_update_position (GeoclueGpsd *gpsd)
 }
 
 static void
-geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd)
+geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 {
 	gps_fix *fix = &gpsd->gpsdata->fix;
 	gps_fix *last_fix = gpsd->last_fix;
@@ -200,7 +216,7 @@ geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd)
 	 */
 	
 	if (((gpsd->gpsdata->set & TRACK_SET) || (gpsd->gpsdata->set & SPEED_SET)) &&
-	    g_strcasecmp (gpsd->gpsdata->tag, "RMC") == 0) {
+	    nmea_tag == NMEA_RMC) {
 		
 		gpsd->gpsdata->set &= ~(TRACK_SET | SPEED_SET);
 		
@@ -215,9 +231,9 @@ geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd)
 			last_fix->speed = fix->speed;
 		}
 	} else if ((gpsd->gpsdata->set & CLIMB_SET) &&
-	           (g_strcasecmp (gpsd->gpsdata->tag, "GGA") == 0 ||
-	            g_strcasecmp (gpsd->gpsdata->tag, "GSA") == 0 ||
-	            g_strcasecmp (gpsd->gpsdata->tag, "GSV") == 0)) {
+	           (nmea_tag == NMEA_GGA || 
+	            nmea_tag == NMEA_GSA || 
+	            nmea_tag == NMEA_GSV)) {
 		
 		gpsd->gpsdata->set &= ~(CLIMB_SET);
 		
@@ -247,13 +263,60 @@ geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd)
 	}
 }
 
+static void
+geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
+{
+	gboolean changed = FALSE;
+	/*online is supposedly always up-to-date*/
+	gboolean online = (gpsd->gpsdata->online > 0);
+	
+	if (online && (gpsd->last_status == GPS_STATUS_OFFLINE)) {
+		gpsd->last_status = GPS_STATUS_NO_FIX;
+		changed = TRUE;
+	} else if (!online && (gpsd->last_status > GPS_STATUS_OFFLINE)) {
+		gpsd->last_status = GPS_STATUS_OFFLINE;
+		changed = TRUE;
+	}
+	
+	if ((gpsd->last_status != GPS_STATUS_OFFLINE) && 
+	    (gpsd->gpsdata->set & STATUS_SET)) {
+		gboolean fix = (gpsd->gpsdata->status > 0);
+		
+		gpsd->gpsdata->set &= ~(STATUS_SET);
+		
+		if (fix && gpsd->last_status != GPS_STATUS_FIX) {
+			gpsd->last_status = GPS_STATUS_FIX;
+			changed = TRUE;
+		} else if (!fix && gpsd->last_status == GPS_STATUS_FIX) {
+			gpsd->last_status = GPS_STATUS_NO_FIX;
+			changed = TRUE;
+		}
+	}
+	if (changed) {
+		g_debug ("new status: %d", gpsd->last_status);
+		/* TODO emit status changed */
+	}
+}
+
 static void 
 gpsd_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
 {
-	/* TODO: how to figure we're offline? */
+	char *tag_str = gpsd->gpsdata->tag;
+	NmeaTag nmea_tag = NMEA_NONE;
 	
-	geoclue_gpsd_update_position (gpsd);
-	geoclue_gpsd_update_velocity (gpsd);
+	if (tag_str[0] == 'G' && tag_str[1] == 'S' && tag_str[2] == 'A') {
+		nmea_tag = NMEA_GSA;
+	} else if (tag_str[0] == 'G' && tag_str[1] == 'G' && tag_str[2] == 'A') {
+		nmea_tag = NMEA_GGA;
+	} else if (tag_str[0] == 'G' && tag_str[1] == 'S' && tag_str[2] == 'V') {
+		nmea_tag = NMEA_GSV;
+	} else if (tag_str[0] == 'R' && tag_str[1] == 'M' && tag_str[2] == 'C') {
+		nmea_tag = NMEA_RMC;
+	}
+	
+	geoclue_gpsd_update_status (gpsd, nmea_tag);
+	geoclue_gpsd_update_position (gpsd, nmea_tag);
+	geoclue_gpsd_update_velocity (gpsd, nmea_tag);
 }
 
 
@@ -263,6 +326,7 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 	pthread_t gps_thread;
 	
 	self->last_fix = g_new0 (gps_fix, 1);
+	self->last_status = GPS_STATUS_OFFLINE;
 	self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
 	self->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
 	self->last_accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);

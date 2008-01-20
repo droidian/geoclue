@@ -53,10 +53,10 @@ dispose (GObject *object)
 
 static void
 status_changed (DBusGProxy    *proxy,
-		gboolean       active,
+		GeoclueStatus status,
 		GeoclueCommon *common)
 {
-	g_signal_emit (common, signals[STATUS_CHANGED], 0, active);
+	g_signal_emit (common, signals[STATUS_CHANGED], 0, status);
 }
 
 static GObject *
@@ -72,7 +72,7 @@ constructor (GType                  type,
 	provider = GEOCLUE_PROVIDER (object);
 
 	dbus_g_proxy_add_signal (provider->proxy, "StatusChanged",
-				 G_TYPE_BOOLEAN, G_TYPE_INVALID);
+				 G_TYPE_INT, G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "StatusChanged",
 				     G_CALLBACK (status_changed),
 				     object, NULL);
@@ -97,8 +97,8 @@ geoclue_common_class_init (GeoclueCommonClass *klass)
 						G_SIGNAL_NO_RECURSE,
 						G_STRUCT_OFFSET (GeoclueCommonClass, status_changed), 
 						NULL, NULL,
-						g_cclosure_marshal_VOID__BOOLEAN,
-						G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
+						g_cclosure_marshal_VOID__INT,
+						G_TYPE_NONE, 1, G_TYPE_INT);
 }
 
 static void
@@ -157,7 +157,7 @@ geoclue_common_get_provider_info (GeoclueCommon *common,
 /**
  * geoclue_common_get_status:
  * @common: A #GeoclueCommon object
- * @active: Pointer for returned status (active or not)
+ * @status: Pointer for returned status as GeoclueStatus
  * @error:  Pointer for returned #GError
  * 
  * Obtains the current status of the provider.
@@ -166,13 +166,13 @@ geoclue_common_get_provider_info (GeoclueCommon *common,
  */
 gboolean
 geoclue_common_get_status (GeoclueCommon *common,
-			   gboolean      *active,
+			   GeoclueStatus *status,
 			   GError       **error)
 {
+	gint i=0;
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (common);
-
 	if (!org_freedesktop_Geoclue_get_status (provider->proxy, 
-						 active, error)) {
+						 &i, error)) {
 		return FALSE;
 	}
 

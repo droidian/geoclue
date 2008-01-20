@@ -102,14 +102,14 @@ get_provider_info (GcIfaceGeoclue *geoclue,
 
 static gboolean
 get_status (GcIfaceGeoclue *geoclue,
-	    gboolean       *available,
+	    GeoclueStatus  *status,
 	    GError        **error)
 {
 	GcProviderClass *klass;
 
 	klass = GC_PROVIDER_GET_CLASS (geoclue);
 	if (klass->get_status) {
-		return klass->get_status (geoclue, available, error);
+		return klass->get_status (geoclue, status, error);
 	} else {
 		*error = g_error_new (GEOCLUE_ERROR,
 				      GEOCLUE_ERROR_NOT_IMPLEMENTED,

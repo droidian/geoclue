@@ -15,7 +15,7 @@ int main (int argc, char** argv)
 	GeoclueCommon *geoclue = NULL;
 	gchar *name = NULL;
 	gchar *desc = NULL;
-	gboolean active;
+	GeoclueStatus status;
 	GError *error = NULL;
 	
 	g_type_init();
@@ -53,12 +53,22 @@ int main (int argc, char** argv)
 		g_free (desc);
 	}
 	
-	if (!geoclue_common_get_status (geoclue, &active, &error)) {
+	if (!geoclue_common_get_status (geoclue, &status, &error)) {
 		g_printerr ("Error getting provider info: %s\n\n", error->message);
 		g_error_free (error);
 		error = NULL;
 	} else {
-		g_print ("Provider status: %sactive\n\n", active ? "" : "not ");
+		switch (status) {
+			case GEOCLUE_STATUS_UNAVAILABLE:
+				g_print ("Provider status: unavailable");
+				break;
+			case GEOCLUE_STATUS_ACQUIRING:
+				g_print ("Provider status: acquiring");
+				break;
+			case GEOCLUE_STATUS_AVAILABLE:
+				g_print ("Provider status: available");
+				break;
+		}
 	}
 	
 	if (!geoclue_common_shutdown (geoclue, &error)) {

@@ -70,16 +70,7 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGeonames, geoclue_geonames, GC_TYPE_PROVIDER,
 
 /* Geoclue interface implementation */
 
-static gboolean
-geoclue_geonames_get_status (GcIfaceGeoclue  *iface,
-                             gboolean        *available,
-                             GError         **error)
-{
-	/* TODO: if connection status info is only in master, how do we do this? */
-	g_set_error (error, GEOCLUE_ERROR, 
-	             GEOCLUE_ERROR_NOT_IMPLEMENTED, "Not implemented yet");
-	return FALSE;
-}
+/* get_status not implemented yet */
 
 static gboolean
 geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
@@ -248,9 +239,7 @@ geoclue_geonames_class_init (GeoclueGeonamesClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->get_status = geoclue_geonames_get_status;
 	p_class->shutdown = geoclue_geonames_shutdown;
-	
 	o_class->finalize = geoclue_geonames_finalize;
 }
 

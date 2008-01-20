@@ -24,7 +24,7 @@ static gboolean gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
 						    gchar          **description,
 						    GError         **error);
 static gboolean gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
-					     gboolean       *status,
+					     GeoclueStatus  *status,
 					     GError        **error);
 static gboolean gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
 					   GError        **error);
@@ -87,7 +87,7 @@ gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
 
 static gboolean
 gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
-			     gboolean       *status,
+			     GeoclueStatus  *status,
 			     GError        **error)
 {
 	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->get_status (gc, status,
@@ -103,7 +103,7 @@ gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
 
 void
 gc_iface_geoclue_emit_status_changed (GcIfaceGeoclue *gc,
-				      gboolean        available)
+				      GeoclueStatus   status)
 {
-	g_signal_emit (gc, signals[STATUS_CHANGED], 0, available);
+	g_signal_emit (gc, signals[STATUS_CHANGED], 0, status);
 }

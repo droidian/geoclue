@@ -9,6 +9,8 @@
 #ifndef _GC_IFACE_GEOCLUE_H
 #define _GC_IFACE_GEOCLUE_H
 
+#include <geoclue/geoclue-types.h>
+
 G_BEGIN_DECLS
 
 #define GC_TYPE_IFACE_GEOCLUE (gc_iface_geoclue_get_type ())
@@ -26,7 +28,7 @@ struct _GcIfaceGeoclueClass {
 
 	/* signals */
 	void (* status_changed) (GcIfaceGeoclue *geoclue,
-				 gboolean        available);
+				 GeoclueStatus   status);
 
 	/* vtable */
 	gboolean (*get_provider_info) (GcIfaceGeoclue  *gc,
@@ -34,7 +36,7 @@ struct _GcIfaceGeoclueClass {
 				       gchar          **description,
 				       GError         **error);
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
-				gboolean       *available,
+				GeoclueStatus  *status,
 				GError        **error);
 	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
 			      GError        **error);
@@ -43,7 +45,7 @@ struct _GcIfaceGeoclueClass {
 GType gc_iface_geoclue_get_type (void);
 
 void gc_iface_geoclue_emit_status_changed (GcIfaceGeoclue *gc,
-					   gboolean        available);
+					   GeoclueStatus   status);
 
 G_END_DECLS
 

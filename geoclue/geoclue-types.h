@@ -10,6 +10,17 @@
 #define _GEOCLUE_TYPES_H
 
 /**
+ * GeoclueStatus
+ * 
+ * defines the provider status
+ **/
+typedef enum {
+	GEOCLUE_STATUS_UNAVAILABLE,
+	GEOCLUE_STATUS_ACQUIRING,
+	GEOCLUE_STATUS_AVAILABLE
+} GeoclueStatus;
+
+/**
  * GeoclueAccuracyLevel:
  *
  * Enum values used to define the approximate accuracy of 

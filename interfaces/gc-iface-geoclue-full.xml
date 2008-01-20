@@ -23,17 +23,17 @@
 		</method>
 		
 		<method name="GetStatus">
-			<arg type="b" name="active" direction="out" >
+			<arg type="i" name="status" direction="out" >
 				<doc:doc>
-					<doc:summary>Current provider status</doc:summary>
+					<doc:summary>Current provider status, as GeoclueStatus</doc:summary>
 				</doc:doc>
 			</arg>
 		</method>
 
 		<signal name="StatusChanged">
-			<arg type="b" name="active" direction="out">
+			<arg type="i" name="status" direction="out">
 				<doc:doc>
-					<doc:summary>Current provider status</doc:summary>
+					<doc:summary>Current provider status, as GeoclueStatus</doc:summary>
 				</doc:doc>
 			</arg>
 		</signal>

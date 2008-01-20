@@ -33,10 +33,10 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueExample, geoclue_example, GC_TYPE_PROVIDER,
 
 static gboolean
 get_status (GcIfaceGeoclue *gc,
-	    gboolean       *available,
+	    GeoclueStatus  *status,
 	    GError        **error)
 {
-	*available = TRUE;
+	*status = GEOCLUE_STATUS_AVAILABLE;
 
 	return TRUE;
 }

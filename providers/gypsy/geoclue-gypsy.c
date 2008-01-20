@@ -66,11 +66,9 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGypsy, geoclue_gypsy, GC_TYPE_PROVIDER,
 
 static gboolean
 get_status (GcIfaceGeoclue *gc,
-            gboolean       *available,
+            GeoclueStatus  *status,
             GError        **error)
 {
-        *available = TRUE;
-
         return TRUE;
 }
 
@@ -329,7 +327,7 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 	gypsy->control = gypsy_control_get_default ();
 
 	/* FIXME: Need a properties interface to get the GPS to use */
-	path = gypsy_control_create (gypsy->control, "00:02:76:C4:27:A8",
+	path = gypsy_control_create (gypsy->control, "00:02:76:C5:81:BF",
 				     &error);
 	if (error != NULL) {
 		/* Need to return an error somehow */

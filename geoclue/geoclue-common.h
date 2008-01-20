@@ -29,7 +29,7 @@ typedef struct _GeoclueCommonClass {
 	GeoclueProviderClass provider_class;
 
 	void (* status_changed) (GeoclueCommon *common,
-				 gboolean       active);
+				 GeoclueStatus status);
 } GeoclueCommonClass;
 
 GType geoclue_common_get_type (void);
@@ -42,7 +42,7 @@ gboolean geoclue_common_get_provider_info (GeoclueCommon *common,
 					   char         **description,
 					   GError       **error);
 gboolean geoclue_common_get_status (GeoclueCommon *common,
-				    gboolean      *active,
+				    GeoclueStatus *status,
 				    GError       **error);
 gboolean geoclue_common_shutdown (GeoclueCommon *common,
 				  GError       **error);

@@ -36,7 +36,7 @@ typedef struct _GcProviderClass {
 
 	/* Implements the GcIfaceGeoclue interface */
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
-				gboolean       *available,
+				GeoclueStatus  *status,
 				GError        **error);
 	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
 			      GError        **error);

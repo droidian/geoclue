@@ -8,14 +8,7 @@
 
 /** TODO
  * 
- * *status
- *   maybe this would work?
- *   * status FALSE on startup
- *   * status TRUE on first gpsd event
- *   * status FALSE if no updates for 10 secs
- * 
- * init
- *   what to do if gpsd is not there?
+ * * init: what to do if gpsd is not there?
  * 
  * */
 
@@ -42,11 +35,6 @@ typedef enum {
 	NMEA_RMC
 } NmeaTag;
 
-typedef enum {
-	GPS_STATUS_OFFLINE,
-	GPS_STATUS_NO_FIX,
-	GPS_STATUS_FIX
-} GpsStatus;
 
 typedef struct {
 	GcProvider parent;
@@ -54,7 +42,7 @@ typedef struct {
 	gps_data *gpsdata;
 	
 	gps_fix *last_fix;
-	GpsStatus last_status;
+	GeoclueStatus last_status;
 	GeocluePositionFields last_pos_fields;
 	GeoclueAccuracy *last_accuracy;
 	GeoclueVelocityFields last_velo_fields;
@@ -88,10 +76,12 @@ GeoclueGpsd *gpsd;
 /* Geoclue interface */
 static gboolean
 get_status (GcIfaceGeoclue *gc,
-            gboolean       *available,
+            GeoclueStatus  *status,
             GError        **error)
 {
-	*available = TRUE;
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
+	
+	*status = gpsd->last_status;
 	return TRUE;
 }
 
@@ -99,9 +89,9 @@ static gboolean
 shutdown (GcIfaceGeoclue *gc,
           GError        **error)
 {
-	GeoclueGpsd *self = GEOCLUE_GPSD (gc);
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
 	
-	g_main_loop_quit (self->loop);
+	g_main_loop_quit (gpsd->loop);
 	return TRUE;
 }
 
@@ -110,10 +100,10 @@ shutdown (GcIfaceGeoclue *gc,
 static void
 finalize (GObject *object)
 {
-	GeoclueGpsd *self = GEOCLUE_GPSD (object);
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (object);
 	
-	g_free (self->last_fix);
-	geoclue_accuracy_free (self->last_accuracy);
+	g_free (gpsd->last_fix);
+	geoclue_accuracy_free (gpsd->last_accuracy);
 	
 	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
 }
@@ -121,10 +111,10 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
-	GeoclueGpsd *self = GEOCLUE_GPSD (object);
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (object);
 	
-	if (self->gpsdata) {
-		gps_close (self->gpsdata);     
+	if (gpsd->gpsdata) {
+		gps_close (gpsd->gpsdata);     
 	}
 	
 	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
@@ -180,7 +170,10 @@ geoclue_gpsd_update_position (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 	last_fix->altitude = fix->altitude;
 	
 	/* Could use fix.eph for accuracy, but eph is 
-	 * often NaN... what then? */
+	 * often NaN... what then? 
+	 * Could also use fix mode (2d/3d) to decide vertical accuracy, 
+	 * but gpsd updates that so erratically that I couldn't
+	 * be arsed so far */
 	geoclue_accuracy_set_details (gpsd->last_accuracy,
 	                              GEOCLUE_ACCURACY_LEVEL_DETAILED,
 	                              24, 60);
@@ -208,7 +201,7 @@ geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 	gps_fix *last_fix = gpsd->last_fix;
 	gboolean changed = FALSE;
 	
-	/* gpsd updates
+	/* at least with my devices, gpsd updates
 	 *  - climb on GGA, GSA and GSV messages (speed and track are set to NaN).
 	 *  - speed and track on RMC message (climb is set to NaN).
 	 * 
@@ -267,34 +260,35 @@ static void
 geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 {
 	gboolean changed = FALSE;
-	/*online is supposedly always up-to-date*/
 	gboolean online = (gpsd->gpsdata->online > 0);
 	
-	if (online && (gpsd->last_status == GPS_STATUS_OFFLINE)) {
-		gpsd->last_status = GPS_STATUS_NO_FIX;
+	/* gpsdata->online is supposedly always up-to-date */
+	if (online && (gpsd->last_status == GEOCLUE_STATUS_UNAVAILABLE)) {
+		gpsd->last_status = GEOCLUE_STATUS_ACQUIRING;
 		changed = TRUE;
-	} else if (!online && (gpsd->last_status > GPS_STATUS_OFFLINE)) {
-		gpsd->last_status = GPS_STATUS_OFFLINE;
+	} else if (!online && (gpsd->last_status != GEOCLUE_STATUS_UNAVAILABLE)) {
+		gpsd->last_status = GEOCLUE_STATUS_UNAVAILABLE;
 		changed = TRUE;
 	}
 	
-	if ((gpsd->last_status != GPS_STATUS_OFFLINE) && 
+	if ((gpsd->last_status != GEOCLUE_STATUS_UNAVAILABLE) && 
 	    (gpsd->gpsdata->set & STATUS_SET)) {
 		gboolean fix = (gpsd->gpsdata->status > 0);
 		
 		gpsd->gpsdata->set &= ~(STATUS_SET);
 		
-		if (fix && gpsd->last_status != GPS_STATUS_FIX) {
-			gpsd->last_status = GPS_STATUS_FIX;
+		if (fix && gpsd->last_status != GEOCLUE_STATUS_AVAILABLE) {
+			gpsd->last_status = GEOCLUE_STATUS_AVAILABLE;
 			changed = TRUE;
-		} else if (!fix && gpsd->last_status == GPS_STATUS_FIX) {
-			gpsd->last_status = GPS_STATUS_NO_FIX;
+		} else if (!fix && gpsd->last_status == GEOCLUE_STATUS_AVAILABLE) {
+			gpsd->last_status = GEOCLUE_STATUS_UNAVAILABLE;
 			changed = TRUE;
 		}
 	}
 	if (changed) {
 		g_debug ("new status: %d", gpsd->last_status);
-		/* TODO emit status changed */
+		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gpsd),
+		                                      gpsd->last_status);
 	}
 }
 
@@ -326,7 +320,7 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 	pthread_t gps_thread;
 	
 	self->last_fix = g_new0 (gps_fix, 1);
-	self->last_status = GPS_STATUS_OFFLINE;
+	self->last_status = GEOCLUE_STATUS_UNAVAILABLE;
 	self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
 	self->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
 	self->last_accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
@@ -338,7 +332,7 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 	} else {
 		g_printerr("Cannot find gpsd!\n");
 		
-		/* TODO: What now? emit status change?  exit?*/
+		/* TODO: What now? */
 	}
 	
 	gc_provider_set_details (GC_PROVIDER (self),

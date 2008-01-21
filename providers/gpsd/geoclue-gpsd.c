@@ -286,6 +286,12 @@ geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 		}
 	}
 	if (changed) {
+		/* make position and velocity invalid if no fix */
+		if (gpsd->last_status != GEOCLUE_STATUS_AVAILABLE) {
+			gpsd->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
+			gpsd->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
+		}
+		
 		g_debug ("new status: %d", gpsd->last_status);
 		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gpsd),
 		                                      gpsd->last_status);
@@ -355,12 +361,10 @@ get_position (GcIfacePosition       *gc,
 	double hor, ver;
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
 	
-	/* return last position from gpsd (could be too old?) */
 	*timestamp = (int)(gpsd->last_fix->time+0.5);
 	*latitude = gpsd->last_fix->latitude;
 	*longitude = gpsd->last_fix->longitude;
 	*altitude = gpsd->last_fix->altitude;
-	
 	*fields = gpsd->last_pos_fields;
 	
 	geoclue_accuracy_get_details (gpsd->last_accuracy, &level,
@@ -392,7 +396,6 @@ get_velocity (GcIfaceVelocity       *gc,
 	*speed = gpsd->last_fix->speed;
 	*direction = gpsd->last_fix->track;
 	*climb = gpsd->last_fix->climb;
-	
 	*fields = gpsd->last_velo_fields;
 	
 	return TRUE;

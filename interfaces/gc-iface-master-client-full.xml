@@ -3,15 +3,10 @@
 <node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
 
         <interface name="org.freedesktop.Geoclue.Master.Control">
-		<method name="SetAccuracy">
+		<method name="SetRequirements">
 			<arg name="accuracy" type="a(idd)" direction="in" />
-		</method>
-
-		<method name="SetMinimumTime">
 			<arg name="time" type="i" direction="in" />
+			<arg name="require_updates" type="b" direction="in" />
 		</method>
-
-		<method name="StartUpdates" />
-		<method name="StopUpdates" />
 	</interface>
 </node>

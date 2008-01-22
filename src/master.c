@@ -10,74 +10,12 @@
 
 #include <string.h>
 
-#include <geoclue/geoclue-types.h>
-#include <geoclue/geoclue-accuracy.h>
-#include <geoclue/geoclue-position.h>
-#include <geoclue/geoclue-velocity.h>
-
 #include "master.h"
 #include "client.h"
 
-#define POSITION_IFACE "org.freedesktop.Geoclue.Position"
-#define VELOCITY_IFACE "org.freedesktop.Geoclue.Velocity"
-
-typedef enum _InterfaceType {
-	POSITION_INTERFACE,
-	VELOCITY_INTERFACE,
-} InterfaceType;
-
-typedef enum _GeoclueRequireFlags {
-	GEOCLUE_REQUIRE_FLAGS_NONE = 0,
-	GEOCLUE_REQUIRE_FLAGS_NETWORK = 1 << 0,
-	GEOCLUE_REQUIRE_FLAGS_GPS = 1 << 1,
-} GeoclueRequireFlags;
-
-typedef enum _GeoclueProvideFlags {
-	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
-	GEOCLUE_PROVIDE_FLAGS_UPDATES = 1 << 0,
-	GEOCLUE_PROVIDE_FLAGS_DETAILED = 1 << 1,
-	GEOCLUE_PROVIDE_FLAGS_FUZZY = 1 << 2,
-} GeoclueProvideFlags;
-
-struct _ProviderInterface {
-	InterfaceType type;
-	int timestamp; /* Last time details was updated */
-
-	union {
-		struct {
-			GeocluePosition *position;
-			GeocluePositionFields fields;
-
-			double latitude;
-			double longitude;
-			double altitude;
-			
-			GeoclueAccuracy *accuracy;
-		} position;
-
-		struct {
-			GeoclueVelocity *velocity;
-			GeoclueVelocityFields fields;
-
-			double speed;
-			double direction;
-			double climb;
-		} velocity;
-	} details;
-};
-
-struct _ProviderDetails {
-	char *name;
-	char *service;
-	char *path;
-
-	GeoclueRequireFlags requires;
-	GeoclueProvideFlags provides;
-
-	GPtrArray *interfaces;
-};
-
 G_DEFINE_TYPE (GeoclueMaster, geoclue_master, G_TYPE_OBJECT);
+
+static GList *providers = NULL;
 
 static gboolean gc_iface_master_create (GeoclueMaster *master,
 					const char   **object_path,
@@ -387,5 +325,57 @@ geoclue_master_init (GeoclueMaster *master)
 		g_error_free (error);
 	}
 
-	master->providers = load_providers (master);
+	if (providers == NULL) {
+		providers = load_providers (master);
+	}
+}
+
+static gboolean
+provider_is_good (ProviderDetails *details,
+		  GeoclueAccuracy *accuracy,
+		  gboolean         can_update)
+{
+	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_FLAGS_NONE;
+	GeoclueAccuracyLevel level;
+
+	if (can_update) {
+		required_flags |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+	}
+
+	if (accuracy != NULL) {
+		geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
+	} else {
+		level = GEOCLUE_ACCURACY_LEVEL_NONE;
+	}
+
+	if (level == GEOCLUE_ACCURACY_LEVEL_DETAILED) {
+		required_flags |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
+	} else if (level > GEOCLUE_ACCURACY_LEVEL_NONE &&
+		   level < GEOCLUE_ACCURACY_LEVEL_DETAILED) {
+		required_flags |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
+	}
+	
+	return (details->provides == required_flags);
+}
+
+ProviderDetails *
+geoclue_master_get_best_provider (GeoclueAccuracy *accuracy,
+				  gboolean         can_update,
+				  GError         **error)
+{
+	GList *l;
+
+	if (providers == NULL) {
+		return NULL;
+	}
+
+	for (l = providers; l; l = l->next) {
+		ProviderDetails *details = l->data;
+
+		if (!provider_is_good (details, accuracy, can_update)) {
+			return details;
+		}
+	}
+
+	return NULL;
 }

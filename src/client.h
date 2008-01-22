@@ -12,6 +12,8 @@
 #include <glib-object.h>
 #include <geoclue/geoclue-accuracy.h>
 
+#include "master.h"
+
 #define GEOCLUE_TYPE_MASTER_CLIENT (geoclue_master_client_get_type ())
 #define GEOCLUE_MASTER_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_MASTER_CLIENT, GeoclueMasterClient))
 
@@ -19,8 +21,11 @@ typedef struct {
 	GObject parent;
 
 	GeoclueAccuracy *desired_accuracy;
-	int time_gap;
-	gboolean update;
+	int min_time;
+	gboolean require_updates;
+
+	guint32 update_id;
+	ProviderDetails *provider;
 } GeoclueMasterClient;
 
 typedef struct {

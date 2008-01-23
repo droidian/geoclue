@@ -20,6 +20,7 @@
 static GMainLoop *mainloop;
 
 #define GEOCLUE_MASTER_NAME "org.freedesktop.Geoclue.Master"
+
 int
 main (int    argc,
       char **argv)

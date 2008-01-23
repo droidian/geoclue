@@ -9,6 +9,8 @@ BUILT_SOURCES =			\
 	gc-iface-geoclue-glue.h \
 	gc-iface-geocode-bindings.h	\
 	gc-iface-geocode-glue.h	\
+	gc-iface-master-bindings.h	\
+	gc-iface-master-client-bindings.h	\
 	gc-iface-position-bindings.h	\
 	gc-iface-position-glue.h	\
 	gc-iface-reverse-geocode-bindings.h	\
@@ -23,6 +25,8 @@ libgeoclue_la_SOURCES = 	\
 	geoclue-common.c	\
 	geoclue-error.c		\
 	geoclue-geocode.c	\
+	geoclue-master.c	\
+	geoclue-master-client.c	\
 	geoclue-position.c	\
 	geoclue-provider.c	\
 	geoclue-reverse-geocode.c	\
@@ -56,6 +60,8 @@ geoclue_headers =		\
 	geoclue-common.h	\
 	geoclue-error.h		\
 	geoclue-geocode.h	\
+	geoclue-master.h	\
+	geoclue-master-client.h	\
 	geoclue-position.h	\
 	geoclue-provider.h	\
 	geoclue-reverse-geocode.h	\

@@ -2,7 +2,7 @@
 
 <node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
 
-        <interface name="org.freedesktop.Geoclue.Master.Control">
+        <interface name="org.freedesktop.Geoclue.MasterClient">
 		<method name="SetRequirements">
 			<arg name="accuracy" type="a(idd)" direction="in" />
 			<arg name="time" type="i" direction="in" />

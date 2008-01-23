@@ -211,6 +211,8 @@ get_position (GcIfacePosition       *gc,
 		if (setup_provider (client, &interface, error) == FALSE) {
 			return FALSE;
 		}
+
+		g_print ("Using %s\n", client->provider->name);
 	}
 
 	if (interface == NULL) {

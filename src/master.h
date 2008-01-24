@@ -94,8 +94,8 @@ typedef struct {
 } GeoclueMasterClass;
 
 GType geoclue_master_get_type (void);
-ProviderDetails *geoclue_master_get_best_provider (GeoclueAccuracy *accuracy,
-						   gboolean         can_update,
-						   GError         **error);
+GList *geoclue_master_get_providers (GeoclueAccuracy *accuracy,
+				     gboolean         can_update,
+				     GError         **error);
 
 #endif

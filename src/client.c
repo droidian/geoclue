@@ -95,6 +95,10 @@ find_interface (ProviderDetails *provider,
 {
 	int i;
 
+	if (provider->interfaces == NULL) {
+		return NULL;
+	}
+
 	for (i = 0; i < provider->interfaces->len; i++) {
 		ProviderInterface *interface = provider->interfaces->pdata[i];
 
@@ -114,10 +118,13 @@ setup_interface (GeoclueMasterClient *client,
 {
 	switch (interface->type) {
 	case POSITION_INTERFACE:
+		g_print ("Setting up interface\n");
 		if (interface->details.position.position == NULL) {
+			g_print ("Creating object\n");
 			interface->details.position.position = 
 				geoclue_position_new (client->provider->service,
 						      client->provider->path);
+			g_print ("Created object\n");
 		}
 
 		if (client->require_updates) {
@@ -127,6 +134,7 @@ setup_interface (GeoclueMasterClient *client,
 				 G_CALLBACK (position_changed_cb), client);
 		}
 
+		g_print ("Getting details\n");
 		interface->details.position.fields = 
 			geoclue_position_get_position 
 			(interface->details.position.position,
@@ -136,6 +144,12 @@ setup_interface (GeoclueMasterClient *client,
 			 &interface->details.position.altitude,
 			 &interface->details.position.accuracy,
 			 error);
+		if (*error != NULL) {
+			g_print ("Error: %s\n", (*error)->message);
+			return FALSE;
+		}
+		g_print ("Got details\n");
+
 		break;
 
 	case VELOCITY_INTERFACE:
@@ -174,24 +188,46 @@ setup_provider (GeoclueMasterClient *client,
 		ProviderInterface  **interface,
 		GError             **error)
 {
-	client->provider = geoclue_master_get_best_provider (client->desired_accuracy,
-							     client->require_updates,
-							     error);
-	if (client->provider == NULL) {
+	GList *providers, *p;
+	GError *sub_error = NULL;
+
+	providers = geoclue_master_get_providers (client->desired_accuracy,
+						  client->require_updates,
+						  &sub_error);
+	if (providers == NULL) {
 		return FALSE;
 	}
 
-	*interface = find_interface (client->provider, POSITION_INTERFACE,
-				    error);
-	if (*interface == NULL) {
-		return FALSE;
+	for (p = providers; p; p = p->next) {
+		ProviderDetails *provider = p->data;
+
+		g_print ("provider: %p\n", provider);
+		*interface = find_interface (provider, POSITION_INTERFACE,
+					     &sub_error);
+		if (*interface == NULL) {
+			g_print ("Skipped %s\n", provider->name);
+			continue;
+		}
+
+		client->provider = provider;
+		if (setup_interface (client, *interface, &sub_error)) {
+			g_list_free (providers);
+			return TRUE;
+		} else {
+			client->provider = NULL;
+			g_print ("Skipped %s\n", provider->name);
+			if (sub_error) {
+				g_print ("Error - %s\n", sub_error->message);
+				g_error_free (sub_error);
+				sub_error = NULL;
+			}
+		}
 	}
 
-	if (setup_interface (client, *interface, error) == FALSE) {
-		return FALSE;
-	}
-
-	return TRUE;
+	g_list_free (providers);
+	client->provider = NULL;
+	*interface = NULL;
+	return FALSE;
 }
 
 static gboolean
@@ -207,8 +243,10 @@ get_position (GcIfacePosition       *gc,
 	GeoclueMasterClient *client = GEOCLUE_MASTER_CLIENT (gc);
 	ProviderInterface *interface = NULL;
 
+	g_print ("Getting position\n");
 	if (client->provider == NULL) {
 		if (setup_provider (client, &interface, error) == FALSE) {
+			g_print ("Error...\n");
 			return FALSE;
 		}
 
@@ -225,7 +263,8 @@ get_position (GcIfacePosition       *gc,
 	*latitude = interface->details.position.latitude;
 	*longitude = interface->details.position.longitude;
 	*altitude = interface->details.position.altitude;
-	*accuracy = interface->details.position.accuracy;
+	/* *accuracy = interface->details.position.accuracy; */
+	*accuracy = geoclue_accuracy_new (0, 0, 0);
 
 	return TRUE;
 }

@@ -84,6 +84,7 @@ geoclue_master_get_default (void)
 
 GeoclueMasterClient *
 geoclue_master_create_client (GeoclueMaster *master,
+			      char         **object_path,
 			      GError       **error)
 {
 	GeoclueMasterPrivate *priv;
@@ -102,7 +103,12 @@ geoclue_master_create_client (GeoclueMaster *master,
 	client = g_object_new (GEOCLUE_TYPE_MASTER_CLIENT,
 			       "object-path", path,
 			       NULL);
-	g_free (path);
+
+	if (*object_path) {
+		*object_path = path;
+	} else {
+		g_free (path);
+	}
 	
 	return client;
 }

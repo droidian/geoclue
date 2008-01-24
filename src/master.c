@@ -358,12 +358,12 @@ provider_is_good (ProviderDetails *details,
 	return (details->provides == required_flags);
 }
 
-ProviderDetails *
-geoclue_master_get_best_provider (GeoclueAccuracy *accuracy,
-				  gboolean         can_update,
-				  GError         **error)
+GList *
+geoclue_master_get_providers (GeoclueAccuracy *accuracy,
+			      gboolean         can_update,
+			      GError         **error)
 {
-	GList *l;
+	GList *l, *p = NULL;
 
 	if (providers == NULL) {
 		return NULL;
@@ -373,9 +373,9 @@ geoclue_master_get_best_provider (GeoclueAccuracy *accuracy,
 		ProviderDetails *details = l->data;
 
 		if (!provider_is_good (details, accuracy, can_update)) {
-			return details;
+			p = g_list_prepend (p, details);
 		}
 	}
 
-	return NULL;
+	return g_list_reverse (p);
 }

@@ -31,6 +31,8 @@ typedef struct {
 
 	int timestamp;
 
+	GeoclueStatus status;
+
 	/* Cached so we don't have to make D-Bus method calls all the time */
 	GypsyPositionFields position_fields;
 	double latitude;
@@ -69,6 +71,10 @@ get_status (GcIfaceGeoclue *gc,
             GeoclueStatus  *status,
             GError        **error)
 {
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
+
+	*status = gypsy->status;
+
         return TRUE;
 }
 
@@ -319,11 +325,62 @@ accuracy_changed (GypsyAccuracy      *accuracy,
 }
 
 static void
+connection_changed (GypsyDevice  *device,
+		    gboolean      connected,
+		    GeoclueGypsy *gypsy)
+{
+	if (connected == FALSE && 
+	    gypsy->status != GEOCLUE_STATUS_UNAVAILABLE) {
+		gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
+		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gypsy),
+						      gypsy->status);
+	}
+}
+
+static void
+fix_status_changed (GypsyDevice         *device,
+		    GypsyDeviceFixStatus status,
+		    GeoclueGypsy        *gypsy)
+{
+	gboolean changed = FALSE;
+
+	switch (status) {
+	case GYPSY_DEVICE_FIX_STATUS_INVALID:
+		if (gypsy->status != GEOCLUE_STATUS_UNAVAILABLE) {
+			changed = TRUE;
+			gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
+		}
+		break;
+
+	case GYPSY_DEVICE_FIX_STATUS_NONE:
+		if (gypsy->status != GEOCLUE_STATUS_ACQUIRING) {
+			changed = TRUE;
+			gypsy->status = GEOCLUE_STATUS_ACQUIRING;
+		}
+		break;
+
+	case GYPSY_DEVICE_FIX_STATUS_2D:
+	case GYPSY_DEVICE_FIX_STATUS_3D:
+		if (gypsy->status != GEOCLUE_STATUS_AVAILABLE) {
+			changed = TRUE;
+			gypsy->status = GEOCLUE_STATUS_AVAILABLE;
+		}
+		break;
+	}
+
+	if (changed) {
+		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gypsy),
+						      gypsy->status);
+	}
+}
+
+static void
 geoclue_gypsy_init (GeoclueGypsy *gypsy)
 {
 	GError *error = NULL;
 	char *path;
 
+	gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
 	gypsy->control = gypsy_control_get_default ();
 
 	/* FIXME: Need a properties interface to get the GPS to use */
@@ -334,6 +391,11 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 	}
 	
 	gypsy->device = gypsy_device_new (path);
+	g_signal_connect (gypsy->device, "connection-changed",
+			  G_CALLBACK (connection_changed), gypsy);
+	g_signal_connect (gypsy->device, "fix-status-changed",
+			  G_CALLBACK (fix_status_changed), gypsy);
+
 	gypsy->position = gypsy_position_new (path);
 	g_signal_connect (gypsy->position, "position-changed",
 			  G_CALLBACK (position_changed), gypsy);

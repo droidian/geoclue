@@ -15,3 +15,10 @@ geoclue_geonames_LDADD = \
 
 providersdir = $(datadir)/geoclue-providers
 providers_DATA = geoclue-geonames.provider
+
+servicedir = $(DBUS_SERVICES_DIR)
+service_in_files = org.freedesktop.Geoclue.Providers.Geonames.service.in
+service_DATA = $(service_in_files:.service.in=.service)
+
+$(service_DATA): $(service_in_files) Makefile
+	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@

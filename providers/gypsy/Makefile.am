@@ -16,3 +16,10 @@ geoclue_gypsy_SOURCES =		\
 
 providersdir = $(datadir)/geoclue-providers
 providers_DATA = geoclue-gypsy.provider
+
+servicedir = $(DBUS_SERVICES_DIR)
+service_in_files = org.freedesktop.Geoclue.Providers.Gypsy.service.in
+service_DATA = $(service_in_files:.service.in=.service)
+
+$(service_DATA): $(service_in_files) Makefile
+	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@

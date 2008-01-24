@@ -43,6 +43,10 @@ AC_SUBST(GEOCLUE_CFLAGS)
 AC_PATH_PROG(DBUS_BINDING_TOOL, dbus-binding-tool)
 AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
 
+DBUS_SERVICES_DIR="${datadir}/dbus-1/services"
+AC_SUBST(DBUS_SERVICES_DIR)
+AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for D-Bus is])
+
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
 PROVIDER_SUBDIRS="example hostip geonames"

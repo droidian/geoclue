@@ -13,15 +13,15 @@
 
 #include "client.h"
 
-static void geoclue_master_client_position_init (GcIfacePositionClass *iface);
+static void gc_master_client_position_init (GcIfacePositionClass *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GeoclueMasterClient, geoclue_master_client, 
+G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client, 
 			 G_TYPE_OBJECT,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
-						geoclue_master_client_position_init))
+						gc_master_client_position_init))
 
 static gboolean
-gc_iface_master_client_set_requirements (GeoclueMasterClient *client,
+gc_iface_master_client_set_requirements (GcMasterClient      *client,
 					 GeoclueAccuracy     *accuracy,
 					 int                  min_time,
 					 gboolean             require_updates,
@@ -32,11 +32,11 @@ gc_iface_master_client_set_requirements (GeoclueMasterClient *client,
 static void
 finalize (GObject *object)
 {
-	((GObjectClass *) geoclue_master_client_parent_class)->finalize (object);
+	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }
 
 static gboolean
-gc_iface_master_client_set_requirements (GeoclueMasterClient *client,
+gc_iface_master_client_set_requirements (GcMasterClient      *client,
 					 GeoclueAccuracy     *accuracy,
 					 int                  min_time,
 					 gboolean             require_updates,
@@ -50,18 +50,18 @@ gc_iface_master_client_set_requirements (GeoclueMasterClient *client,
 }
 
 static void
-geoclue_master_client_class_init (GeoclueMasterClientClass *klass)
+gc_master_client_class_init (GcMasterClientClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 
 	o_class->finalize = finalize;
 
-	dbus_g_object_type_install_info (geoclue_master_client_get_type (),
+	dbus_g_object_type_install_info (gc_master_client_get_type (),
 					 &dbus_glib_gc_iface_master_client_object_info);
 }
 
 static void
-geoclue_master_client_init (GeoclueMasterClient *client)
+gc_master_client_init (GcMasterClient *client)
 {
 }
 
@@ -73,7 +73,7 @@ position_changed_cb (GeocluePosition      *position,
 		     double                longitude,
 		     double                altitude,
 		     GeoclueAccuracy      *accuracy,
-		     GeoclueMasterClient  *client)
+		     GcMasterClient       *client)
 {
 }
 
@@ -84,7 +84,7 @@ velocity_changed_cb (GeoclueVelocity      *velocity,
 		     double                speed,
 		     double                direction,
 		     double                climb,
-		     GeoclueMasterClient  *client)
+		     GcMasterClient       *client)
 {
 }
 
@@ -112,19 +112,22 @@ find_interface (ProviderDetails *provider,
 }
 
 static gboolean
-setup_interface (GeoclueMasterClient *client,
+provider_is_available (ProviderDetails *provider)
+{
+	return TRUE;
+}
+
+static gboolean
+setup_interface (GcMasterClient      *client,
 		 ProviderInterface   *interface,
 		 GError             **error)
 {
 	switch (interface->type) {
 	case POSITION_INTERFACE:
-		g_print ("Setting up interface\n");
 		if (interface->details.position.position == NULL) {
-			g_print ("Creating object\n");
 			interface->details.position.position = 
 				geoclue_position_new (client->provider->service,
 						      client->provider->path);
-			g_print ("Created object\n");
 		}
 
 		if (client->require_updates) {
@@ -134,7 +137,6 @@ setup_interface (GeoclueMasterClient *client,
 				 G_CALLBACK (position_changed_cb), client);
 		}
 
-		g_print ("Getting details\n");
 		interface->details.position.fields = 
 			geoclue_position_get_position 
 			(interface->details.position.position,
@@ -148,7 +150,6 @@ setup_interface (GeoclueMasterClient *client,
 			g_print ("Error: %s\n", (*error)->message);
 			return FALSE;
 		}
-		g_print ("Got details\n");
 
 		break;
 
@@ -183,17 +184,31 @@ setup_interface (GeoclueMasterClient *client,
 	return TRUE;
 }
 
+static void
+setup_provider (GcMasterClient  *client,
+		ProviderDetails *provider)
+{
+#if 0
+	/* We need the Geoclue interface to know the status of the object
+	   but if someone else has created the object then we don't want to
+	   destroy it on them if we shut this provider down */
+	if (provider->geoclue == NULL) {
+		provider->geoclue =  asdas;
+	}
+#endif
+}
+	
 static gboolean
-setup_provider (GeoclueMasterClient *client,
-		ProviderInterface  **interface,
-		GError             **error)
+find_provider (GcMasterClient      *client,
+	       ProviderInterface  **interface,
+	       GError             **error)
 {
 	GList *providers, *p;
 	GError *sub_error = NULL;
 
-	providers = geoclue_master_get_providers (client->desired_accuracy,
-						  client->require_updates,
-						  &sub_error);
+	providers = gc_master_get_providers (client->desired_accuracy,
+					     client->require_updates,
+					     &sub_error);
 	if (providers == NULL) {
 		return FALSE;
 	}
@@ -201,7 +216,13 @@ setup_provider (GeoclueMasterClient *client,
 	for (p = providers; p; p = p->next) {
 		ProviderDetails *provider = p->data;
 
-		g_print ("provider: %p\n", provider);
+		setup_provider (client, provider);
+
+		if (provider_is_available (provider) == FALSE) {
+			g_print ("Skipped %s\n", provider->name);
+			continue;
+		}
+
 		*interface = find_interface (provider, POSITION_INTERFACE,
 					     &sub_error);
 		if (*interface == NULL) {
@@ -240,12 +261,12 @@ get_position (GcIfacePosition       *gc,
 	      GeoclueAccuracy      **accuracy,
 	      GError               **error)
 {
-	GeoclueMasterClient *client = GEOCLUE_MASTER_CLIENT (gc);
+	GcMasterClient *client = GC_MASTER_CLIENT (gc);
 	ProviderInterface *interface = NULL;
 
 	g_print ("Getting position\n");
 	if (client->provider == NULL) {
-		if (setup_provider (client, &interface, error) == FALSE) {
+		if (find_provider (client, &interface, error) == FALSE) {
 			g_print ("Error...\n");
 			return FALSE;
 		}
@@ -270,7 +291,7 @@ get_position (GcIfacePosition       *gc,
 }
 
 static void
-geoclue_master_client_position_init (GcIfacePositionClass *iface)
+gc_master_client_position_init (GcIfacePositionClass *iface)
 {
 	iface->get_position = get_position;
 }

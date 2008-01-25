@@ -13,6 +13,7 @@
 #include <dbus/dbus-glib.h>
 
 #include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-accuracy.h>
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-velocity.h>
@@ -76,26 +77,27 @@ typedef struct _ProviderDetails {
 	GeoclueRequireFlags requires;
 	GeoclueProvideFlags provides;
 
+	GeoclueCommon *geoclue;
 	GPtrArray *interfaces;
 } ProviderDetails;
 
-#define GEOCLUE_TYPE_MASTER (geoclue_master_get_type ())
-#define GEOCLUE_MASTER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_MASTER, GeoclueMaster))
+#define GC_TYPE_MASTER (gc_master_get_type ())
+#define GC_MASTER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER, GcMaster))
 
 typedef struct {
 	GObject parent;
 
 	GMainLoop *loop;
 	DBusGConnection *connection;
-} GeoclueMaster;
+} GcMaster;
 
 typedef struct {
 	GObjectClass parent_class;
-} GeoclueMasterClass;
+} GcMasterClass;
 
-GType geoclue_master_get_type (void);
-GList *geoclue_master_get_providers (GeoclueAccuracy *accuracy,
-				     gboolean         can_update,
-				     GError         **error);
+GType gc_master_get_type (void);
+GList *gc_master_get_providers (GeoclueAccuracy *accuracy,
+				gboolean         can_update,
+				GError         **error);
 
 #endif

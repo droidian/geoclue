@@ -14,8 +14,8 @@
 
 #include "master.h"
 
-#define GEOCLUE_TYPE_MASTER_CLIENT (geoclue_master_client_get_type ())
-#define GEOCLUE_MASTER_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_MASTER_CLIENT, GeoclueMasterClient))
+#define GC_TYPE_MASTER_CLIENT (gc_master_client_get_type ())
+#define GC_MASTER_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER_CLIENT, GcMasterClient))
 
 typedef struct {
 	GObject parent;
@@ -26,12 +26,12 @@ typedef struct {
 
 	guint32 update_id;
 	ProviderDetails *provider;
-} GeoclueMasterClient;
+} GcMasterClient;
 
 typedef struct {
 	GObjectClass parent_class;
-} GeoclueMasterClientClass;
+} GcMasterClientClass;
 
-GType geoclue_master_client_get_type (void);
+GType gc_master_client_get_type (void);
 
 #endif

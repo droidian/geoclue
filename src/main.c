@@ -25,7 +25,7 @@ int
 main (int    argc,
       char **argv)
 {
-	GeoclueMaster *master;
+	GcMaster *master;
 	DBusGConnection *conn;
 	DBusGProxy *proxy;
 	GError *error = NULL;
@@ -57,7 +57,7 @@ main (int    argc,
 		return 1;
 	}
 
-	master = g_object_new (GEOCLUE_TYPE_MASTER, NULL);
+	master = g_object_new (GC_TYPE_MASTER, NULL);
 	dbus_g_connection_register_g_object (conn, 
 					     "/org/freedesktop/Geoclue/Master", 
 					     G_OBJECT (master));

@@ -13,30 +13,30 @@
 #include "master.h"
 #include "client.h"
 
-G_DEFINE_TYPE (GeoclueMaster, geoclue_master, G_TYPE_OBJECT);
+G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
 static GList *providers = NULL;
 
-static gboolean gc_iface_master_create (GeoclueMaster *master,
+static gboolean gc_iface_master_create (GcMaster      *master,
 					const char   **object_path,
 					GError       **error);
-static gboolean gc_iface_master_shutdown (GeoclueMaster *master,
-					  GError       **error);
+static gboolean gc_iface_master_shutdown (GcMaster *master,
+					  GError  **error);
 
 #include "gc-iface-master-glue.h"
 
 #define GEOCLUE_MASTER_PATH "/org/freedesktop/Geoclue/Master/client"
 static gboolean
-gc_iface_master_create (GeoclueMaster *master,
+gc_iface_master_create (GcMaster      *master,
 			const char   **object_path,
 			GError       **error)
 {
 	static guint32 serial = 0;
-	GeoclueMasterClient *client;
+	GcMasterClient *client;
 	char *path;
 
 	path = g_strdup_printf ("%s%d", GEOCLUE_MASTER_PATH, serial++);
-	client = g_object_new (GEOCLUE_TYPE_MASTER_CLIENT, NULL);
+	client = g_object_new (GC_TYPE_MASTER_CLIENT, NULL);
 	dbus_g_connection_register_g_object (master->connection, path,
 					     G_OBJECT (client));
 
@@ -45,22 +45,22 @@ gc_iface_master_create (GeoclueMaster *master,
 }
 
 static gboolean
-gc_iface_master_shutdown (GeoclueMaster *master,
-			  GError       **error)
+gc_iface_master_shutdown (GcMaster *master,
+			  GError  **error)
 {
 	return TRUE;
 }
 
 static void
-geoclue_master_class_init (GeoclueMasterClass *klass)
+gc_master_class_init (GcMasterClass *klass)
 {
-	dbus_g_object_type_install_info (geoclue_master_get_type (),
+	dbus_g_object_type_install_info (gc_master_get_type (),
 					 &dbus_glib_gc_iface_master_object_info);
 }
 
 static GeoclueRequireFlags
-parse_require_strings (GeoclueMaster *master,
-		       char         **flags)
+parse_require_strings (GcMaster *master,
+		       char    **flags)
 {
 	GeoclueRequireFlags requires = GEOCLUE_REQUIRE_FLAGS_NONE;
 	int i;
@@ -77,8 +77,8 @@ parse_require_strings (GeoclueMaster *master,
 }
 
 static GeoclueProvideFlags
-parse_provide_strings (GeoclueMaster *master,
-		       char         **flags)
+parse_provide_strings (GcMaster *master,
+		       char    **flags)
 {
 	GeoclueProvideFlags provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	int i;
@@ -97,9 +97,9 @@ parse_provide_strings (GeoclueMaster *master,
 }
 
 static GPtrArray *
-parse_interface_strings (GeoclueMaster *master,
-			 char         **interfaces,
-			 guint          n_interfaces)
+parse_interface_strings (GcMaster *master,
+			 char    **interfaces,
+			 guint     n_interfaces)
 {
 	GPtrArray *ifaces;
 	int i;
@@ -201,8 +201,8 @@ dump_provider_details (struct _ProviderDetails *details)
 
 /* Load the provider details out of a keyfile */
 static struct _ProviderDetails *
-new_provider (GeoclueMaster *master,
-	      const char    *filename)
+new_provider (GcMaster   *master,
+	      const char *filename)
 {
 	struct _ProviderDetails *provider;
 	GKeyFile *keyfile;
@@ -268,7 +268,7 @@ new_provider (GeoclueMaster *master,
 #define PROVIDER_EXTENSION ".provider"
 
 static GList *
-load_providers (GeoclueMaster *master)
+load_providers (GcMaster *master)
 {
 	GList *providers = NULL;
 	GDir *dir;
@@ -314,7 +314,7 @@ load_providers (GeoclueMaster *master)
 }
 
 static void
-geoclue_master_init (GeoclueMaster *master)
+gc_master_init (GcMaster *master)
 {
 	GError *error = NULL;
 
@@ -359,9 +359,9 @@ provider_is_good (ProviderDetails *details,
 }
 
 GList *
-geoclue_master_get_providers (GeoclueAccuracy *accuracy,
-			      gboolean         can_update,
-			      GError         **error)
+gc_master_get_providers (GeoclueAccuracy *accuracy,
+			 gboolean         can_update,
+			 GError         **error)
 {
 	GList *l, *p = NULL;
 

@@ -70,15 +70,9 @@ int main (int argc, char** argv)
 				break;
 		}
 	}
-	
-	if (!geoclue_common_shutdown (geoclue, &error)) {
-		g_printerr ("Error shutting down provider: %s\n\n", error->message);
-		g_error_free (error);
-		error = NULL;
-	} else {
-		g_print ("Provider shut down\n\n");
-	}
-	
+
+	g_object_unref (geoclue);
+
 	g_free (geoclue);
 	return 0;
 	

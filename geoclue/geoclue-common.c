@@ -48,6 +48,14 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (object);
+	GError *error = NULL;
+
+	if (!org_freedesktop_Geoclue_shutdown (provider->proxy, &error)) {
+		g_warning ("Error shutting down: %s", error->message);
+		g_error_free (error);
+	}
+
 	G_OBJECT_CLASS (geoclue_common_parent_class)->dispose (object);
 }
 
@@ -179,28 +187,6 @@ geoclue_common_get_status (GeoclueCommon *common,
 
 	if (status != NULL) {
 		*status = i;
-	}
-
-	return TRUE;
-}
-
-/**
- * geoclue_common_shutdown:
- * @common: A #GeoclueCommon object
- * @error:  Pointer for returned #GError
- * 
- * Shuts the provider down.
- * 
- * Return value: #TRUE if D-Bus call succeeded
- */
-gboolean
-geoclue_common_shutdown (GeoclueCommon *common,
-			 GError       **error)
-{
-	GeoclueProvider *provider = GEOCLUE_PROVIDER (common);
-
-	if (!org_freedesktop_Geoclue_shutdown (provider->proxy, error)) {
-		return FALSE;
 	}
 
 	return TRUE;

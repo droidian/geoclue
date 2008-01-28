@@ -44,8 +44,6 @@ gboolean geoclue_common_get_provider_info (GeoclueCommon *common,
 gboolean geoclue_common_get_status (GeoclueCommon *common,
 				    GeoclueStatus *status,
 				    GError       **error);
-gboolean geoclue_common_shutdown (GeoclueCommon *common,
-				  GError       **error);
 
 G_END_DECLS
 

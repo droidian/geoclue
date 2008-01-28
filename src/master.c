@@ -222,7 +222,7 @@ new_provider (GcMaster   *master,
 	}
 
 	g_print ("Loaded %s\n", filename);
-	provider = g_new (struct _ProviderDetails, 1);
+	provider = g_new0 (struct _ProviderDetails, 1);
 	provider->name = g_key_file_get_value (keyfile, "Geoclue Provider",
 					       "Name", NULL);
 	provider->service = g_key_file_get_value (keyfile, "Geoclue Provider",

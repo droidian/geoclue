@@ -169,11 +169,16 @@ geoclue_common_get_status (GeoclueCommon *common,
 			   GeoclueStatus *status,
 			   GError       **error)
 {
-	gint i=0;
+	gint i = 0;
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (common);
+
 	if (!org_freedesktop_Geoclue_get_status (provider->proxy, 
 						 &i, error)) {
 		return FALSE;
+	}
+
+	if (status != NULL) {
+		*status = i;
 	}
 
 	return TRUE;

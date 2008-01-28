@@ -123,6 +123,7 @@ provider_is_available (ProviderDetails *provider)
 		return FALSE;
 	}
 
+	g_print ("Status for %s is %d\n", provider->name, status);
 	return (status != GEOCLUE_STATUS_UNAVAILABLE);
 }
 
@@ -201,11 +202,13 @@ setup_provider (GcMasterClient  *client,
 	   but if someone else has created the object then we don't want to
 	   destroy it on them if we shut this provider down */
 	if (provider->geoclue == NULL) {
+		g_print ("Creating Common interface\n");
 		provider->geoclue = geoclue_common_new (provider->service,
 							provider->path);
 		g_object_add_weak_pointer (G_OBJECT (provider->geoclue),
 					   (gpointer) &provider->geoclue);
 	} else {
+		g_print ("Reffing Common interface\n");
 		g_object_ref (provider->geoclue);
 	}
 }
@@ -214,6 +217,7 @@ static void
 shutdown_provider (GcMasterClient  *client,
 		   ProviderDetails *provider)
 {
+	g_print ("Shutting down provider - %s\n", provider->name);
 	g_object_unref (provider->geoclue);
 }
 
@@ -235,6 +239,7 @@ find_provider (GcMasterClient      *client,
 	for (p = providers; p; p = p->next) {
 		ProviderDetails *provider = p->data;
 
+		g_print ("Checking %s\n", provider->name);
 		setup_provider (client, provider);
 
 		/* Find interface before testing availablity as it doesn't

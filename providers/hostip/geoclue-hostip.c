@@ -46,12 +46,20 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueHostip, geoclue_hostip, GC_TYPE_PROVIDER,
 
 
 /* Geoclue interface implementation */
-
-/* get_status not implemented yet */
+static gboolean
+geoclue_hostip_get_status (GcIfaceGeoclue *iface,
+			   GeoclueStatus  *status,
+			   GError        **error)
+{
+	/* Assume it is available so long as all the requirements are satisfied
+	   ie: Network is available */
+	*status = GEOCLUE_STATUS_AVAILABLE;
+	return TRUE;
+}
 
 static gboolean
-geoclue_hostip_shutdown (GcIfaceGeoclue  *iface,
-                             GError         **error)
+geoclue_hostip_shutdown (GcIfaceGeoclue *iface,
+			 GError        **error)
 {
 	GeoclueHostip *obj = GEOCLUE_HOSTIP (iface);
 	g_main_loop_quit (obj->loop);
@@ -200,6 +208,7 @@ geoclue_hostip_class_init (GeoclueHostipClass *klass)
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
 	p_class->shutdown = geoclue_hostip_shutdown;
+	p_class->get_status = geoclue_hostip_get_status;
 	
 	o_class->finalize = geoclue_hostip_finalize;
 }

@@ -13,12 +13,15 @@ geoclue_master_LDADD =		\
 
 NOINST_H_FILES =		\
 	master.h		\
-	client.h
+	client.h		\
+	connectivity.h
 
 geoclue_master_SOURCES =	\
 	client.c		\
 	main.c			\
-	master.c
+	master.c		\
+	connectivity.c	\
+	connectivity-networkmanager.c
 
 BUILT_SOURCES =			\
 	gc-iface-master-glue.h	\

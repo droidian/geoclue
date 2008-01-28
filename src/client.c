@@ -114,7 +114,16 @@ find_interface (ProviderDetails *provider,
 static gboolean
 provider_is_available (ProviderDetails *provider)
 {
-	return TRUE;
+	GeoclueStatus status;
+	GError *error = NULL;
+
+	if (!geoclue_common_get_status (provider->geoclue, &status, &error)) {
+		g_warning ("Error getting status: %s", error->message);
+		g_error_free (error);
+		return FALSE;
+	}
+
+	return (status != GEOCLUE_STATUS_UNAVAILABLE);
 }
 
 static gboolean
@@ -188,16 +197,26 @@ static void
 setup_provider (GcMasterClient  *client,
 		ProviderDetails *provider)
 {
-#if 0
 	/* We need the Geoclue interface to know the status of the object
 	   but if someone else has created the object then we don't want to
 	   destroy it on them if we shut this provider down */
 	if (provider->geoclue == NULL) {
-		provider->geoclue =  asdas;
+		provider->geoclue = geoclue_common_new (provider->service,
+							provider->path);
+		g_object_add_weak_pointer (G_OBJECT (provider->geoclue),
+					   (gpointer) &provider->geoclue);
+	} else {
+		g_object_ref (provider->geoclue);
 	}
-#endif
 }
-	
+
+static void
+shutdown_provider (GcMasterClient  *client,
+		   ProviderDetails *provider)
+{
+	g_object_unref (provider->geoclue);
+}
+
 static gboolean
 find_provider (GcMasterClient      *client,
 	       ProviderInterface  **interface,
@@ -218,15 +237,20 @@ find_provider (GcMasterClient      *client,
 
 		setup_provider (client, provider);
 
-		if (provider_is_available (provider) == FALSE) {
-			g_print ("Skipped %s\n", provider->name);
-			continue;
-		}
-
+		/* Find interface before testing availablity as it doesn't
+		   require a process to be started up */
 		*interface = find_interface (provider, POSITION_INTERFACE,
 					     &sub_error);
 		if (*interface == NULL) {
-			g_print ("Skipped %s\n", provider->name);
+			g_print ("Skipped %s - no interface\n", provider->name);
+			shutdown_provider (client, provider);
+			continue;
+		}
+
+		if (provider_is_available (provider) == FALSE) {
+			g_print ("Skipped %s - not available\n", 
+				 provider->name);
+			shutdown_provider (client, provider);
 			continue;
 		}
 
@@ -242,6 +266,8 @@ find_provider (GcMasterClient      *client,
 				g_error_free (sub_error);
 				sub_error = NULL;
 			}
+
+			shutdown_provider (client, provider);
 		}
 	}
 

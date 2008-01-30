@@ -175,6 +175,7 @@ initialize_provider (GcMaster        *master,
 	
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
 	if (*error != NULL) {
+		g_object_unref (provider->geoclue);
 		return FALSE;
 	}
 	

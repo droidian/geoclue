@@ -96,19 +96,136 @@ parse_provide_strings (GcMaster *master,
 	return provides;
 }
 
+static gboolean
+update_interface (ProviderDetails   *provider,
+		  ProviderInterface *iface,
+		  GError           **error)
+{
+	GError *real_error = NULL;
+
+	switch (iface->type) {
+	case POSITION_INTERFACE:
+		if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
+			GeocluePositionFields fields;
+			
+			fields = geoclue_position_get_position 
+				(iface->details.position.position,
+				 &iface->details.position.timestamp,
+				 &iface->details.position.latitude,
+				 &iface->details.position.longitude,
+				 &iface->details.position.altitude,
+				 &iface->details.position.accuracy,
+				 &real_error);
+			if (real_error != NULL) {
+				if (*error != NULL) {
+					*error = real_error;
+				} else {
+					g_warning ("Error updating position: %s",
+						   real_error->message);
+					g_error_free (real_error);
+				}
+
+				return FALSE;
+			}
+			iface->details.position.fields = fields;
+		}
+		
+		break;
+		
+	case VELOCITY_INTERFACE:
+		break;
+		
+	default:
+		break;
+	}
+
+	return TRUE;
+}
+
+static void
+provider_status_changed (GeoclueCommon   *common,
+			 GeoclueStatus    status,
+			 ProviderDetails *provider)
+{
+	provider->status = status;
+	if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
+		int i;
+		
+		if (provider->interfaces == NULL) {
+			return;
+		}
+		
+		for (i = 0; i < provider->interfaces->len; i++) {
+			update_interface (provider, 
+					  provider->interfaces->pdata[i], NULL);
+		}
+	}
+}
+
+static gboolean
+initialize_provider (GcMaster        *master,
+		     ProviderDetails *provider,
+		     GError         **error)
+{
+	/* This will start the provider */
+	provider->geoclue = geoclue_common_new (provider->service,
+						provider->path);
+	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
+			  G_CALLBACK (provider_status_changed), provider);
+	
+	geoclue_common_get_status (provider->geoclue, &provider->status, error);
+	if (*error != NULL) {
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+
+static gboolean
+initialize_interface (GcMaster          *master,
+		      ProviderDetails   *provider,
+		      ProviderInterface *iface,
+		      GError           **error)
+{
+	switch (iface->type) {
+	case POSITION_INTERFACE:
+		iface->details.position.position = 
+			geoclue_position_new (provider->service,
+					      provider->path);
+		break;
+		
+	case VELOCITY_INTERFACE:
+		iface->details.velocity.velocity = 
+			geoclue_velocity_new (provider->service,
+					      provider->path);
+		break;
+		
+	default:
+		break;
+	}
+	
+	if (update_interface (provider, iface, error) == FALSE) {
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 static GPtrArray *
-parse_interface_strings (GcMaster *master,
-			 char    **interfaces,
-			 guint     n_interfaces)
+parse_interface_strings (GcMaster        *master,
+			 ProviderDetails *provider,
+			 char           **interfaces,
+			 guint            n_interfaces)
 {
 	GPtrArray *ifaces;
 	int i;
 
 	ifaces = g_ptr_array_sized_new (n_interfaces);
 	for (i = 0; interfaces[i]; i++) {
-		struct _ProviderInterface *iface;
+		ProviderInterface *iface;
+		GError *error = NULL;
 
-		iface = g_new0 (struct _ProviderInterface, 1);
+		iface = g_new0 (ProviderInterface, 1);
 
 		if (strcmp (interfaces[i], POSITION_IFACE) == 0) {
 			iface->type = POSITION_INTERFACE;
@@ -119,7 +236,15 @@ parse_interface_strings (GcMaster *master,
 			continue;
 		}
 
-		g_ptr_array_add (ifaces, iface);
+		if (initialize_interface (master, provider, 
+					  iface, &error) == FALSE) {
+			g_warning ("Error starting interface: %s", 
+				   error->message);
+			g_error_free (error);
+			g_free (iface);
+		} else {
+			g_ptr_array_add (ifaces, iface);
+		}
 	}
 
 	return ifaces;
@@ -248,11 +373,25 @@ new_provider (GcMaster   *master,
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
 
+	if (initialize_provider (master, provider, &error) == FALSE) {
+		g_warning ("Error starting %s - %s", provider->name,
+			   error->message);
+		g_error_free (error);
+
+		g_free (provider->path);
+		g_free (provider->name);
+		g_free (provider->service);
+		g_free (provider);
+
+		return NULL;
+	}
+
 	interfaces = g_key_file_get_string_list (keyfile, "Geoclue Provider",
 						 "Interfaces", 
 						 &n_interfaces, NULL);
 	if (interfaces != NULL) {
 		provider->interfaces = parse_interface_strings (master, 
+								provider,
 								interfaces,
 								n_interfaces);
 		g_strfreev (interfaces);

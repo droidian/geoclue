@@ -78,6 +78,8 @@ typedef struct _ProviderDetails {
 	GeoclueProvideFlags provides;
 
 	GeoclueCommon *geoclue;
+	GeoclueStatus status;
+
 	GPtrArray *interfaces;
 } ProviderDetails;
 

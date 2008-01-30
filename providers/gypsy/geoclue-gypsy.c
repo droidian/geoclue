@@ -375,6 +375,39 @@ fix_status_changed (GypsyDevice         *device,
 }
 
 static void
+get_initial_status (GeoclueGypsy *gypsy)
+{
+	gboolean connected;
+	GypsyDeviceFixStatus status;
+	GError *error = NULL;
+
+	connected = gypsy_device_get_connection_status (gypsy->device, &error);
+	if (connected == FALSE) {
+		gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
+		g_print ("Initial status - %d (disconnected)\n", gypsy->status);
+		return;
+	}
+
+	status = gypsy_device_get_fix_status (gypsy->device, &error);
+	switch (status) {
+	case GYPSY_DEVICE_FIX_STATUS_INVALID:
+		gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
+		break;
+
+	case GYPSY_DEVICE_FIX_STATUS_NONE:
+		gypsy->status = GEOCLUE_STATUS_ACQUIRING;
+		break;
+
+	case GYPSY_DEVICE_FIX_STATUS_2D:
+	case GYPSY_DEVICE_FIX_STATUS_3D:
+		gypsy->status = GEOCLUE_STATUS_AVAILABLE;
+		break;
+	}
+
+	g_print ("Initial status - %d (connected)\n", gypsy->status);
+}
+
+static void
 geoclue_gypsy_init (GeoclueGypsy *gypsy)
 {
 	GError *error = NULL;
@@ -384,7 +417,7 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 	gypsy->control = gypsy_control_get_default ();
 
 	/* FIXME: Need a properties interface to get the GPS to use */
-	path = gypsy_control_create (gypsy->control, "00:02:76:C5:81:BF",
+	path = gypsy_control_create (gypsy->control, "00:02:76:C4:27:A8",
 				     &error);
 	if (error != NULL) {
 		/* Need to return an error somehow */
@@ -395,7 +428,8 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 			  G_CALLBACK (connection_changed), gypsy);
 	g_signal_connect (gypsy->device, "fix-status-changed",
 			  G_CALLBACK (fix_status_changed), gypsy);
-
+	get_initial_status (gypsy);
+	
 	gypsy->position = gypsy_position_new (path);
 	g_signal_connect (gypsy->position, "position-changed",
 			  G_CALLBACK (position_changed), gypsy);

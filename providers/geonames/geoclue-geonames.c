@@ -70,7 +70,17 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGeonames, geoclue_geonames, GC_TYPE_PROVIDER,
 
 /* Geoclue interface implementation */
 
-/* get_status not implemented yet */
+static gboolean
+geoclue_geonames_get_status (GcIfaceGeoclue *iface,
+			     GeoclueStatus  *status,
+			     GError        **error)
+{
+	/* Assumption that we are available so long as the 
+	   providers requirements are met: ie network is up */
+	*status = GEOCLUE_STATUS_AVAILABLE;
+
+	return TRUE;
+}
 
 static gboolean
 geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
@@ -221,14 +231,35 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 static void
 geoclue_geonames_finalize (GObject *obj)
 {
-	GeoclueGeonames *self = (GeoclueGeonames *) obj;
-	
-	g_object_unref (self->place_geocoder);
-	g_object_unref (self->postalcode_geocoder);
-	g_object_unref (self->rev_place_geocoder);
-	g_object_unref (self->rev_street_geocoder);
-	
 	((GObjectClass *) geoclue_geonames_parent_class)->finalize (obj);
+}
+
+static void
+geoclue_geonames_dispose (GObject *obj)
+{
+	GeoclueGeonames *self = (GeoclueGeonames *) obj;
+
+	if (self->place_geocoder) {
+		g_object_unref (self->place_geocoder);
+		self->place_geocoder = NULL;
+	}
+
+	if (self->postalcode_geocoder) {
+		g_object_unref (self->postalcode_geocoder);
+		self->postalcode_geocoder = NULL;
+	}
+
+	if (self->rev_place_geocoder) {
+		g_object_unref (self->rev_place_geocoder);
+		self->rev_place_geocoder = NULL;
+	}
+
+	if (self->rev_street_geocoder) {
+		g_object_unref (self->rev_street_geocoder);
+		self->rev_street_geocoder = NULL;
+	}
+	
+	((GObjectClass *) geoclue_geonames_parent_class)->dispose (obj);
 }
 
 /* Initialization */
@@ -240,7 +271,10 @@ geoclue_geonames_class_init (GeoclueGeonamesClass *klass)
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
 	p_class->shutdown = geoclue_geonames_shutdown;
+	p_class->get_status = geoclue_geonames_get_status;
+
 	o_class->finalize = geoclue_geonames_finalize;
+	o_class->dispose = geoclue_geonames_dispose;
 }
 
 static void

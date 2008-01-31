@@ -79,6 +79,10 @@ get_position (GcIfacePosition       *gc,
 	      GeoclueAccuracy      **accuracy,
 	      GError               **error)
 {
+	*timestamp = time (NULL);
+
+	/* We're not emitting location details here because we don't want
+	   geoclue to accidently use this as a source */
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
 	*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
 	return TRUE;
@@ -96,17 +100,13 @@ emit_position_signal (gpointer data)
 	GeoclueExample *example = data;
 	GeoclueAccuracy *accuracy;
 
-	g_print ("Emitting\n");
-	/* FIXME: get the real accuracy */
-	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_DETAILED,
-					 12.3, 0.0);
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
+					 0.0, 0.0);
 	
 	gc_iface_position_emit_position_changed 
 		(GC_IFACE_POSITION (example), 
-		 GEOCLUE_POSITION_FIELDS_LATITUDE |
-		 GEOCLUE_POSITION_FIELDS_LONGITUDE |
-		 GEOCLUE_POSITION_FIELDS_ALTITUDE,
-		 time (NULL), -5.0, 56.0, 23.5, accuracy);
+		 GEOCLUE_POSITION_FIELDS_NONE,
+		 time (NULL), 0.0, 0.0, 0.0, accuracy);
 
 	geoclue_accuracy_free (accuracy);
 

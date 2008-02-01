@@ -9,7 +9,7 @@
 /* #include <config.h> */ 
 
 #include <dbus/dbus-glib.h>
-#include "connectivity.h"
+#include "connectivity-networkmanager.h"
 
 static int NMStateToConnectivityStatus[] = {
 	GEOCLUE_CONNECTIVITY_UNKNOWN,  /* NM_STATE_UNKNOWN */
@@ -18,19 +18,6 @@ static int NMStateToConnectivityStatus[] = {
 	GEOCLUE_CONNECTIVITY_ONLINE,    /* NM_STATE_CONNECTED */
 	GEOCLUE_CONNECTIVITY_OFFLINE   /* NM_STATE_DISCONNECTED */
 };
-
-
-typedef struct {
-	GObject parent;
-	
-	/* private */
-	GeoclueConnectionStatus status;
-	DBusGConnection *connection;
-} GeoclueNetworkManager;
-
-typedef struct {
-	GObjectClass parent_class;
-} GeoclueNetworkManagerClass;
 
 static void geoclue_networkmanager_connectivity_init (GeoclueConnectivityInterface *iface);
 

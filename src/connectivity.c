@@ -61,7 +61,7 @@ geoclue_connectivity_get_status (GeoclueConnectivity *self)
 
 void
 geoclue_connectivity_emit_status_changed (GeoclueConnectivity *self,
-                                          GeoclueConnectionStatus status)
+                                          GeoclueNetworkStatus status)
 {
 	g_signal_emit (self, signals[STATUS_CHANGED], 0, status);
 }

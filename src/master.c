@@ -12,6 +12,7 @@
 
 #include "master.h"
 #include "client.h"
+#include "connectivity-networkmanager.h"
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
@@ -373,7 +374,14 @@ new_provider (GcMaster   *master,
 	} else {
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
-
+	
+	/* if master is connectivity event -aware, mark all network providers 
+	 * with update flag */
+	if ((master->connectivity != NULL) && 
+	    (provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK)) {
+		provider->provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+	}
+	
 	if (initialize_provider (master, provider, &error) == FALSE) {
 		g_warning ("Error starting %s - %s", provider->name,
 			   error->message);
@@ -454,17 +462,31 @@ load_providers (GcMaster *master)
 }
 
 static void
+network_status_changed (GeoclueConnectivity *connectivity, 
+                        GeoclueNetworkStatus status, 
+                        gpointer userdata)
+{
+	g_debug ("status changed: %d", status);
+}
+
+static void
 gc_master_init (GcMaster *master)
 {
 	GError *error = NULL;
-
+	
+	
 	master->connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
 	if (master->connection == NULL) {
 		g_warning ("Could not get %s: %s", GEOCLUE_DBUS_BUS, 
 			   error->message);
 		g_error_free (error);
 	}
-
+	
+	/* set connectivity = NULL on platforms with no networkmanager functionality */
+	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_NETWORKMANAGER, NULL));
+	g_signal_connect (master->connectivity, "status-changed",
+	                  G_CALLBACK (network_status_changed), master);
+	
 	if (providers == NULL) {
 		providers = load_providers (master);
 	}

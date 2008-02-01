@@ -97,6 +97,24 @@ parse_provide_strings (GcMaster *master,
 	return provides;
 }
 
+static void
+dump_position (ProviderDetails   *provider,
+	       ProviderInterface *iface)
+{
+	GeocluePositionFields fields;
+
+	fields = iface->details.position.fields;
+	g_print ("Position Information: %s\n", provider->name);
+	g_print ("---------------------\n");
+	g_print ("   Timestamp: %d\n", iface->details.position.timestamp);
+	g_print ("   Latitude: %.2f %s\n", iface->details.position.latitude,
+		 fields & GEOCLUE_POSITION_FIELDS_LATITUDE ? "" : "(not set)");
+	g_print ("   Longitude: %.2f %s\n", iface->details.position.longitude,
+		 fields & GEOCLUE_POSITION_FIELDS_LONGITUDE ? "" : "(not set)");
+	g_print ("   Altitude: %.2f %s\n", iface->details.position.altitude,
+		 fields & GEOCLUE_POSITION_FIELDS_ALTITUDE ? "" : "(not set)");
+}
+
 static gboolean
 update_interface (ProviderDetails   *provider,
 		  ProviderInterface *iface,
@@ -129,6 +147,8 @@ update_interface (ProviderDetails   *provider,
 				return FALSE;
 			}
 			iface->details.position.fields = fields;
+
+			dump_position (provider, iface);
 		}
 		
 		break;
@@ -148,6 +168,8 @@ provider_status_changed (GeoclueCommon   *common,
 			 GeoclueStatus    status,
 			 ProviderDetails *provider)
 {
+	g_print ("Provider %s status changed (%d->%d)\n", provider->name, 
+		 provider->status, status);
 	provider->status = status;
 	if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
 		int i;
@@ -156,6 +178,7 @@ provider_status_changed (GeoclueCommon   *common,
 			return;
 		}
 		
+		/* Update all the available interfaces */
 		for (i = 0; i < provider->interfaces->len; i++) {
 			update_interface (provider, 
 					  provider->interfaces->pdata[i], NULL);

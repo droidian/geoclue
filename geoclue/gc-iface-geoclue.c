@@ -47,9 +47,9 @@ gc_iface_geoclue_base_init (gpointer klass)
 						G_SIGNAL_RUN_LAST, 
 						G_STRUCT_OFFSET (GcIfaceGeoclueClass, status_changed),
 						NULL, NULL,
-						g_cclosure_marshal_VOID__BOOLEAN,
+						g_cclosure_marshal_VOID__INT,
 						G_TYPE_NONE, 1,
-						G_TYPE_BOOLEAN);
+						G_TYPE_INT);
 	dbus_g_object_type_install_info (gc_iface_geoclue_get_type (),
 					 &dbus_glib_gc_iface_geoclue_object_info);
 }

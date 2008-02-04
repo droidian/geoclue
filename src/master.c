@@ -12,7 +12,10 @@
 
 #include "master.h"
 #include "client.h"
+
+#ifdef HAVE_NETWORK_MANAGER
 #include "connectivity-networkmanager.h"
+#endif
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
@@ -168,8 +171,6 @@ provider_status_changed (GeoclueCommon   *common,
 			 GeoclueStatus    status,
 			 ProviderDetails *provider)
 {
-	g_print ("Provider %s status changed (%d->%d)\n", provider->name, 
-		 provider->status, status);
 	provider->status = status;
 	if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
 		int i;
@@ -198,6 +199,7 @@ initialize_provider (GcMaster        *master,
 			  G_CALLBACK (provider_status_changed), provider);
 	
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
+	
 	if (*error != NULL) {
 		g_object_unref (provider->geoclue);
 		return FALSE;
@@ -398,7 +400,7 @@ new_provider (GcMaster   *master,
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
 	
-	/* if master is connectivity event -aware, mark all network providers 
+	/* if master is connectivity event aware, mark all network providers 
 	 * with update flag */
 	if ((master->connectivity != NULL) && 
 	    (provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK)) {
@@ -484,12 +486,40 @@ load_providers (GcMaster *master)
 	return providers;
 }
 
+static int ConnectivityStatusToProviderStatus[] = {
+	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_UNKNOWN,*/
+	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_OFFLINE,*/
+	GEOCLUE_STATUS_ACQUIRING,    /*GEOCLUE_CONNECTIVITY_ACQUIRING,*/
+	GEOCLUE_STATUS_AVAILABLE     /*GEOCLUE_CONNECTIVITY_ONLINE,*/
+};
+
 static void
 network_status_changed (GeoclueConnectivity *connectivity, 
                         GeoclueNetworkStatus status, 
                         gpointer userdata)
 {
-	g_debug ("status changed: %d", status);
+	/* TODO: connectivity stuff should maybe have some latency
+	 * so we wouldn't start this on any 2sec network problems */
+	GList *l;
+	GeoclueStatus gc_status;
+	
+	g_debug ("network status changed: %d", status);
+	
+	if (providers == NULL) {
+		return;
+	}
+	
+	gc_status = ConnectivityStatusToProviderStatus[status];
+	for (l = providers; l; l = l->next) {
+		ProviderDetails *provider = l->data;
+		/* could also check internal status with geoclue_common_get_status
+		 * and not do this if it returns UNAVAILABLE ...*/
+		
+		if ((provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) &&
+		    (gc_status != provider->status)) {
+			provider_status_changed (provider->geoclue, gc_status, provider);
+		}
+	}
 }
 
 static void
@@ -505,8 +535,11 @@ gc_master_init (GcMaster *master)
 		g_error_free (error);
 	}
 	
-	/* set connectivity = NULL on platforms with no networkmanager functionality */
+	master->connectivity = NULL;
+#ifdef HAVE_NETWORK_MANAGER
+	g_debug ("setting up connection events");
 	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_NETWORKMANAGER, NULL));
+#endif
 	g_signal_connect (master->connectivity, "status-changed",
 	                  G_CALLBACK (network_status_changed), master);
 	

@@ -197,7 +197,9 @@ initialize_provider (GcMaster        *master,
 	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), provider);
 	
+	/* TODO fix this for network providers */
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
+	
 	if (*error != NULL) {
 		g_object_unref (provider->geoclue);
 		return FALSE;
@@ -398,7 +400,7 @@ new_provider (GcMaster   *master,
 		provider->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
 	
-	/* if master is connectivity event -aware, mark all network providers 
+	/* if master is connectivity event aware, mark all network providers 
 	 * with update flag */
 	if ((master->connectivity != NULL) && 
 	    (provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK)) {
@@ -484,12 +486,40 @@ load_providers (GcMaster *master)
 	return providers;
 }
 
+static int ConnectivityStatusToProviderStatus[] = {
+	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_UNKNOWN,*/
+	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_OFFLINE,*/
+	GEOCLUE_STATUS_ACQUIRING,    /*GEOCLUE_CONNECTIVITY_ACQUIRING,*/
+	GEOCLUE_STATUS_AVAILABLE     /*GEOCLUE_CONNECTIVITY_ONLINE,*/
+};
+
 static void
 network_status_changed (GeoclueConnectivity *connectivity, 
                         GeoclueNetworkStatus status, 
                         gpointer userdata)
 {
-	g_debug ("status changed: %d", status);
+	/* TODO: connectivity stuff should  have some latency
+	 * so we wouldn't start this on any 2sec network problems */
+	GList *l;
+	
+	g_debug ("network status changed: %d", status);
+	
+	if (providers == NULL) {
+		return;
+	}
+	
+	for (l = providers; l; l = l->next) {
+		ProviderDetails *provider = l->data;
+		
+		if ((provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) &&
+		    (status != GEOCLUE_CONNECTIVITY_UNKNOWN)) {
+			GeoclueStatus gc_status;
+			
+			gc_status = ConnectivityStatusToProviderStatus[status];
+			g_debug(".");
+			provider_status_changed (provider->geoclue, gc_status, provider);
+		}
+	}
 }
 
 static void

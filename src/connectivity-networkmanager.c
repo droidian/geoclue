@@ -72,9 +72,11 @@ geoclue_networkmanager_state_changed (DBusGProxy *proxy,
 {
 	GeoclueNetworkManager *self = GEOCLUE_NETWORKMANAGER (userdata);
 	
-	self->status = NMStateToConnectivityStatus[status];
-	geoclue_connectivity_emit_status_changed (GEOCLUE_CONNECTIVITY (self),
-	                                          self->status);
+	if (NMStateToConnectivityStatus[status] != self->status) {
+		self->status = NMStateToConnectivityStatus[status];
+		geoclue_connectivity_emit_status_changed (GEOCLUE_CONNECTIVITY (self),
+		                                          self->status);
+	}
 }
 
 static void
@@ -109,7 +111,6 @@ geoclue_networkmanager_init (GeoclueNetworkManager *self)
 	                       G_TYPE_UINT, &state, G_TYPE_INVALID)){
 		self->status = NMStateToConnectivityStatus[state];
 	} else {
-	                       	g_debug ("!");
 		g_warning ("Could not get connectivity state from NetworkManager: %s", error->message);
 		g_error_free (error);
 	}

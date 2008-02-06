@@ -198,6 +198,7 @@ initialize_provider (GcMaster        *master,
 	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), provider);
 	
+	/* TODO fix this for network providers */
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
 	
 	if (*error != NULL) {

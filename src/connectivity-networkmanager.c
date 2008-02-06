@@ -6,23 +6,13 @@
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
-/* #include <config.h> */ 
+#include <config.h>
 
 #include <dbus/dbus-glib.h>
+#include <NetworkManager.h> /*for DBus strings */
 #include "connectivity-networkmanager.h"
 
-static int NMStateToConnectivityStatus[] = {
-	GEOCLUE_CONNECTIVITY_UNKNOWN,  /* NM_STATE_UNKNOWN */
-	GEOCLUE_CONNECTIVITY_OFFLINE,   /*  NM_STATE_ASLEEP */
-	GEOCLUE_CONNECTIVITY_ACQUIRING, /* NM_STATE_CONNECTING */
-	GEOCLUE_CONNECTIVITY_ONLINE,    /* NM_STATE_CONNECTED */
-	GEOCLUE_CONNECTIVITY_OFFLINE   /* NM_STATE_DISCONNECTED */
-};
-
 static void geoclue_networkmanager_connectivity_init (GeoclueConnectivityInterface *iface);
-
-#define GEOCLUE_TYPE_NETWORKMANAGER (geoclue_networkmanager_get_type ())
-#define GEOCLUE_NETWORKMANAGER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_NETWORKMANAGER, GeoclueNetworkManager))
 
 G_DEFINE_TYPE_WITH_CODE (GeoclueNetworkManager, geoclue_networkmanager, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (GEOCLUE_TYPE_CONNECTIVITY,
@@ -65,15 +55,37 @@ geoclue_networkmanager_class_init (GeoclueNetworkManagerClass *klass)
 	o_class->dispose = dispose;
 }
 
+static GeoclueNetworkStatus 
+nmstate_to_geocluenetworkstatus (NMState status)
+{
+	switch (status) {
+		case NM_STATE_UNKNOWN:
+			return GEOCLUE_CONNECTIVITY_UNKNOWN;
+		case NM_STATE_ASLEEP:
+		case NM_STATE_DISCONNECTED:
+			return GEOCLUE_CONNECTIVITY_OFFLINE;
+		case NM_STATE_CONNECTING:
+			return GEOCLUE_CONNECTIVITY_ACQUIRING;
+		case NM_STATE_CONNECTED:
+			return GEOCLUE_CONNECTIVITY_ONLINE;
+		default:
+			g_warning ("Unknown NMStatus: %d", status);
+			return GEOCLUE_CONNECTIVITY_UNKNOWN;
+	}
+}
+
 static void
 geoclue_networkmanager_state_changed (DBusGProxy *proxy, 
-                                      int status, 
+                                      NMState status, 
                                       gpointer userdata)
 {
 	GeoclueNetworkManager *self = GEOCLUE_NETWORKMANAGER (userdata);
+	GeoclueNetworkStatus gc_status;
 	
-	if (NMStateToConnectivityStatus[status] != self->status) {
-		self->status = NMStateToConnectivityStatus[status];
+	gc_status = self->status;
+	
+	if (gc_status != self->status) {
+		self->status = gc_status;
 		geoclue_connectivity_emit_status_changed (GEOCLUE_CONNECTIVITY (self),
 		                                          self->status);
 	}
@@ -84,7 +96,7 @@ geoclue_networkmanager_init (GeoclueNetworkManager *self)
 {
 	GError *error = NULL;
 	DBusGProxy *proxy;
-	int state;
+	NMState state;
 	
 	self->status = GEOCLUE_CONNECTIVITY_UNKNOWN;
 	
@@ -97,19 +109,19 @@ geoclue_networkmanager_init (GeoclueNetworkManager *self)
 	}
 	
 	proxy = dbus_g_proxy_new_for_name (self->connection, 
-	                                   "org.freedesktop.NetworkManager",
-	                                   "/org/freedesktop/NetworkManager", 
-	                                   "org.freedesktop.NetworkManager");
-	dbus_g_proxy_add_signal (proxy, "StateChange", 
+	                                   NM_DBUS_SERVICE,
+	                                   NM_DBUS_PATH, 
+	                                   NM_DBUS_INTERFACE);
+	dbus_g_proxy_add_signal (proxy, NM_DBUS_SIGNAL_STATE_CHANGE, 
 	                         G_TYPE_UINT, G_TYPE_INVALID);
-	dbus_g_proxy_connect_signal (proxy, "StateChange", 
+	dbus_g_proxy_connect_signal (proxy, NM_DBUS_SIGNAL_STATE_CHANGE, 
 	                             G_CALLBACK (geoclue_networkmanager_state_changed), 
 	                             self, NULL);
 	
 	if (dbus_g_proxy_call (proxy, "state", &error, 
 	                       G_TYPE_INVALID, 
 	                       G_TYPE_UINT, &state, G_TYPE_INVALID)){
-		self->status = NMStateToConnectivityStatus[state];
+		self->status = nmstate_to_geocluenetworkstatus (state);
 	} else {
 		g_warning ("Could not get connectivity state from NetworkManager: %s", error->message);
 		g_error_free (error);

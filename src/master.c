@@ -15,6 +15,10 @@
 
 #ifdef HAVE_NETWORK_MANAGER
 #include "connectivity-networkmanager.h"
+#else
+#ifdef HAVE_CONIC
+#include "connectivity-conic.h"
+#endif
 #endif
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
@@ -538,8 +542,11 @@ gc_master_init (GcMaster *master)
 	
 	master->connectivity = NULL;
 #ifdef HAVE_NETWORK_MANAGER
-	g_debug ("setting up connection events");
 	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_NETWORKMANAGER, NULL));
+#else
+#ifdef HAVE_CONIC
+	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_CONIC, NULL));
+#endif
 #endif
 	g_signal_connect (master->connectivity, "status-changed",
 	                  G_CALLBACK (network_status_changed), master);

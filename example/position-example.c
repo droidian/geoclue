@@ -53,7 +53,7 @@ int main (int argc, char** argv)
 		return 1;
 	}
 
-	g_print ("Using provider '%s'", argv[1]);
+	g_print ("Using provider '%s'\n", argv[1]);
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
@@ -99,7 +99,7 @@ int main (int argc, char** argv)
 	}
 
 	geoclue_accuracy_free (accuracy);
-	
+
 	g_signal_connect (G_OBJECT (pos), "position-changed",
 			  G_CALLBACK (position_changed_cb), NULL);
 

@@ -18,7 +18,7 @@ typedef enum {
 	GEOCLUE_CONNECTIVITY_OFFLINE,
 	GEOCLUE_CONNECTIVITY_ACQUIRING,
 	GEOCLUE_CONNECTIVITY_ONLINE,
-} GeoclueConnectionStatus;
+} GeoclueNetworkStatus;
 
 
 #define GEOCLUE_TYPE_CONNECTIVITY (geoclue_connectivity_get_type ())
@@ -34,7 +34,7 @@ struct _GeoclueConnectivityInterface {
 	
 	/* signals */
 	void (* status_changed) (GeoclueConnectivity *self,
-	                         GeoclueConnectionStatus status);
+	                         GeoclueNetworkStatus status);
 	
 	/* vtable */
 	int (*get_status) (GeoclueConnectivity *self);
@@ -47,7 +47,7 @@ int geoclue_connectivity_get_status (GeoclueConnectivity *self);
 
 void
 geoclue_connectivity_emit_status_changed (GeoclueConnectivity *self,
-                                          GeoclueConnectionStatus status);
+                                          GeoclueNetworkStatus status);
 
 G_END_DECLS
 

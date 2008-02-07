@@ -6,10 +6,12 @@ geoclue_master_CFLAGS =		\
 	-I$(top_builddir)	\
 	-DGEOCLUE_PROVIDERS_DIR=\""$(datadir)/geoclue-providers"\" \
 	$(GEOCLUE_CFLAGS)
+	$(CONNECTIVITY_CFLAGS)
 
 geoclue_master_LDADD =		\
 	$(top_builddir)/geoclue/libgeoclue.la	\
 	$(GEOCLUE_LIBS)
+	$(CONNECTIVITY_LIBS)
 
 NOINST_H_FILES =		\
 	master.h		\

@@ -17,6 +17,7 @@
 #include <geoclue/geoclue-accuracy.h>
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-velocity.h>
+#include "connectivity.h"
 
 #define POSITION_IFACE "org.freedesktop.Geoclue.Position"
 #define VELOCITY_IFACE "org.freedesktop.Geoclue.Velocity"
@@ -91,6 +92,7 @@ typedef struct {
 
 	GMainLoop *loop;
 	DBusGConnection *connection;
+	GeoclueConnectivity *connectivity;
 } GcMaster;
 
 typedef struct {

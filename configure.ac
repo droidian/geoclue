@@ -49,6 +49,23 @@ AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir 
 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
+
+CONNECTIVITY="None"
+
+PKG_CHECK_MODULES(NETWORK_MANAGER, [
+		  NetworkManager
+], HAVE_NETWORK_MANAGER=yes, HAVE_NETWORK_MANAGER=no)
+if test "x$HAVE_NETWORK_MANAGER" = "xyes"; then
+	CONNECTIVITY="Network Manager"
+	CONNECTIVITY_LIBS=${NETWORK_MANAGER_LIBS}
+	CONNECTIVITY_CFLAGS=${NETWORK_MANAGER_CFLAGS}
+	AC_DEFINE(HAVE_NETWORK_MANAGER, 1, [define if Network Manager is installed])
+fi
+
+AC_SUBST(CONNECTIVITY_LIBS)
+AC_SUBST(CONNECTIVITY_CFLAGS)
+
+
 PROVIDER_SUBDIRS="example hostip geonames"
 
 PKG_CHECK_MODULES(GYPSY, [
@@ -95,4 +112,5 @@ echo "---------------------------------------------------"
 echo "Source code location:   ${srcdir}"
 echo "Compiler:               ${CC}"
 echo "Providers:              ${PROVIDER_SUBDIRS}"
+echo "Network connectivity:   ${CONNECTIVITY}"
 echo ""

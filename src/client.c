@@ -42,10 +42,39 @@ gc_iface_master_client_set_requirements (GcMasterClient      *client,
 					 gboolean             require_updates,
 					 GError             **error)
 {
+	/* get_providers here, choose which one to use */
+	
+	/*
+	GList *providers = NULL;
+	PositionInterface *p;
+	
 	client->desired_accuracy = geoclue_accuracy_copy (accuracy);
 	client->min_time = min_time;
 	client->require_updates = require_updates;
-
+	
+	providers = gc_master_get_providers (client->desired_accuracy,
+	                                     require_updates,
+	                                     GEOCLUE_REQUIRE_FLAGS_NETWORK, ///FIXME should be in the DBus API
+	                                     NULL);
+	if (!providers) {
+		// error?
+		return TRUE;
+	}
+	
+	// select which provider/interface to use out of the possible ones
+	p = providers->data;
+	g_list_free (providers);
+	
+	int i=0;
+	ProviderInterface *iface;
+	for (i = 0; i < p->interfaces->len; i++) {
+		iface = g_ptr_array_index (p->interfaces, i);
+		if (iface->type == POSITION_INTERFACE) {
+			client->iface = iface;
+			break;
+		}
+	}
+	*/
 	return TRUE;
 }
 
@@ -63,6 +92,7 @@ gc_master_client_class_init (GcMasterClientClass *klass)
 static void
 gc_master_client_init (GcMasterClient *client)
 {
+	/*TODO: should set sensible defaults and get providers ? */
 }
 
 static gboolean
@@ -75,6 +105,23 @@ get_position (GcIfacePosition       *gc,
 	      GeoclueAccuracy      **accuracy,
 	      GError               **error)
 {
+	GcMasterClient *client = GC_MASTER_CLIENT (gc);
+	
+	if (client->position_provider == NULL) {
+		return FALSE;
+	}
+	
+	/* FIXME: assuming this is up-to-date */
+	
+	/*
+	*timestamp = client->pos_iface->timestamp;
+	*latitude = client->pos_iface->latitude;
+	*longitude = client->pos_iface->longitude;
+	*altitude = client->pos_iface->altitude;
+	*fields = client->pos_iface->fields;
+	*accuracy = geoclue_accuracy_copy (client->pos_iface->accuracy);
+	*/
+	
 	return TRUE;
 }
 

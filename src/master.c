@@ -23,7 +23,7 @@
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
-static GList *providers = NULL;
+static GList *position_providers = NULL;
 
 static gboolean gc_iface_master_create (GcMaster      *master,
 					const char   **object_path,
@@ -105,88 +105,53 @@ parse_provide_strings (GcMaster *master,
 }
 
 static void
-dump_position (ProviderDetails   *provider,
-	       ProviderInterface *iface)
+dump_position (PositionInterface *iface)
 {
 	GeocluePositionFields fields;
 
-	fields = iface->details.position.fields;
-	g_print ("Position Information: %s\n", provider->name);
+	fields = iface->fields;
+	g_print ("Position Information:\n");
 	g_print ("---------------------\n");
-	g_print ("   Timestamp: %d\n", iface->details.position.timestamp);
-	g_print ("   Latitude: %.2f %s\n", iface->details.position.latitude,
+	g_print ("   Timestamp: %d\n", iface->timestamp);
+	g_print ("   Latitude: %.2f %s\n", iface->latitude,
 		 fields & GEOCLUE_POSITION_FIELDS_LATITUDE ? "" : "(not set)");
-	g_print ("   Longitude: %.2f %s\n", iface->details.position.longitude,
+	g_print ("   Longitude: %.2f %s\n", iface->longitude,
 		 fields & GEOCLUE_POSITION_FIELDS_LONGITUDE ? "" : "(not set)");
-	g_print ("   Altitude: %.2f %s\n", iface->details.position.altitude,
+	g_print ("   Altitude: %.2f %s\n", iface->altitude,
 		 fields & GEOCLUE_POSITION_FIELDS_ALTITUDE ? "" : "(not set)");
 }
 
-static gboolean
-update_interface (ProviderDetails   *provider,
-		  ProviderInterface *iface,
-		  GError           **error)
+static void
+update_position_interface (PositionInterface *iface)
 {
-	GError *real_error = NULL;
-
-	switch (iface->type) {
-	case POSITION_INTERFACE:
-		if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
-			GeocluePositionFields fields;
-			
-			fields = geoclue_position_get_position 
-				(iface->details.position.position,
-				 &iface->details.position.timestamp,
-				 &iface->details.position.latitude,
-				 &iface->details.position.longitude,
-				 &iface->details.position.altitude,
-				 &iface->details.position.accuracy,
-				 &real_error);
-			if (real_error != NULL) {
-				if (*error != NULL) {
-					*error = real_error;
-				} else {
-					g_warning ("Error updating position: %s",
-						   real_error->message);
-					g_error_free (real_error);
-				}
-
-				return FALSE;
-			}
-			iface->details.position.fields = fields;
-
-			dump_position (provider, iface);
-		}
-		
-		break;
-		
-	case VELOCITY_INTERFACE:
-		break;
-		
-	default:
-		break;
+	GError *error = NULL;
+	
+	iface->fields = geoclue_position_get_position 
+		(iface->position,
+		 &iface->timestamp,
+		 &iface->latitude,
+		 &iface->longitude,
+		 &iface->altitude,
+		 &iface->accuracy,
+		 &error);
+	if (error) {
+		/* TODO */
 	}
-
-	return TRUE;
+	
 }
 
 static void
 provider_status_changed (GeoclueCommon   *common,
-			 GeoclueStatus    status,
-			 ProviderDetails *provider)
+                         GeoclueStatus    status,
+                         ProviderDetails *details)
 {
-	provider->status = status;
-	if (provider->status == GEOCLUE_STATUS_AVAILABLE) {
-		int i;
-		
-		if (provider->interfaces == NULL) {
-			return;
-		}
-		
-		/* Update all the available interfaces */
-		for (i = 0; i < provider->interfaces->len; i++) {
-			update_interface (provider, 
-					  provider->interfaces->pdata[i], NULL);
+	g_assert (details != NULL);
+	
+	details->status = status;
+	
+	if (status == GEOCLUE_STATUS_AVAILABLE) {
+		if (details->position) {
+			update_position_interface (details->position);
 		}
 	}
 }
@@ -199,9 +164,10 @@ initialize_provider (GcMaster        *master,
 	/* This will start the provider */
 	provider->geoclue = geoclue_common_new (provider->service,
 						provider->path);
+	/* moving this to iface init
 	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), provider);
-	
+	*/
 	/* TODO fix this for network providers */
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
 	
@@ -213,77 +179,49 @@ initialize_provider (GcMaster        *master,
 	return TRUE;
 }
 
-static gboolean
-initialize_interface (GcMaster          *master,
-		      ProviderDetails   *provider,
-		      ProviderInterface *iface,
-		      GError           **error)
-{
-	switch (iface->type) {
-	case POSITION_INTERFACE:
-		iface->details.position.position = 
-			geoclue_position_new (provider->service,
-					      provider->path);
-		break;
-		
-	case VELOCITY_INTERFACE:
-		iface->details.velocity.velocity = 
-			geoclue_velocity_new (provider->service,
-					      provider->path);
-		break;
-		
-	default:
-		break;
-	}
-	
-	if (update_interface (provider, iface, error) == FALSE) {
-		return FALSE;
-	}
 
-	return TRUE;
-}
-
-static GPtrArray *
-parse_interface_strings (GcMaster        *master,
-			 ProviderDetails *provider,
-			 char           **interfaces,
-			 guint            n_interfaces)
+static void
+add_new_interfaces (GcMaster        *master,
+                    ProviderDetails *provider,
+                    char           **interfaces)
 {
-	GPtrArray *ifaces;
 	int i;
-
-	ifaces = g_ptr_array_sized_new (n_interfaces);
+	
+	if (!interfaces) {
+		g_warning ("No interfaces defined for %s", provider->name);
+		return;
+	}
 	for (i = 0; interfaces[i]; i++) {
-		ProviderInterface *iface;
-		GError *error = NULL;
-
-		iface = g_new0 (ProviderInterface, 1);
-
+		
+		
 		if (strcmp (interfaces[i], POSITION_IFACE) == 0) {
-			iface->type = POSITION_INTERFACE;
-		} else if (strcmp (interfaces[i], VELOCITY_IFACE) == 0) {
-			iface->type = VELOCITY_INTERFACE;
+			GeocluePosition *pos;
+			PositionInterface *iface;
+			
+			iface = g_new0 (PositionInterface, 1);
+			
+			iface->position =
+				pos = geoclue_position_new (provider->service,
+				                            provider->path);
+			g_signal_connect (G_OBJECT (provider->geoclue), 
+			                  "status-changed",
+			                  G_CALLBACK (provider_status_changed), 
+			                  provider);
+			update_position_interface (iface);
+			
+			provider->position = iface;
+			position_providers = g_list_prepend (position_providers,
+				                             provider);
 		} else {
-			g_free (iface);
+			g_warning ("Not processing interface %s", interfaces[i]);
 			continue;
 		}
-
-		if (initialize_interface (master, provider, 
-					  iface, &error) == FALSE) {
-			g_warning ("Error starting interface: %s", 
-				   error->message);
-			g_error_free (error);
-			g_free (iface);
-		} else {
-			g_ptr_array_add (ifaces, iface);
-		}
+		
 	}
-
-	return ifaces;
 }
-			
+
 static void
-dump_requires (struct _ProviderDetails *details)
+dump_requires (ProviderDetails *details)
 {
 	g_print ("   Requires\n");
 	if (details->requires & GEOCLUE_REQUIRE_FLAGS_GPS) {
@@ -296,7 +234,7 @@ dump_requires (struct _ProviderDetails *details)
 }
 
 static void
-dump_provides (struct _ProviderDetails *details)
+dump_provides (ProviderDetails *details)
 {
 	g_print ("   Provides\n");
 	if (details->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
@@ -313,38 +251,6 @@ dump_provides (struct _ProviderDetails *details)
 }
 
 static void
-dump_interfaces (struct _ProviderDetails *details)
-{
-	int i;
-
-	g_print ("   Interfaces");
-	if (details->interfaces == NULL) {
-		g_print (" - None\n");
-		return;
-	}
-
-	g_print ("\n");
-	for (i = 0; i < details->interfaces->len; i++) {
-		struct _ProviderInterface *iface;
-
-		iface = details->interfaces->pdata[i];
-		switch (iface->type) {
-		case POSITION_INTERFACE:
-			g_print ("      Position Interface\n");
-			break;
-
-		case VELOCITY_INTERFACE:
-			g_print ("      Velocity Interface\n");
-			break;
-
-		default:
-			g_print ("      Unknown Interface\n");
-			break;
-		}
-	}
-}
-
-static void
 dump_provider_details (struct _ProviderDetails *details)
 {
 	g_print ("   Name - %s\n", details->name);
@@ -353,21 +259,24 @@ dump_provider_details (struct _ProviderDetails *details)
 
 	dump_requires (details);
 	dump_provides (details);
-	dump_interfaces (details);
+	
+	if (details->position) {
+		g_print ("   Interface - Position\n");
+	}
 }
 
 /* Load the provider details out of a keyfile */
-static struct _ProviderDetails *
-new_provider (GcMaster   *master,
-	      const char *filename)
+static void
+add_new_provider (GcMaster   *master,
+                  const char *filename)
 {
-	struct _ProviderDetails *provider;
+	/*FIXME*/
+	ProviderDetails *provider;
 	GKeyFile *keyfile;
 	GError *error = NULL;
 	gboolean ret;
 	char **flags, **interfaces;
-	guint n_interfaces;
-
+	
 	keyfile = g_key_file_new ();
 	ret = g_key_file_load_from_file (keyfile, filename, 
 					 G_KEY_FILE_NONE, &error);
@@ -375,11 +284,11 @@ new_provider (GcMaster   *master,
 		g_warning ("Error loading %s: %s", filename, error->message);
 		g_error_free (error);
 		g_key_file_free (keyfile);
-		return NULL;
+		return;
 	}
 
 	g_print ("Loaded %s\n", filename);
-	provider = g_new0 (struct _ProviderDetails, 1);
+	provider = g_new0 (ProviderDetails, 1);
 	provider->name = g_key_file_get_value (keyfile, "Geoclue Provider",
 					       "Name", NULL);
 	provider->service = g_key_file_get_value (keyfile, "Geoclue Provider",
@@ -411,7 +320,6 @@ new_provider (GcMaster   *master,
 	    (provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK)) {
 		provider->provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
 	}
-	
 	if (initialize_provider (master, provider, &error) == FALSE) {
 		g_warning ("Error starting %s - %s", provider->name,
 			   error->message);
@@ -422,33 +330,28 @@ new_provider (GcMaster   *master,
 		g_free (provider->service);
 		g_free (provider);
 
-		return NULL;
+		return;
 	}
-
+	
+	
 	interfaces = g_key_file_get_string_list (keyfile, "Geoclue Provider",
 						 "Interfaces", 
-						 &n_interfaces, NULL);
-	if (interfaces != NULL) {
-		provider->interfaces = parse_interface_strings (master, 
-								provider,
-								interfaces,
-								n_interfaces);
-		g_strfreev (interfaces);
-	} else {
-		provider->interfaces = NULL;
-	}
-
+						 NULL, NULL);
+	add_new_interfaces (master, provider, interfaces);
+	g_strfreev (interfaces);
+	
 	dump_provider_details (provider);
-	return provider;
+	if (provider->position) {
+		dump_position (provider->position);
+	}
 }
 
 /* Scan a directory for .provider files */
 #define PROVIDER_EXTENSION ".provider"
 
-static GList *
+static void
 load_providers (GcMaster *master)
 {
-	GList *providers = NULL;
 	GDir *dir;
 	GError *error = NULL;
 	const char *filename;
@@ -458,12 +361,11 @@ load_providers (GcMaster *master)
 		g_warning ("Error opening %s: %s", GEOCLUE_PROVIDERS_DIR,
 			   error->message);
 		g_error_free (error);
-		return NULL;
+		return;
 	}
 
 	filename = g_dir_read_name (dir);
 	while (filename) {
-		struct _ProviderDetails *provider;
 		char *fullname, *ext;
 
 		g_print ("Found %s", filename);
@@ -477,18 +379,13 @@ load_providers (GcMaster *master)
 		fullname = g_build_filename (GEOCLUE_PROVIDERS_DIR, 
 					     filename, NULL);
 		g_print ("\n");
-		provider = new_provider (master, fullname);
+		add_new_provider (master, fullname);
 		g_free (fullname);
-
-		if (provider) {
-			providers = g_list_prepend (providers, provider);
-		}
-
+		
 		filename = g_dir_read_name (dir);
 	}
 
 	g_dir_close (dir);
-	return providers;
 }
 
 static int ConnectivityStatusToProviderStatus[] = {
@@ -501,7 +398,7 @@ static int ConnectivityStatusToProviderStatus[] = {
 static void
 network_status_changed (GeoclueConnectivity *connectivity, 
                         GeoclueNetworkStatus status, 
-                        gpointer userdata)
+                        GcMaster *master)
 {
 	/* TODO: connectivity stuff should maybe have some latency
 	 * so we wouldn't start this on any 2sec network problems */
@@ -510,19 +407,20 @@ network_status_changed (GeoclueConnectivity *connectivity,
 	
 	g_debug ("network status changed: %d", status);
 	
-	if (providers == NULL) {
+	if (position_providers == NULL) {
 		return;
 	}
 	
 	gc_status = ConnectivityStatusToProviderStatus[status];
-	for (l = providers; l; l = l->next) {
-		ProviderDetails *provider = l->data;
+	for (l = position_providers; l; l = l->next) {
+		ProviderDetails *details = l->data;
 		/* could also check internal status with geoclue_common_get_status
 		 * and not do this if it returns UNAVAILABLE ...*/
 		
-		if ((provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) &&
-		    (gc_status != provider->status)) {
-			provider_status_changed (provider->geoclue, gc_status, provider);
+		if ((details->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) &&
+		    (gc_status != details->status)) {
+			provider_status_changed (details->geoclue, 
+			                         gc_status, details);
 		}
 	}
 }
@@ -551,16 +449,19 @@ gc_master_init (GcMaster *master)
 	g_signal_connect (master->connectivity, "status-changed",
 	                  G_CALLBACK (network_status_changed), master);
 	
-	if (providers == NULL) {
-		providers = load_providers (master);
+	if (position_providers == NULL) {
+		load_providers (master);
 	}
 }
 
 static gboolean
-provider_is_good (ProviderDetails *details,
-		  GeoclueAccuracy *accuracy,
-		  gboolean         can_update)
+provider_is_good (ProviderDetails     *details,
+		  GeoclueAccuracy     *accuracy,
+		  GeoclueRequireFlags  allowed,
+		  gboolean             can_update)
 {
+	/*FIXME*/
+	
 	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_FLAGS_NONE;
 	GeoclueAccuracyLevel level;
 
@@ -581,24 +482,35 @@ provider_is_good (ProviderDetails *details,
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
 	}
 	
-	return (details->provides == required_flags);
+	/* provider must provide all that is required and
+	 * cannot require something that is not allowed */
+	
+	/* TODO: really, we need to change some of those terms... */
+	
+	return (details->provides == required_flags &&
+		(details->requires & (~allowed)) == 0);
 }
 
 GList *
-gc_master_get_providers (GeoclueAccuracy *accuracy,
-			 gboolean         can_update,
-			 GError         **error)
+gc_master_get_position_interfaces (GeoclueAccuracy      *accuracy,
+				   gboolean              can_update,
+				   GeoclueRequireFlags   allowed,
+				   GError              **error)
 {
+	/*FIXME*/
+	
 	GList *l, *p = NULL;
 
-	if (providers == NULL) {
+	if (position_providers == NULL) {
 		return NULL;
 	}
-
-	for (l = providers; l; l = l->next) {
+	
+	/* we should probably return in some order? 
+	 * requirement or accuracy? */
+	for (l = position_providers; l; l = l->next) {
 		ProviderDetails *details = l->data;
-
-		if (!provider_is_good (details, accuracy, can_update)) {
+		
+		if (!provider_is_good (details, accuracy, can_update, allowed)) {
 			p = g_list_prepend (p, details);
 		}
 	}

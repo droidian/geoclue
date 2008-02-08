@@ -27,6 +27,8 @@ typedef enum _InterfaceType {
 	VELOCITY_INTERFACE,
 } InterfaceType;
 
+/*FIXME: this is usable also as an "allowed" flag when clients ask
+ * for a provider... should rethink the name */
 typedef enum _GeoclueRequireFlags {
 	GEOCLUE_REQUIRE_FLAGS_NONE = 0,
 	GEOCLUE_REQUIRE_FLAGS_NETWORK = 1 << 0,
@@ -40,35 +42,17 @@ typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_FUZZY = 1 << 2,
 } GeoclueProvideFlags;
 
-typedef struct _ProviderInterface {
-	InterfaceType type;
-
-	union {
-		struct {
-			GeocluePosition *position;
-			GeocluePositionFields fields;
-
-			int timestamp; /* Last time details was updated */
-
-			double latitude;
-			double longitude;
-			double altitude;
-			
-			GeoclueAccuracy *accuracy;
-		} position;
-
-		struct {
-			GeoclueVelocity *velocity;
-			GeoclueVelocityFields fields;
-
-			int timestamp; /* Last time details was updated */
-
-			double speed;
-			double direction;
-			double climb;
-		} velocity;
-	} details;
-} ProviderInterface;
+typedef struct _PositionInterface {
+	GeocluePosition *position;
+	
+	int timestamp; /* Last time data was updated from position */
+	
+	GeocluePositionFields fields;
+	double latitude;
+	double longitude;
+	double altitude;
+	GeoclueAccuracy *accuracy;
+} PositionInterface;
 
 typedef struct _ProviderDetails {
 	char *name;
@@ -80,16 +64,18 @@ typedef struct _ProviderDetails {
 
 	GeoclueCommon *geoclue;
 	GeoclueStatus status;
-
-	GPtrArray *interfaces;
+	
+	PositionInterface *position;
+	/* add other interfaces here */
 } ProviderDetails;
+
 
 #define GC_TYPE_MASTER (gc_master_get_type ())
 #define GC_MASTER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER, GcMaster))
 
 typedef struct {
 	GObject parent;
-
+	
 	GMainLoop *loop;
 	DBusGConnection *connection;
 	GeoclueConnectivity *connectivity;
@@ -100,8 +86,9 @@ typedef struct {
 } GcMasterClass;
 
 GType gc_master_get_type (void);
-GList *gc_master_get_providers (GeoclueAccuracy *accuracy,
-				gboolean         can_update,
-				GError         **error);
+GList *gc_master_get_providers (GeoclueAccuracy      *accuracy,
+				gboolean              can_update,
+				GeoclueRequireFlags   allowed,
+				GError              **error);
 
 #endif

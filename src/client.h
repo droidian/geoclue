@@ -25,7 +25,7 @@ typedef struct {
 	gboolean require_updates;
 
 	guint32 update_id;
-	ProviderDetails *provider;
+	ProviderDetails *position_provider;
 } GcMasterClient;
 
 typedef struct {

@@ -27,13 +27,11 @@ typedef enum _InterfaceType {
 	VELOCITY_INTERFACE,
 } InterfaceType;
 
-/*FIXME: this is usable also as an "allowed" flag when clients ask
- * for a provider... should rethink the name */
-typedef enum _GeoclueRequireFlags {
-	GEOCLUE_REQUIRE_FLAGS_NONE = 0,
-	GEOCLUE_REQUIRE_FLAGS_NETWORK = 1 << 0,
-	GEOCLUE_REQUIRE_FLAGS_GPS = 1 << 1,
-} GeoclueRequireFlags;
+typedef enum _GeoclueResourceFlags {
+	GEOCLUE_RESOURCE_FLAGS_NONE = 0,
+	GEOCLUE_RESOURCE_FLAGS_NETWORK = 1 << 0,
+	GEOCLUE_RESOURCE_FLAGS_GPS = 1 << 1,
+} GeoclueResourceFlags;
 
 typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
@@ -59,7 +57,7 @@ typedef struct _ProviderDetails {
 	char *service;
 	char *path;
 
-	GeoclueRequireFlags requires;
+	GeoclueResourceFlags requires;
 	GeoclueProvideFlags provides;
 
 	GeoclueCommon *geoclue;
@@ -86,9 +84,9 @@ typedef struct {
 } GcMasterClass;
 
 GType gc_master_get_type (void);
-GList *gc_master_get_providers (GeoclueAccuracy      *accuracy,
-				gboolean              can_update,
-				GeoclueRequireFlags   allowed,
-				GError              **error);
+GList *gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
+					 gboolean              can_update,
+					 GeoclueResourceFlags  allowed,
+					 GError              **error);
 
 #endif

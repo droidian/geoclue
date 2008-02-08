@@ -80,8 +80,7 @@ constructor (GType                  type,
 	dbus_g_proxy_add_signal (provider->proxy, "PositionChanged",
 				 G_TYPE_INT, G_TYPE_INT, G_TYPE_DOUBLE,
 				 G_TYPE_DOUBLE, G_TYPE_DOUBLE, 
- 				 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
-/* 				 G_TYPE_POINTER, */
+                                 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
 				 G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "PositionChanged",
 				     G_CALLBACK (position_changed),
@@ -107,7 +106,7 @@ geoclue_position_class_init (GeocluePositionClass *klass)
 						  G_SIGNAL_NO_RECURSE,
 						  G_STRUCT_OFFSET (GeocluePositionClass, position_changed), 
 						  NULL, NULL,
-						  geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_POINTER,
+						  geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE_BOXED,
 						  G_TYPE_NONE, 6,
 						  G_TYPE_INT, G_TYPE_INT,
 						  G_TYPE_DOUBLE, G_TYPE_DOUBLE,

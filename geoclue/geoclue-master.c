@@ -103,7 +103,7 @@ geoclue_master_create_client (GeoclueMaster *master,
 	client = g_object_new (GEOCLUE_TYPE_MASTER_CLIENT,
 			       "object-path", path,
 			       NULL);
-
+	
 	if (*object_path) {
 		*object_path = path;
 	} else {
@@ -112,5 +112,3 @@ geoclue_master_create_client (GeoclueMaster *master,
 	
 	return client;
 }
-	
-	

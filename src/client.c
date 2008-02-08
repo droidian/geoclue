@@ -44,37 +44,27 @@ gc_iface_master_client_set_requirements (GcMasterClient      *client,
 {
 	/* get_providers here, choose which one to use */
 	
-	/*
 	GList *providers = NULL;
-	PositionInterface *p;
 	
 	client->desired_accuracy = geoclue_accuracy_copy (accuracy);
 	client->min_time = min_time;
 	client->require_updates = require_updates;
 	
-	providers = gc_master_get_providers (client->desired_accuracy,
+	providers = gc_master_get_position_providers (client->desired_accuracy,
 	                                     require_updates,
-	                                     GEOCLUE_REQUIRE_FLAGS_NETWORK, ///FIXME should be in the DBus API
+	                                     GEOCLUE_RESOURCE_FLAGS_NETWORK, /*FIXME should be in the client DBUS API*/
 	                                     NULL);
 	if (!providers) {
 		// error?
 		return TRUE;
 	}
 	
-	// select which provider/interface to use out of the possible ones
-	p = providers->data;
+	/* TODO select which provider/interface to use out of the possible ones
+	 * Now using the first one */
+	client->position_provider = providers->data;
+	g_print ("Requirements set, provider '%s' chosen\n", client->position_provider->name);
 	g_list_free (providers);
 	
-	int i=0;
-	ProviderInterface *iface;
-	for (i = 0; i < p->interfaces->len; i++) {
-		iface = g_ptr_array_index (p->interfaces, i);
-		if (iface->type == POSITION_INTERFACE) {
-			client->iface = iface;
-			break;
-		}
-	}
-	*/
 	return TRUE;
 }
 
@@ -92,7 +82,6 @@ gc_master_client_class_init (GcMasterClientClass *klass)
 static void
 gc_master_client_init (GcMasterClient *client)
 {
-	/*TODO: should set sensible defaults and get providers ? */
 }
 
 static gboolean
@@ -107,22 +96,28 @@ get_position (GcIfacePosition       *gc,
 {
 	GcMasterClient *client = GC_MASTER_CLIENT (gc);
 	
+	/*TODO: should maybe set sensible defaults and get providers, 
+	 * if set_requirements has not been called?? */
+	
 	if (client->position_provider == NULL) {
 		return FALSE;
 	}
 	
-	/* FIXME: assuming this is up-to-date */
-	
-	/*
-	*timestamp = client->pos_iface->timestamp;
-	*latitude = client->pos_iface->latitude;
-	*longitude = client->pos_iface->longitude;
-	*altitude = client->pos_iface->altitude;
-	*fields = client->pos_iface->fields;
-	*accuracy = geoclue_accuracy_copy (client->pos_iface->accuracy);
-	*/
-	
-	return TRUE;
+	if (client->position_provider->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
+		g_debug ("returning position");
+		PositionInterface *iface = client->position_provider->position;
+		
+		*timestamp = iface->timestamp;
+		*latitude = iface->latitude;
+		*longitude = iface->longitude;
+		*altitude = iface->altitude;
+		*fields = iface->fields;
+		*accuracy = geoclue_accuracy_copy (iface->accuracy);
+		return TRUE;
+	} else {
+		g_warning ("not implemented yet");
+		return FALSE;
+	}
 }
 
 static void

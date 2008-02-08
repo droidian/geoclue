@@ -25,11 +25,20 @@ main (int    argc,
 
 	g_type_init ();
 
+	/*set the accuracy we want */
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY, 0, 0);
+	
 	master = geoclue_master_get_default ();
 	client = geoclue_master_create_client (master, &path, &error);
-	
+	if (!geoclue_master_client_set_requirements (client, 
+	                                             accuracy,
+	                                             0,
+	                                             FALSE,
+	                                             NULL)){
+		g_printerr ("set_requirements failed");
+	}
 	position = geoclue_position_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
-
+	
 	fields = geoclue_position_get_position (position,  &timestamp,
 						&lat, &lon, &alt,
 						&accuracy, &error);
@@ -41,5 +50,3 @@ main (int    argc,
 	g_print ("lat - %.2f lon - %.2f alt - %.2f\n", lat, lon, alt);
 	return 0;
 }
-				       
-					 

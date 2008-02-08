@@ -34,7 +34,7 @@ int main (int argc, char** argv)
 		g_printerr ("Usage:\n  address-example <provider_name>\n");
 		return 1;
 	}
-	g_print ("Using provider '%s'", argv[1]);
+	g_print ("Using provider '%s'\n", argv[1]);
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	

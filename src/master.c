@@ -66,18 +66,18 @@ gc_master_class_init (GcMasterClass *klass)
 					 &dbus_glib_gc_iface_master_object_info);
 }
 
-static GeoclueRequireFlags
+static GeoclueResourceFlags
 parse_require_strings (GcMaster *master,
 		       char    **flags)
 {
-	GeoclueRequireFlags requires = GEOCLUE_REQUIRE_FLAGS_NONE;
+	GeoclueResourceFlags requires = GEOCLUE_RESOURCE_FLAGS_NONE;
 	int i;
 
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "RequiresNetwork") == 0) {
-			requires |= GEOCLUE_REQUIRE_FLAGS_NETWORK;
+			requires |= GEOCLUE_RESOURCE_FLAGS_NETWORK;
 		} else if (strcmp (flags[i], "RequiresGPS") == 0) {
-			requires |= GEOCLUE_REQUIRE_FLAGS_GPS;
+			requires |= GEOCLUE_RESOURCE_FLAGS_GPS;
 		}
 	}
 
@@ -224,11 +224,11 @@ static void
 dump_requires (ProviderDetails *details)
 {
 	g_print ("   Requires\n");
-	if (details->requires & GEOCLUE_REQUIRE_FLAGS_GPS) {
+	if (details->requires & GEOCLUE_RESOURCE_FLAGS_GPS) {
 		g_print ("      - GPS\n");
 	}
 
-	if (details->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) {
+	if (details->requires & GEOCLUE_RESOURCE_FLAGS_NETWORK) {
 		g_print ("      - Network\n");
 	}
 }
@@ -302,7 +302,7 @@ add_new_provider (GcMaster   *master,
 		provider->requires = parse_require_strings (master, flags);
 		g_strfreev (flags);
 	} else {
-		provider->requires = GEOCLUE_REQUIRE_FLAGS_NONE;
+		provider->requires = GEOCLUE_RESOURCE_FLAGS_NONE;
 	}
 
 	flags = g_key_file_get_string_list (keyfile, "Geoclue Provider",
@@ -317,7 +317,7 @@ add_new_provider (GcMaster   *master,
 	/* if master is connectivity event aware, mark all network providers 
 	 * with update flag */
 	if ((master->connectivity != NULL) && 
-	    (provider->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK)) {
+	    (provider->requires & GEOCLUE_RESOURCE_FLAGS_NETWORK)) {
 		provider->provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
 	}
 	if (initialize_provider (master, provider, &error) == FALSE) {
@@ -417,7 +417,7 @@ network_status_changed (GeoclueConnectivity *connectivity,
 		/* could also check internal status with geoclue_common_get_status
 		 * and not do this if it returns UNAVAILABLE ...*/
 		
-		if ((details->requires & GEOCLUE_REQUIRE_FLAGS_NETWORK) &&
+		if ((details->requires & GEOCLUE_RESOURCE_FLAGS_NETWORK) &&
 		    (gc_status != details->status)) {
 			provider_status_changed (details->geoclue, 
 			                         gc_status, details);
@@ -455,10 +455,10 @@ gc_master_init (GcMaster *master)
 }
 
 static gboolean
-provider_is_good (ProviderDetails     *details,
-		  GeoclueAccuracy     *accuracy,
-		  GeoclueRequireFlags  allowed,
-		  gboolean             can_update)
+provider_is_good (ProviderDetails      *details,
+		  GeoclueAccuracy      *accuracy,
+		  GeoclueResourceFlags  allowed,
+		  gboolean              can_update)
 {
 	/*FIXME*/
 	
@@ -474,7 +474,8 @@ provider_is_good (ProviderDetails     *details,
 	} else {
 		level = GEOCLUE_ACCURACY_LEVEL_NONE;
 	}
-
+	
+	/*FIXME: what if only numeric accuracy is defined? */
 	if (level == GEOCLUE_ACCURACY_LEVEL_DETAILED) {
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
 	} else if (level > GEOCLUE_ACCURACY_LEVEL_NONE &&
@@ -483,22 +484,19 @@ provider_is_good (ProviderDetails     *details,
 	}
 	
 	/* provider must provide all that is required and
-	 * cannot require something that is not allowed */
-	
+	 * cannot require a resource that is not allowed */
 	/* TODO: really, we need to change some of those terms... */
 	
 	return (details->provides == required_flags &&
-		(details->requires & (~allowed)) == 0);
+	        (details->requires & (~allowed)) == 0);
 }
 
 GList *
-gc_master_get_position_interfaces (GeoclueAccuracy      *accuracy,
-				   gboolean              can_update,
-				   GeoclueRequireFlags   allowed,
-				   GError              **error)
+gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
+                                  gboolean              can_update,
+                                  GeoclueResourceFlags  allowed,
+                                  GError              **error)
 {
-	/*FIXME*/
-	
 	GList *l, *p = NULL;
 
 	if (position_providers == NULL) {

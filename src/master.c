@@ -141,14 +141,33 @@ update_position_interface (PositionInterface *iface)
 }
 
 static void
+iface_position_changed (GeocluePosition      *position,
+                        GeocluePositionFields fields,
+                        int                   timestamp,
+                        double                latitude,
+                        double                longitude,
+                        double                altitude,
+                        GeoclueAccuracy      *accuracy,
+                        PositionInterface    *iface)
+{
+        iface->fields = fields;
+        iface->timestamp = timestamp;
+        iface->latitude = latitude;
+        iface->longitude = longitude;
+        iface->altitude = altitude;
+        iface->accuracy = geoclue_accuracy_copy (accuracy);
+}
+
+static void
 provider_status_changed (GeoclueCommon   *common,
                          GeoclueStatus    status,
                          ProviderDetails *details)
 {
 	g_assert (details != NULL);
-	
+
+        g_print ("Changing status: %d->%d\n", details->status, status);
 	details->status = status;
-	
+
 	if (status == GEOCLUE_STATUS_AVAILABLE) {
 		if (details->position) {
 			update_position_interface (details->position);
@@ -164,10 +183,9 @@ initialize_provider (GcMaster        *master,
 	/* This will start the provider */
 	provider->geoclue = geoclue_common_new (provider->service,
 						provider->path);
-	/* moving this to iface init
 	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), provider);
-	*/
+
 	/* TODO fix this for network providers */
 	geoclue_common_get_status (provider->geoclue, &provider->status, error);
 	
@@ -178,7 +196,6 @@ initialize_provider (GcMaster        *master,
 	
 	return TRUE;
 }
-
 
 static void
 add_new_interfaces (GcMaster        *master,
@@ -200,13 +217,14 @@ add_new_interfaces (GcMaster        *master,
 			
 			iface = g_new0 (PositionInterface, 1);
 			
-			iface->position =
-				pos = geoclue_position_new (provider->service,
-				                            provider->path);
-			g_signal_connect (G_OBJECT (provider->geoclue), 
-			                  "status-changed",
-			                  G_CALLBACK (provider_status_changed), 
-			                  provider);
+                        pos = geoclue_position_new (provider->service,
+                                                    provider->path);
+			iface->position = pos;
+
+                        g_signal_connect (G_OBJECT (pos), "position-changed",
+                                          G_CALLBACK (iface_position_changed),
+                                          iface);
+
 			update_position_interface (iface);
 			
 			provider->position = iface;

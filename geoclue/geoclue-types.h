@@ -15,6 +15,7 @@
  * defines the provider status
  **/
 typedef enum {
+        GEOCLUE_STATUS_ERROR,
 	GEOCLUE_STATUS_UNAVAILABLE,
 	GEOCLUE_STATUS_ACQUIRING,
 	GEOCLUE_STATUS_AVAILABLE

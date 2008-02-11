@@ -6,6 +6,7 @@
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  */
 
+#include <config.h>
 #include <geoclue/geoclue-master.h>
 #include <geoclue/geoclue-position.h>
 
@@ -24,12 +25,13 @@ main (int    argc,
 	GeoclueAccuracy *accuracy;
 
 	g_type_init ();
-
-	/*set the accuracy we want */
-	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY, 0, 0);
 	
 	master = geoclue_master_get_default ();
 	client = geoclue_master_create_client (master, &path, &error);
+
+	/*set the accuracy we want */
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY, 0, 0);
+
 	if (!geoclue_master_client_set_requirements (client, 
 	                                             accuracy,
 	                                             0,

@@ -59,15 +59,18 @@ int main (int argc, char** argv)
 		error = NULL;
 	} else {
 		switch (status) {
-			case GEOCLUE_STATUS_UNAVAILABLE:
-				g_print ("Provider status: unavailable");
-				break;
-			case GEOCLUE_STATUS_ACQUIRING:
-				g_print ("Provider status: acquiring");
-				break;
-			case GEOCLUE_STATUS_AVAILABLE:
-				g_print ("Provider status: available");
-				break;
+                case GEOCLUE_STATUS_ERROR:
+                        g_print ("Provider status: error");
+                        break;
+                case GEOCLUE_STATUS_UNAVAILABLE:
+                        g_print ("Provider status: unavailable");
+                        break;
+                case GEOCLUE_STATUS_ACQUIRING:
+                        g_print ("Provider status: acquiring");
+                        break;
+                case GEOCLUE_STATUS_AVAILABLE:
+                        g_print ("Provider status: available");
+                        break;
 		}
 	}
 

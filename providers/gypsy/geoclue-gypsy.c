@@ -190,6 +190,7 @@ position_changed (GypsyPosition      *position,
 {
 	gboolean changed = FALSE;
 
+        g_print ("Gypsy position changed\n");
 	gypsy->timestamp = timestamp;
 	if (compare_field (gypsy->position_fields, gypsy->latitude,
 			   fields, latitude, GYPSY_POSITION_FIELDS_LATITUDE)) {
@@ -221,6 +222,7 @@ position_changed (GypsyPosition      *position,
 	if (changed) {
 		GeocluePositionFields fields;
 
+                g_print ("Emitting signal\n");
 		fields = gypsy_position_to_geoclue (gypsy->position_fields);
 		gc_iface_position_emit_position_changed 
 			(GC_IFACE_POSITION (gypsy), fields,

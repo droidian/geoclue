@@ -7,6 +7,7 @@
  */
 
 #include <glib.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-position.h>
 
 static void
@@ -34,10 +35,26 @@ position_changed_cb (GeocluePosition      *position,
 		g_print ("Latitude and longitude not available.\n");
 	}
 }
-	
+
+static GHashTable *
+parse_options (int    argc,
+               char **argv)
+{
+        GHashTable *options;
+        int i;
+
+        options = g_hash_table_new (g_str_hash, g_str_equal);
+        for (i = 2; i < argc; i += 2) {
+                g_hash_table_insert (options, argv[i], argv[i + 1]);
+        }
+
+        return options;
+}
+
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
+        GeoclueCommon *common = NULL;
 	GeocluePosition *pos = NULL;
 	GeocluePositionFields fields;
 	int timestamp;
@@ -48,8 +65,8 @@ int main (int argc, char** argv)
 	
 	g_type_init();
 	
-	if (argc != 2) {
-		g_printerr ("Usage:\n  position-example <provider_name>\n");
+	if (argc < 2 || argc % 2 != 0) {
+		g_printerr ("Usage:\n  position-example <provider_name> [option,value]\n");
 		return 1;
 	}
 
@@ -59,15 +76,34 @@ int main (int argc, char** argv)
 	
 	mainloop = g_main_loop_new (NULL, FALSE);
 
+        common = geoclue_common_new (service, path);
+        if (common == NULL) {
+                g_printerr ("Error while creating GeoclueCommon object.\n");
+                return 1;
+        }
+
 	/* Create new GeocluePosition */
 	pos = geoclue_position_new (service, path);
-	g_free (service);
-	g_free (path);
 	if (pos == NULL) {
 		g_printerr ("Error while creating GeocluePosition object.\n");
 		return 1;
 	}
+
+	g_free (service);
+	g_free (path);
 	
+        if (argc > 2) {
+                GHashTable *options;
+
+                options = parse_options (argc, argv);
+                if (!geoclue_common_set_options (common, options, &error)) {
+                        g_printerr ("Error setting options: %s\n", 
+                                    error->message);
+                        g_error_free (error);
+                        error = NULL;
+                }
+                g_hash_table_destroy (options);
+        }
 	
 	/* Query current position. We're not interested in altitude 
 	   this time, so leave it NULL. Same can be done with all other

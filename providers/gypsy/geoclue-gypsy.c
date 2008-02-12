@@ -20,6 +20,8 @@
 
 typedef struct {
 	GcProvider parent;
+
+        char *device_name;
 	
 	GypsyControl *control;
 	GypsyDevice *device;
@@ -78,61 +80,6 @@ get_status (GcIfaceGeoclue *gc,
         return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-          GError        **error)
-{
-	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
-
-        g_main_loop_quit (gypsy->loop);
-        return TRUE;
-}
-
-static void
-finalize (GObject *object)
-{
-	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (object);
-
-	geoclue_accuracy_free (gypsy->accuracy);
-
-	((GObjectClass *) geoclue_gypsy_parent_class)->finalize (object);
-}
-
-static void
-dispose (GObject *object)
-{
-	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (object);
-
-	if (gypsy->control) {
-		g_object_unref (gypsy->control);
-		gypsy->control = NULL;
-	}
-
-	if (gypsy->device) {
-		g_object_unref (gypsy->device);
-		gypsy->device = NULL;
-	}
-
-	if (gypsy->position) {
-		g_object_unref (gypsy->position);
-		gypsy->position = NULL;
-	}
-
-	((GObjectClass *) geoclue_gypsy_parent_class)->dispose (object);
-}
-
-static void
-geoclue_gypsy_class_init (GeoclueGypsyClass *klass)
-{
-	GObjectClass *o_class = (GObjectClass *) klass;
-	GcProviderClass *p_class = (GcProviderClass *) klass;
-
-	o_class->finalize = finalize;
-	o_class->dispose = dispose;
-
-	p_class->get_status = get_status;
-	p_class->shutdown = shutdown;
-}
 
 /* Compare the two fields and return TRUE if they have changed */
 static gboolean
@@ -409,22 +356,34 @@ get_initial_status (GeoclueGypsy *gypsy)
 	g_print ("Initial status - %d (connected)\n", gypsy->status);
 }
 
-static void
-geoclue_gypsy_init (GeoclueGypsy *gypsy)
+static gboolean
+set_options (GcIfaceGeoclue *gc,
+             GHashTable     *options,
+             GError        **error)
 {
-	GError *error = NULL;
-	char *path;
+        GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
+        gpointer device_name;
+        char *path;
 
-	gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
-	gypsy->control = gypsy_control_get_default ();
+        device_name = g_hash_table_lookup (options, 
+                                           "org.freedesktop.Geoclue.GPSName");
+        if (device_name == NULL) {
+                return TRUE;
+        }
 
-	/* FIXME: Need a properties interface to get the GPS to use */
-	path = gypsy_control_create (gypsy->control, "00:02:76:C4:27:A8",
-				     &error);
-	if (error != NULL) {
-		/* Need to return an error somehow */
+        gypsy->device_name = g_strdup (device_name);
+        g_print ("Gypsy provider using %s\n", gypsy->device_name);
+	path = gypsy_control_create (gypsy->control, gypsy->device_name,
+				     error);
+	if (*error != NULL) {
+                g_print ("Error - %s?\n", (*error)->message);
+                gypsy->status = GEOCLUE_STATUS_ERROR;
+                return FALSE;
 	}
-	
+
+        /* If we've got here, then we are out of the ERROR condition */
+        gypsy->status = GEOCLUE_STATUS_UNAVAILABLE;
+
 	gypsy->device = gypsy_device_new (path);
 	g_signal_connect (gypsy->device, "connection-changed",
 			  G_CALLBACK (connection_changed), gypsy);
@@ -443,6 +402,73 @@ geoclue_gypsy_init (GeoclueGypsy *gypsy)
 			  G_CALLBACK (accuracy_changed), gypsy);
 
 	g_free (path);
+
+        return TRUE;
+}
+
+static gboolean
+shutdown (GcIfaceGeoclue *gc,
+          GError        **error)
+{
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
+
+        g_main_loop_quit (gypsy->loop);
+        return TRUE;
+}
+
+static void
+finalize (GObject *object)
+{
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (object);
+
+	geoclue_accuracy_free (gypsy->accuracy);
+        g_free (gypsy->device_name);
+
+	((GObjectClass *) geoclue_gypsy_parent_class)->finalize (object);
+}
+
+static void
+dispose (GObject *object)
+{
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (object);
+
+	if (gypsy->control) {
+		g_object_unref (gypsy->control);
+		gypsy->control = NULL;
+	}
+
+	if (gypsy->device) {
+		g_object_unref (gypsy->device);
+		gypsy->device = NULL;
+	}
+
+	if (gypsy->position) {
+		g_object_unref (gypsy->position);
+		gypsy->position = NULL;
+	}
+
+	((GObjectClass *) geoclue_gypsy_parent_class)->dispose (object);
+}
+
+static void
+geoclue_gypsy_class_init (GeoclueGypsyClass *klass)
+{
+	GObjectClass *o_class = (GObjectClass *) klass;
+	GcProviderClass *p_class = (GcProviderClass *) klass;
+
+	o_class->finalize = finalize;
+	o_class->dispose = dispose;
+
+	p_class->get_status = get_status;
+        p_class->set_options = set_options;
+	p_class->shutdown = shutdown;
+}
+
+static void
+geoclue_gypsy_init (GeoclueGypsy *gypsy)
+{
+	gypsy->status = GEOCLUE_STATUS_ERROR;
+	gypsy->control = gypsy_control_get_default ();
 
 	gc_provider_set_details (GC_PROVIDER (gypsy),
 				 "org.freedesktop.Geoclue.Providers.Gypsy",

@@ -43,6 +43,10 @@
 				<doc:description>Shut down the provider</doc:description>
 			</doc:doc>
 		</method>
+
+		<method name="SetOptions">
+			<arg type="a{ss}" name="options" direction="in" />
+		</method>
 	</interface>
 </node>
 

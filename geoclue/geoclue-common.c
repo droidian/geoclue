@@ -191,3 +191,28 @@ geoclue_common_get_status (GeoclueCommon *common,
 
 	return TRUE;
 }
+
+/**
+ * geoclue_common_set_options:
+ * @common: A #GeoclueCommon object
+ * @options: A GHashTable containing the options
+ * @error: Pointer for returned #GError
+ *
+ * Sets the options on the provider.
+ *
+ * Return value: #TRUE if D-Bus call succeeded
+ */
+gboolean
+geoclue_common_set_options (GeoclueCommon *common,
+                            GHashTable    *options,
+                            GError       **error)
+{
+        GeoclueProvider *provider = GEOCLUE_PROVIDER (common);
+
+        if (!org_freedesktop_Geoclue_set_options (provider->proxy, options,
+                                                  error)) {
+                return FALSE;
+        }
+
+        return TRUE;
+}

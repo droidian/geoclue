@@ -119,6 +119,22 @@ get_status (GcIfaceGeoclue *geoclue,
 }
 
 static gboolean
+set_options (GcIfaceGeoclue *geoclue,
+             GHashTable     *options,
+             GError        **error)
+{
+	GcProviderClass *klass;
+
+	klass = GC_PROVIDER_GET_CLASS (geoclue);
+	if (klass->get_status) {
+		return klass->set_options (geoclue, options, error);
+	} 
+
+        /* It is not an error to not have a SetOptions implementation */
+        return TRUE;
+}
+
+static gboolean
 shutdown (GcIfaceGeoclue *geoclue,
 	  GError        **error)
 {
@@ -140,6 +156,7 @@ gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 {
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
+        iface->set_options = set_options;
 	iface->shutdown = shutdown;
 }
 

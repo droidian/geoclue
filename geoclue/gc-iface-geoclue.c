@@ -26,6 +26,9 @@ static gboolean gc_iface_geoclue_get_provider_info (GcIfaceGeoclue  *gc,
 static gboolean gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
 					     GeoclueStatus  *status,
 					     GError        **error);
+static gboolean gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
+                                              GHashTable     *options,
+                                              GError        **error);
 static gboolean gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
 					   GError        **error);
 
@@ -92,6 +95,15 @@ gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
 {
 	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->get_status (gc, status,
 							    error);
+}
+
+static gboolean
+gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
+                              GHashTable     *options,
+                              GError        **error)
+{
+        return GC_IFACE_GEOCLUE_GET_CLASS (gc)->set_options (gc, options, 
+                                                             error);
 }
 
 static gboolean

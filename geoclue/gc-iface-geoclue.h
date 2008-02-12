@@ -38,6 +38,9 @@ struct _GcIfaceGeoclueClass {
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
 				GeoclueStatus  *status,
 				GError        **error);
+        gboolean (*set_options) (GcIfaceGeoclue *geoclue,
+                                 GHashTable     *options,
+                                 GError        **error);
 	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
 			      GError        **error);
 };

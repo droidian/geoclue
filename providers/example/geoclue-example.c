@@ -41,6 +41,24 @@ get_status (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
+static void
+print_option (gpointer key,
+              gpointer value,
+              gpointer data)
+{
+        g_print ("   %s - %s\n", key, value);
+}
+
+static gboolean
+set_options (GcIfaceGeoclue *gc,
+             GHashTable     *options,
+             GError        **error)
+{
+        g_print ("Options received---\n");
+        g_hash_table_foreach (options, print_option, NULL);
+        return TRUE;
+}
+
 static gboolean
 shutdown (GcIfaceGeoclue *gc,
 	  GError        **error)
@@ -57,6 +75,7 @@ geoclue_example_class_init (GeoclueExampleClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *) klass;
 
 	p_class->get_status = get_status;
+        p_class->set_options = set_options;
 	p_class->shutdown = shutdown;
 }
 

@@ -27,12 +27,6 @@ typedef enum _InterfaceType {
 	VELOCITY_INTERFACE,
 } InterfaceType;
 
-typedef enum _GeoclueResourceFlags {
-	GEOCLUE_RESOURCE_FLAGS_NONE = 0,
-	GEOCLUE_RESOURCE_FLAGS_NETWORK = 1 << 0,
-	GEOCLUE_RESOURCE_FLAGS_GPS = 1 << 1,
-} GeoclueResourceFlags;
-
 typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
 	GEOCLUE_PROVIDE_FLAGS_UPDATES = 1 << 0,

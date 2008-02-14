@@ -146,6 +146,18 @@ typedef enum {
  */
 #define GEOCLUE_ADDRESS_KEY_STREET "street"
 
+/**
+ * GeoclueResourceFlags:
+ *
+ * bitfield that represents a set of physical resources. 
+ * 
+ **/
+typedef enum _GeoclueResourceFlags {
+	GEOCLUE_RESOURCE_FLAGS_NONE = 0,
+	GEOCLUE_RESOURCE_FLAGS_NETWORK = 1 << 0,
+	GEOCLUE_RESOURCE_FLAGS_GPS = 1 << 1,
+} GeoclueResourceFlags;
+
 void geoclue_types_init (void);
 
 #endif

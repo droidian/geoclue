@@ -23,7 +23,8 @@ typedef struct {
 	GeoclueAccuracy *desired_accuracy;
 	int min_time;
 	gboolean require_updates;
-
+	GeoclueResourceFlags allowed_resources;
+	
 	guint32 update_id;
 	ProviderDetails *position_provider;
 } GcMasterClient;

@@ -21,11 +21,12 @@ G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client,
 						gc_master_client_position_init))
 
 static gboolean
-gc_iface_master_client_set_requirements (GcMasterClient      *client,
-					 GeoclueAccuracy     *accuracy,
-					 int                  min_time,
-					 gboolean             require_updates,
-					 GError             **error);
+gc_iface_master_client_set_requirements (GcMasterClient        *client,
+					 GeoclueAccuracy       *accuracy,
+					 int                    min_time,
+					 gboolean               require_updates,
+					 GeoclueResourceFlags   allowed_resources,
+					 GError               **error);
 
 #include "gc-iface-master-client-glue.h"
 
@@ -36,11 +37,12 @@ finalize (GObject *object)
 }
 
 static gboolean
-gc_iface_master_client_set_requirements (GcMasterClient      *client,
-					 GeoclueAccuracy     *accuracy,
-					 int                  min_time,
-					 gboolean             require_updates,
-					 GError             **error)
+gc_iface_master_client_set_requirements (GcMasterClient        *client,
+					 GeoclueAccuracy       *accuracy,
+					 int                    min_time,
+					 gboolean               require_updates,
+					 GeoclueResourceFlags   allowed_resources,
+					 GError               **error)
 {
 	/* get_providers here, choose which one to use */
 	
@@ -49,11 +51,12 @@ gc_iface_master_client_set_requirements (GcMasterClient      *client,
 	client->desired_accuracy = geoclue_accuracy_copy (accuracy);
 	client->min_time = min_time;
 	client->require_updates = require_updates;
+	client->allowed_resources = allowed_resources;
 	
 	providers = gc_master_get_position_providers (client->desired_accuracy,
-	                                     require_updates,
-	                                     GEOCLUE_RESOURCE_FLAGS_NETWORK, /*FIXME should be in the client DBUS API*/
-	                                     NULL);
+	                                              require_updates,
+	                                              allowed_resources,
+	                                              NULL);
 	if (!providers) {
 		// error?
 		return TRUE;

@@ -7,6 +7,7 @@
 			<arg name="accuracy" type="a(idd)" direction="in" />
 			<arg name="time" type="i" direction="in" />
 			<arg name="require_updates" type="b" direction="in" />
+			<arg name="allowed_resources" type="i" direction="in" />
 		</method>
 	</interface>
 </node>

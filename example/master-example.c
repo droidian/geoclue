@@ -36,6 +36,7 @@ main (int    argc,
 	                                             accuracy,
 	                                             0,
 	                                             FALSE,
+	                                             GEOCLUE_RESOURCE_FLAGS_NETWORK,
 	                                             NULL)){
 		g_printerr ("set_requirements failed");
 	}

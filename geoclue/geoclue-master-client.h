@@ -31,11 +31,12 @@ typedef struct _GeoclueMasterClientClass {
 
 GType geoclue_master_client_get_type (void);
 
-gboolean geoclue_master_client_set_requirements (GeoclueMasterClient *client,
-						 GeoclueAccuracy     *accuracy,
-						 int                  min_time,
-						 gboolean             require_updates,
-						 GError             **error);
+gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
+						 GeoclueAccuracy       *accuracy,
+						 int                    min_time,
+						 gboolean               require_updates,
+						 GeoclueResourceFlags   allowed_resources,
+						 GError               **error);
 
 G_END_DECLS
 

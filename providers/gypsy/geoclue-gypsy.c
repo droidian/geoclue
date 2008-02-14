@@ -366,7 +366,7 @@ set_options (GcIfaceGeoclue *gc,
         char *path;
 
         device_name = g_hash_table_lookup (options, 
-                                           "org.freedesktop.Geoclue.GPSName");
+                                           "org.freedesktop.Geoclue.GPSDevice");
         if (device_name == NULL) {
                 return TRUE;
         }

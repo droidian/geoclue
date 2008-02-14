@@ -33,7 +33,7 @@ load_options (void)
         GSList *entries, *e;
         GError *error = NULL;
         
-        entries = gconf_client_all_entries (client, "/apps/geoclue/master/", &error);
+        entries = gconf_client_all_entries (client, "/apps/geoclue/master", &error);
         if (error != NULL) {
                 g_warning ("Error loading master options: %s", error->message);
                 g_error_free (error);
@@ -55,13 +55,15 @@ load_options (void)
                 v = gconf_entry_get_value (entry);
                 value = gconf_value_get_string (v);
 
-                g_hash_table_insert (ht, g_strdup (key), g_strdup (value));
-                gconf_entry_free (entry);
-        }
-        g_slist_free (entries);
+                g_print ("%s = %s\n", key, value);
+                g_hash_table_insert (ht, g_path_get_basename (key), 
+                                     g_strdup (value));
+                 gconf_entry_free (entry);
+         }
+         g_slist_free (entries);
 
-        return ht;
-}
+         return ht;
+ }
 
 GHashTable *
 geoclue_get_main_options (void)

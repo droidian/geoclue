@@ -214,6 +214,7 @@ initialize_provider (GcMaster        *master,
         if (!geoclue_common_set_options (provider->geoclue,
                                          geoclue_get_main_options (),
                                          error)) {
+                g_print ("Error setting options: %s\n", (*error)->message);
                 g_object_unref (provider->geoclue);
                 provider->geoclue = NULL;
                 return FALSE;

@@ -7,11 +7,28 @@
  */
 
 #include <glib.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-geocode.h>
+
+static GHashTable *
+parse_options (int    argc,
+               char **argv)
+{
+        GHashTable *options;
+        int i;
+
+        options = g_hash_table_new (g_str_hash, g_str_equal);
+        for (i = 2; i < argc; i += 2) {
+                g_hash_table_insert (options, argv[i], argv[i + 1]);
+        }
+
+        return options;
+}
 
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
+        GeoclueCommon *common = NULL;
 	GeoclueGeocode *geocoder = NULL;
 	GeocluePositionFields fields;
 	GHashTable *address = NULL;
@@ -21,14 +38,34 @@ int main (int argc, char** argv)
 	
 	g_type_init();
 	
-	if (argc != 2) {
-		g_printerr ("Usage:\n  geocode-example <provider_name>\n");
+	if (argc < 2 || argc % 2 != 0) {
+		g_printerr ("Usage:\n  geocode-example <provider_name> [option value]\n");
 		return 1;
 	}
 	g_print ("Using provider '%s'\n", argv[1]);
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
+        common = geoclue_common_new (service, path);
+        if (common == NULL) {
+                g_printerr ("Error while creating GeoclueCommon object.\n");
+                return 1;
+        }
+        
+        /* Set options */
+        if (argc > 2) {
+                GHashTable *options;
+                
+                options = parse_options (argc, argv);
+                if (!geoclue_common_set_options (common, options, &error)) {
+                        g_printerr ("Error setting options: %s\n", 
+                                    error->message);
+                        g_error_free (error);
+                        error = NULL;
+                }
+                g_hash_table_destroy (options);
+        }
+		
 	address = g_hash_table_new (g_str_hash, g_str_equal);
 	g_hash_table_insert (address, "postalcode", "00330");
 	g_hash_table_insert (address, "countrycode", "FI");

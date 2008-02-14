@@ -95,7 +95,8 @@ get_position (GcIfacePosition       *gc,
 	      GError               **error)
 {
 	GcMasterClient *client = GC_MASTER_CLIENT (gc);
-	
+	PositionInterface *iface;
+		
 	/*TODO: should maybe set sensible defaults and get providers, 
 	 * if set_requirements has not been called?? */
 	
@@ -103,9 +104,8 @@ get_position (GcIfacePosition       *gc,
 		return FALSE;
 	}
 	
+	iface = client->position_provider->position;
 	if (client->position_provider->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
-		g_debug ("returning position");
-		PositionInterface *iface = client->position_provider->position;
 		
 		*timestamp = iface->timestamp;
 		*latitude = iface->latitude;
@@ -113,11 +113,17 @@ get_position (GcIfacePosition       *gc,
 		*altitude = iface->altitude;
 		*fields = iface->fields;
 		*accuracy = geoclue_accuracy_copy (iface->accuracy);
-		return TRUE;
 	} else {
-		g_warning ("not implemented yet");
-		return FALSE;
+		/* the data in iface is not necessarily up-to-date */
+		*fields = geoclue_position_get_position (iface->position,
+		                                         timestamp,
+		                                         latitude,
+		                                         longitude,
+		                                         altitude,
+		                                         accuracy,
+		                                         error);
 	}
+	return TRUE;
 }
 
 static void

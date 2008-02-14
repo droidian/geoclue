@@ -7,6 +7,10 @@
 			<arg type="o" name="path" direction="out" />
 		</method>
 
+		<method name="SetOptions">
+			<arg type="a{ss}" name="options" direction="in" />
+		</method>
+
 		<method name="Shutdown" />
 	</interface>
 </node>

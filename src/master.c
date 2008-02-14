@@ -211,6 +211,14 @@ initialize_provider (GcMaster        *master,
 	/* This will start the provider */
 	provider->geoclue = geoclue_common_new (provider->service,
 						provider->path);
+        if (!geoclue_common_set_options (provider->geoclue,
+                                         geoclue_get_main_options (),
+                                         error)) {
+                g_object_unref (provider->geoclue);
+                provider->geoclue = NULL;
+                return FALSE;
+        }
+
 	g_signal_connect (G_OBJECT (provider->geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), provider);
 
@@ -219,6 +227,7 @@ initialize_provider (GcMaster        *master,
 	
 	if (*error != NULL) {
 		g_object_unref (provider->geoclue);
+                provider->geoclue = NULL;
 		return FALSE;
 	}
 	

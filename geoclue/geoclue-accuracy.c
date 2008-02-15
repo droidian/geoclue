@@ -64,9 +64,13 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 void
 geoclue_accuracy_free (GeoclueAccuracy *accuracy)
 {
-	GPtrArray *arr = (GPtrArray *) accuracy;
+	GPtrArray *arr;
 	int i;
+	if (!accuracy) {
+		return;
+	}
 	
+	arr = (GPtrArray *) accuracy;
 	for (i = 0; i < arr->len; i++) {
 		g_boxed_free (GEOCLUE_ACCURACY_TYPE,
 			      g_ptr_array_index (arr, i));

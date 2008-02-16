@@ -18,6 +18,7 @@
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-velocity.h>
 #include "connectivity.h"
+#include "master-position.h"
 
 #define POSITION_IFACE "org.freedesktop.Geoclue.Position"
 #define VELOCITY_IFACE "org.freedesktop.Geoclue.Velocity"
@@ -34,30 +35,18 @@ typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_FUZZY = 1 << 2,
 } GeoclueProvideFlags;
 
-typedef struct _PositionInterface {
-	GeocluePosition *position;
-	
-	int timestamp; /* Last time data was updated from position */
-	
-	GeocluePositionFields fields;
-	double latitude;
-	double longitude;
-	double altitude;
-	GeoclueAccuracy *accuracy;
-} PositionInterface;
-
 typedef struct _ProviderDetails {
 	char *name;
 	char *service;
 	char *path;
 
-	GeoclueResourceFlags requires;
+	GeoclueResourceFlags required_resources;
 	GeoclueProvideFlags provides;
 
 	GeoclueCommon *geoclue;
 	GeoclueStatus status;
 	
-	PositionInterface *position;
+	GcMasterPosition *master_position;
 	/* add other interfaces here */
 } ProviderDetails;
 
@@ -84,3 +73,4 @@ GList *gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
 					 GError              **error);
 
 #endif
+	

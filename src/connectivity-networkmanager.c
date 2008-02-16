@@ -82,7 +82,7 @@ geoclue_networkmanager_state_changed (DBusGProxy *proxy,
 	GeoclueNetworkManager *self = GEOCLUE_NETWORKMANAGER (userdata);
 	GeoclueNetworkStatus gc_status;
 	
-	gc_status = self->status;
+	gc_status = nmstate_to_geocluenetworkstatus (status);
 	
 	if (gc_status != self->status) {
 		self->status = gc_status;

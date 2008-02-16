@@ -65,6 +65,10 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	/* TODO select which provider/interface to use out of the possible ones
 	 * Now using the first one */
 	client->position_provider = providers->data;
+	
+	/* TODO connect signal handler of position_provider  */
+	
+	
 	g_print ("Requirements set, provider '%s' chosen\n", client->position_provider->name);
 	g_list_free (providers);
 	
@@ -98,7 +102,6 @@ get_position (GcIfacePosition       *gc,
 	      GError               **error)
 {
 	GcMasterClient *client = GC_MASTER_CLIENT (gc);
-	PositionInterface *iface;
 		
 	/*TODO: should maybe set sensible defaults and get providers, 
 	 * if set_requirements has not been called?? */
@@ -107,25 +110,12 @@ get_position (GcIfacePosition       *gc,
 		return FALSE;
 	}
 	
-	iface = client->position_provider->position;
-	if (client->position_provider->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
-		
-		*timestamp = iface->timestamp;
-		*latitude = iface->latitude;
-		*longitude = iface->longitude;
-		*altitude = iface->altitude;
-		*fields = iface->fields;
-		*accuracy = geoclue_accuracy_copy (iface->accuracy);
-	} else {
-		/* the data in iface is not necessarily up-to-date */
-		*fields = geoclue_position_get_position (iface->position,
-		                                         timestamp,
-		                                         latitude,
-		                                         longitude,
-		                                         altitude,
-		                                         accuracy,
-		                                         error);
-	}
+	*fields = gc_master_position_get_position 
+		(client->position_provider->master_position,
+		 timestamp,
+		 latitude, longitude, altitude,
+		 accuracy,
+		 error);
 	return TRUE;
 }
 

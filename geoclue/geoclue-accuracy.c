@@ -92,9 +92,12 @@ geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 			      double               *horizontal_accuracy,
 			      double               *vertical_accuracy)
 {
+	GValueArray *vals;
 	GPtrArray *arr = (GPtrArray *) accuracy;
-	GValueArray *vals = arr->pdata[0];
-
+	
+	g_assert (arr->pdata != NULL);
+	
+	vals = arr->pdata[0];
 	if (level != NULL) {
 		*level = g_value_get_int (g_value_array_get_nth (vals, 0));
 	}

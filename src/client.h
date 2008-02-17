@@ -13,6 +13,7 @@
 #include <geoclue/geoclue-accuracy.h>
 
 #include "master.h"
+#include "master-provider.h"
 
 #define GC_TYPE_MASTER_CLIENT (gc_master_client_get_type ())
 #define GC_MASTER_CLIENT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER_CLIENT, GcMasterClient))
@@ -26,7 +27,7 @@ typedef struct {
 	GeoclueResourceFlags allowed_resources;
 	
 	guint32 update_id;
-	ProviderDetails *position_provider;
+	GcMasterProvider *position_provider;
 } GcMasterClient;
 
 typedef struct {

@@ -36,6 +36,24 @@ finalize (GObject *object)
 	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }
 
+static void
+position_changed (GcMasterProvider     *provider,
+                  GeocluePositionFields fields,
+                  int                   timestamp,
+                  double                latitude,
+                  double                longitude,
+                  double                altitude,
+                  GeoclueAccuracy      *accuracy,
+                  GcMasterClient       *client)
+{
+	gc_iface_position_emit_position_changed
+		(GC_IFACE_POSITION (client),
+		 fields,
+		 timestamp,
+		 latitude, longitude, altitude,
+		 accuracy);
+}
+
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GeoclueAccuracy       *accuracy,
@@ -58,7 +76,9 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	                                              allowed_resources,
 	                                              NULL);
 	if (!providers) {
-		// error?
+		g_debug ("no providers");
+
+		// TODO: should have a return value?
 		return TRUE;
 	}
 	
@@ -66,10 +86,15 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	 * Now using the first one */
 	client->position_provider = providers->data;
 	
-	/* TODO connect signal handler of position_provider  */
+	g_signal_connect (G_OBJECT (client->position_provider),
+	                  "position-changed",
+	                  G_CALLBACK (position_changed),
+	                  client);
 	
-	
+	/*
 	g_print ("Requirements set, provider '%s' chosen\n", client->position_provider->name);
+	*/
+	
 	g_list_free (providers);
 	
 	return TRUE;
@@ -102,16 +127,16 @@ get_position (GcIfacePosition       *gc,
 	      GError               **error)
 {
 	GcMasterClient *client = GC_MASTER_CLIENT (gc);
-		
 	/*TODO: should maybe set sensible defaults and get providers, 
 	 * if set_requirements has not been called?? */
 	
-	if (client->position_provider == NULL) {
+		if (client->position_provider == NULL) {
+		/* TODO: set error*/
 		return FALSE;
 	}
 	
-	*fields = gc_master_position_get_position 
-		(client->position_provider->master_position,
+	*fields = gc_master_provider_get_position
+		(client->position_provider,
 		 timestamp,
 		 latitude, longitude, altitude,
 		 accuracy,

@@ -25,7 +25,7 @@ geoclue_master_SOURCES =	\
 	client.c		\
 	main.c			\
 	master.c		\
-	master-position.c	\
+	master-provider.c	\
 	connectivity.c	\
 	connectivity-networkmanager.c
 

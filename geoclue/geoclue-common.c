@@ -208,7 +208,11 @@ geoclue_common_set_options (GeoclueCommon *common,
                             GError       **error)
 {
         GeoclueProvider *provider = GEOCLUE_PROVIDER (common);
-
+        
+        if (options == NULL) {
+                return TRUE;
+        }
+        
         if (!org_freedesktop_Geoclue_set_options (provider->proxy, options,
                                                   error)) {
                 return FALSE;

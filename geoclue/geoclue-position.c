@@ -171,7 +171,6 @@ geoclue_position_get_position (GeocluePosition  *position,
 	double la, lo, al;
 	int ts, fields;
 	GeoclueAccuracy *acc;
-
 	if (!org_freedesktop_Geoclue_Position_get_position (provider->proxy,
 							    &fields, &ts,
 							    &la, &lo, &al,

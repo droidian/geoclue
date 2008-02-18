@@ -67,6 +67,14 @@ geoclue_master_init (GeoclueMaster *master)
 						 GEOCLUE_MASTER_DBUS_INTERFACE);
 }
 
+/**
+ * geoclue_master_get_default:
+ *
+ * Returns the default #GeoclueMaster object. This should be unreffed once
+ * the client is finished with it
+ *
+ * Return value: A reference to the default #GeoclueMaster object
+ */
 GeoclueMaster *
 geoclue_master_get_default (void)
 {
@@ -82,6 +90,18 @@ geoclue_master_get_default (void)
 	return g_object_ref (master);
 }
 
+/**
+ * geoclue_master_create_client:
+ * @master: A #GeoclueMaster
+ * @object_path: Pointer for the path to the #GeoclueMasterClient
+ * @error: Pointer for a GError
+ *
+ * Creates a #GeoclueMasterClient and puts the path to the D-Bus object in
+ * @object_path.
+ *
+ * Return Value: A newly created #GeoclueMasterClient or NULL on error.
+ */
+ 
 GeoclueMasterClient *
 geoclue_master_create_client (GeoclueMaster *master,
 			      char         **object_path,
@@ -111,4 +131,32 @@ geoclue_master_create_client (GeoclueMaster *master,
 	}
 	
 	return client;
+}
+
+/**
+ * geoclue_master_set_options:
+ * @master: A #GeoclueMaster
+ * @options: A #GHashTable storing option strings as key value pairs
+ * @error: A pointer to a #GError to store any returned error
+ *
+ * Sets provider options for the master process to use.
+ * 
+ * Return value: TRUE on success, FALSE on failure
+ */
+gboolean
+geoclue_master_set_options (GeoclueMaster *master,
+                            GHashTable    *options,
+                            GError       **error)
+{
+        GeoclueMasterPrivate *priv;
+
+        g_return_val_if_fail (GEOCLUE_IS_MASTER (master), FALSE);
+
+        priv = GET_PRIVATE (master);
+        if (!org_freedesktop_Geoclue_Master_set_options (priv->proxy,
+                                                         options, error)) {
+                return FALSE;
+        }
+
+        return TRUE;
 }

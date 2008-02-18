@@ -135,6 +135,19 @@ geoclue_master_client_init (GeoclueMasterClient *client)
 {
 }
 
+/**
+ * geoclue_master_client_set_requirements:
+ * @client: A #GeoclueMasterClient
+ * @accuracy: The required minimum accuracy.
+ * @min_time: The minimum time between update signals
+ * @require_updates: Whether the provider should give updates
+ * @allowed_resources: The resources that are allowed to be used
+ * @error: A pointer to a #GError.
+ *
+ * Sets the criteria that should be used when selecting a provider
+ *
+ * Return value: TRUE on success, FALSE otherwise
+ */
 gboolean
 geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 					GeoclueAccuracy       *accuracy,

@@ -597,11 +597,11 @@ gc_master_provider_is_good (GcMasterProvider *provider,
 	/*FIXME: what if only numeric accuracy is defined? */
 	if (level == GEOCLUE_ACCURACY_LEVEL_DETAILED) {
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
-	} else if (level >= GEOCLUE_ACCURACY_LEVEL_NONE &&
-		   level < GEOCLUE_ACCURACY_LEVEL_DETAILED) {
-		
+	} else if (level == GEOCLUE_ACCURACY_LEVEL_NONE) {  
+		required_flags |= GEOCLUE_PROVIDE_FLAGS_NONE;
+	} else {
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
-	}
+	} 
 	
 	/* provider must provide all that is required and
 	 * cannot require a resource that is not allowed */

@@ -563,13 +563,19 @@ gc_master_provider_get_position (GcMasterProvider *provider,
 	}
 }
 
-/* might want to change this to a bitfield defining all supported ifaces */
-gboolean 
-gc_master_provider_is_position_provider (GcMasterProvider *provider)
+GcInterfaceFlags
+gc_master_provider_get_supported_interfaces (GcMasterProvider *provider)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE  (provider);
+	GcInterfaceFlags ifaces = GC_IFACE_NONE;
 	
-	return (priv->position != NULL);
+	if (priv->geoclue != NULL) {
+		ifaces |= GC_IFACE_GEOCLUE;
+	}
+	if (priv->position != NULL) {
+		ifaces |= GC_IFACE_POSITION;
+	}
+	return ifaces;
 }
 
 gboolean

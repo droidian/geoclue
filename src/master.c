@@ -105,6 +105,7 @@ add_new_provider (GcMaster   *master,
                   const char *filename)
 {
 	GcMasterProvider *provider;
+	GcInterfaceFlags ifaces;
 	gboolean provider_used = FALSE;
 	
 	provider = gc_master_provider_new (filename, 
@@ -114,8 +115,8 @@ add_new_provider (GcMaster   *master,
 		return;
 	}
 	
-	
-	if (gc_master_provider_is_position_provider (provider)) {
+	ifaces = gc_master_provider_get_supported_interfaces (provider);
+	if (ifaces & GC_IFACE_POSITION) {
 		position_providers = g_list_prepend (position_providers,
 		                                     provider);
 		provider_used = TRUE;

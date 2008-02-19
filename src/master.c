@@ -99,9 +99,10 @@ gc_master_class_init (GcMasterClass *klass)
 }
 
 
+
 /* Load the provider details out of a keyfile */
 static void
-add_new_provider (GcMaster   *master,
+gc_master_add_new_provider (GcMaster   *master,
                   const char *filename)
 {
 	GcMasterProvider *provider;
@@ -133,7 +134,7 @@ add_new_provider (GcMaster   *master,
 #define PROVIDER_EXTENSION ".provider"
 
 static void
-load_providers (GcMaster *master)
+gc_master_load_providers (GcMaster *master)
 {
 	GDir *dir;
 	GError *error = NULL;
@@ -162,7 +163,7 @@ load_providers (GcMaster *master)
 		fullname = g_build_filename (GEOCLUE_PROVIDERS_DIR, 
 					     filename, NULL);
 		g_print ("\n");
-		add_new_provider (master, fullname);
+		gc_master_add_new_provider (master, fullname);
 		g_free (fullname);
 		
 		filename = g_dir_read_name (dir);
@@ -226,7 +227,7 @@ gc_master_init (GcMaster *master)
 	g_signal_connect (master->connectivity, "status-changed",
 	                  G_CALLBACK (network_status_changed), master);
 	
-	load_providers (master);
+	gc_master_load_providers (master);
 }
 
 

@@ -9,8 +9,12 @@
  *  current data is not available (MasterClient api would have to 
  *  have a "allowOldData" setting)
  * 
- * TODO: check geoclue-accuracy frees...
- *        fix status especially for network providers
+ * TODO: 
+ * 	fix status especially for network providers
+ * 
+ * 	save accuracy level estimate in .provider: could be used to 
+ * 	select suitable providers and to sort them...
+ * 
  **/
 
 #include <string.h>
@@ -86,7 +90,7 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
 	priv->position_cache.longitude = longitude;
 	priv->position_cache.altitude = altitude;
 	
-	/*FIXME: free old one?*/
+	geoclue_accuracy_free (priv->position_cache.accuracy);
 	priv->position_cache.accuracy = geoclue_accuracy_copy (accuracy);
 	
 	g_signal_emit (provider, signals[POSITION_CHANGED], 0, 
@@ -172,9 +176,7 @@ finalize (GObject *object)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (object);
 	
-	if (priv->position_cache.accuracy) {
-		geoclue_accuracy_free (priv->position_cache.accuracy);
-	}
+	geoclue_accuracy_free (priv->position_cache.accuracy);
 	
 	g_free (priv->name);
 	g_free (priv->service);

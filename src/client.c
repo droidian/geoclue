@@ -10,10 +10,12 @@
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-position.h>
+#include <geoclue/gc-iface-address.h>
 
 #include "client.h"
 
 static void gc_master_client_position_init (GcIfacePositionClass *iface);
+static void gc_master_client_address_init (GcIfaceAddressClass *iface);
 
 G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client, 
 			 G_TYPE_OBJECT,
@@ -119,7 +121,7 @@ gc_master_client_init (GcMasterClient *client)
 }
 
 static gboolean
-get_position (GcIfacePosition       *gc,
+get_position (GcIfacePosition       *iface,
 	      GeocluePositionFields *fields,
 	      int                   *timestamp,
 	      double                *latitude,
@@ -128,7 +130,7 @@ get_position (GcIfacePosition       *gc,
 	      GeoclueAccuracy      **accuracy,
 	      GError               **error)
 {
-	GcMasterClient *client = GC_MASTER_CLIENT (gc);
+	GcMasterClient *client = GC_MASTER_CLIENT (iface);
 	/*TODO: should maybe set sensible defaults and get providers, 
 	 * if set_requirements has not been called?? */
 	
@@ -147,8 +149,27 @@ get_position (GcIfacePosition       *gc,
 	return TRUE;
 }
 
+static gboolean 
+get_address (GcIfaceAddress   *iface,
+             int              *timestamp,
+             GHashTable      **address,
+             GeoclueAccuracy **accuracy,
+             GError          **error)
+{
+	
+	/* TODO: Implement */
+	
+	return FALSE;
+}
+
 static void
 gc_master_client_position_init (GcIfacePositionClass *iface)
 {
 	iface->get_position = get_position;
+}
+
+static void
+gc_master_client_address_init (GcIfaceAddressClass *iface)
+{
+	iface->get_address = get_address;
 }

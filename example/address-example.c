@@ -12,10 +12,9 @@
 
 /* GHFunc, use with g_hash_table_foreach */
 static void
-add_to_string (gpointer key, gpointer value, gpointer user_data)
+print_address_key_and_value (char *key, char *value, gpointer user_data)
 {
-	GString *str = (GString *)user_data;
-	g_string_append_printf (str, "\t%s = %s\n", key, value);
+	g_print ("    %s: %s\n", key, value);
 }
 
 static GHashTable *
@@ -36,12 +35,12 @@ parse_options (int    argc,
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-        GeoclueCommon *common = NULL;
+	GeoclueCommon *common = NULL;
 	GeoclueAddress *address = NULL;
 	int timestamp;
 	GHashTable *details = NULL;
 	GeoclueAccuracy *accuracy = NULL;
-	GString *address_str = NULL;
+	GeoclueAccuracyLevel level;
 	GError *error = NULL;
 	
 	g_type_init();
@@ -92,29 +91,17 @@ int main (int argc, char** argv)
 		g_free (address);
 		return 1;
 	}
+	geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
 	
 	/* address data is in GHashTable details, need to turn that into a string */
-	address_str = g_string_new (NULL);
-	g_hash_table_foreach (details, add_to_string, address_str);
+	g_print ("Current address: (accuracy level %d)\n", level);
+	g_hash_table_foreach (details, (GHFunc)print_address_key_and_value, NULL);
 	
-	/* print current address */
-	if (address_str->len == 0) {
-		g_print ("Current address not available\n");
-	} else {
-		GeoclueAccuracyLevel level;
-		double horiz_acc;
-		
-		geoclue_accuracy_get_details (accuracy, &level, &horiz_acc, NULL);
-		
-		g_print ("Current address:\n");
-		g_print (address_str->str);
-		g_print ("\n\tAccuracy level %d (%.0f meters)\n", level, horiz_acc);
-	}
 	
-	g_hash_table_destroy (details);
-	g_string_free (address_str, TRUE);
+    /*todo: free hashtable contents */
+	g_hash_table_unref (details);
 	geoclue_accuracy_free (accuracy);
-	g_free (address);
+	g_object_unref (address);
 	
 	return 0;
 }

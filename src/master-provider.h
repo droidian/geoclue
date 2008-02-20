@@ -11,7 +11,7 @@ G_BEGIN_DECLS
 #define GC_MASTER_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER_PROVIDER, GcMasterProvider))
 #define GC_IS_MASTER_PROVIDER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GC_TYPE_MASTER_PROVIDER))
 
-typedef enum _GcInterfaceFlags {
+typedef enum {
 	GC_IFACE_NONE = 0, 
 	GC_IFACE_GEOCLUE = 1 << 0, 
 	GC_IFACE_POSITION = 1 << 1,
@@ -44,16 +44,14 @@ GType gc_master_provider_get_type (void);
 GcMasterProvider *gc_master_provider_new (const char *filename,
                                           gboolean    network_status_events);
 
-GcInterfaceFlags gc_master_provider_get_supported_interfaces (GcMasterProvider *master_provider);
-
 gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
+                                     GcInterfaceFlags      iface_types,
                                      GeoclueAccuracyLevel  min_accuracy,
-                                     GeoclueResourceFlags  allowed_resources,
-                                     gboolean              need_update);
+                                     gboolean              need_update,
+                                     GeoclueResourceFlags  allowed_resources);
                                      
 void gc_master_provider_network_status_changed (GcMasterProvider *provider,
                                                 GeoclueStatus status);
-
 
 GeocluePositionFields gc_master_provider_get_position (GcMasterProvider *master_provider,
                                                        int              *timestamp,

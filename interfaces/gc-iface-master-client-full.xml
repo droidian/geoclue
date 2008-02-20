@@ -4,7 +4,7 @@
 
         <interface name="org.freedesktop.Geoclue.MasterClient">
 		<method name="SetRequirements">
-			<arg name="accuracy" type="d" direction="in" />
+			<arg name="accuracy_level" type="i" direction="in" />
 			<arg name="time" type="i" direction="in" />
 			<arg name="require_updates" type="b" direction="in" />
 			<arg name="allowed_resources" type="i" direction="in" />

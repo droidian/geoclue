@@ -25,7 +25,7 @@
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
-static GList *position_providers = NULL;
+static GList *providers = NULL;
 
 static gboolean gc_iface_master_create (GcMaster    *master,
 					const char **object_path,
@@ -103,11 +103,9 @@ gc_master_class_init (GcMasterClass *klass)
 /* Load the provider details out of a keyfile */
 static void
 gc_master_add_new_provider (GcMaster   *master,
-                  const char *filename)
+                            const char *filename)
 {
 	GcMasterProvider *provider;
-	GcInterfaceFlags ifaces;
-	gboolean provider_used = FALSE;
 	
 	provider = gc_master_provider_new (filename, 
 	                                   master->connectivity != NULL);
@@ -116,19 +114,7 @@ gc_master_add_new_provider (GcMaster   *master,
 		return;
 	}
 	
-	ifaces = gc_master_provider_get_supported_interfaces (provider);
-	if (ifaces & GC_IFACE_POSITION) {
-		position_providers = g_list_prepend (position_providers,
-		                                     provider);
-		provider_used = TRUE;
-	}
-	/*check for other provider types here*/
-	
-	if (!provider_used) {
-		/* provider did not have any useful interfaces */
-		g_object_unref (provider);
-	}
-	
+	providers = g_list_prepend (providers, provider);
 }
 
 /* Scan a directory for .provider files */
@@ -190,12 +176,12 @@ network_status_changed (GeoclueConnectivity *connectivity,
 	GList *l;
 	GeoclueStatus gc_status;
 	
-	if (position_providers == NULL) {
+	if (providers == NULL) {
 		return;
 	}
 	
 	gc_status = ConnectivityStatusToProviderStatus[status];
-	for (l = position_providers; l; l = l->next) {
+	for (l = providers; l; l = l->next) {
 		GcMasterProvider *provider = l->data;
 		
 		/* might be nicer to do this with a signal, but ... */
@@ -233,24 +219,28 @@ gc_master_init (GcMaster *master)
 
 
 GList *
-gc_master_get_position_providers (GeoclueAccuracyLevel  min_accuracy,
-                                  gboolean              can_update,
-                                  GeoclueResourceFlags  allowed,
-                                  GError              **error)
+gc_master_get_providers (GcInterfaceFlags      iface_type,
+                         GeoclueAccuracyLevel  min_accuracy,
+                         gboolean              can_update,
+                         GeoclueResourceFlags  allowed,
+                         GError              **error)
 {
 	GList *l, *p = NULL;
 	
-	if (position_providers == NULL) {
+	if (providers == NULL) {
 		return NULL;
 	}
 	
 	/* we should probably return in some order? 
 	 * accuracy? */
-	for (l = position_providers; l; l = l->next) {
+	for (l = providers; l; l = l->next) {
 		GcMasterProvider *provider = l->data;
 		
-		if (gc_master_provider_is_good (provider, min_accuracy, 
-		                                can_update, allowed)) {
+		if (gc_master_provider_is_good (provider,
+		                                iface_type, 
+		                                min_accuracy, 
+		                                can_update, 
+		                                allowed)) {
 			p = g_list_prepend (p, provider);
 		}
 	}

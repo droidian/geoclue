@@ -16,6 +16,7 @@
 #include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-accuracy.h>
 #include "connectivity.h"
+#include "master-provider.h"
 
 #define GC_TYPE_MASTER (gc_master_get_type ())
 #define GC_MASTER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GC_TYPE_MASTER, GcMaster))
@@ -33,10 +34,11 @@ typedef struct {
 } GcMasterClass;
 
 GType gc_master_get_type (void);
-GList *gc_master_get_position_providers (GeoclueAccuracyLevel  min_accuracy,
-					 gboolean              can_update,
-					 GeoclueResourceFlags  allowed,
-					 GError              **error);
+GList *gc_master_get_providers (GcInterfaceFlags      iface_type,
+				GeoclueAccuracyLevel  min_accuracy,
+				gboolean              can_update,
+				GeoclueResourceFlags  allowed,
+				GError              **error);
 
 #endif
 	

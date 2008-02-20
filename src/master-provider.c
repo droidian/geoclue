@@ -761,7 +761,7 @@ gc_master_provider_get_address (GcMasterProvider  *provider,
 
 
 
-GcInterfaceFlags
+static GcInterfaceFlags
 gc_master_provider_get_supported_interfaces (GcMasterProvider *provider)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE  (provider);
@@ -781,11 +781,13 @@ gc_master_provider_get_supported_interfaces (GcMasterProvider *provider)
 
 gboolean
 gc_master_provider_is_good (GcMasterProvider     *provider,
+                            GcInterfaceFlags      iface_type,
                             GeoclueAccuracyLevel  min_accuracy,
-                            GeoclueResourceFlags  allowed_resources,
-                            gboolean              need_update)
+                            gboolean              need_update,
+                            GeoclueResourceFlags  allowed_resources)
 {
 	GcMasterProviderPrivate *priv;
+	GcInterfaceFlags supported_ifaces;
 	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_FLAGS_NONE;
 	
 	priv = GET_PRIVATE (provider);
@@ -794,11 +796,14 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
 	}
 	
+	supported_ifaces = gc_master_provider_get_supported_interfaces (provider);
+	
 	/* provider must provide all that is required and
 	 * cannot require a resource that is not allowed */
 	/* TODO: really, we need to change some of those terms... */
 	
-	return (((priv->provides & required_flags) == required_flags) &&
+	return (((supported_ifaces & iface_type) == iface_type) &&
+	        ((priv->provides & required_flags) == required_flags) &&
 	        (priv->accuracy_level >= min_accuracy) &&
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }

@@ -28,6 +28,9 @@ typedef struct {
 	
 	guint32 update_id;
 	GcMasterProvider *position_provider;
+	
+	GcMasterProvider *address_provider;
+	
 } GcMasterClient;
 
 typedef struct {

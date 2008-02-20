@@ -58,6 +58,20 @@ position_changed (GcMasterProvider     *provider,
 		 accuracy);
 }
 
+static void
+address_changed (GcMasterProvider     *provider,
+                 int                   timestamp,
+                 GHashTable           *details,
+                 GeoclueAccuracy      *accuracy,
+                 GcMasterClient       *client)
+{
+	gc_iface_address_emit_address_changed
+		(GC_IFACE_ADDRESS (client),
+		 timestamp,
+		 details,
+		 accuracy);
+}
+
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GeoclueAccuracyLevel   min_accuracy,
@@ -66,7 +80,6 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GeoclueResourceFlags   allowed_resources,
 					 GError               **error)
 {
-	/* get_providers here, choose which one to use */
 	
 	GList *providers = NULL;
 	
@@ -75,31 +88,51 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	client->require_updates = require_updates;
 	client->allowed_resources = allowed_resources;
 	
-	providers = gc_master_get_position_providers (min_accuracy,
-	                                              require_updates,
-	                                              allowed_resources,
-	                                              NULL);
-	g_debug ("%d providers matching requirements found", g_list_length (providers));
+	/* position provider */
+	providers = gc_master_get_providers (GC_IFACE_POSITION,
+	                                     min_accuracy,
+	                                     require_updates,
+	                                     allowed_resources,
+	                                     NULL);
+	g_debug ("%d position providers matching requirements found", g_list_length (providers));
 	if (!providers) {
-		
 		// TODO: should have a return value to indicate provider existence?
-		return TRUE;
+	} else {
+		
+		/* TODO select which provider/interface to use out of the possible ones
+		 * Now using the first one */
+		client->position_provider = providers->data;
+		
+		g_signal_connect (G_OBJECT (client->position_provider),
+				  "position-changed",
+				  G_CALLBACK (position_changed),
+				  client);
+		
+		g_list_free (providers);
 	}
 	
-	/* TODO select which provider/interface to use out of the possible ones
-	 * Now using the first one */
-	client->position_provider = providers->data;
-	
-	g_signal_connect (G_OBJECT (client->position_provider),
-	                  "position-changed",
-	                  G_CALLBACK (position_changed),
-	                  client);
-	
-	/*
-	g_print ("Requirements set, provider '%s' chosen\n", client->position_provider->name);
-	*/
-	
-	g_list_free (providers);
+	/* Address provider */
+	providers = gc_master_get_providers (GC_IFACE_ADDRESS,
+	                                     min_accuracy,
+	                                     require_updates,
+	                                     allowed_resources,
+	                                     NULL);
+	g_debug ("%d address providers matching requirements found", g_list_length (providers));
+	if (!providers) {
+		// TODO: should have a return value to indicate provider existence?
+	} else {
+		
+		/* TODO select which provider/interface to use out of the possible ones
+		 * Now using the first one */
+		client->address_provider = providers->data;
+		
+		g_signal_connect (G_OBJECT (client->address_provider),
+				  "position-changed",
+				  G_CALLBACK (address_changed),
+				  client);
+		
+		g_list_free (providers);
+	}
 	
 	return TRUE;
 }
@@ -156,10 +189,20 @@ get_address (GcIfaceAddress   *iface,
              GeoclueAccuracy **accuracy,
              GError          **error)
 {
+	GcMasterClient *client = GC_MASTER_CLIENT (iface);
 	
-	/* TODO: Implement */
+	if (client->address_provider == NULL) {
+		/* TODO: set error*/
+		g_warning ("get_position called, but no provider available");
+		return FALSE;
+	}
 	
-	return FALSE;
+	return gc_master_provider_get_address
+		(client->address_provider,
+		 timestamp,
+		 address,
+		 accuracy,
+		 error);
 }
 
 static void

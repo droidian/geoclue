@@ -820,11 +820,21 @@ gc_master_provider_network_status_changed (GcMasterProvider *provider,
 		
 		provider_status_changed (priv->geoclue, status, provider);
 		
-		/* update position cache */
 		/* FIXME what should happen when net is down:
 		 * should position cache be updated ? */
 		if (status == GEOCLUE_STATUS_AVAILABLE) {
 			gc_master_provider_update_cache (provider);
 		}
 	}
+}
+
+/* GCompareFunc for sorting providers by accuracy */
+gint
+gc_master_provider_compare_by_accuracy (GcMasterProvider *a, 
+                                        GcMasterProvider *b)
+{
+	GcMasterProviderPrivate *priv_a = GET_PRIVATE (a);
+	GcMasterProviderPrivate *priv_b = GET_PRIVATE (b);
+	
+	return priv_b->accuracy_level - priv_a->accuracy_level;
 }

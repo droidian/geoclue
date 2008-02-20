@@ -99,8 +99,7 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		// TODO: should have a return value to indicate provider existence?
 	} else {
 		
-		/* TODO select which provider/interface to use out of the possible ones
-		 * Now using the first one */
+		/* choose the most accurate provider (first one) */
 		client->position_provider = providers->data;
 		
 		g_signal_connect (G_OBJECT (client->position_provider),
@@ -122,12 +121,11 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		// TODO: should have a return value to indicate provider existence?
 	} else {
 		
-		/* TODO select which provider/interface to use out of the possible ones
-		 * Now using the first one */
+		/* choose the most accurate provider (first one) */
 		client->address_provider = providers->data;
 		
 		g_signal_connect (G_OBJECT (client->address_provider),
-				  "position-changed",
+				  "address-changed",
 				  G_CALLBACK (address_changed),
 				  client);
 		

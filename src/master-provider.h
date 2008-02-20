@@ -44,6 +44,8 @@ GType gc_master_provider_get_type (void);
 GcMasterProvider *gc_master_provider_new (const char *filename,
                                           gboolean    network_status_events);
 
+gint gc_master_provider_compare_by_accuracy (GcMasterProvider *a, GcMasterProvider *b);
+
 gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
                                      GcInterfaceFlags      iface_types,
                                      GeoclueAccuracyLevel  min_accuracy,

@@ -114,7 +114,9 @@ gc_master_add_new_provider (GcMaster   *master,
 		return;
 	}
 	
-	providers = g_list_prepend (providers, provider);
+	providers = g_list_insert_sorted 
+		(providers, provider, 
+		 (GCompareFunc)gc_master_provider_compare_by_accuracy);
 }
 
 /* Scan a directory for .provider files */
@@ -231,8 +233,6 @@ gc_master_get_providers (GcInterfaceFlags      iface_type,
 		return NULL;
 	}
 	
-	/* we should probably return in some order? 
-	 * accuracy? */
 	for (l = providers; l; l = l->next) {
 		GcMasterProvider *provider = l->data;
 		
@@ -245,5 +245,6 @@ gc_master_get_providers (GcInterfaceFlags      iface_type,
 		}
 	}
 	
+	/* return most accurate first */
 	return g_list_reverse (p);
 }

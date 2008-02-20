@@ -37,8 +37,6 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GEOCLUE_TYPE_ADDRESS, GeoclueAddressPrivate))
 
-#define GEOCLUE_ADDRESS_TYPE (dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING))
-
 G_DEFINE_TYPE (GeoclueAddress, geoclue_address, GEOCLUE_TYPE_PROVIDER);
 
 static void
@@ -77,8 +75,9 @@ constructor (GType                  type,
 	provider = GEOCLUE_PROVIDER (object);
 
 	dbus_g_proxy_add_signal (provider->proxy, "AddressChanged",
-				 G_TYPE_INT, GEOCLUE_ADDRESS_TYPE,
-				 GEOCLUE_ACCURACY_TYPE,
+				 G_TYPE_INT, 
+				 dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING),
+				 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
 				 G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "AddressChanged",
 				     G_CALLBACK (address_changed),
@@ -107,8 +106,8 @@ geoclue_address_class_init (GeoclueAddressClass *klass)
 						 geoclue_marshal_VOID__INT_BOXED_BOXED,
 						 G_TYPE_NONE, 3,
 						 G_TYPE_INT, 
-						 dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING),
-						 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE));
+						 G_TYPE_POINTER,
+						 G_TYPE_POINTER);
 }
 
 static void

@@ -4,4 +4,4 @@ Service=org.freedesktop.Geoclue.Providers.Hostip
 Path=/org/freedesktop/Geoclue/Providers/Hostip
 Requires=RequiresNetwork
 Provides=ProvidesFuzzyAccuracy
-Interfaces=org.freedesktop.Geoclue.Position
+Interfaces=org.freedesktop.Geoclue.Position;org.freedesktop.Geoclue.Address

@@ -14,7 +14,8 @@ G_BEGIN_DECLS
 typedef enum _GcInterfaceFlags {
 	GC_IFACE_NONE = 0, 
 	GC_IFACE_GEOCLUE = 1 << 0, 
-	GC_IFACE_POSITION = 1 << 1
+	GC_IFACE_POSITION = 1 << 1,
+	GC_IFACE_ADDRESS = 1 << 2,
 } GcInterfaceFlags;
 
 
@@ -32,6 +33,10 @@ typedef struct _GcMasterProviderClass {
 	                           double                longitude,
 	                           double                altitude,
 	                           GeoclueAccuracy      *accuracy);
+	void (* address_changed) (GcMasterProvider *master_provider,
+	                          int               timestamp,
+	                          GHashTable       *details,
+	                          GeoclueAccuracy  *accuracy);
 } GcMasterProviderClass;
 
 GType gc_master_provider_get_type (void);
@@ -57,6 +62,12 @@ GeocluePositionFields gc_master_provider_get_position (GcMasterProvider *master_
                                                        double           *altitude,
                                                        GeoclueAccuracy **accuracy,
                                                        GError          **error);
+
+gboolean gc_master_provider_get_address (GcMasterProvider  *master_provider,
+                                         int               *timestamp,
+                                         GHashTable       **details,
+                                         GeoclueAccuracy  **accuracy,
+                                         GError           **error);
 
 G_END_DECLS
 

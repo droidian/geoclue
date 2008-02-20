@@ -81,7 +81,7 @@ int main (int argc, char** argv)
                 }
                 g_hash_table_destroy (options);
         }
-		
+	
 	/* Query current address */
 	if (!geoclue_address_get_address (address, &timestamp, 
 	                                      &details, &accuracy, 
@@ -97,8 +97,7 @@ int main (int argc, char** argv)
 	g_print ("Current address: (accuracy level %d)\n", level);
 	g_hash_table_foreach (details, (GHFunc)print_address_key_and_value, NULL);
 	
-	
-    /*todo: free hashtable contents */
+	/*todo: free hashtable contents */
 	g_hash_table_unref (details);
 	geoclue_accuracy_free (accuracy);
 	g_object_unref (address);

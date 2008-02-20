@@ -125,6 +125,7 @@ gc_master_add_new_provider (GcMaster   *master,
 	/*check for other provider types here*/
 	
 	if (!provider_used) {
+		/* provider did not have any useful interfaces */
 		g_object_unref (provider);
 	}
 	

@@ -798,8 +798,7 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 	 * cannot require a resource that is not allowed */
 	/* TODO: really, we need to change some of those terms... */
 	
-	/* TODO shouldn't check equality for provides, should check flags ? */
-	return ((priv->provides == required_flags) &&
+	return (((priv->provides & required_flags) == required_flags) &&
 	        (priv->accuracy_level >= min_accuracy) &&
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }

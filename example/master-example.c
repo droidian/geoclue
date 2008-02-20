@@ -56,8 +56,6 @@ main (int    argc,
 	
 	master = geoclue_master_get_default ();
 	client = geoclue_master_create_client (master, &path, &error);
-
-	/*set the accuracy we want */
 	
 	if (!geoclue_master_client_set_requirements (client, 
 	                                             GEOCLUE_ACCURACY_LEVEL_NONE,

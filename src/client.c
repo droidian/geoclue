@@ -18,7 +18,9 @@ static void gc_master_client_position_init (GcIfacePositionClass *iface);
 G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client, 
 			 G_TYPE_OBJECT,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
-						gc_master_client_position_init))
+						gc_master_client_position_init)
+			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
+						gc_master_client_address_init))
 
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
@@ -75,10 +77,10 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	                                              require_updates,
 	                                              allowed_resources,
 	                                              NULL);
+	g_debug ("%d providers matching requirements found", g_list_length (providers));
 	if (!providers) {
-		g_debug ("no providers");
-
-		// TODO: should have a return value?
+		
+		// TODO: should have a return value to indicate provider existence?
 		return TRUE;
 	}
 	
@@ -130,8 +132,9 @@ get_position (GcIfacePosition       *gc,
 	/*TODO: should maybe set sensible defaults and get providers, 
 	 * if set_requirements has not been called?? */
 	
-		if (client->position_provider == NULL) {
+	if (client->position_provider == NULL) {
 		/* TODO: set error*/
+		g_warning ("get_position called, but no provider available");
 		return FALSE;
 	}
 	

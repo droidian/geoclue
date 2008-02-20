@@ -233,7 +233,7 @@ gc_master_init (GcMaster *master)
 
 
 GList *
-gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
+gc_master_get_position_providers (GeoclueAccuracyLevel  min_accuracy,
                                   gboolean              can_update,
                                   GeoclueResourceFlags  allowed,
                                   GError              **error)
@@ -249,8 +249,7 @@ gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
 	for (l = position_providers; l; l = l->next) {
 		GcMasterProvider *provider = l->data;
 		
-		
-		if (gc_master_provider_is_good (provider, accuracy, 
+		if (gc_master_provider_is_good (provider, min_accuracy, 
 		                                can_update, allowed)) {
 			p = g_list_prepend (p, provider);
 		}

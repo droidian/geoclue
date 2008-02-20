@@ -21,7 +21,7 @@
 typedef struct {
 	GObject parent;
 
-	GeoclueAccuracy *desired_accuracy;
+	GeoclueAccuracyLevel min_accuracy;
 	int min_time;
 	gboolean require_updates;
 	GeoclueResourceFlags allowed_resources;

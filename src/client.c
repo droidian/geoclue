@@ -22,7 +22,7 @@ G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client,
 
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
-					 GeoclueAccuracy       *accuracy,
+					 GeoclueAccuracyLevel   min_accuracy,
 					 int                    min_time,
 					 gboolean               require_updates,
 					 GeoclueResourceFlags   allowed_resources,
@@ -56,7 +56,7 @@ position_changed (GcMasterProvider     *provider,
 
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
-					 GeoclueAccuracy       *accuracy,
+					 GeoclueAccuracyLevel   min_accuracy,
 					 int                    min_time,
 					 gboolean               require_updates,
 					 GeoclueResourceFlags   allowed_resources,
@@ -66,12 +66,12 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	
 	GList *providers = NULL;
 	
-	client->desired_accuracy = geoclue_accuracy_copy (accuracy);
+	client->min_accuracy = min_accuracy;
 	client->min_time = min_time;
 	client->require_updates = require_updates;
 	client->allowed_resources = allowed_resources;
 	
-	providers = gc_master_get_position_providers (client->desired_accuracy,
+	providers = gc_master_get_position_providers (min_accuracy,
 	                                              require_updates,
 	                                              allowed_resources,
 	                                              NULL);

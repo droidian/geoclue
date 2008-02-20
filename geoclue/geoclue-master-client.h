@@ -32,7 +32,7 @@ typedef struct _GeoclueMasterClientClass {
 GType geoclue_master_client_get_type (void);
 
 gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
-						 GeoclueAccuracy       *accuracy,
+						 GeoclueAccuracyLevel   min_accuracy,
 						 int                    min_time,
 						 gboolean               require_updates,
 						 GeoclueResourceFlags   allowed_resources,

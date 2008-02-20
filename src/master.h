@@ -33,7 +33,7 @@ typedef struct {
 } GcMasterClass;
 
 GType gc_master_get_type (void);
-GList *gc_master_get_position_providers (GeoclueAccuracy      *accuracy,
+GList *gc_master_get_position_providers (GeoclueAccuracyLevel  min_accuracy,
 					 gboolean              can_update,
 					 GeoclueResourceFlags  allowed,
 					 GError              **error);

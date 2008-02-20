@@ -47,7 +47,7 @@ GcMasterProvider *gc_master_provider_new (const char *filename,
 GcInterfaceFlags gc_master_provider_get_supported_interfaces (GcMasterProvider *master_provider);
 
 gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
-                                     GeoclueAccuracy      *accuracy,
+                                     GeoclueAccuracyLevel  min_accuracy,
                                      GeoclueResourceFlags  allowed_resources,
                                      gboolean              need_update);
                                      

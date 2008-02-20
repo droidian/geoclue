@@ -2,6 +2,6 @@
 Name=Hostip Provider
 Service=org.freedesktop.Geoclue.Providers.Hostip
 Path=/org/freedesktop/Geoclue/Providers/Hostip
+Accuracy=3
 Requires=RequiresNetwork
-Provides=ProvidesFuzzyAccuracy
 Interfaces=org.freedesktop.Geoclue.Position;org.freedesktop.Geoclue.Address

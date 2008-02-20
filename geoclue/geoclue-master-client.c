@@ -138,7 +138,7 @@ geoclue_master_client_init (GeoclueMasterClient *client)
 /**
  * geoclue_master_client_set_requirements:
  * @client: A #GeoclueMasterClient
- * @accuracy: The required minimum accuracy.
+ * @min_accuracy: The required minimum accuracy as a #GeoclueAccuracyLevel.
  * @min_time: The minimum time between update signals
  * @require_updates: Whether the provider should give updates
  * @allowed_resources: The resources that are allowed to be used
@@ -150,7 +150,7 @@ geoclue_master_client_init (GeoclueMasterClient *client)
  */
 gboolean
 geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
-					GeoclueAccuracy       *accuracy,
+					GeoclueAccuracyLevel   min_accuracy,
 					int                    min_time,
 					gboolean               require_updates,
 					GeoclueResourceFlags   allowed_resources,
@@ -160,7 +160,7 @@ geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 
 	priv = GET_PRIVATE (client);
 	if (!org_freedesktop_Geoclue_MasterClient_set_requirements 
-	    (priv->proxy, accuracy, min_time, require_updates, allowed_resources, error)) {
+	    (priv->proxy, min_accuracy, min_time, require_updates, allowed_resources, error)) {
 		return FALSE;
 	}
 

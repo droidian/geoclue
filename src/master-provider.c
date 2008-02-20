@@ -34,8 +34,6 @@
 typedef enum _GeoclueProvideFlags {
 	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
 	GEOCLUE_PROVIDE_FLAGS_UPDATES = 1 << 0,
-	GEOCLUE_PROVIDE_FLAGS_DETAILED = 1 << 1,
-	GEOCLUE_PROVIDE_FLAGS_FUZZY = 1 << 2,
 } GeoclueProvideFlags;
 
 typedef struct _GcPositionCache {
@@ -59,6 +57,7 @@ typedef struct _GcMasterProviderPrivate {
 	char *name;
 	char *service;
 	char *path;
+	GeoclueAccuracyLevel accuracy_level;
 	
 	GeoclueResourceFlags required_resources;
 	GeoclueProvideFlags provides;
@@ -191,10 +190,6 @@ parse_provide_strings (char **flags)
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "ProvidesUpdates") == 0) {
 			provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
-		} else if (strcmp (flags[i], "ProvidesDetailedAccuracy") == 0) {
-			provides |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
-		} else if (strcmp (flags[i], "ProvidesFuzzyAccuracy") == 0) {
-			provides |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
 		}
 	}
 	
@@ -508,14 +503,6 @@ gc_master_provider_dump_provides (GcMasterProvider *provider)
 	if (priv->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
 		g_print ("      - Updates\n");
 	}
-
-	if (priv->provides & GEOCLUE_PROVIDE_FLAGS_DETAILED) {
-		g_print ("      - Detailed Accuracy\n");
-	} else if (priv->provides & GEOCLUE_PROVIDE_FLAGS_FUZZY) {
-		g_print ("      - Fuzzy Accuracy\n");
-	} else {
-		g_print ("      - No Accuracy\n");
-	}
 }
 
 static void
@@ -527,6 +514,7 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 	g_print ("\n   Name - %s\n", priv->name);
 	g_print ("   Service - %s\n", priv->service);
 	g_print ("   Path - %s\n", priv->path);
+	g_print ("   Accuracy level - %d\n", priv->accuracy_level);
 
 	gc_master_provider_dump_required_resources (provider);
 	gc_master_provider_dump_provides (provider);
@@ -652,6 +640,10 @@ gc_master_provider_new (const char *filename,
 	 * for gps providers at least, so there wouldn't
 	 * be so much unnecessary copying ? */
 	priv->use_cache = network_status_events;
+	
+	priv->accuracy_level = 
+		g_key_file_get_integer (keyfile, "Geoclue Provider",
+		                        "Accuracy", NULL);
 	
 	flags = g_key_file_get_string_list (keyfile, "Geoclue Provider",
 	                                    "Requires", NULL, NULL);
@@ -788,12 +780,11 @@ gc_master_provider_get_supported_interfaces (GcMasterProvider *provider)
 }
 
 gboolean
-gc_master_provider_is_good (GcMasterProvider *provider,
-                            GeoclueAccuracy      *accuracy,
+gc_master_provider_is_good (GcMasterProvider     *provider,
+                            GeoclueAccuracyLevel  min_accuracy,
                             GeoclueResourceFlags  allowed_resources,
                             gboolean              need_update)
 {
-	GeoclueAccuracyLevel level;
 	GcMasterProviderPrivate *priv;
 	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_FLAGS_NONE;
 	
@@ -802,21 +793,6 @@ gc_master_provider_is_good (GcMasterProvider *provider,
 	if (need_update) {
 		required_flags |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
 	}
-
-	if (accuracy != NULL) {
-		geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
-	} else {
-		level = GEOCLUE_ACCURACY_LEVEL_NONE;
-	}
-	
-	/*FIXME: what if only numeric accuracy is defined? */
-	if (level == GEOCLUE_ACCURACY_LEVEL_DETAILED) {
-		required_flags |= GEOCLUE_PROVIDE_FLAGS_DETAILED;
-	} else if (level == GEOCLUE_ACCURACY_LEVEL_NONE) {  
-		required_flags |= GEOCLUE_PROVIDE_FLAGS_NONE;
-	} else {
-		required_flags |= GEOCLUE_PROVIDE_FLAGS_FUZZY;
-	} 
 	
 	/* provider must provide all that is required and
 	 * cannot require a resource that is not allowed */
@@ -824,6 +800,7 @@ gc_master_provider_is_good (GcMasterProvider *provider,
 	
 	/* TODO shouldn't check equality for provides, should check flags ? */
 	return ((priv->provides == required_flags) &&
+	        (priv->accuracy_level >= min_accuracy) &&
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }
 

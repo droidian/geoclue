@@ -158,6 +158,22 @@ typedef enum _GeoclueResourceFlags {
 	GEOCLUE_RESOURCE_FLAGS_GPS = 1 << 1,
 } GeoclueResourceFlags;
 
+
+/**
+ * GeoclueNetworkStatus:
+ *
+ * Enumeration for current network status. 
+ * 
+ **/
+typedef enum {
+	GEOCLUE_CONNECTIVITY_UNKNOWN,
+	GEOCLUE_CONNECTIVITY_OFFLINE,
+	GEOCLUE_CONNECTIVITY_ACQUIRING,
+	GEOCLUE_CONNECTIVITY_ONLINE,
+} GeoclueNetworkStatus;
+
+
+
 void geoclue_types_init (void);
 
 #endif

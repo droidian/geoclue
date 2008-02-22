@@ -55,7 +55,7 @@ geoclue_connectivity_get_type (void)
 	return type;
 }
 
-int
+GeoclueNetworkStatus
 geoclue_connectivity_get_status (GeoclueConnectivity *self)
 {
 	return GEOCLUE_CONNECTIVITY_GET_INTERFACE (self)->get_status (self);

@@ -41,6 +41,14 @@ finalize (GObject *object)
 }
 
 static void
+status_changed (GcMasterProvider *provider,
+                GeoclueStatus     status,
+                GcMasterClient   *client)
+{
+	g_debug ("client: provider status changed");
+}
+
+static void
 position_changed (GcMasterProvider     *provider,
                   GeocluePositionFields fields,
                   int                   timestamp,
@@ -80,56 +88,72 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GeoclueResourceFlags   allowed_resources,
 					 GError               **error)
 {
-	
-	GList *providers = NULL;
-	
 	client->min_accuracy = min_accuracy;
 	client->min_time = min_time;
 	client->require_updates = require_updates;
 	client->allowed_resources = allowed_resources;
 	
 	/* position provider */
-	providers = gc_master_get_providers (GC_IFACE_POSITION,
-	                                     min_accuracy,
-	                                     require_updates,
-	                                     allowed_resources,
-	                                     NULL);
-	g_debug ("%d position providers matching requirements found", g_list_length (providers));
-	if (!providers) {
+	client->position_providers = 
+		gc_master_get_providers (GC_IFACE_POSITION,
+		                         min_accuracy,
+		                         require_updates,
+		                         allowed_resources,
+		                         NULL);
+	g_debug ("%d position providers matching requirements found", 
+	         g_list_length (client->position_providers));
+	if (!client->position_providers) {
 		// TODO: should have a return value to indicate provider existence?
 	} else {
+		GList *p = client->position_providers;
+		/* TODO: choose the most accurate provider that is also available */
+		/* TODO: connect to the status signal of current provider,
+		 *       change provider if it goes offline */
+		/* TODO: connect to all providers status signals,
+		 *       change provider if a better than current becomes available */
+		while (p) {
+			GcMasterProvider *provider = p->data;
+			
+			g_signal_connect (G_OBJECT (provider),
+			                  "status-changed",
+			                  G_CALLBACK (status_changed),
+			                  client);
+			
+			/* choose the most accurate provider that is available or acquiring */
+			if ((!client->position_provider) &&
+			    (gc_master_provider_get_status (provider) >= GEOCLUE_STATUS_ACQUIRING)) {
+				client->position_provider = provider;
+				g_signal_connect (G_OBJECT (client->position_provider),
+				                  "position-changed",
+				                  G_CALLBACK (position_changed),
+				                  client);
+				
+			}
+			p = p->next;
+		} 
 		
-		/* choose the most accurate provider (first one) */
-		client->position_provider = providers->data;
-		
-		g_signal_connect (G_OBJECT (client->position_provider),
-				  "position-changed",
-				  G_CALLBACK (position_changed),
-				  client);
-		
-		g_list_free (providers);
 	}
 	
 	/* Address provider */
-	providers = gc_master_get_providers (GC_IFACE_ADDRESS,
-	                                     min_accuracy,
-	                                     require_updates,
-	                                     allowed_resources,
-	                                     NULL);
-	g_debug ("%d address providers matching requirements found", g_list_length (providers));
-	if (!providers) {
+	client->address_providers = 
+		gc_master_get_providers (GC_IFACE_ADDRESS,
+		                         min_accuracy,
+		                         require_updates,
+		                         allowed_resources,
+		                         NULL);
+	g_debug ("%d address providers matching requirements found", 
+	         g_list_length (client->address_providers));
+	if (!client->address_providers) {
 		// TODO: should have a return value to indicate provider existence?
 	} else {
 		
-		/* choose the most accurate provider (first one) */
-		client->address_provider = providers->data;
+		client->address_provider = client->address_providers->data;
 		
 		g_signal_connect (G_OBJECT (client->address_provider),
 				  "address-changed",
 				  G_CALLBACK (address_changed),
 				  client);
 		
-		g_list_free (providers);
 	}
 	
 	return TRUE;

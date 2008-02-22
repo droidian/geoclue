@@ -108,7 +108,8 @@ gc_master_add_new_provider (GcMaster   *master,
 	GcMasterProvider *provider;
 	
 	provider = gc_master_provider_new (filename, 
-	                                   master->connectivity != NULL);
+	                                   master->connectivity);
+	
 	if (!provider) {
 		g_warning ("Loading from %s failed", filename);
 		return;
@@ -161,37 +162,6 @@ gc_master_load_providers (GcMaster *master)
 	g_dir_close (dir);
 }
 
-static int ConnectivityStatusToProviderStatus[] = {
-	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_UNKNOWN,*/
-	GEOCLUE_STATUS_UNAVAILABLE,  /*GEOCLUE_CONNECTIVITY_OFFLINE,*/
-	GEOCLUE_STATUS_ACQUIRING,    /*GEOCLUE_CONNECTIVITY_ACQUIRING,*/
-	GEOCLUE_STATUS_AVAILABLE     /*GEOCLUE_CONNECTIVITY_ONLINE,*/
-};
-
-static void
-network_status_changed (GeoclueConnectivity *connectivity, 
-                        GeoclueNetworkStatus status, 
-                        GcMaster *master)
-{
-	/* TODO: connectivity stuff should maybe have some latency
-	 * so we wouldn't start this on any 2sec network problems */
-	GList *l;
-	GeoclueStatus gc_status;
-	
-	if (providers == NULL) {
-		return;
-	}
-	
-	gc_status = ConnectivityStatusToProviderStatus[status];
-	for (l = providers; l; l = l->next) {
-		GcMasterProvider *provider = l->data;
-		
-		/* might be nicer to do this with a signal, but ... */
-		gc_master_provider_network_status_changed (provider,
-		                                           gc_status);
-	}
-}
-
 static void
 gc_master_init (GcMaster *master)
 {
@@ -213,8 +183,6 @@ gc_master_init (GcMaster *master)
 	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_CONIC, NULL));
 #endif
 #endif
-	g_signal_connect (master->connectivity, "status-changed",
-	                  G_CALLBACK (network_status_changed), master);
 	
 	gc_master_load_providers (master);
 }

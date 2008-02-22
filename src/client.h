@@ -31,6 +31,8 @@ typedef struct {
 	
 	GcMasterProvider *address_provider;
 	
+	GList *position_providers;
+	GList *address_providers;
 } GcMasterClient;
 
 typedef struct {

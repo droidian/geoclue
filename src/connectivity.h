@@ -10,15 +10,9 @@
 #define _GEOCLUE_CONNECTIVITY_H
 
 #include <glib-object.h>
+#include <geoclue/geoclue-types.h>
 
 G_BEGIN_DECLS
-
-typedef enum {
-	GEOCLUE_CONNECTIVITY_UNKNOWN,
-	GEOCLUE_CONNECTIVITY_OFFLINE,
-	GEOCLUE_CONNECTIVITY_ACQUIRING,
-	GEOCLUE_CONNECTIVITY_ONLINE,
-} GeoclueNetworkStatus;
 
 
 #define GEOCLUE_TYPE_CONNECTIVITY (geoclue_connectivity_get_type ())
@@ -43,7 +37,7 @@ struct _GeoclueConnectivityInterface {
 GType geoclue_connectivity_get_type (void);
 
 
-int geoclue_connectivity_get_status (GeoclueConnectivity *self);
+GeoclueNetworkStatus geoclue_connectivity_get_status (GeoclueConnectivity *self);
 
 void
 geoclue_connectivity_emit_status_changed (GeoclueConnectivity *self,

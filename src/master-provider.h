@@ -1,9 +1,11 @@
 #ifndef MASTER_PROVIDER_H
 #define MASTER_PROVIDER_H
 
+
 #include <geoclue/geoclue-provider.h>
 #include <geoclue/geoclue-types.h>
 #include <geoclue/geoclue-accuracy.h>
+#include "connectivity.h"
 
 G_BEGIN_DECLS
 
@@ -26,6 +28,8 @@ typedef struct _GcMasterProvider {
 typedef struct _GcMasterProviderClass {
 	GeoclueProviderClass provider_class;
 	
+	void (* status_changed) (GcMasterProvider *master_provider,
+	                         GeoclueStatus     status);
 	void (* position_changed) (GcMasterProvider     *master_provider,
 	                           GeocluePositionFields fields,
 	                           int                   timestamp,
@@ -42,7 +46,7 @@ typedef struct _GcMasterProviderClass {
 GType gc_master_provider_get_type (void);
 
 GcMasterProvider *gc_master_provider_new (const char *filename,
-                                          gboolean    network_status_events);
+                                          GeoclueConnectivity *connectivity);
 
 gint gc_master_provider_compare_by_accuracy (GcMasterProvider *a, GcMasterProvider *b);
 
@@ -51,9 +55,11 @@ gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
                                      GeoclueAccuracyLevel  min_accuracy,
                                      gboolean              need_update,
                                      GeoclueResourceFlags  allowed_resources);
-                                     
+
 void gc_master_provider_network_status_changed (GcMasterProvider *provider,
-                                                GeoclueStatus status);
+                                                GeoclueNetworkStatus status);
+
+GeoclueNetworkStatus gc_master_provider_get_status (GcMasterProvider *provider);
 
 GeocluePositionFields gc_master_provider_get_position (GcMasterProvider *master_provider,
                                                        int              *timestamp,

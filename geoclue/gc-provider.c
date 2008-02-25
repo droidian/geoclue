@@ -126,7 +126,7 @@ set_options (GcIfaceGeoclue *geoclue,
 	GcProviderClass *klass;
 
 	klass = GC_PROVIDER_GET_CLASS (geoclue);
-	if (klass->get_status) {
+	if (klass->set_options) {
 		return klass->set_options (geoclue, options, error);
 	} 
 

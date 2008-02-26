@@ -33,6 +33,11 @@ enum {
 /* used to save signal ids for current provider */
 static guint32 signals[LAST_SIGNAL] = {0, };
 
+
+static gboolean status_change_requires_provider_change (GList            *provider_list,
+                                                        GcMasterProvider *current_provider,
+                                                        GcMasterProvider *changed_provider,
+                                                        GeoclueStatus     status)
 static void gc_master_client_emit_position_changed (GcMasterClient *client);
 static void gc_master_client_emit_address_changed (GcMasterClient *client);
 static gboolean gc_master_client_choose_position_provider (GcMasterClient *client, 
@@ -59,39 +64,6 @@ G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client,
 
 
 #include "gc-iface-master-client-glue.h"
-
-static void
-finalize (GObject *object)
-{
-	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
-}
-
-/*if changed_provider status changes, do we need to choose a new provider? */
-static gboolean
-status_change_requires_provider_change (GList            *provider_list,
-                                        GcMasterProvider *current_provider,
-                                        GcMasterProvider *changed_provider,
-                                        GeoclueStatus     status)
-{
-	if (current_provider == changed_provider &&
-	    status != GEOCLUE_STATUS_AVAILABLE) {
-		return TRUE;
-	}
-	while (provider_list) {
-		GcMasterProvider *p = provider_list->data;
-		if (p == current_provider) {
-			/* not interested in worse-than-current providers */
-			return FALSE;
-		}
-		if (p == changed_provider &&
-		    status == GEOCLUE_STATUS_AVAILABLE) {
-			/* better-than-current provider */
-			return TRUE;
-		}
-		provider_list = provider_list->next;
-	}
-	g_assert_not_reached();
-}
 
 static void
 status_changed (GcMasterProvider *provider,
@@ -176,6 +148,33 @@ address_changed (GcMasterProvider     *provider,
 		 timestamp,
 		 details,
 		 accuracy);
+}
+
+/*if changed_provider status changes, do we need to choose a new provider? */
+static gboolean
+status_change_requires_provider_change (GList            *provider_list,
+                                        GcMasterProvider *current_provider,
+                                        GcMasterProvider *changed_provider,
+                                        GeoclueStatus     status)
+{
+	if (current_provider == changed_provider &&
+	    status != GEOCLUE_STATUS_AVAILABLE) {
+		return TRUE;
+	}
+	while (provider_list) {
+		GcMasterProvider *p = provider_list->data;
+		if (p == current_provider) {
+			/* not interested in worse-than-current providers */
+			return FALSE;
+		}
+		if (p == changed_provider &&
+		    status == GEOCLUE_STATUS_AVAILABLE) {
+			/* better-than-current provider */
+			return TRUE;
+		}
+		provider_list = provider_list->next;
+	}
+	g_assert_not_reached();
 }
 
 static void
@@ -406,6 +405,12 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	gc_master_client_choose_address_provider (client, client->address_providers);
 	
 	return TRUE;
+}
+
+static void
+finalize (GObject *object)
+{
+	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }
 
 static void

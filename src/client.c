@@ -370,6 +370,9 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		                         require_updates,
 		                         allowed_resources,
 		                         NULL);
+	client->position_providers = 
+		g_list_sort (client->position_providers,
+		             (GCompareFunc)gc_master_provider_compare);
 	g_debug ("client: %d position providers matching requirements found", 
 	         g_list_length (client->position_providers));
 	
@@ -379,8 +382,12 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		                         require_updates,
 		                         allowed_resources,
 		                         NULL);
+	client->address_providers = 
+		g_list_sort (client->address_providers,
+		             (GCompareFunc)gc_master_provider_compare);
 	g_debug ("client: %d address providers matching requirements found", 
 	         g_list_length (client->address_providers));
+	
 	
 	/* connect status and accuracy signals */
 	all_providers = g_list_copy (client->position_providers);

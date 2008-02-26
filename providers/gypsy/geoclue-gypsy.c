@@ -389,7 +389,6 @@ set_options (GcIfaceGeoclue *gc,
 			  G_CALLBACK (connection_changed), gypsy);
 	g_signal_connect (gypsy->device, "fix-status-changed",
 			  G_CALLBACK (fix_status_changed), gypsy);
-	get_initial_status (gypsy);
 	
 	gypsy->position = gypsy_position_new (path);
 	g_signal_connect (gypsy->position, "position-changed",
@@ -400,10 +399,19 @@ set_options (GcIfaceGeoclue *gc,
 	gypsy->acc = gypsy_accuracy_new (path);
 	g_signal_connect (gypsy->acc, "accuracy-changed",
 			  G_CALLBACK (accuracy_changed), gypsy);
-
+	
+	g_debug ("starting device");
+	gypsy_device_start (gypsy->device, error);
+	if (*error != NULL) {
+		g_print ("Error - %s?\n", (*error)->message);
+		gypsy->status = GEOCLUE_STATUS_ERROR;
+		g_free (path);
+		return FALSE;
+	}
+	get_initial_status (gypsy);
 	g_free (path);
-
-        return TRUE;
+	
+	return TRUE;
 }
 
 static gboolean

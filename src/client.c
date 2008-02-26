@@ -66,87 +66,61 @@ finalize (GObject *object)
 	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }
 
+/*if changed_provider status changes, do we need to choose a new provider? */
+static gboolean
+status_change_requires_provider_change (GList            *provider_list,
+                                        GcMasterProvider *current_provider,
+                                        GcMasterProvider *changed_provider,
+                                        GeoclueStatus     status)
+{
+	if (current_provider == changed_provider &&
+	    status != GEOCLUE_STATUS_AVAILABLE) {
+		return TRUE;
+	}
+	while (provider_list) {
+		GcMasterProvider *p = provider_list->data;
+		if (p == current_provider) {
+			/* not interested in worse-than-current providers */
+			return FALSE;
+		}
+		if (p == changed_provider &&
+		    status == GEOCLUE_STATUS_AVAILABLE) {
+			/* better-than-current provider */
+			return TRUE;
+		}
+		provider_list = provider_list->next;
+	}
+	g_assert_not_reached();
+}
+
 static void
 status_changed (GcMasterProvider *provider,
                 GeoclueStatus     status,
                 GcMasterClient   *client)
 {
-	GList *l;
-	gboolean new_p = FALSE;
-	
 	g_debug ("client: provider %s status changed", gc_master_provider_get_name (provider));
 	
+	/*change providers if needed */
 	
-	/*change position provider if needed */
-	l = client->position_providers;
-	while (l) {
-		GcMasterProvider *p = l->data;
+	if (status_change_requires_provider_change (client->position_providers,
+	                                            client->position_provider,
+	                                            provider, status) &&
+	    gc_master_client_choose_position_provider (client, 
+	                                               client->position_providers)) {
 		
-		if (p == client->position_provider) {
-			if (p == provider) {
-				/* current provider status changed:
-				   If not available, change provider */
-				if (status != GEOCLUE_STATUS_AVAILABLE) {
-					new_p = gc_master_client_choose_position_provider 
-						(client, client->position_providers);
-				}
-			}
-			/* not interested in status changes of providers 
-			   lower on the list than current provider */
-			break;
-		} else if (p == provider) {
-			/* a better-than-current provider changed status:
-			  if status is available, change provider */
-			if (status == GEOCLUE_STATUS_AVAILABLE) {
-				new_p = gc_master_client_choose_position_provider 
-					(client, client->position_providers);
-				break;
-			}
-		}
-		l = l->next;
-	}
-	
-	if (new_p) {
-		/* we have a new position_provider, force-emit position_changed */
+		/* we have a new position provider, force-emit position_changed */
 		gc_master_client_emit_position_changed (client);
 	}
 	
-	
-	/*change address provider if needed */
-	new_p = FALSE;
-	l = client->address_providers;
-	while (l) {
-		GcMasterProvider *p = l->data;
+	if (status_change_requires_provider_change (client->address_providers,
+	                                            client->address_provider,
+	                                            provider, status) &&
+	    gc_master_client_choose_address_provider (client, 
+	                                              client->address_providers)) {
 		
-		if (p == client->address_provider) {
-			if (p == provider) {
-				/* current provider status changed:
-				   If not available or acquiring, change provider */
-				if (status < GEOCLUE_STATUS_ACQUIRING) {
-					new_p = gc_master_client_choose_address_provider 
-						(client, client->address_providers);
-				}
-			}
-			/* not interested in status changes of providers 
-			   lower on the list */
-			break;
-		} else if (p == provider) {
-			/* a better-than-current provider changed status:
-			  if status is available or acq., change provider */
-			if (status >= GEOCLUE_STATUS_ACQUIRING) {
-				new_p = gc_master_client_choose_address_provider 
-					(client, client->address_providers);
-				break;
-			}
-		}
-		l = l->next;
-	}
-	
-	if (new_p) {
-		/* we have a new address_provider, force-emit address_changed */
+		/* we have a new address provider, force-emit position_changed */
 		gc_master_client_emit_address_changed (client);
 	}
-
 }
 
 static void

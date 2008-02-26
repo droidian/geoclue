@@ -1,3 +1,12 @@
+/*
+ * Geoclue
+ * master-provider.c - Provider object for master and master client
+ *
+ * Author: Jussi Kukkonen <jku@o-hand.com>
+ * 
+ * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
+ */
+
 /**
  *  Provider object for GcMaster. Takes care of cacheing 
  *  queried data.
@@ -10,13 +19,6 @@
  *  have a "allowOldData" setting)
  * 
  * TODO: 
- * 	fix status especially for network providers
- * 
- * 	save accuracy level estimate in .provider: could be used to 
- * 	select suitable providers and to sort them...
- * 
- * 	fix  address marshaller problems
- * 
  * 	implement velocity (maybe this should be somehow related to position)
  * 
  * 	implement other (non-updating) ifaces
@@ -57,7 +59,7 @@ typedef struct _GcMasterProviderPrivate {
 	char *name;
 	char *service;
 	char *path;
-	GeoclueAccuracyLevel accuracy_level;
+	GeoclueAccuracyLevel promised_accuracy;
 	
 	GeoclueResourceFlags required_resources;
 	GeoclueProvideFlags provides;
@@ -79,6 +81,7 @@ typedef struct _GcMasterProviderPrivate {
 
 enum {
 	STATUS_CHANGED,
+	ACCURACY_CHANGED,
 	POSITION_CHANGED,
 	ADDRESS_CHANGED,
 	LAST_SIGNAL
@@ -88,6 +91,28 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GC_TYPE_MASTER_PROVIDER, GcMasterProviderPrivate))
 
 G_DEFINE_TYPE (GcMasterProvider, gc_master_provider, G_TYPE_OBJECT)
+
+
+static void 
+gc_master_provider_handle_new_accuracy (GcMasterProvider *provider,
+                                        GeoclueAccuracy  *accuracy)
+{
+	GeoclueAccuracyLevel old_level, new_level;
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	if (priv->position_cache.accuracy) {
+		geoclue_accuracy_get_details (priv->position_cache.accuracy,
+		                              &old_level, NULL, NULL);
+	} else {
+		old_level = priv->promised_accuracy;
+	}
+	geoclue_accuracy_get_details (accuracy,
+	                              &new_level, NULL, NULL);
+	if (old_level != new_level) {
+		g_signal_emit (provider, signals[ACCURACY_CHANGED], 0,
+		               new_level);
+	}
+}
 
 static void
 gc_master_provider_set_position (GcMasterProvider      *provider,
@@ -99,6 +124,8 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
                                  GeoclueAccuracy       *accuracy)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	gc_master_provider_handle_new_accuracy (provider, accuracy);
 	
 	priv->position_cache.timestamp = timestamp;
 	priv->position_cache.fields = fields;
@@ -152,6 +179,9 @@ gc_master_provider_set_address (GcMasterProvider *provider,
                                 GeoclueAccuracy  *accuracy)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	gc_master_provider_handle_new_accuracy (provider, accuracy);
+	
 	
 	priv->address_cache.timestamp = timestamp;
 	
@@ -213,7 +243,7 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 		return;
 	}
 	
-	g_debug ("master-provider: Updating %s cache ", priv->name);
+	g_debug ("%s: Updating cache ", priv->name);
 	
 	if (priv->position) {
 		int timestamp;
@@ -319,7 +349,6 @@ gc_master_provider_handle_status_change (GcMasterProvider *provider)
 		
 		priv->master_status = new_master_status;
 		if (!startup) {
-			g_debug ("master-provider: %s emitting new status: %d", priv->name, new_master_status);
 			g_signal_emit (provider, signals[STATUS_CHANGED], 0, new_master_status);
 			gc_master_provider_update_cache (provider);
 		}
@@ -432,6 +461,15 @@ gc_master_provider_class_init (GcMasterProviderClass *klass)
 						  G_SIGNAL_RUN_FIRST |
 						  G_SIGNAL_NO_RECURSE,
 						  G_STRUCT_OFFSET (GcMasterProviderClass, status_changed), 
+						  NULL, NULL,
+						  g_cclosure_marshal_VOID__INT,
+						  G_TYPE_NONE, 1,
+						  G_TYPE_INT);
+	signals[ACCURACY_CHANGED] = g_signal_new ("accuracy-changed",
+						  G_TYPE_FROM_CLASS (klass),
+						  G_SIGNAL_RUN_FIRST |
+						  G_SIGNAL_NO_RECURSE,
+						  G_STRUCT_OFFSET (GcMasterProviderClass, accuracy_changed), 
 						  NULL, NULL,
 						  g_cclosure_marshal_VOID__INT,
 						  G_TYPE_NONE, 1,
@@ -576,7 +614,7 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 	g_print ("\n   Name - %s\n", priv->name);
 	g_print ("   Service - %s\n", priv->service);
 	g_print ("   Path - %s\n", priv->path);
-	g_print ("   Accuracy level - %d\n", priv->accuracy_level);
+	g_print ("   Accuracy level - %d\n", priv->promised_accuracy);
 
 	gc_master_provider_dump_required_resources (provider);
 	gc_master_provider_dump_provides (provider);
@@ -714,7 +752,7 @@ gc_master_provider_new (const char *filename,
 	priv->path = g_key_file_get_value (keyfile, "Geoclue Provider",
 	                                   "Path", NULL);
 	
-	priv->accuracy_level = 
+	priv->promised_accuracy = 
 		g_key_file_get_integer (keyfile, "Geoclue Provider",
 		                        "Accuracy", NULL);
 	
@@ -885,7 +923,7 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 	
 	return (((supported_ifaces & iface_type) == iface_type) &&
 	        ((priv->provides & required_flags) == required_flags) &&
-	        (priv->accuracy_level >= min_accuracy) &&
+	        (priv->promised_accuracy >= min_accuracy) &&
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }
 
@@ -897,13 +935,50 @@ gc_master_provider_get_status (GcMasterProvider *provider)
 	return priv->master_status;
 }
 
-/* GCompareFunc for sorting providers by accuracy */
-gint
-gc_master_provider_compare_by_accuracy (GcMasterProvider *a, 
-                                        GcMasterProvider *b)
+/*returns a reference, but is not meant for editing...*/
+char * 
+gc_master_provider_get_name (GcMasterProvider *provider)
 {
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return priv->name;
+}
+
+GeoclueAccuracyLevel
+gc_master_provider_get_accuracy_level (GcMasterProvider *provider)
+{
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return priv->promised_accuracy;
+}
+
+/* GCompareFunc for sorting providers by accuracy and required resources */
+gint
+gc_master_provider_compare (GcMasterProvider *a, 
+                            GcMasterProvider *b)
+{
+	int diff;
+	GeoclueAccuracyLevel level_a, level_b;
+	
 	GcMasterProviderPrivate *priv_a = GET_PRIVATE (a);
 	GcMasterProviderPrivate *priv_b = GET_PRIVATE (b);
 	
-	return priv_b->accuracy_level - priv_a->accuracy_level;
+	if (priv_a->position_cache.accuracy) {
+		geoclue_accuracy_get_details (priv_a->position_cache.accuracy,
+		                              &level_a, NULL, NULL);
+	} else {
+		level_a = priv_a->promised_accuracy;
+	}
+	if (priv_b->position_cache.accuracy) {
+		geoclue_accuracy_get_details (priv_b->position_cache.accuracy,
+		                              &level_b, NULL, NULL);
+	} else {
+		level_b = priv_b->promised_accuracy;
+	}
+	
+	diff =  level_b - level_a;
+	if (diff != 0) {
+		return diff;
+	}
+	return priv_a->required_resources - priv_b->required_resources;
 }

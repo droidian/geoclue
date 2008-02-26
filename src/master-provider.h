@@ -30,6 +30,8 @@ typedef struct _GcMasterProviderClass {
 	
 	void (* status_changed) (GcMasterProvider *master_provider,
 	                         GeoclueStatus     status);
+	void (* accuracy_changed) (GcMasterProvider     *master_provider,
+	                           GeoclueAccuracyLevel  status);
 	void (* position_changed) (GcMasterProvider     *master_provider,
 	                           GeocluePositionFields fields,
 	                           int                   timestamp,
@@ -48,7 +50,7 @@ GType gc_master_provider_get_type (void);
 GcMasterProvider *gc_master_provider_new (const char *filename,
                                           GeoclueConnectivity *connectivity);
 
-gint gc_master_provider_compare_by_accuracy (GcMasterProvider *a, GcMasterProvider *b);
+gint gc_master_provider_compare (GcMasterProvider *a, GcMasterProvider *b);
 
 gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
                                      GcInterfaceFlags      iface_types,
@@ -58,6 +60,9 @@ gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
 
 void gc_master_provider_network_status_changed (GcMasterProvider *provider,
                                                 GeoclueNetworkStatus status);
+
+char* gc_master_provider_get_name (GcMasterProvider *provider);
+GeoclueAccuracyLevel gc_master_provider_get_accuracy_level (GcMasterProvider *provider);
 
 GeoclueNetworkStatus gc_master_provider_get_status (GcMasterProvider *provider);
 

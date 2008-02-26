@@ -3,6 +3,7 @@
  * master.c - Master process
  *
  * Authors: Iain Holmes <iain@openedhand.com>
+ *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
  */
 
@@ -98,7 +99,15 @@ gc_master_class_init (GcMasterClass *klass)
 					 &dbus_glib_gc_iface_master_object_info);
 }
 
-
+static void
+accuracy_changed (GcMasterProvider     *provider,
+                  GeoclueAccuracyLevel  level,
+                  GcMaster             *master)
+{
+	g_debug ("master: provider accuracy changed, sorting list");
+	providers = g_list_sort (providers, 
+	                         (GCompareFunc)gc_master_provider_compare);
+}
 
 /* Load the provider details out of a keyfile */
 static void
@@ -117,7 +126,12 @@ gc_master_add_new_provider (GcMaster   *master,
 	
 	providers = g_list_insert_sorted 
 		(providers, provider, 
-		 (GCompareFunc)gc_master_provider_compare_by_accuracy);
+		 (GCompareFunc)gc_master_provider_compare);
+	
+	g_signal_connect (G_OBJECT (provider),
+			  "accuracy-changed",
+			  G_CALLBACK (accuracy_changed),
+			  master);
 }
 
 /* Scan a directory for .provider files */

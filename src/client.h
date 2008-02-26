@@ -26,13 +26,12 @@ typedef struct {
 	gboolean require_updates;
 	GeoclueResourceFlags allowed_resources;
 	
-	guint32 update_id;
 	GcMasterProvider *position_provider;
+	GList *position_providers;
 	
 	GcMasterProvider *address_provider;
-	
-	GList *position_providers;
 	GList *address_providers;
+	
 } GcMasterClient;
 
 typedef struct {

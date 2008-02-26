@@ -292,7 +292,6 @@ geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 			gpsd->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
 		}
 		
-		g_debug ("new status: %d", gpsd->last_status);
 		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gpsd),
 		                                      gpsd->last_status);
 	}
@@ -334,6 +333,7 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 	/* init gpsd (localhost, default port) */
 	self->gpsdata = gps_open (NULL, DEFAULT_GPSD_PORT);
 	if (self->gpsdata) {
+		/* FIXME: This will block for a long time (10-80 seconds) if device is not available */
 		gps_set_callback (self->gpsdata, gpsd_callback, &gps_thread);
 	} else {
 		g_printerr("Cannot find gpsd!\n");

@@ -37,7 +37,7 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 static gboolean status_change_requires_provider_change (GList            *provider_list,
                                                         GcMasterProvider *current_provider,
                                                         GcMasterProvider *changed_provider,
-                                                        GeoclueStatus     status)
+                                                        GeoclueStatus     status);
 static void gc_master_client_emit_position_changed (GcMasterClient *client);
 static void gc_master_client_emit_address_changed (GcMasterClient *client);
 static gboolean gc_master_client_choose_position_provider (GcMasterClient *client, 

@@ -53,7 +53,7 @@ gc_iface_position_base_init (gpointer klass)
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
 						  G_TYPE_DOUBLE,
-						  dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE));
+						  GEOCLUE_ACCURACY_TYPE);
 	
 	dbus_g_object_type_install_info (gc_iface_position_get_type (),
 					 &dbus_glib_gc_iface_position_object_info);

@@ -35,10 +35,7 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 		      double               horizontal_accuracy,
 		      double               vertical_accuracy)
 {
-	GPtrArray *accuracy;
 	GValue accuracy_struct = {0, };
-
-	accuracy = g_ptr_array_new ();
 
 	g_value_init (&accuracy_struct, GEOCLUE_ACCURACY_TYPE);
 	g_value_take_boxed (&accuracy_struct,
@@ -50,9 +47,8 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 				1, horizontal_accuracy,
 				2, vertical_accuracy,
 				G_MAXUINT);
-	g_ptr_array_add (accuracy, g_value_get_boxed (&accuracy_struct));
 	
-	return (GeoclueAccuracy *) accuracy;
+	return (GeoclueAccuracy *) g_value_get_boxed (&accuracy_struct);
 }
 
 /**
@@ -64,18 +60,11 @@ geoclue_accuracy_new (GeoclueAccuracyLevel level,
 void
 geoclue_accuracy_free (GeoclueAccuracy *accuracy)
 {
-	GPtrArray *arr;
-	int i;
 	if (!accuracy) {
 		return;
 	}
 	
-	arr = (GPtrArray *) accuracy;
-	for (i = 0; i < arr->len; i++) {
-		g_boxed_free (GEOCLUE_ACCURACY_TYPE,
-			      g_ptr_array_index (arr, i));
-	}
-	g_ptr_array_free (arr, TRUE);
+        g_boxed_free (GEOCLUE_ACCURACY_TYPE, accuracy);
 }
 
 /**
@@ -93,11 +82,8 @@ geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 			      double               *vertical_accuracy)
 {
 	GValueArray *vals;
-	GPtrArray *arr = (GPtrArray *) accuracy;
 	
-	g_assert (arr->pdata != NULL);
-	
-	vals = arr->pdata[0];
+	vals = accuracy;
 	if (level != NULL) {
 		*level = g_value_get_int (g_value_array_get_nth (vals, 0));
 	}
@@ -123,8 +109,7 @@ geoclue_accuracy_set_details (GeoclueAccuracy     *accuracy,
 			      double               horizontal_accuracy,
 			      double               vertical_accuracy)
 {
-	GPtrArray *arr = (GPtrArray *) accuracy;
-	GValueArray *vals = arr->pdata[0];
+	GValueArray *vals = accuracy;
 
 	g_value_set_int (g_value_array_get_nth (vals, 0), level);
 	g_value_set_double (g_value_array_get_nth (vals, 1), 

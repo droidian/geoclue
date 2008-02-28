@@ -18,7 +18,7 @@ G_BEGIN_DECLS
 
 #define GEOCLUE_ACCURACY_TYPE (dbus_g_type_get_struct ("GValueArray", G_TYPE_INT, G_TYPE_DOUBLE, G_TYPE_DOUBLE, G_TYPE_INVALID))
 
-typedef GPtrArray GeoclueAccuracy;
+typedef GValueArray GeoclueAccuracy;
 
 GeoclueAccuracy *geoclue_accuracy_new (GeoclueAccuracyLevel level,
 				       double               horizontal_accuracy,

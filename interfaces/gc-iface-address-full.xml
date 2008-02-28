@@ -7,13 +7,13 @@
 			
 			<arg name="address" type="a{ss}" direction="out" />
 
-		        <arg name="accuracy" type="a(idd)" direction="out" />
+		        <arg name="accuracy" type="(idd)" direction="out" />
 		</method>
 
 		<signal name="AddressChanged">
 		        <arg type="i" name="timestamp" />
 		        <arg type="a{ss}" name="address" />
-			<arg type="a(idd)" name="accuracy" />
+			<arg type="(idd)" name="accuracy" />
 		</signal>
 	</interface>
 </node>

@@ -77,7 +77,7 @@ constructor (GType                  type,
 	dbus_g_proxy_add_signal (provider->proxy, "AddressChanged",
 				 G_TYPE_INT, 
 				 dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING),
-				 dbus_g_type_get_collection ("GPtrArray", GEOCLUE_ACCURACY_TYPE),
+				 GEOCLUE_ACCURACY_TYPE,
 				 G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "AddressChanged",
 				     G_CALLBACK (address_changed),

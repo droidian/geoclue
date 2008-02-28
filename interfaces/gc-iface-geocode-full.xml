@@ -10,7 +10,7 @@
 		        <arg name="longitude" type="d" direction="out" />
 		        <arg name="altitude" type="d" direction="out" />
 
-                        <arg name="accuracy" type="a(idd)" direction="out" />
+                        <arg name="accuracy" type="(idd)" direction="out" />
 		</method>
 	</interface>
 </node>

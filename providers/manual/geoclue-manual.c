@@ -67,8 +67,8 @@ typedef struct {
 static void geoclue_manual_address_init (GcIfaceAddressClass *iface);
 
 G_DEFINE_TYPE_WITH_CODE (GeoclueManual, geoclue_manual, GC_TYPE_PROVIDER,
-			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
-						geoclue_manual_address_init))
+                         G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
+                                                geoclue_manual_address_init))
 
 static gboolean
 geoclue_manual_set_address (GeoclueManual *manual,
@@ -91,64 +91,23 @@ geoclue_manual_set_address_fields (GeoclueManual *manual,
 #include "geoclue-manual-glue.h"
 
 
-static void 
-free_address_key_and_value (char *key, char *value, gpointer userdata)
-{
-	g_free (key);
-	g_free (value);
-}
-static void 
-copy_address_key_and_value (char *key, char *value, GHashTable *target)
-{
-	/*FIXME: copy values?*/
-	g_hash_table_insert (target, key, value);
-}
-static void
-free_address_details (GHashTable *details)
-{
-	if (details) {
-		g_hash_table_foreach (details, (GHFunc)free_address_key_and_value, NULL);
-		g_hash_table_unref (details);
-	}
-}
-static GHashTable*
-copy_address_details (GHashTable *details)
-{
-	GHashTable *t = g_hash_table_new (g_str_hash, g_str_equal);
-	if (details) {
-		g_hash_table_foreach (details, (GHFunc)copy_address_key_and_value, t);
-	}
-	return t;
-}
-
-static GeoclueAccuracy*
+static GeoclueAccuracyLevel
 get_accuracy_for_address (GHashTable *address)
 {
-	/* TODO: should we define default values for hor/vert accuracy */
 	if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_STREET)) {
-		return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_STREET, 0, 0); 
+		return GEOCLUE_ACCURACY_LEVEL_STREET;
 	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_POSTALCODE)) {
-		return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_POSTALCODE, 0, 0);
+		return GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
 	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_LOCALITY)) {
-		return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY, 0, 0);
+		return GEOCLUE_ACCURACY_LEVEL_LOCALITY;
 	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_REGION)) {
-		return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_REGION, 0, 0); 
+		return GEOCLUE_ACCURACY_LEVEL_REGION;
 	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRY) ||
 	           g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE)) {
-		return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_COUNTRY, 0, 0); 
+		return GEOCLUE_ACCURACY_LEVEL_COUNTRY;
 	}
-	return geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_STREET, 0, 0); 
+	return GEOCLUE_ACCURACY_LEVEL_STREET;
 }
-
-static void geoclue_manual_init_empty (GeoclueManual *manual)
-{
-	free_address_details (manual->address);
-	manual->address = g_hash_table_new (g_str_hash, g_str_equal);
-	
-	geoclue_accuracy_free (manual->accuracy);
-	manual->accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
-}
-
 
 static gboolean
 get_status (GcIfaceGeoclue *gc,
@@ -163,8 +122,9 @@ static gboolean
 shutdown (GcIfaceGeoclue *gc,
 	  GError        **error)
 {
-	GeoclueManual *manual = GEOCLUE_MANUAL (gc);
-
+	GeoclueManual *manual;
+	
+	manual = GEOCLUE_MANUAL (gc);
 	g_main_loop_quit (manual->loop);
 	return TRUE;
 }
@@ -173,13 +133,14 @@ gboolean
 validity_ended (GeoclueManual *manual)
 {
 	manual->event_id = 0;
-	geoclue_manual_init_empty (manual);
+	g_hash_table_remove_all (manual->address);
+	geoclue_accuracy_set_details (manual->accuracy,
+	                              GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
 	
 	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (manual),
 	                                       manual->timestamp,
 	                                       manual->address,
 	                                       manual->accuracy);
-	
 	return FALSE;
 }
 
@@ -195,11 +156,12 @@ geoclue_manual_set_address_common (GeoclueManual *manual,
 	
 	manual->timestamp = time (NULL);
 	
-	free_address_details (manual->address);
+	g_hash_table_destroy (manual->address);
 	manual->address = address;
 	
-	geoclue_accuracy_free (manual->accuracy);
-	manual->accuracy = get_accuracy_for_address (manual->address);
+	geoclue_accuracy_set_details (manual->accuracy,
+	                              get_accuracy_for_address (address),
+	                              0, 0);
 	
 	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (manual),
 	                                       manual->timestamp,
@@ -211,7 +173,6 @@ geoclue_manual_set_address_common (GeoclueManual *manual,
 		                                  (GSourceFunc)validity_ended, 
 		                                  manual);
 	}
-
 }
 
 static gboolean
@@ -222,8 +183,7 @@ geoclue_manual_set_address (GeoclueManual *manual,
 {
 	geoclue_manual_set_address_common (manual,
 	                                   valid_for,
-	                                   copy_address_details (address));
-	
+	                                   address_details_copy (address));
 	return TRUE;
 }
 
@@ -239,8 +199,9 @@ geoclue_manual_set_address_fields (GeoclueManual *manual,
                                    char *street,
                                    GError **error)
 {
-	GHashTable *address = g_hash_table_new (g_str_hash, g_str_equal);
+	GHashTable *address;
 	
+	address = address_details_new ();
 	if (country_code && (strlen (country_code) > 0)) {
 		g_hash_table_insert (address,
 		                     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE), 
@@ -280,7 +241,6 @@ geoclue_manual_set_address_fields (GeoclueManual *manual,
 	geoclue_manual_set_address_common (manual,
 	                                   valid_for,
 	                                   address);
-	
 	return TRUE;
 }
 
@@ -288,11 +248,13 @@ geoclue_manual_set_address_fields (GeoclueManual *manual,
 static void
 finalize (GObject *object)
 {
-	GeoclueManual *manual = GEOCLUE_MANUAL (object);
-
-	free_address_details (manual->address);
+	GeoclueManual *manual;
+	
+	manual = GEOCLUE_MANUAL (object);
+	
+	g_hash_table_destroy (manual->address);
 	geoclue_accuracy_free (manual->accuracy);
-
+	
 	((GObjectClass *) geoclue_manual_parent_class)->finalize (object);
 }
 
@@ -301,7 +263,7 @@ geoclue_manual_class_init (GeoclueManualClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 	GcProviderClass *p_class = (GcProviderClass *) klass;
-
+	
 	o_class->finalize = finalize;
 	
 	p_class->get_status = get_status;
@@ -319,7 +281,9 @@ geoclue_manual_init (GeoclueManual *manual)
 	                         "/org/freedesktop/Geoclue/Providers/Manual",
 	                         "Manual", "Manual provider");
 	
-	geoclue_manual_init_empty (manual);
+	manual->address = address_details_new ();
+	manual->accuracy = 
+		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
 }
 
 static gboolean
@@ -336,10 +300,10 @@ get_address (GcIfaceAddress   *gc,
 		*timestamp = manual->timestamp;
 	}
 	if (address) {
-		*address = copy_address_details (manual->address);
+		*address = manual->address;
 	}
 	if (accuracy) {
-		*accuracy = geoclue_accuracy_copy (manual->accuracy);
+		*accuracy = manual->accuracy;
 	}
 	
 	return TRUE;

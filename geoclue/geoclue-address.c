@@ -54,12 +54,12 @@ dispose (GObject *object)
 static void
 address_changed (DBusGProxy      *proxy,
 		 int              timestamp,
-		 GPtrArray       *details,
-		 GPtrArray       *accuracy,
+		 GHashTable      *details,
+		 GeoclueAccuracy *accuracy,
 		 GeoclueAddress *address)
 {
 	g_signal_emit (address, signals[ADDRESS_CHANGED], 0, 
-		       timestamp, address, accuracy);
+		       timestamp, details, accuracy);
 }
 
 static GObject *
@@ -76,7 +76,7 @@ constructor (GType                  type,
 
 	dbus_g_proxy_add_signal (provider->proxy, "AddressChanged",
 				 G_TYPE_INT, 
-				 dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING),
+				 DBUS_TYPE_G_STRING_STRING_HASHTABLE,
 				 GEOCLUE_ACCURACY_TYPE,
 				 G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (provider->proxy, "AddressChanged",

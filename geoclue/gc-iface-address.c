@@ -45,7 +45,7 @@ gc_iface_address_base_init (gpointer klass)
 						 geoclue_marshal_VOID__INT_POINTER_BOXED,
 						 G_TYPE_NONE, 3,
 						 G_TYPE_INT, 
-						 dbus_g_type_get_map ("GHashTable", G_TYPE_STRING, G_TYPE_STRING),
+						 DBUS_TYPE_G_STRING_STRING_HASHTABLE,
 						 GEOCLUE_ACCURACY_TYPE);
 	dbus_g_object_type_install_info (gc_iface_address_get_type (),
 					 &dbus_glib_gc_iface_address_object_info);

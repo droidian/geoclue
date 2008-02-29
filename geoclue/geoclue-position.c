@@ -58,7 +58,7 @@ position_changed (DBusGProxy      *proxy,
 		  double           latitude,
 		  double           longitude,
 		  double           altitude,
-		  GValueArray     *accuracy,
+		  GeoclueAccuracy *accuracy,
 		  GeocluePosition *position)
 {
 	g_signal_emit (position, signals[POSITION_CHANGED], 0, fields,

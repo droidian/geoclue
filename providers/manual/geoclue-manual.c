@@ -198,11 +198,9 @@ geoclue_manual_set_address_common (GeoclueManual *manual,
 	free_address_details (manual->address);
 	manual->address = address;
 	
-	
 	geoclue_accuracy_free (manual->accuracy);
 	manual->accuracy = get_accuracy_for_address (manual->address);
 	
-	g_debug ("emitting. country: %s", g_hash_table_lookup (manual->address, "country"));
 	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (manual),
 	                                       manual->timestamp,
 	                                       manual->address,

@@ -90,7 +90,7 @@ status_changed (GcMasterProvider *provider,
 	    gc_master_client_choose_address_provider (client, 
 	                                              client->address_providers)) {
 		
-		/* we have a new address provider, force-emit position_changed */
+		/* we have a new address provider, force-emit address_changed */
 		gc_master_client_emit_address_changed (client);
 	}
 }
@@ -100,15 +100,15 @@ accuracy_changed (GcMasterProvider     *provider,
                   GeoclueAccuracyLevel  level,
                   GcMasterClient       *client)
 {
-	g_debug ("client: accuracy changed, re-choosing current providers");
+	g_debug ("client: %s accuracy changed, re-choosing current providers", 
+	         gc_master_provider_get_name (provider));
 	client->position_providers = 
 		g_list_sort (client->position_providers, 
 		             (GCompareFunc)gc_master_provider_compare);
 	if (gc_master_client_choose_position_provider (client, 
-	                                               client->address_providers)) {
+	                                               client->position_providers)) {
 		gc_master_client_emit_position_changed (client);
 	}
-	
 	client->address_providers = 
 		g_list_sort (client->address_providers, 
 		             (GCompareFunc)gc_master_provider_compare);

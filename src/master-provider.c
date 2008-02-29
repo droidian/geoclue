@@ -60,6 +60,7 @@ typedef struct _GcMasterProviderPrivate {
 	char *service;
 	char *path;
 	GeoclueAccuracyLevel promised_accuracy;
+	GeoclueAccuracyLevel cached_accuracy;
 	
 	GeoclueResourceFlags required_resources;
 	GeoclueProvideFlags provides;
@@ -97,18 +98,13 @@ static void
 gc_master_provider_handle_new_accuracy (GcMasterProvider *provider,
                                         GeoclueAccuracy  *accuracy)
 {
-	GeoclueAccuracyLevel old_level, new_level;
+	GeoclueAccuracyLevel new_level;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
-	if (priv->position_cache.accuracy) {
-		geoclue_accuracy_get_details (priv->position_cache.accuracy,
-		                              &old_level, NULL, NULL);
-	} else {
-		old_level = priv->promised_accuracy;
-	}
 	geoclue_accuracy_get_details (accuracy,
 	                              &new_level, NULL, NULL);
-	if (old_level != new_level) {
+	if (priv->cached_accuracy != new_level) {
+		priv->cached_accuracy = new_level;
 		g_signal_emit (provider, signals[ACCURACY_CHANGED], 0,
 		               new_level);
 	}
@@ -145,8 +141,8 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
 static void 
 free_address_key_and_value (char *key, char *value, gpointer userdata)
 {
-	g_free (key);
-	g_free (value);
+	/* TODO: actually fix address frees...
+	 * should probably use g_hash_table_destroy  */
 }
 static void 
 copy_address_key_and_value (char *key, char *value, GHashTable *target)
@@ -182,8 +178,8 @@ gc_master_provider_set_address (GcMasterProvider *provider,
 	
 	gc_master_provider_handle_new_accuracy (provider, accuracy);
 	
-	
 	priv->address_cache.timestamp = timestamp;
+	
 	
 	free_address_details (priv->address_cache.details);
 	priv->address_cache.details = copy_address_details (details);
@@ -439,8 +435,8 @@ dispose (GObject *object)
 		priv->address = NULL;
 	}
 	if (priv->address_cache.details) {
-		g_hash_table_foreach (priv->address_cache.details, (GHFunc)free_address_key_and_value, NULL);
-		g_hash_table_unref (priv->address_cache.details);
+		free_address_details (priv->address_cache.details);
+		priv->address_cache.details = NULL;
 	}
 	
 	G_OBJECT_CLASS (gc_master_provider_parent_class)->dispose (object);
@@ -755,6 +751,7 @@ gc_master_provider_new (const char *filename,
 	priv->promised_accuracy = 
 		g_key_file_get_integer (keyfile, "Geoclue Provider",
 		                        "Accuracy", NULL);
+	priv->cached_accuracy = priv->promised_accuracy;
 	
 	flags = g_key_file_get_string_list (keyfile, "Geoclue Provider",
 	                                    "Requires", NULL, NULL);
@@ -773,7 +770,11 @@ gc_master_provider_new (const char *filename,
 	} else {
 		priv->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
-	priv->use_cache = FALSE;
+	
+	/* TODO using the cache might not be smart for eg gps providers.
+	 * ATM everything uses it though... */
+	priv->use_cache = TRUE;
+	
 	if (connectivity && 
 	    (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_NETWORK)) {
 		
@@ -786,7 +787,6 @@ gc_master_provider_new (const char *filename,
 		                  G_CALLBACK (network_status_changed), 
 		                  provider);
 		priv->net_status = geoclue_connectivity_get_status (connectivity);
-		priv->use_cache = TRUE;
 	}
 	
 	if (gc_master_provider_initialize (provider, &error) == FALSE) {
@@ -958,25 +958,11 @@ gc_master_provider_compare (GcMasterProvider *a,
                             GcMasterProvider *b)
 {
 	int diff;
-	GeoclueAccuracyLevel level_a, level_b;
 	
 	GcMasterProviderPrivate *priv_a = GET_PRIVATE (a);
 	GcMasterProviderPrivate *priv_b = GET_PRIVATE (b);
 	
-	if (priv_a->position_cache.accuracy) {
-		geoclue_accuracy_get_details (priv_a->position_cache.accuracy,
-		                              &level_a, NULL, NULL);
-	} else {
-		level_a = priv_a->promised_accuracy;
-	}
-	if (priv_b->position_cache.accuracy) {
-		geoclue_accuracy_get_details (priv_b->position_cache.accuracy,
-		                              &level_b, NULL, NULL);
-	} else {
-		level_b = priv_b->promised_accuracy;
-	}
-	
-	diff =  level_b - level_a;
+	diff =  priv_b->cached_accuracy - priv_a->cached_accuracy;
 	if (diff != 0) {
 		return diff;
 	}

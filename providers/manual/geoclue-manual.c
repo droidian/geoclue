@@ -20,7 +20,7 @@
  * 
  * dbus-send --print-reply --type=method_call \
  *           --dest=org.freedesktop.Geoclue.Providers.Manual \
- *           /org/freedesktop/Geoclue/Manual \
+ *           /org/freedesktop/Geoclue/Providers/Manual \
  *           org.freedesktop.Geoclue.Manual.SetAddressFields \
  *           int32:7200 \
  *           string: \
@@ -155,6 +155,7 @@ get_status (GcIfaceGeoclue *gc,
 	    GeoclueStatus  *status,
 	    GError        **error)
 {
+	*status = GEOCLUE_STATUS_AVAILABLE;
 	return TRUE;
 }
 

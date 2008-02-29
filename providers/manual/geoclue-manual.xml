@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object Introspection 1.0//EN" "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
+<node name="/">
+  <interface name="org.freedesktop.Geoclue.Manual">
+    <method name="SetAddress">
+      <arg type="i" name="valid_for" direction="in"/>
+      <arg name="address" type="a{ss}" direction="in"/>
+      <arg name="accuracy" type="a(idd)" direction="in"/>
+    </method>
+    <method name="SetAddressFields">
+      <arg type="i" name="valid_for" direction="in"/>
+      <arg type="s" name="countrycode" direction="in"/>
+      <arg type="s" name="country" direction="in"/>
+      <arg type="s" name="region" direction="in"/>
+      <arg type="s" name="locality" direction="in"/>
+      <arg type="s" name="area" direction="in"/>
+      <arg type="s" name="postalcode" direction="in"/>
+      <arg type="s" name="street" direction="in"/>
+    </method>
+  </interface>
+</node>

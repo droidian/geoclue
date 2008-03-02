@@ -31,6 +31,7 @@
 #include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-address.h>
+#include <geoclue/geoclue-address-details.h>
 #include <geoclue/geoclue-marshal.h>
 
 typedef enum _GeoclueProvideFlags {
@@ -119,6 +120,8 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
                                  double                 altitude,
                                  GeoclueAccuracy       *accuracy)
 {
+	GeoclueAccuracyLevel level;
+	double hor_acc, ver_acc;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	gc_master_provider_handle_new_accuracy (provider, accuracy);
@@ -129,43 +132,14 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
 	priv->position_cache.longitude = longitude;
 	priv->position_cache.altitude = altitude;
 	
-	geoclue_accuracy_free (priv->position_cache.accuracy);
-	priv->position_cache.accuracy = geoclue_accuracy_copy (accuracy);
+	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	geoclue_accuracy_set_details (priv->position_cache.accuracy,
+	                              level, hor_acc, ver_acc);
 	
 	g_signal_emit (provider, signals[POSITION_CHANGED], 0, 
 	               fields, timestamp, 
 	               latitude, longitude, altitude, 
 	               priv->position_cache.accuracy);
-}
-
-static void 
-free_address_key_and_value (char *key, char *value, gpointer userdata)
-{
-	/* TODO: actually fix address frees...
-	 * should probably use g_hash_table_destroy  */
-}
-static void 
-copy_address_key_and_value (char *key, char *value, GHashTable *target)
-{
-	g_hash_table_insert (target, key, value);
-}
-static void
-free_address_details (GHashTable *details)
-{
-	if (details) {
-		g_hash_table_foreach (details, (GHFunc)free_address_key_and_value, NULL);
-		g_hash_table_unref (details);
-	}
-}
-
-static GHashTable*
-copy_address_details (GHashTable *details)
-{
-	GHashTable *t = g_hash_table_new (g_str_hash, g_str_equal);
-	if (details) {
-		g_hash_table_foreach (details, (GHFunc)copy_address_key_and_value, t);
-	}
-	return t;
 }
 
 static void
@@ -174,18 +148,20 @@ gc_master_provider_set_address (GcMasterProvider *provider,
                                 GHashTable       *details,
                                 GeoclueAccuracy  *accuracy)
 {
+	GeoclueAccuracyLevel level;
+	double hor_acc, ver_acc;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	gc_master_provider_handle_new_accuracy (provider, accuracy);
 	
 	priv->address_cache.timestamp = timestamp;
 	
+	g_hash_table_destroy (priv->address_cache.details);
+	priv->address_cache.details = address_details_copy (details);
 	
-	free_address_details (priv->address_cache.details);
-	priv->address_cache.details = copy_address_details (details);
-	
-	geoclue_accuracy_free (priv->address_cache.accuracy);
-	priv->address_cache.accuracy = geoclue_accuracy_copy (accuracy);
+	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	geoclue_accuracy_set_details (priv->position_cache.accuracy,
+	                              level, hor_acc, ver_acc);
 	
 	g_signal_emit (provider, signals[ADDRESS_CHANGED], 0, 
 	               priv->address_cache.timestamp, 
@@ -435,7 +411,7 @@ dispose (GObject *object)
 		priv->address = NULL;
 	}
 	if (priv->address_cache.details) {
-		free_address_details (priv->address_cache.details);
+		g_hash_table_destroy (priv->address_cache.details);
 		priv->address_cache.details = NULL;
 	}
 	
@@ -504,11 +480,13 @@ gc_master_provider_init (GcMasterProvider *provider)
 	priv->geoclue = NULL;
 	
 	priv->position = NULL;
-	priv->position_cache.accuracy = NULL;
+	priv->position_cache.accuracy = 
+		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0 ,0);
 	
 	priv->address = NULL;
-	priv->address_cache.accuracy = NULL;
-	priv->address_cache.details = NULL;
+	priv->address_cache.accuracy = 
+		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0 ,0);
+	priv->address_cache.details = address_details_new ();
 }
 
 
@@ -771,10 +749,6 @@ gc_master_provider_new (const char *filename,
 		priv->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
 	}
 	
-	/* TODO using the cache might not be smart for eg gps providers.
-	 * ATM everything uses it though... */
-	priv->use_cache = TRUE;
-	
 	if (connectivity && 
 	    (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_NETWORK)) {
 		
@@ -787,6 +761,10 @@ gc_master_provider_new (const char *filename,
 		                  G_CALLBACK (network_status_changed), 
 		                  provider);
 		priv->net_status = geoclue_connectivity_get_status (connectivity);
+	}
+	
+	if (priv->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
+		priv->use_cache = TRUE;
 	}
 	
 	if (gc_master_provider_initialize (provider, &error) == FALSE) {
@@ -863,7 +841,7 @@ gc_master_provider_get_address (GcMasterProvider  *provider,
 			*timestamp = priv->address_cache.timestamp;
 		}
 		if (details != NULL) {
-			*details = copy_address_details (priv->address_cache.details);
+			*details = address_details_copy (priv->address_cache.details);
 		}
 		if (accuracy != NULL) {
 			*accuracy = geoclue_accuracy_copy (priv->address_cache.accuracy);
@@ -927,7 +905,7 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }
 
-GeoclueNetworkStatus 
+GeoclueStatus 
 gc_master_provider_get_status (GcMasterProvider *provider)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
@@ -942,14 +920,6 @@ gc_master_provider_get_name (GcMasterProvider *provider)
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	return priv->name;
-}
-
-GeoclueAccuracyLevel
-gc_master_provider_get_accuracy_level (GcMasterProvider *provider)
-{
-	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
-	
-	return priv->promised_accuracy;
 }
 
 /* GCompareFunc for sorting providers by accuracy and required resources */

@@ -3,7 +3,7 @@
  * geoclue-hostip.c - A hostip.info-based Address/Position provider
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
- * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ * Copyright 2007, 2008 by Garmin Ltd. or its subsidiaries
  */
 
 #include <config.h>
@@ -16,6 +16,7 @@
 
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
+#include <geoclue/geoclue-address-details.h>
 
 #include "geoclue-hostip.h"
 

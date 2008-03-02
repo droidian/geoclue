@@ -48,12 +48,6 @@ void gc_iface_address_emit_address_changed (GcIfaceAddress  *gc,
 					    GHashTable      *address,
 					    GeoclueAccuracy *accuracy);
 
-GHashTable *
-address_details_new ();
-
-GHashTable *
-address_details_copy (GHashTable *source);
-
 G_END_DECLS
 
 #endif

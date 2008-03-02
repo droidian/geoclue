@@ -44,6 +44,7 @@
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-address.h>
+#include <geoclue/geoclue-address-details.h>
 
 typedef struct {
 	GcProvider parent;
@@ -300,10 +301,10 @@ get_address (GcIfaceAddress   *gc,
 		*timestamp = manual->timestamp;
 	}
 	if (address) {
-		*address = manual->address;
+		*address = address_details_copy (manual->address);
 	}
 	if (accuracy) {
-		*accuracy = manual->accuracy;
+		*accuracy = geoclue_accuracy_copy (manual->accuracy);
 	}
 	
 	return TRUE;

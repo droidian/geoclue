@@ -22,6 +22,7 @@ libgeoclue_la_SOURCES = 	\
 	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
 	geoclue-address.c	\
+	geoclue-address-details.c	\
 	geoclue-common.c	\
 	geoclue-error.c		\
 	geoclue-geocode.c	\
@@ -57,6 +58,7 @@ geoclue_headers =		\
 	gc-web-service.h	\
 	geoclue-accuracy.h	\
 	geoclue-address.h	\
+	geoclue-address-details.h	\
 	geoclue-common.h	\
 	geoclue-error.h		\
 	geoclue-geocode.h	\

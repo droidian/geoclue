@@ -62,9 +62,8 @@ void gc_master_provider_network_status_changed (GcMasterProvider *provider,
                                                 GeoclueNetworkStatus status);
 
 char* gc_master_provider_get_name (GcMasterProvider *provider);
-GeoclueAccuracyLevel gc_master_provider_get_accuracy_level (GcMasterProvider *provider);
 
-GeoclueNetworkStatus gc_master_provider_get_status (GcMasterProvider *provider);
+GeoclueStatus gc_master_provider_get_status (GcMasterProvider *provider);
 
 GeocluePositionFields gc_master_provider_get_position (GcMasterProvider *master_provider,
                                                        int              *timestamp,

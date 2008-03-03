@@ -8,7 +8,6 @@
  */
 
 /** TODO
- * 	if suddenly no providers available, should emit something ? 
  * 
  * 	might want to write a testing-provider with a gui for 
  * 	choosing what to emit...
@@ -22,15 +21,19 @@
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
 
+#include <geoclue/geoclue-marshal.h>
 #include "client.h"
+
+#define GEOCLUE_POSITION_INTERFACE_NAME "org.freedesktop.Geoclue.Position"
+#define GEOCLUE_ADDRESS_INTERFACE_NAME "org.freedesktop.Geoclue.Address"
 
 
 enum {
-	POSITION_CHANGED,
-	ADDRESS_CHANGED,
+	PROVIDER_CHANGED,
+	POSITION_CHANGED, /* signal id of current provider */
+	ADDRESS_CHANGED, /* signal id of current provider */
 	LAST_SIGNAL
 };
-/* used to save signal ids for current provider */
 static guint32 signals[LAST_SIGNAL] = {0, };
 
 
@@ -40,17 +43,22 @@ static gboolean status_change_requires_provider_change (GList            *provid
                                                         GeoclueStatus     status);
 static void gc_master_client_emit_position_changed (GcMasterClient *client);
 static void gc_master_client_emit_address_changed (GcMasterClient *client);
-static gboolean gc_master_client_choose_position_provider (GcMasterClient *client, 
-                                                           GList *providers);
-static gboolean gc_master_client_choose_address_provider (GcMasterClient *client, 
-                                                          GList *providers);
+static gboolean gc_master_client_choose_position_provider (GcMasterClient  *client, 
+                                                           GList           *providers);
+static gboolean gc_master_client_choose_address_provider (GcMasterClient  *client, 
+                                                          GList           *providers);
 
-static gboolean gc_iface_master_client_set_requirements (GcMasterClient *client, 
-                                                         GeoclueAccuracyLevel min_accuracy, 
-                                                         int min_time, 
-                                                         gboolean require_updates, 
-                                                         GeoclueResourceFlags allowed_resources, 
-                                                         GError **error);
+static gboolean gc_iface_master_client_set_requirements (GcMasterClient       *client, 
+                                                         GeoclueAccuracyLevel  min_accuracy, 
+                                                         int                   min_time, 
+                                                         gboolean              require_updates, 
+                                                         GeoclueResourceFlags  allowed_resources, 
+                                                         GError              **error);
+static gboolean gc_iface_master_client_get_provider (GcMasterClient  *client,
+                                                     char            *interface,
+                                                     char           **name,
+                                                     char           **description,
+                                                     GError         **error);
 
 static void gc_master_client_position_init (GcIfacePositionClass *iface);
 static void gc_master_client_address_init (GcIfaceAddressClass *iface);
@@ -291,11 +299,12 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	new_p = gc_master_client_get_best_provider (client, providers);
 	
 	if (new_p == NULL) {
-		g_debug ("client: no position providers found matching req's");
+		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+		               GEOCLUE_POSITION_INTERFACE_NAME, 
+		               NULL, NULL);
 		/*TODO: cache?*/
 		return FALSE;
 	}else if (new_p == client->position_provider) {
-		g_debug ("client: continuing with position provider %s", gc_master_provider_get_name (new_p));
 		return FALSE;
 	}
 	
@@ -305,12 +314,17 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	}
 	
 	client->position_provider = new_p;
+	
+	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+	               GEOCLUE_POSITION_INTERFACE_NAME, 
+	               gc_master_provider_get_name (new_p),
+	               gc_master_provider_get_description (new_p));
+	
 	signals[POSITION_CHANGED] =
 		g_signal_connect (G_OBJECT (client->position_provider),
 		                  "position-changed",
 		                  G_CALLBACK (position_changed),
 		                  client);
-	g_debug ("client: now using position provider: %s", gc_master_provider_get_name (new_p));
 	
 	return TRUE;
 }
@@ -326,6 +340,10 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	
 	if (new_p == NULL) {
 		g_debug ("client: no address providers found matching req's");
+		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+		               GEOCLUE_ADDRESS_INTERFACE_NAME, 
+		               NULL, NULL);
+		
 		/*TODO: cache?*/
 		return FALSE;
 	}else if (new_p == client->address_provider) {
@@ -339,12 +357,20 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	}
 	
 	client->address_provider = new_p;
+	
+	/*TODO: emit provider_changed */
+	g_debug ("client: now using address provider: %s", gc_master_provider_get_name (new_p));
+	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+	               GEOCLUE_ADDRESS_INTERFACE_NAME, 
+	               gc_master_provider_get_name (new_p),
+	               gc_master_provider_get_description (new_p));
+	
 	signals[ADDRESS_CHANGED] = 
 		g_signal_connect (G_OBJECT (client->address_provider),
 		                  "address-changed",
 		                  G_CALLBACK (address_changed),
 		                  client);
-	g_debug ("client: now using address provider: %s", gc_master_provider_get_name (new_p));
+	
 	return TRUE;
 }
 
@@ -407,6 +433,28 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 	return TRUE;
 }
 
+static gboolean 
+gc_iface_master_client_get_provider (GcMasterClient  *client,
+                                     char            *iface,
+                                     char           **name,
+                                     char           **description,
+                                     GError         **error)
+{
+	GcMasterProvider *provider;
+	if (g_ascii_strcasecmp (iface, GEOCLUE_ADDRESS_INTERFACE_NAME) == 0) {
+		provider = client->address_provider;
+	} else if (g_ascii_strcasecmp (iface, GEOCLUE_POSITION_INTERFACE_NAME) == 0) {
+		provider = client->position_provider;
+	} else {
+		g_warning ("unknown interface in get_provider");
+		return FALSE;
+	}
+	
+	*name = g_strdup (gc_master_provider_get_name (provider));
+	*description = g_strdup (gc_master_provider_get_description (provider));
+	return TRUE;
+}
+
 static void
 finalize (GObject *object)
 {
@@ -417,9 +465,17 @@ static void
 gc_master_client_class_init (GcMasterClientClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
-
+	
 	o_class->finalize = finalize;
-
+	
+	signals[PROVIDER_CHANGED] = g_signal_new ("provider-changed",
+	                                          G_OBJECT_CLASS_TYPE (klass),
+	                                          G_SIGNAL_RUN_LAST, 0,
+	                                          NULL, NULL,
+	                                          geoclue_marshal_VOID__STRING_STRING_STRING,
+	                                          G_TYPE_NONE, 3,
+	                                          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	
 	dbus_g_object_type_install_info (gc_master_client_get_type (),
 					 &dbus_glib_gc_iface_master_client_object_info);
 }

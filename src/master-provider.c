@@ -58,6 +58,7 @@ typedef struct _GcAddressCache {
 
 typedef struct _GcMasterProviderPrivate {
 	char *name;
+	char *description;
 	char *service;
 	char *path;
 	GeoclueAccuracyLevel promised_accuracy;
@@ -385,6 +386,7 @@ finalize (GObject *object)
 	geoclue_accuracy_free (priv->address_cache.accuracy);
 	
 	g_free (priv->name);
+	g_free (priv->description);
 	g_free (priv->service);
 	g_free (priv->path);
 	
@@ -586,6 +588,7 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 	
 	priv = GET_PRIVATE (provider);
 	g_print ("\n   Name - %s\n", priv->name);
+	g_print ("   Description - %s\n", priv->description);
 	g_print ("   Service - %s\n", priv->service);
 	g_print ("   Path - %s\n", priv->path);
 	g_print ("   Accuracy level - %d\n", priv->promised_accuracy);
@@ -619,10 +622,19 @@ gc_master_provider_initialize (GcMasterProvider *provider,
 	if (!geoclue_common_set_options (priv->geoclue,
 	                                 geoclue_get_main_options (),
 	                                 error)) {
-		g_print ("Error setting options: %s\n", (*error)->message);
+		g_warning ("Error setting options: %s\n", (*error)->message);
 		g_object_unref (priv->geoclue);
 		priv->geoclue = NULL;
+		g_error_free (*error);
 		return FALSE;
+	}
+	/* priv->name has been read from .provider-file earlier...
+	 * could ask the provider anyway, just to be consistent */
+	if (!geoclue_common_get_provider_info (priv->geoclue, NULL, 
+	                                       &priv->description, error)) {
+		g_warning ("Error getting provider info: %s\n", (*error)->message);
+		g_error_free (*error);
+		priv->description = "";
 	}
 	
 	g_signal_connect (G_OBJECT (priv->geoclue), "status-changed",
@@ -920,6 +932,13 @@ gc_master_provider_get_name (GcMasterProvider *provider)
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	return priv->name;
+}
+char * 
+gc_master_provider_get_description (GcMasterProvider *provider)
+{
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return priv->description;
 }
 
 /* GCompareFunc for sorting providers by accuracy and required resources */

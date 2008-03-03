@@ -11,6 +11,17 @@
 #include <geoclue/geoclue-position.h>
 
 static void
+provider_changed_cb (GeoclueMasterClient *client,
+                     char *iface,
+                     char *name,
+                     char *description, 
+                     gpointer userdata)
+{
+	g_print ("%s provider changed: %s (%s)\n", iface, name, description);
+}
+
+
+static void
 position_changed_cb (GeocluePosition      *position,
 		     GeocluePositionFields fields,
 		     int                   timestamp,
@@ -56,6 +67,9 @@ main (int    argc,
 	
 	master = geoclue_master_get_default ();
 	client = geoclue_master_create_client (master, &path, &error);
+
+	g_signal_connect (G_OBJECT (client), "provider-changed",
+	                  G_CALLBACK (provider_changed_cb), NULL);
 	
 	if (!geoclue_master_client_set_requirements (client, 
 	                                             GEOCLUE_ACCURACY_LEVEL_NONE,

@@ -22,11 +22,11 @@ typedef enum {
 
 
 typedef struct _GcMasterProvider {
-	GeoclueProvider provider;
+	GObject parent;
 } GcMasterProvider;
 
 typedef struct _GcMasterProviderClass {
-	GeoclueProviderClass provider_class;
+	GObjectClass parent_class;
 	
 	void (* status_changed) (GcMasterProvider *master_provider,
 	                         GeoclueStatus     status);
@@ -62,6 +62,7 @@ void gc_master_provider_network_status_changed (GcMasterProvider *provider,
                                                 GeoclueNetworkStatus status);
 
 char* gc_master_provider_get_name (GcMasterProvider *provider);
+char* gc_master_provider_get_description (GcMasterProvider *provider);
 
 GeoclueStatus gc_master_provider_get_status (GcMasterProvider *provider);
 

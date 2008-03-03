@@ -27,6 +27,10 @@ typedef struct _GeoclueMasterClient {
 
 typedef struct _GeoclueMasterClientClass {
 	GObjectClass parent_class;
+	void (* provider_changed) (GeoclueMasterClient  *client,
+	                           char                 *interface,
+	                           char                 *name,
+	                           char                 *description);
 } GeoclueMasterClientClass;
 
 GType geoclue_master_client_get_type (void);
@@ -37,6 +41,11 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 						 gboolean               require_updates,
 						 GeoclueResourceFlags   allowed_resources,
 						 GError               **error);
+
+gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
+                                             char                 *interface,
+                                             char                **name,
+                                             char                **description);
 
 G_END_DECLS
 

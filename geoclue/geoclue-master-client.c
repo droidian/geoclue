@@ -10,6 +10,7 @@
 
 #include <glib-object.h>
 
+#include <geoclue/geoclue-marshal.h>
 #include <geoclue/geoclue-master.h>
 #include <geoclue/geoclue-master-client.h>
 #include <geoclue/geoclue-types.h>
@@ -26,6 +27,13 @@ enum {
 	PROP_0,
 	PROP_PATH
 };
+
+enum {
+	PROVIDER_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint32 signals[LAST_SIGNAL] = {0, };
 
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GEOCLUE_TYPE_MASTER_CLIENT, GeoclueMasterClientPrivate))
 
@@ -71,6 +79,17 @@ get_property (GObject    *object,
 {
 }
 
+static void
+provider_changed (DBusGProxy          *proxy,
+                  char                *iface,
+                  char                *name,
+                  char                *description, 
+                  GeoclueMasterClient *client)
+{
+	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+		       iface, name, description);
+}
+
 static GObject *
 constructor (GType                  type,
 	     guint                  n_props,
@@ -100,7 +119,13 @@ constructor (GType                  type,
 						 GEOCLUE_MASTER_DBUS_SERVICE,
 						 priv->object_path,
 						 GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE);
-
+	
+	dbus_g_proxy_add_signal (priv->proxy, "ProviderChanged",
+	                         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
+	                         G_TYPE_INVALID);
+	dbus_g_proxy_connect_signal (priv->proxy, "ProviderChanged",
+	                             G_CALLBACK (provider_changed),
+	                             object, NULL);
 	return object;
 }
 
@@ -128,6 +153,16 @@ geoclue_master_client_class_init (GeoclueMasterClientClass *klass)
 				      G_PARAM_STATIC_NICK |
 				      G_PARAM_STATIC_BLURB |
 				      G_PARAM_STATIC_NAME));
+	
+	signals[PROVIDER_CHANGED] = g_signal_new ("provider-changed",
+	                            G_TYPE_FROM_CLASS (klass),
+	                            G_SIGNAL_RUN_FIRST |
+	                            G_SIGNAL_NO_RECURSE,
+	                            G_STRUCT_OFFSET (GeoclueMasterClientClass, provider_changed), 
+	                            NULL, NULL,
+	                            geoclue_marshal_VOID__STRING_STRING_STRING,
+	                            G_TYPE_NONE, 3,
+	                            G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 }
 
 static void

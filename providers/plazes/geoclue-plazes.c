@@ -195,7 +195,7 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 		/* TODO: set status == error ? */
 		return FALSE;
 	}
-	g_debug (mac);
+	
 	if (!gc_web_service_query (plazes->web_service, 
 	                           PLAZES_KEY_MAC, mac, NULL)) {
 		g_set_error (error, GEOCLUE_ERROR, 

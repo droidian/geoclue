@@ -1,7 +1,7 @@
 /**
  * 
- * Expects to find a keyfile in user data dir
- * (~/.local/share/geoclue-localnet-gateways). 
+ * Expects to find a keyfile in user config dir
+ * (~/.config/geoclue-localnet-gateways). 
  * 
  * The keyfile should contain entries like this:
  * 
@@ -23,7 +23,7 @@
 #include <geoclue/gc-iface-address.h>
 #include <geoclue/geoclue-address.h>
 
-#define KEYFILE_NAME "/geoclue-localnet-gateways"
+#define KEYFILE_NAME "geoclue-localnet-gateways"
 
 typedef struct {
 	char *mac;
@@ -349,8 +349,8 @@ geoclue_localnet_init (GeoclueLocalnet *localnet)
 	localnet->gateways = NULL;
 	
 	/* load known addresses from keyfile */
-	dir = g_get_user_data_dir ();
-	localnet->keyfile_name = g_strconcat (dir, KEYFILE_NAME, NULL);
+	dir = g_get_user_config_dir ();
+	localnet->keyfile_name = g_build_filename (dir, KEYFILE_NAME, NULL);
 	
 	keyfile = g_key_file_new ();
 	if (!g_key_file_load_from_file (keyfile, localnet->keyfile_name, 

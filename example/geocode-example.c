@@ -2,33 +2,19 @@
  * Geoclue
  * geocode-example.c - Example using the Geocode client API
  *
+ * Provider options are not used in this sample. See other files for
+ * examples on that.
+ * 
  * Author: Jussi Kukkonen <jku@openedhand.com>
- * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ * Copyright 2007, 2008 by Garmin Ltd. or its subsidiaries
  */
 
 #include <glib.h>
-#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-geocode.h>
-
-static GHashTable *
-parse_options (int    argc,
-               char **argv)
-{
-        GHashTable *options;
-        int i;
-
-        options = g_hash_table_new (g_str_hash, g_str_equal);
-        for (i = 2; i < argc; i += 2) {
-                g_hash_table_insert (options, argv[i], argv[i + 1]);
-        }
-
-        return options;
-}
 
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-        GeoclueCommon *common = NULL;
 	GeoclueGeocode *geocoder = NULL;
 	GeocluePositionFields fields;
 	GHashTable *address = NULL;
@@ -38,38 +24,20 @@ int main (int argc, char** argv)
 	
 	g_type_init();
 	
-	if (argc < 2 || argc % 2 != 0) {
-		g_printerr ("Usage:\n  geocode-example <provider_name> [option value]\n");
+	if (argc < 2 || argc > 3) {
+		g_printerr ("Usage:\n  geocode-example <provider_name>\n");
 		return 1;
 	}
 	g_print ("Using provider '%s'\n", argv[1]);
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
-        common = geoclue_common_new (service, path);
-        if (common == NULL) {
-                g_printerr ("Error while creating GeoclueCommon object.\n");
-                return 1;
-        }
-        
-        /* Set options */
-        if (argc > 2) {
-                GHashTable *options;
-                
-                options = parse_options (argc, argv);
-                if (!geoclue_common_set_options (common, options, &error)) {
-                        g_printerr ("Error setting options: %s\n", 
-                                    error->message);
-                        g_error_free (error);
-                        error = NULL;
-                }
-                g_hash_table_destroy (options);
-        }
-		
-	address = g_hash_table_new (g_str_hash, g_str_equal);
-	g_hash_table_insert (address, "postalcode", "00330");
-	g_hash_table_insert (address, "countrycode", "FI");
-	g_hash_table_insert (address, "street", "Solnantie 24");
+	/* Address we'd like geocoded */
+	address = address_details_new();
+	g_hash_table_insert (address, g_strdup ("postalcode"), g_strdup ("00330"));
+	g_hash_table_insert (address, g_strdup ("countrycode"), g_strdup ("FI"));
+	g_hash_table_insert (address, g_strdup ("locality"), g_strdup ("Helsinki"));
+	g_hash_table_insert (address, g_strdup ("street"), g_strdup ("Solnantie 24"));
 	
 	
 	/* Create new GeoclueGeocode */
@@ -90,28 +58,28 @@ int main (int argc, char** argv)
 	if (error) {
 		g_printerr ("Error while geocoding: %s\n", error->message);
 		g_error_free (error);
-		g_free (geocoder);
+		g_hash_table_destroy (address);
+		g_object_unref (geocoder);
+		
 		return 1;
 	}
-	
 	/* Print out coordinates if they are valid */
 	if (fields & GEOCLUE_POSITION_FIELDS_LATITUDE &&
 	    fields & GEOCLUE_POSITION_FIELDS_LONGITUDE) {
 		
 		GeoclueAccuracyLevel level;
-		double horiz_acc;
 		
-		geoclue_accuracy_get_details (accuracy, &level, &horiz_acc, NULL);
-		g_print ("Geocoded position:\n");
+		geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
+		g_print ("Geocoded position (accuracy level %d): \n", level);
 		g_print ("\t%f, %f\n", lat, lon);
-		g_print ("\tAccuracy level %d (%.0f meters)\n", level, horiz_acc);
 		
 	} else {
 		g_print ("Latitude and longitude not available.\n");
 	}
 	
+	g_hash_table_destroy (address);
 	geoclue_accuracy_free (accuracy);
-	g_free (geocoder);
+	g_object_unref (geocoder);
 	return 0;
 	
 }

@@ -347,7 +347,7 @@ geoclue_localnet_init (GeoclueLocalnet *localnet)
 	gc_provider_set_details (GC_PROVIDER (localnet),
 	                         "org.freedesktop.Geoclue.Providers.Localnet",
 	                         "/org/freedesktop/Geoclue/Providers/Localnet",
-	                         "Localnet", "provides Address based using current gateway mac address and a local file. Also saves data from manual-provider");
+	                         "Localnet", "provides Address based on current gateway mac address and a local address file, can be updated with manual-provider");
 	
 	
 	localnet->gateways = NULL;

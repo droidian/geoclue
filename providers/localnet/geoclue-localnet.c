@@ -10,7 +10,11 @@
  * street=Solnantie 24
  * locality=Helsinki
  *
- * Only address is supported so far. File is only read on startup.
+ * Only address interface is supported so far. 
+ * 
+ * Provider connects to manual provider "address-changed" signals
+ * and adds updates addresses in the keyfile based on them (using 
+ * current gateway mac address as group name).
  */ 
 
 #include <config.h>

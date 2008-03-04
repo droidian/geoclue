@@ -107,7 +107,7 @@ get_accuracy_for_address (GHashTable *address)
 	           g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE)) {
 		return GEOCLUE_ACCURACY_LEVEL_COUNTRY;
 	}
-	return GEOCLUE_ACCURACY_LEVEL_STREET;
+	return GEOCLUE_ACCURACY_LEVEL_NONE;
 }
 
 static gboolean

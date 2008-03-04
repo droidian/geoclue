@@ -133,6 +133,8 @@ get_mac_address ()
 		pclose (in);
 		return NULL;
 	}
+	
+	
 	pclose (in);
 	return mac;
 }
@@ -162,12 +164,12 @@ geoclue_localnet_read_keyfile (GeoclueLocalnet *localnet, char *filename)
 	GKeyFile *keyfile;
 	char **groups;
 	char **g;
-	GError *error;
+	GError *error = NULL;
 	
 	keyfile = g_key_file_new ();
 	if (!g_key_file_load_from_file (keyfile, filename, 
 	                                G_KEY_FILE_NONE, &error)) {
-		g_warning ("Error loading keyfile %s", filename);
+		g_error ("Error loading keyfile %s: %s", filename, error->message);
 		g_error_free (error);
 		return FALSE;
 	}
@@ -182,18 +184,28 @@ geoclue_localnet_read_keyfile (GeoclueLocalnet *localnet, char *filename)
 		gateway->mac = *g;
 		gateway->address = address_details_new ();
 		
+		/* read all keys in the group as address fields */
 		keys = g_key_file_get_keys (keyfile, *g,
-		                            NULL, NULL);
+		                            NULL, &error);
+		if (error) {
+			g_warning ("Could not load keys for group %s from %s: %s", 
+			           *g, filename, error->message);
+			g_error_free (error);
+			error = NULL;
+		}
+		
 		k = keys;
 		while (*k) {
 			char *value;
 			
-			/*TODO error checks */
 			value = g_key_file_get_string (keyfile, *g, *k, NULL);
-			g_hash_table_insert (gateway->address, *k, value);
+			g_hash_table_insert (gateway->address, 
+			                     *k, g_ascii_strup (value, -1));
+			g_free (value);
 			
 			k++;
 		}
+		g_free (keys);
 		
 		gateway->accuracy = 
 			geoclue_accuracy_new (get_accuracy_for_address (gateway->address), 0, 0);
@@ -202,6 +214,9 @@ geoclue_localnet_read_keyfile (GeoclueLocalnet *localnet, char *filename)
 		
 		g++;
 	}
+	g_free (groups);
+	g_key_file_free (keyfile);
+	
 	return TRUE;
 }
 

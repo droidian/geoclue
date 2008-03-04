@@ -18,7 +18,6 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
-#include <geoclue/geoclue-address-details.h>
 
 #define GEOCLUE_DBUS_SERVICE_PLAZES "org.freedesktop.Geoclue.Providers.Plazes"
 #define GEOCLUE_DBUS_PATH_PLAZES "/org/freedesktop/Geoclue/Providers/Plazes"

@@ -31,7 +31,6 @@
 #include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-position.h>
 #include <geoclue/geoclue-address.h>
-#include <geoclue/geoclue-address-details.h>
 #include <geoclue/geoclue-marshal.h>
 
 typedef enum _GeoclueProvideFlags {

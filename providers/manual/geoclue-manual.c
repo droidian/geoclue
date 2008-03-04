@@ -44,7 +44,6 @@
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-address.h>
-#include <geoclue/geoclue-address-details.h>
 
 typedef struct {
 	GcProvider parent;

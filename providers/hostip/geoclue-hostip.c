@@ -16,7 +16,6 @@
 
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
-#include <geoclue/geoclue-address-details.h>
 
 #include "geoclue-hostip.h"
 

@@ -12,6 +12,7 @@
 #include <geoclue/geoclue-provider.h>
 #include <geoclue/geoclue-types.h>
 #include <geoclue/geoclue-accuracy.h>
+#include <geoclue/geoclue-address-details.h>
 
 G_BEGIN_DECLS
 

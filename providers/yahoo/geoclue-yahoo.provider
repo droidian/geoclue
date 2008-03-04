@@ -1,0 +1,7 @@
+[Geoclue Provider]
+Name=Yahoo
+Service=org.freedesktop.Geoclue.Providers.Yahoo
+Path=/org/freedesktop/Geoclue/Providers/Yahoo
+Requires=RequiresNetwork
+Accuracy=6
+Interfaces=org.freedesktop.Geoclue.Geocode

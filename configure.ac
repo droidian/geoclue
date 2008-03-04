@@ -83,7 +83,7 @@ AC_SUBST(CONNECTIVITY_LIBS)
 AC_SUBST(CONNECTIVITY_CFLAGS)
 
 
-PROVIDER_SUBDIRS="example hostip geonames manual plazes localnet"
+PROVIDER_SUBDIRS="example hostip geonames manual plazes localnet yahoo"
 
 PKG_CHECK_MODULES(GYPSY, [
 		  gypsy
@@ -121,6 +121,7 @@ providers/geonames/Makefile
 providers/manual/Makefile
 providers/plazes/Makefile
 providers/localnet/Makefile
+providers/yahoo/Makefile
 src/Makefile
 ])
 

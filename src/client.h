@@ -20,18 +20,6 @@
 
 typedef struct {
 	GObject parent;
-
-	GeoclueAccuracyLevel min_accuracy;
-	int min_time;
-	gboolean require_updates;
-	GeoclueResourceFlags allowed_resources;
-	
-	GcMasterProvider *position_provider;
-	GList *position_providers;
-	
-	GcMasterProvider *address_provider;
-	GList *address_providers;
-	
 } GcMasterClient;
 
 typedef struct {

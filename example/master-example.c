@@ -8,7 +8,11 @@
 
 #include <config.h>
 #include <geoclue/geoclue-master.h>
+#include <geoclue/geoclue-address.h>
 #include <geoclue/geoclue-position.h>
+
+
+/* Provider methods */
 
 static void
 provider_changed_cb (GeoclueMasterClient *client,
@@ -20,6 +24,59 @@ provider_changed_cb (GeoclueMasterClient *client,
 	g_print ("%s provider changed: %s (%s)\n", iface, name, description);
 }
 
+
+/* Address methods */
+
+static void
+print_address_key_and_value (char *key, char *value, gpointer user_data)
+{
+	g_print ("    %s: %s\n", key, value);
+}
+
+static void
+address_changed_cb (GeoclueAddress  *address,
+		    int              timestamp,
+		    GHashTable      *details,
+		    GeoclueAccuracy *accuracy)
+{
+	GeoclueAccuracyLevel level;
+	geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
+	g_hash_table_foreach (details, (GHFunc)print_address_key_and_value, NULL);
+}
+
+static void
+get_address (const char *path)
+{
+	GError *error = NULL;
+	GeoclueAddress *address;
+	GHashTable *details = NULL;
+	GeoclueAccuracyLevel level;
+	GeoclueAccuracy *accuracy = NULL;
+	int timestamp = 0;
+
+	address = geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+	
+	if (!geoclue_address_get_address (address, &timestamp, 
+					  &details, &accuracy, 
+					  &error)) {
+		g_printerr ("Error getting address: %s\n", error->message);
+		g_error_free (error);
+		g_object_unref (address);
+		return;
+	}
+	
+	geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
+	g_print ("Current address: (accuracy level %d)\n", level);
+	g_hash_table_foreach (details, (GHFunc)print_address_key_and_value, NULL);
+	g_hash_table_destroy (details);
+	geoclue_accuracy_free (accuracy);
+
+	g_signal_connect (G_OBJECT (address), "address-changed",
+			  G_CALLBACK (address_changed_cb), NULL);
+}
+
+
+/* Position methods */
 
 static void
 position_changed_cb (GeocluePosition      *position,
@@ -47,6 +104,33 @@ position_changed_cb (GeocluePosition      *position,
 	}
 }
 
+static void
+get_position (const char *path)
+{
+	GeocluePosition *position;
+	GError *error = NULL;
+	GeocluePositionFields fields;
+	int timestamp;
+	double lat = 0.0, lon = 0.0, alt = 0.0;
+	GeoclueAccuracy *accuracy = NULL;
+
+	position = geoclue_position_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+	
+	fields = geoclue_position_get_position (position,  &timestamp,
+						&lat, &lon, &alt,
+						&accuracy, &error);
+	if (error != NULL) {
+		g_warning ("Error: %s", error->message);
+		g_error_free (error);
+		g_object_unref (position);
+		return;
+	}
+	
+	g_print ("lat - %.2f lon - %.2f alt - %.2f\n", lat, lon, alt);
+	
+	g_signal_connect (G_OBJECT (position), "position-changed",
+			  G_CALLBACK (position_changed_cb), NULL);
+}
 
 int
 main (int    argc,
@@ -54,13 +138,8 @@ main (int    argc,
 {
 	GeoclueMaster *master;
 	GeoclueMasterClient *client;
-	GeocluePosition *position;
 	GError *error = NULL;
 	char *path;
-	GeocluePositionFields fields;
-	int timestamp;
-	double lat = 0.0, lon = 0.0, alt = 0.0;
-	GeoclueAccuracy *accuracy;
 	GMainLoop *mainloop;
 
 	g_type_init ();
@@ -80,19 +159,9 @@ main (int    argc,
 		g_printerr ("set_requirements failed");
 	}
 	
-	position = geoclue_position_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+	get_address (path);
 	
-	fields = geoclue_position_get_position (position,  &timestamp,
-						&lat, &lon, &alt,
-						&accuracy, &error);
-	if (error != NULL) {
-		g_warning ("Error: %s", error->message);
-		return 0;
-	}
-	g_print ("lat - %.2f lon - %.2f alt - %.2f\n", lat, lon, alt);
-	
-	g_signal_connect (G_OBJECT (position), "position-changed",
-			  G_CALLBACK (position_changed_cb), NULL);
+	get_position (path);
 	
 	mainloop = g_main_loop_new (NULL, FALSE);
 	g_main_loop_run (mainloop);

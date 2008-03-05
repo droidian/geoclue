@@ -185,6 +185,14 @@ status_change_requires_provider_change (GList            *provider_list,
                                         GcMasterProvider *changed_provider,
                                         GeoclueStatus     status)
 {
+	if (!provider_list) {
+		return FALSE;
+	}
+	if (current_provider == NULL &&
+	    status == GEOCLUE_STATUS_AVAILABLE) {
+		return TRUE;
+	}
+	g_debug (gc_master_provider_get_name (current_provider));
 	if (current_provider == changed_provider &&
 	    status != GEOCLUE_STATUS_AVAILABLE) {
 		return TRUE;
@@ -510,6 +518,13 @@ gc_master_client_class_init (GcMasterClientClass *klass)
 static void
 gc_master_client_init (GcMasterClient *client)
 {
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	priv->position_provider = NULL;
+	priv->position_providers = NULL;
+	
+	priv->address_provider = NULL;
+	priv->address_providers = NULL;
 }
 
 static gboolean

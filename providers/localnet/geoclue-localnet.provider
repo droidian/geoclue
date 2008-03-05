@@ -4,3 +4,4 @@ Service=org.freedesktop.Geoclue.Providers.Localnet
 Path=/org/freedesktop/Geoclue/Providers/Localnet
 Interfaces=org.freedesktop.Geoclue.Address
 Accuracy=6
+Provides=ProvidesCacheableOnConnection

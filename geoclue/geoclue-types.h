@@ -153,9 +153,9 @@ typedef enum {
  * 
  **/
 typedef enum _GeoclueResourceFlags {
-	GEOCLUE_RESOURCE_FLAGS_NONE = 0,
-	GEOCLUE_RESOURCE_FLAGS_NETWORK = 1 << 0,
-	GEOCLUE_RESOURCE_FLAGS_GPS = 1 << 1,
+	GEOCLUE_RESOURCE_NONE = 0,
+	GEOCLUE_RESOURCE_NETWORK = 1 << 0,
+	GEOCLUE_RESOURCE_GPS = 1 << 1,
 } GeoclueResourceFlags;
 
 

@@ -34,8 +34,9 @@
 #include <geoclue/geoclue-marshal.h>
 
 typedef enum _GeoclueProvideFlags {
-	GEOCLUE_PROVIDE_FLAGS_NONE = 0,
-	GEOCLUE_PROVIDE_FLAGS_UPDATES = 1 << 0,
+	GEOCLUE_PROVIDE_NONE = 0,
+	GEOCLUE_PROVIDE_UPDATES = 1 << 0,			/* will send *-changed signals */
+	GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION = 1 << 1,	/* data can be queried on new connection, and cached until connection ends */
 } GeoclueProvideFlags;
 
 typedef struct _GcPositionCache {
@@ -58,15 +59,16 @@ typedef struct _GcAddressCache {
 typedef struct _GcMasterProviderPrivate {
 	char *name;
 	char *description;
+	
 	char *service;
 	char *path;
+	
 	GeoclueAccuracyLevel promised_accuracy;
 	GeoclueAccuracyLevel cached_accuracy;
 	
 	GeoclueResourceFlags required_resources;
 	GeoclueProvideFlags provides;
 	
-	gboolean use_cache;
 	GeoclueStatus master_status; /* net_status and status affect this */
 	GeoclueNetworkStatus net_status;
 	
@@ -174,14 +176,14 @@ gc_master_provider_set_address (GcMasterProvider *provider,
 static GeoclueResourceFlags
 parse_resource_strings (char **flags)
 {
-	GeoclueResourceFlags resources = GEOCLUE_RESOURCE_FLAGS_NONE;
+	GeoclueResourceFlags resources = GEOCLUE_RESOURCE_NONE;
 	int i;
 	
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "RequiresNetwork") == 0) {
-			resources |= GEOCLUE_RESOURCE_FLAGS_NETWORK;
+			resources |= GEOCLUE_RESOURCE_NETWORK;
 		} else if (strcmp (flags[i], "RequiresGPS") == 0) {
-			resources |= GEOCLUE_RESOURCE_FLAGS_GPS;
+			resources |= GEOCLUE_RESOURCE_GPS;
 		}
 	}
 	
@@ -191,12 +193,14 @@ parse_resource_strings (char **flags)
 static GeoclueProvideFlags
 parse_provide_strings (char **flags)
 {
-	GeoclueProvideFlags provides = GEOCLUE_PROVIDE_FLAGS_NONE;
+	GeoclueProvideFlags provides = GEOCLUE_PROVIDE_NONE;
 	int i;
 	
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "ProvidesUpdates") == 0) {
-			provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+			provides |= GEOCLUE_PROVIDE_UPDATES;
+		} else if (strcmp (flags[i], "ProvidesCacheableOnConnection") == 0) {
+			provides |= GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION;
 		}
 	}
 	
@@ -210,7 +214,7 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 	
 	priv = GET_PRIVATE (provider);
 	
-	if ((priv->use_cache == FALSE) ||
+	if ((!(priv->provides & GEOCLUE_PROVIDE_UPDATES)) ||
 	    (priv->master_status != GEOCLUE_STATUS_AVAILABLE)) {
 		return;
 	}
@@ -291,7 +295,9 @@ gc_master_provider_handle_status_change (GcMasterProvider *provider)
 	
 	GeoclueStatus new_master_status;
 	
-	if (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_NETWORK) {
+	/* calculate new master status */
+	if (priv->required_resources & GEOCLUE_RESOURCE_NETWORK ||
+	    priv->provides & GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION) {
 		switch (priv->net_status) {
 			case GEOCLUE_CONNECTIVITY_UNKNOWN:
 				/*TODO: what should be done? Now falling through*/
@@ -322,7 +328,11 @@ gc_master_provider_handle_status_change (GcMasterProvider *provider)
 		priv->master_status = new_master_status;
 		if (!startup) {
 			g_signal_emit (provider, signals[STATUS_CHANGED], 0, new_master_status);
-			gc_master_provider_update_cache (provider);
+			
+			/* update cacheable providers */
+			if (priv->provides & GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION) {
+				gc_master_provider_update_cache (provider);
+			}
 		}
 	}
 }
@@ -559,11 +569,11 @@ gc_master_provider_dump_required_resources (GcMasterProvider *provider)
 	
 	priv = GET_PRIVATE (provider);
 	g_print ("   Requires\n");
-	if (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_GPS) {
+	if (priv->required_resources & GEOCLUE_RESOURCE_GPS) {
 		g_print ("      - GPS\n");
 	}
 
-	if (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_NETWORK) {
+	if (priv->required_resources & GEOCLUE_RESOURCE_NETWORK) {
 		g_print ("      - Network\n");
 	}
 }
@@ -575,8 +585,11 @@ gc_master_provider_dump_provides (GcMasterProvider *provider)
 	
 	priv = GET_PRIVATE (provider);
 	g_print ("   Provides\n");
-	if (priv->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
+	if (priv->provides & GEOCLUE_PROVIDE_UPDATES) {
 		g_print ("      - Updates\n");
+	}
+	if (priv->provides & GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION) {
+		g_print ("      - Cacheable on network connection\n");
 	}
 }
 
@@ -748,7 +761,7 @@ gc_master_provider_new (const char *filename,
 		priv->required_resources = parse_resource_strings (flags);
 		g_strfreev (flags);
 	} else {
-		priv->required_resources = GEOCLUE_RESOURCE_FLAGS_NONE;
+		priv->required_resources = GEOCLUE_RESOURCE_NONE;
 	}
 	
 	flags = g_key_file_get_string_list (keyfile, "Geoclue Provider",
@@ -757,25 +770,21 @@ gc_master_provider_new (const char *filename,
 		priv->provides = parse_provide_strings (flags);
 		g_strfreev (flags);
 	} else {
-		priv->provides = GEOCLUE_PROVIDE_FLAGS_NONE;
+		priv->provides = GEOCLUE_PROVIDE_NONE;
 	}
 	
 	if (connectivity && 
-	    (priv->required_resources & GEOCLUE_RESOURCE_FLAGS_NETWORK)) {
+	    (priv->provides & GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION)) {
 		
 		/* we have network status events: mark network provider 
 		 * with update flag, set the callback and set use_cache */
-		priv->provides |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+		priv->provides |= GEOCLUE_PROVIDE_UPDATES;
 		
 		g_signal_connect (connectivity, 
 		                  "status-changed",
 		                  G_CALLBACK (network_status_changed), 
 		                  provider);
 		priv->net_status = geoclue_connectivity_get_status (connectivity);
-	}
-	
-	if (priv->provides & GEOCLUE_PROVIDE_FLAGS_UPDATES) {
-		priv->use_cache = TRUE;
 	}
 	
 	if (gc_master_provider_initialize (provider, &error) == FALSE) {
@@ -810,7 +819,7 @@ gc_master_provider_get_position (GcMasterProvider *provider,
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
-	if (priv->use_cache) {
+	if (priv->provides & GEOCLUE_PROVIDE_UPDATES) {
 		if (timestamp != NULL) {
 			*timestamp = priv->position_cache.timestamp;
 		}
@@ -847,7 +856,7 @@ gc_master_provider_get_address (GcMasterProvider  *provider,
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
-	if (priv->use_cache) {
+	if (priv->provides & GEOCLUE_PROVIDE_UPDATES) {
 		if (timestamp != NULL) {
 			*timestamp = priv->address_cache.timestamp;
 		}
@@ -896,12 +905,12 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 {
 	GcMasterProviderPrivate *priv;
 	GcInterfaceFlags supported_ifaces;
-	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_FLAGS_NONE;
+	GeoclueProvideFlags required_flags = GEOCLUE_PROVIDE_NONE;
 	
 	priv = GET_PRIVATE (provider);
 	
 	if (need_update) {
-		required_flags |= GEOCLUE_PROVIDE_FLAGS_UPDATES;
+		required_flags |= GEOCLUE_PROVIDE_UPDATES;
 	}
 	
 	supported_ifaces = gc_master_provider_get_supported_interfaces (provider);

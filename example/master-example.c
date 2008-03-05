@@ -21,7 +21,7 @@ provider_changed_cb (GeoclueMasterClient *client,
                      char *description, 
                      gpointer userdata)
 {
-	g_print ("%s provider changed: %s (%s)\n", iface, name, description);
+	g_print ("%s provider changed: %s\n", iface, name);
 }
 
 

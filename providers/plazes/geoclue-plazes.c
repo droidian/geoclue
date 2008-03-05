@@ -9,6 +9,8 @@
 #include <config.h>
 
 #include <time.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include <glib-object.h>
 #include <dbus/dbus-glib-bindings.h>
@@ -72,32 +74,43 @@ geoclue_plazes_shutdown (GcIfaceGeoclue *iface,
 	return TRUE;
 }
 
+#define MAC_LEN 18
+
 static char *
 get_mac_address ()
 	{
 	/* this is an ugly hack, but it seems there is no easy 
 	 * ioctl-based way to get the mac address of the router. This 
-	 * implementation expects the system to have netstat, grep, 
-	 * awk, tr and /proc/net/arp */
+	 * implementation expects the system to have netstat, grep and awk 
+	 * */
 	
 	FILE *in;
-	char *mac;
-	int mac_len = sizeof (char) * 18;
+	char mac[MAC_LEN];
+	int i;
 	
-	if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}' | tr A-Z a-z", "r"))) {
-		g_warning ("mac address lookup failed");
-		return NULL;
-	}
-	
-	mac = g_malloc (mac_len);
-	if (fgets (mac, mac_len, in) == NULL) {
-		g_debug ("mac address lookup returned nothing");
-		g_free (mac);
+	/*for some reason netstat or /proc/net/arp isn't always ready 
+	 * when a connection is already up... Try a couple of times */
+	for (i=0; i<10; i++) {
+		if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
+			g_warning ("popen failed");
+			return NULL;
+		}
+		
+		if (!(fgets (mac, MAC_LEN, in))) {
+			if (errno != ENOENT && errno != EAGAIN) {
+				g_debug ("error %d", errno);
+				return NULL;
+			}
+			/* try again */
+			pclose (in);
+			g_debug ("trying again...");
+			usleep (200);
+			continue;
+		}
 		pclose (in);
-		return NULL;
+		return g_strdup (mac);
 	}
-	pclose (in);
-	return mac;
+	return NULL;
 }
 
 

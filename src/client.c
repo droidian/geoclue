@@ -192,7 +192,6 @@ status_change_requires_provider_change (GList            *provider_list,
 	    status == GEOCLUE_STATUS_AVAILABLE) {
 		return TRUE;
 	}
-	g_debug (gc_master_provider_get_name (current_provider));
 	if (current_provider == changed_provider &&
 	    status != GEOCLUE_STATUS_AVAILABLE) {
 		return TRUE;

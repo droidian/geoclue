@@ -20,7 +20,9 @@
 #include <config.h>
 
 #include <stdio.h>
+#include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #include <geoclue/gc-provider.h>
 #include <geoclue/geoclue-error.h>
@@ -136,6 +138,8 @@ geoclue_localnet_class_init (GeoclueLocalnetClass *klass)
 	p_class->shutdown = shutdown;
 }
 
+#define MAC_LEN 18
+
 static char *
 get_mac_address ()
 	{
@@ -145,23 +149,32 @@ get_mac_address ()
 	 * */
 	
 	FILE *in;
-	char *mac;
-	int mac_len = sizeof (char) * 18;
+	char mac[MAC_LEN];
+	int i;
 	
-	if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
-		return NULL;
-	}
-	
-	mac = g_malloc (mac_len);
-	if (fgets (mac, mac_len, in) == NULL) {
-		g_free (mac);
+	/*for some reason netstat or /proc/net/arp isn't always ready 
+	 * when a connection is already up... Try a couple of times */
+	for (i=0; i<10; i++) {
+		if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
+			g_warning ("popen failed");
+			return NULL;
+		}
+		
+		if (!(fgets (mac, MAC_LEN, in))) {
+			if (errno != ENOENT && errno != EAGAIN) {
+				g_debug ("error %d", errno);
+				return NULL;
+			}
+			/* try again */
+			pclose (in);
+			g_debug ("trying again...");
+			usleep (200);
+			continue;
+		}
 		pclose (in);
-		return NULL;
+		return g_strdup (mac);
 	}
-	
-	
-	pclose (in);
-	return mac;
+	return NULL;
 }
 
 

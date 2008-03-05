@@ -88,7 +88,7 @@ int main (int argc, char** argv)
 	                                      &error)) {
 		g_printerr ("Error getting address: %s\n", error->message);
 		g_error_free (error);
-		g_free (address);
+		g_object_unref (address);
 		return 1;
 	}
 	geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);

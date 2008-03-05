@@ -328,13 +328,7 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	
 	new_p = gc_master_client_get_best_provider (client, providers);
 	
-	if (new_p == NULL) {
-		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		               GEOCLUE_POSITION_INTERFACE_NAME, 
-		               NULL, NULL);
-		/*TODO: cache?*/
-		return FALSE;
-	}else if (new_p == priv->position_provider) {
+	if (new_p == priv->position_provider) {
 		return FALSE;
 	}
 	
@@ -344,18 +338,22 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	}
 	
 	priv->position_provider = new_p;
-	
+	if (priv->position_provider == NULL) {
+		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+		               GEOCLUE_POSITION_INTERFACE_NAME, 
+		               NULL, NULL);
+		/* cache ? */
+		return FALSE;
+	}
 	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-	               GEOCLUE_POSITION_INTERFACE_NAME, 
-	               gc_master_provider_get_name (new_p),
-	               gc_master_provider_get_description (new_p));
-	
+		       GEOCLUE_POSITION_INTERFACE_NAME, 
+		       gc_master_provider_get_name (priv->position_provider),
+		       gc_master_provider_get_description (priv->position_provider));
 	signals[POSITION_CHANGED] =
 		g_signal_connect (G_OBJECT (priv->position_provider),
-		                  "position-changed",
-		                  G_CALLBACK (position_changed),
-		                  client);
-	
+				  "position-changed",
+				  G_CALLBACK (position_changed),
+				  client);
 	return TRUE;
 }
 
@@ -369,14 +367,7 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	
 	new_p = gc_master_client_get_best_provider (client, providers);
 	
-	if (new_p == NULL) {
-		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		               GEOCLUE_ADDRESS_INTERFACE_NAME, 
-		               NULL, NULL);
-		
-		/*TODO: cache?*/
-		return FALSE;
-	}else if (new_p == priv->address_provider) {
+	if (new_p == priv->address_provider) {
 		return FALSE;
 	}
 	
@@ -386,18 +377,23 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	}
 	
 	priv->address_provider = new_p;
+	if (priv->address_provider == NULL) {
+		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
+		               GEOCLUE_ADDRESS_INTERFACE_NAME, 
+		               NULL, NULL);
+		/* cache ? */
+		return FALSE;
+	}
 	
 	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-	               GEOCLUE_ADDRESS_INTERFACE_NAME, 
-	               gc_master_provider_get_name (new_p),
-	               gc_master_provider_get_description (new_p));
-	
+		       GEOCLUE_ADDRESS_INTERFACE_NAME, 
+		       gc_master_provider_get_name (priv->address_provider),
+		       gc_master_provider_get_description (priv->address_provider));
 	signals[ADDRESS_CHANGED] = 
 		g_signal_connect (G_OBJECT (priv->address_provider),
-		                  "address-changed",
-		                  G_CALLBACK (address_changed),
-		                  client);
-	
+				  "address-changed",
+				  G_CALLBACK (address_changed),
+				  client);
 	return TRUE;
 }
 

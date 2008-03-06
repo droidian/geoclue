@@ -1,10 +1,10 @@
 AC_PREREQ(2.59)
-AC_INIT(geoclue, 0.1, http://geoclue.freedesktop.org)
+AC_INIT(geoclue, 0.10, http://geoclue.freedesktop.org)
 
 AC_CONFIG_SRCDIR(geoclue/gc-iface-geoclue.c)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE([1.9 foreign])
-GEOCLUE_VERSION=0.1
+GEOCLUE_VERSION=0.10
 
 AC_PROG_CC
 AC_ISC_POSIX

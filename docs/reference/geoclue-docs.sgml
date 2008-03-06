@@ -9,9 +9,7 @@
 	<reference>
 		<title>Geoclue for client applications</title>
 		
-		<chapter>
-			<title>How to use Geoclue in an application (TODO)</title>
-		</chapter>
+		<xi:include href="using-geoclue.xml"/>
 		
 		<chapter>
 			<title>C API</title>

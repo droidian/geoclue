@@ -245,8 +245,6 @@ gc_web_service_class_init (GcWebServiceClass *klass)
  * 
  * Sets base url for the web service. Must be called before calls to 
  * gc_web_service_get_* -methods.
- *
- * Return value: %TRUE on success.
  */
 void
 gc_web_service_set_base_url (GcWebService *self, gchar *url)

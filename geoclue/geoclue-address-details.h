@@ -3,10 +3,10 @@
 
 #include <glib.h>
 
-GHashTable *
-geoclue_address_details_new ();
+GHashTable *geoclue_address_details_new ();
 
-GHashTable *
-geoclue_address_details_copy (GHashTable *source);
+GHashTable *geoclue_address_details_copy (GHashTable *source);
+
+GeoclueAccuracyLevel geoclue_address_details_get_accuracy_level (GHashTable *address)
 
 #endif

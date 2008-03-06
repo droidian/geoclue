@@ -11,6 +11,7 @@
  * @short_description: Convenience functions for handling Geoclue address
  * #GHashTables
  */
+#include <geoclue/geoclue-types.h>
 #include "geoclue-address-details.h"
 
 static void 
@@ -57,4 +58,31 @@ geoclue_address_details_copy (GHashTable *source)
 	                      (GHFunc)copy_address_key_and_value, 
 	                      target);
 	return target;
+}
+
+/**
+ * geoclue_address_details_get_accuracy:
+ * 
+ * @address: A #GHashTable
+ * 
+ * Returns a #GeoclueAccuracy that best describes the accuracy of @address
+ * 
+ * Return value: #GeoclueAccuracy
+ */
+GeoclueAccuracyLevel
+geoclue_address_details_get_accuracy_level (GHashTable *address)
+{
+	if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_STREET)) {
+		return GEOCLUE_ACCURACY_LEVEL_STREET;
+	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_POSTALCODE)) {
+		return GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
+	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_LOCALITY)) {
+		return GEOCLUE_ACCURACY_LEVEL_LOCALITY;
+	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_REGION)) {
+		return GEOCLUE_ACCURACY_LEVEL_REGION;
+	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRY) ||
+	           g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE)) {
+		return GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+	}
+	return GEOCLUE_ACCURACY_LEVEL_NONE;
 }

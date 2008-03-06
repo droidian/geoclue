@@ -177,24 +177,6 @@ get_mac_address ()
 	return NULL;
 }
 
-
-static GeoclueAccuracyLevel
-get_accuracy_for_address (GHashTable *address)
-{
-	if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_STREET)) {
-		return GEOCLUE_ACCURACY_LEVEL_STREET;
-	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_POSTALCODE)) {
-		return GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
-	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_LOCALITY)) {
-		return GEOCLUE_ACCURACY_LEVEL_LOCALITY;
-	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_REGION)) {
-		return GEOCLUE_ACCURACY_LEVEL_REGION;
-	} else if (g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRY) ||
-	           g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE)) {
-		return GEOCLUE_ACCURACY_LEVEL_COUNTRY;
-	}
-	return GEOCLUE_ACCURACY_LEVEL_NONE;
-}
 static void
 geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet, 
                                              GKeyFile         *keyfile)
@@ -206,6 +188,7 @@ geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet,
 	groups = g_key_file_get_groups (keyfile, NULL);
 	g = groups;
 	while (*g) {
+		GeoclueAccuracyLevel level;
 		char **keys;
 		char **k;
 		Gateway *gateway = g_new0 (Gateway, 1);
@@ -234,8 +217,8 @@ geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet,
 		}
 		g_free (keys);
 		
-		gateway->accuracy = 
-			geoclue_accuracy_new (get_accuracy_for_address (gateway->address), 0, 0);
+		level = geoclue_address_details_get_accuracy_level (gateway->address);
+		gateway->accuracy = geoclue_accuracy_new (level, 0, 0);
 		
 		localnet->gateways = g_slist_prepend (localnet->gateways, gateway);
 		

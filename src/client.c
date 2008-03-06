@@ -53,17 +53,6 @@ enum {
 static guint32 signals[LAST_SIGNAL] = {0, };
 
 
-static gboolean status_change_requires_provider_change (GList            *provider_list,
-                                                        GcMasterProvider *current_provider,
-                                                        GcMasterProvider *changed_provider,
-                                                        GeoclueStatus     status);
-static void gc_master_client_emit_position_changed (GcMasterClient *client);
-static void gc_master_client_emit_address_changed (GcMasterClient *client);
-static gboolean gc_master_client_choose_position_provider (GcMasterClient  *client, 
-                                                           GList           *providers);
-static gboolean gc_master_client_choose_address_provider (GcMasterClient  *client, 
-                                                          GList           *providers);
-
 static gboolean gc_iface_master_client_set_requirements (GcMasterClient       *client, 
                                                          GeoclueAccuracyLevel  min_accuracy, 
                                                          int                   min_time, 
@@ -86,8 +75,20 @@ G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client,
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
 						gc_master_client_address_init))
 
-
 #include "gc-iface-master-client-glue.h"
+
+
+static gboolean status_change_requires_provider_change (GList            *provider_list,
+                                                        GcMasterProvider *current_provider,
+                                                        GcMasterProvider *changed_provider,
+                                                        GeoclueStatus     status);
+static void gc_master_client_emit_position_changed (GcMasterClient *client);
+static void gc_master_client_emit_address_changed (GcMasterClient *client);
+static gboolean gc_master_client_choose_position_provider (GcMasterClient  *client, 
+                                                           GList           *providers);
+static gboolean gc_master_client_choose_address_provider (GcMasterClient  *client, 
+                                                          GList           *providers);
+
 
 static void
 status_changed (GcMasterProvider *provider,

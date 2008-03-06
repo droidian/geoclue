@@ -12,10 +12,9 @@
 
 /* GHFunc, use with g_hash_table_foreach */
 static void
-add_to_string (gpointer key, gpointer value, gpointer user_data)
+print_address_key_and_value (char *key, char *value, gpointer user_data)
 {
-	GString *str = (GString *)user_data;
-	g_string_append_printf (str, "\t%s = %s\n", key, value);
+	g_print ("    %s: %s\n", key, value);
 }
 
 static GHashTable *
@@ -39,7 +38,6 @@ int main (int argc, char** argv)
         GeoclueCommon *common = NULL;
 	GeoclueReverseGeocode *revgeocoder = NULL;
 	GHashTable *address = NULL;
-	GString *address_str= NULL;
 	double lat, lon;
 	GError *error = NULL;
 	
@@ -98,18 +96,11 @@ int main (int argc, char** argv)
 	}
 	
 	/* Print out the address */
-	address_str = g_string_new (NULL);
-	g_hash_table_foreach (address, add_to_string, address_str);
-	if (address_str->len == 0) {
-		g_print ("Address not available for (%.4f, %.4f).\n", lat, lon);
-	} else {
-		g_print ("Reverse geocoded address for (%.4f, %.4f):\n", lat, lon);
-		g_print (address_str->str);
-	}
+	g_print ("Reverse Geocoded  [%.2f, %.2f] to address:\n", lat, lon);
+	g_hash_table_foreach (address, (GHFunc)print_address_key_and_value, NULL);
 	
 	g_hash_table_destroy (address);
-	g_string_free (address_str, TRUE);
-	g_free (revgeocoder);
+	g_object_unref (revgeocoder);
 	return 0;
 	
 }

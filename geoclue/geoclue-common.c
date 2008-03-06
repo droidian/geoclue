@@ -11,12 +11,12 @@
  * @short_description: Geoclue common client API
  *
  * #GeoclueCommon contains the methods and signals common to all Geoclue 
- * providers. It is part of the public client API which uses the D-Bus 
- * API to communicate with the actual provider.
+ * providers. It is part of the public C client API which uses D-Bus 
+ * to communicate with the actual provider.
  * 
  * After a #GeoclueCommon is created with geoclue_common_new(), it can 
- * be used to obtain information about the provider and to shut the 
- * provider down.
+ * be used to obtain information about the provider, to set provider 
+ * options and also to shut the provider down.
  */
 
 #include <geoclue/geoclue-common.h>
@@ -137,13 +137,13 @@ geoclue_common_new (const char *service,
 /**
  * geoclue_common_get_provider_info:
  * @common: A #GeoclueCommon object
- * @name: Pointer for returned provider name
- * @description: Pointer for returned provider description
- * @error:  Pointer for returned #GError
+ * @name: Pointer for returned provider name or %NULL
+ * @description: Pointer for returned provider description or %NULL
+ * @error:  Pointer for returned #GError or %NULL
  * 
  * Obtains name and a short description of the provider.
  * 
- * Return value: #TRUE if D-Bus call succeeded
+ * Return value: %TRUE on success
  */
 gboolean
 geoclue_common_get_provider_info (GeoclueCommon *common,
@@ -165,12 +165,12 @@ geoclue_common_get_provider_info (GeoclueCommon *common,
 /**
  * geoclue_common_get_status:
  * @common: A #GeoclueCommon object
- * @status: Pointer for returned status as GeoclueStatus
- * @error:  Pointer for returned #GError
+ * @status: Pointer for returned status as #GeoclueStatus
+ * @error:  Pointer for returned #GError or %NULL
  * 
  * Obtains the current status of the provider.
  * 
- * Return value: #TRUE if D-Bus call succeeded
+ * Return value: %TRUE on success
  */
 gboolean
 geoclue_common_get_status (GeoclueCommon *common,
@@ -195,12 +195,12 @@ geoclue_common_get_status (GeoclueCommon *common,
 /**
  * geoclue_common_set_options:
  * @common: A #GeoclueCommon object
- * @options: A GHashTable containing the options
- * @error: Pointer for returned #GError
+ * @options: A #GHashTable containing the options
+ * @error: Pointer for returned #GError or %NULL
  *
  * Sets the options on the provider.
  *
- * Return value: #TRUE if D-Bus call succeeded
+ * Return value: %TRUE if setting options succeeded
  */
 gboolean
 geoclue_common_set_options (GeoclueCommon *common,

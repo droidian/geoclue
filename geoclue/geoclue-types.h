@@ -10,6 +10,12 @@
 #define _GEOCLUE_TYPES_H
 
 /**
+ * SECTION:geoclue-types
+ * @short_description: Type definitions and defines useful for Geoclue clients 
+ **/
+
+
+/**
  * GeoclueStatus
  * 
  * defines the provider status

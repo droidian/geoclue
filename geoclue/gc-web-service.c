@@ -5,7 +5,7 @@
  * Author: Jussi Kukkonen <jku@o-hand.com>
  * 
  * Copyright 2007 Jussi Kukkonen (from old geoclue_web_service.c)
- * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ * Copyright 2007, 2008 by Garmin Ltd. or its subsidiaries
  */
 
 /**
@@ -57,7 +57,6 @@
  * 
  * . . . 
  *
- * / * Web service is not needed anymore * /
  * g_object_unref (G_OBJECT (web_service));
  * </programlisting>
  * </informalexample>
@@ -245,14 +244,14 @@ gc_web_service_class_init (GcWebServiceClass *klass)
  * @url: base url
  * 
  * Sets base url for the web service. Must be called before calls to 
- * other methods.
+ * gc_web_service_get_* -methods.
  *
  * Return value: %TRUE on success.
  */
-gboolean
+void
 gc_web_service_set_base_url (GcWebService *self, gchar *url)
 {
-	g_return_val_if_fail (url, FALSE);
+	g_assert (url);
 	
 	g_free (self->base_url);
 	g_free (self->response);
@@ -267,8 +266,6 @@ gc_web_service_set_base_url (GcWebService *self, gchar *url)
 	self->xpath_ctx = NULL;
 	
 	self->base_url = g_strdup (url);
-	
-	return TRUE;
 }
  
 /**
@@ -298,7 +295,7 @@ gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
 
 /**
  * gc_web_service_query:
- * @self: The #GcWebService object
+ * @self: A #GcWebService object
  * @Varargs: NULL-terminated list of key-value gchar* pairs
  * 
  * Fetches data from the web. The url is constructed using the 
@@ -352,13 +349,13 @@ gc_web_service_query (GcWebService *self, ...)
 
 /**
  * gc_web_service_get_double:
- * @self: The #GcWebService object
- * @value: returned double
- * @xpath: XPath expression used to find the value  
+ * @self: A #GcWebService object
+ * @value: Pointer to returned value
+ * @xpath: XPath expression to find the value  
  * 
  * Extracts a @value from the data that was fetched in the last call 
- * to gc_web_service_query() using XPath expression @xpath (returned 
- * value is the first match).
+ * to gc_web_service_query() using XPath expression @xpath. Returned 
+ * value is the first match.
  *
  * Return value: %TRUE if a value was found.
  */

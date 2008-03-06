@@ -6,6 +6,21 @@
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  */
 
+/**
+ * SECTION:geoclue-master
+ * @short_description: Geoclue Master API
+ * @see_also: #GeoclueMasterClient
+ * 
+ * #GeoclueMaster is part of the Geoclue public C client API. It uses  
+ * D-Bus to communicate with the actual Master service.
+ * 
+ * #GeoclueMaster is a singleton service, so it should not be created
+ * explicitly: instead one should use geoclue_master_get_default() to
+ * get a reference to it. It can be used to set Master options and to 
+ * create a #GeoclueMasterClient object.
+ *
+ */
+
 #include <config.h>
 
 #include <geoclue/geoclue-master.h>
@@ -92,14 +107,14 @@ geoclue_master_get_default (void)
 
 /**
  * geoclue_master_create_client:
- * @master: A #GeoclueMaster
- * @object_path: Pointer for the path to the #GeoclueMasterClient
- * @error: Pointer for a GError
+ * @master: A #GeoclueMaster object
+ * @object_path: Pointer for #GeoclueMasterClient D-Bus object path
+ * @error: Pointer to returned #GError or %NULL
  *
- * Creates a #GeoclueMasterClient and puts the path to the D-Bus object in
+ * Creates a #GeoclueMasterClient and puts the D-Bus object path in
  * @object_path.
  *
- * Return Value: A newly created #GeoclueMasterClient or NULL on error.
+ * Return Value: A new #GeoclueMasterClient or %NULL on error.
  */
  
 GeoclueMasterClient *
@@ -136,12 +151,12 @@ geoclue_master_create_client (GeoclueMaster *master,
 /**
  * geoclue_master_set_options:
  * @master: A #GeoclueMaster
- * @options: A #GHashTable storing option strings as key value pairs
- * @error: A pointer to a #GError to store any returned error
+ * @options: A #GHashTable storing option strings as key-value pairs
+ * @error: A pointer to returned #GError or %NULL 
  *
  * Sets provider options for the master process to use.
  * 
- * Return value: TRUE on success, FALSE on failure
+ * Return value: TRUE on success
  */
 gboolean
 geoclue_master_set_options (GeoclueMaster *master,

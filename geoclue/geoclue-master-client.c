@@ -6,6 +6,56 @@
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  */
 
+/**
+ * SECTION:geoclue-master-client
+ * @short_description: Geoclue MasterClient API
+ *
+ * #GeoclueMasterClient is part of the Geoclue public C client API. It uses  
+ * D-Bus to communicate with the actual Master service.
+ * 
+ * #GeoclueMasterClient is the easy way to use Geoclue: There's 
+ * no need to choose a specific provider and hope it can provide whatever
+ * is needed, just set requirements with 
+ * geoclue_master_client_set_requirements() and use the wanted Geoclue 
+ * interface. #GeoclueMasterClient will make sure the best possible 
+ * provider is used at all times, even when provider availabilities and 
+ * accuracies change. In other words, the data may actually come from 
+ * different providers in different situations.
+ * 
+ * <informalexample>
+ * <programlisting>
+ * GeoclueMaster *master;
+ * GeoclueMasterClient *client;
+ * GeoclueAddress *address;
+ * char* path;
+ * GError *error;
+ * 
+ * ...
+ * 
+ * master = geoclue_master_get_default ();
+ * 
+ * client = geoclue_master_create_client (master, &path, &error);
+ * if (!client) {
+ * 	/ * handle error * /
+ * }
+ * 
+ * if (!geoclue_master_client_set_requirements (client,
+ *                                              GEOCLUE_ACCURACY_LEVEL_NONE,
+ *                                              0, FALSE,
+ *                                              GEOCLUE_RESOURCE_NETWORK,
+ *                                              &error)) {
+ * 	/ * handle error * /
+ * }
+ * 
+ * address = geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+ * 
+ * / * Now we can use address just like we'd use a normal address provider, 
+ *     but GeoclueMasterClient makes sure that underneath the provider
+ *     that best matches our requirements is used * /
+ * </programlisting>
+ * </informalexample>
+ */
+
 #include <config.h>
 
 #include <glib-object.h>
@@ -175,13 +225,13 @@ geoclue_master_client_init (GeoclueMasterClient *client)
  * @client: A #GeoclueMasterClient
  * @min_accuracy: The required minimum accuracy as a #GeoclueAccuracyLevel.
  * @min_time: The minimum time between update signals
- * @require_updates: Whether the provider should give updates
- * @allowed_resources: The resources that are allowed to be used
- * @error: A pointer to a #GError.
+ * @require_updates: Whether the updates (signals) are required. Only applies to interfaces with signals
+ * @allowed_resources: The resources that are allowed to be used as a #GeoclueResourceFlags
+ * @error: A pointer to returned #GError or %NULL.
  *
- * Sets the criteria that should be used when selecting a provider
+ * Sets the criteria that should be used when selecting the used provider
  *
- * Return value: TRUE on success, FALSE otherwise
+ * Return value: %TRUE on success
  */
 gboolean
 geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
@@ -201,3 +251,34 @@ geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 
 	return TRUE;
 }
+
+/**
+ * geoclue_master_client_get_provider:
+ * @client: A #GeoclueMasterClient
+ * @interface: The D-Bus interface name (e.g. "org.freedesktop.Geoclue.Position")
+ * @name: Pointer to the returned provider name or %NULL
+ * @description: Pointer to the returned provider description or %NULL
+ * @error: Pointer to the returned #GError or %NULL
+ * 
+ * Gets the name and description of the currently used provider for 
+ * given interface.
+ * 
+ * Return value: %TRUE on success
+ */
+gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
+                                             char                 *interface,
+                                             char                **name,
+                                             char                **description,
+                                             GError              **error)
+{
+	GeoclueMasterClientPrivate *priv;
+	
+	priv = GET_PRIVATE (client);
+	if (!org_freedesktop_Geoclue_MasterClient_get_provider 
+	    (priv->proxy, interface, name, description,error)) {
+		return FALSE;
+	}
+	
+	return TRUE;
+}
+

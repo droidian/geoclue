@@ -6,6 +6,20 @@
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
+/**
+ * SECTION:geoclue-velocity
+ * @short_description: Geoclue velocity client API
+ *
+ * #GeoclueVelocity contains velocity-related methods and signals. 
+ * It is part of the Geoclue public C client API which uses D-Bus 
+ * to communicate with the actual provider.
+ * 
+ * After a #GeoclueVelocity is created with 
+ * geoclue_velocity_new(), the 
+ * geoclue_velocity_get_velocity() method and the VelocityChanged-signal
+ * can be used to obtain the current velocity.
+ */
+
 #include <geoclue/geoclue-velocity.h>
 #include <geoclue/geoclue-marshal.h>
 
@@ -97,6 +111,15 @@ geoclue_velocity_class_init (GeoclueVelocityClass *klass)
 						  G_TYPE_DOUBLE);
 }
 
+/**
+ * geoclue_velocity_new:
+ * @service: D-Bus service name
+ * @path: D-Bus path name
+ *
+ * Creates a #GeoclueVelocity with given D-Bus service name and path.
+ * 
+ * Return value: Pointer to a new #GeoclueVelocity
+ */
 static void
 geoclue_velocity_init (GeoclueVelocity *velocity)
 {
@@ -115,15 +138,21 @@ geoclue_velocity_new (const char *service,
 
 /**
  * geoclue_velocity_get_velocity:
- * @velocity:
- * @timestamp:
- * @speed:
- * @direction:
- * @climb:
- * @error:
+ * @velocity: A #GeoclueVelocity object
+ * @timestamp: Pointer to returned unix timestamp or %NULL
+ * @speed: Pointer to returned horizontal speed or %NULL
+ * @direction: Pointer to returned horizontal direction (bearing) or %NULL
+ * @climb: Pointer to returned vertical speed or %NULL
+ * @error: Pointer to returned #GError or %NULL
  *
- *
- * Return value:
+ * Obtains the current velocity. @timestamp will contain the time of 
+ * the actual velocity measurement.
+ * 
+ * If the caller is not interested in some values, the pointers can be 
+ * left %NULL.
+ * 
+ * Return value: A #GeoclueVelocityFields bitfield representing the 
+ * validity of the velocity values.
  */
 GeoclueVelocityFields
 geoclue_velocity_get_velocity (GeoclueVelocity *velocity,

@@ -7,16 +7,25 @@
 	</bookinfo>
 
 	<reference>
-		<title>Geoclue for clients</title>
+		<title>Geoclue for client applications</title>
+		
 		<chapter>
-			<title>Geoclue C API</title>
+			<title>How to use Geoclue in an application (TODO)</title>
+		</chapter>
+		
+		<chapter>
+			<title>C API</title>
+			<xi:include href="xml/geoclue-master.xml"/>
+			<xi:include href="xml/geoclue-master-client.xml"/>
 			<xi:include href="xml/geoclue-common.xml"/>
 			<xi:include href="xml/geoclue-position.xml"/>
 			<xi:include href="xml/geoclue-address.xml"/>
+			<xi:include href="xml/geoclue-velocity.xml"/>
 			<xi:include href="xml/geoclue-geocode.xml"/>
 			<xi:include href="xml/geoclue-reverse-geocode.xml"/>
 			<xi:include href="xml/geoclue-types.xml"/>
 			<xi:include href="xml/geoclue-accuracy.xml"/>
+			<xi:include href="xml/geoclue-address-details.xml"/>
 			<xi:include href="xml/geoclue-error.xml"/>
 		</chapter>
 	</reference>
@@ -25,14 +34,14 @@
 		<title>Geoclue for providers</title>
 		<xi:include href="implementing-providers.xml"/>
 		<chapter>
-			<title>Geoclue provider C API</title>
+			<title>Provider C API</title>
 			<xi:include href="xml/gc-provider.xml"/>
 			<xi:include href="xml/gc-web-service.xml"/>
-			<xi:include href="xml/gc-iface-geocode.xml"/>
+			<xi:include href="xml/gc-iface-geoclue.xml"/>
 			<xi:include href="xml/gc-iface-position.xml"/>
 			<xi:include href="xml/gc-iface-address.xml"/>
 			<xi:include href="xml/gc-iface-velocity.xml"/>
-			<xi:include href="xml/gc-iface-geoclue.xml"/>
+			<xi:include href="xml/gc-iface-geocode.xml"/>
 			<xi:include href="xml/gc-iface-reverse-geocode.xml"/>
 		</chapter>
 	</reference>
@@ -42,9 +51,9 @@
 		<xi:include href="gc-iface-geoclue-ref.xml"/>
 		<xi:include href="gc-iface-position-ref.xml"/>
 		<xi:include href="gc-iface-address-ref.xml"/>
+		<xi:include href="gc-iface-velocity-ref.xml"/>
 		<xi:include href="gc-iface-geocode-ref.xml"/>
 		<xi:include href="gc-iface-reverse-geocode-ref.xml"/>
-		<xi:include href="gc-iface-velocity-ref.xml"/>
 	</reference>
 	
 </book>

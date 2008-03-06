@@ -11,8 +11,8 @@
  * @short_description: Geoclue geocode client API
  *
  * #GeoclueGeocode contains geocoding methods. 
- * It is part of the Geoclue public client API which uses the D-Bus 
- * API to communicate with the actual provider.
+ * It is part of the Geoclue public C client API which uses D-Bus 
+ * to communicate with the actual provider.
  * 
  * After a #GeoclueGeocode is created with geoclue_geocode_new(), the 
  * geoclue_geocode_address_to_position() method can be used to 
@@ -84,20 +84,20 @@ geoclue_geocode_new (const char *service,
  * geoclue_geocode_address_to_position:
  * @geocode: A #GeoclueGeocode object
  * @details: Hashtable with address data
- * @latitude: Pointer to returned latitude in degrees
- * @longitude: Pointer to returned longitude in degrees
- * @altitude: Pointer to returned altitude in meters
- * @accuracy: Pointer to returned #GeoclueAccuracy
- * @error: Pointer to returned #Gerror
+ * @latitude: Pointer to returned latitude in degrees or %NULL
+ * @longitude: Pointer to returned longitude in degrees or %NULL
+ * @altitude: Pointer to returned altitude in meters or %NULL
+ * @accuracy: Pointer to returned #GeoclueAccuracy or %NULL
+ * @error: Pointer to returned #Gerror or %NULL
  * 
- * Geocodes given address to a position. @accuracy is a rough estimate 
- * of the accuracy of the returned position.
+ * Geocodes given address to coordinates (@latitude, @longitude, @altitude). 
+ * @accuracy is a rough estimate of the accuracy of the returned position.
  * 
  * If the caller is not interested in some values, the pointers can be 
  * left %NULL.
  * 
  * Return value: A #GeocluePositionFields bitfield representing the 
- * validity of the position values.
+ * validity of the returned coordinates.
  */
 GeocluePositionFields
 geoclue_geocode_address_to_position (GeoclueGeocode   *geocode,

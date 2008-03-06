@@ -159,7 +159,7 @@ gc_master_provider_set_address (GcMasterProvider *provider,
 	priv->address_cache.timestamp = timestamp;
 	
 	g_hash_table_destroy (priv->address_cache.details);
-	priv->address_cache.details = address_details_copy (details);
+	priv->address_cache.details = geoclue_address_details_copy (details);
 	
 	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
 	geoclue_accuracy_set_details (priv->position_cache.accuracy,
@@ -497,7 +497,7 @@ gc_master_provider_init (GcMasterProvider *provider)
 	priv->address = NULL;
 	priv->address_cache.accuracy = 
 		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0 ,0);
-	priv->address_cache.details = address_details_new ();
+	priv->address_cache.details = geoclue_address_details_new ();
 }
 
 
@@ -861,7 +861,7 @@ gc_master_provider_get_address (GcMasterProvider  *provider,
 			*timestamp = priv->address_cache.timestamp;
 		}
 		if (details != NULL) {
-			*details = address_details_copy (priv->address_cache.details);
+			*details = geoclue_address_details_copy (priv->address_cache.details);
 		}
 		if (accuracy != NULL) {
 			*accuracy = geoclue_accuracy_copy (priv->address_cache.accuracy);

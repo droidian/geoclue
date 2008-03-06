@@ -220,7 +220,7 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 	if (address) {
 		char *str;
 		
-		*address = address_details_new ();
+		*address = geoclue_address_details_new ();
 		
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/country")) {

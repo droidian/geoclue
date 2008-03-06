@@ -132,7 +132,7 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 	}
 	
 	if (address) {
-		*address = address_details_new ();
+		*address = geoclue_address_details_new ();
 		if (gc_web_service_get_string (obj->web_service, 
 					       &locality, HOSTIP_LOCALITY_XPATH)) {
 			/* hostip "sctructured data" for the win... */

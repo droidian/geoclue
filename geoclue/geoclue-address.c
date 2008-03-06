@@ -11,12 +11,17 @@
  * @short_description: Geoclue address client API
  *
  * #GeoclueAddress contains Address-related methods and signals. 
- * It is part of the Geoclue public client API which uses the D-Bus 
- * API to communicate with the actual provider.
+ * It is part of the Geoclue public C client API which uses D-Bus 
+ * to communicate with the actual provider.
  * 
  * After a #GeoclueAddress is created with geoclue_address_new(), the 
  * geoclue_address_get_address() method and the AddressChanged signal
- * can be used to obtain the current address.
+ * can be used to obtain the current address. 
+ * 
+ * Address #GHashTable keys are defined in 
+ * <ulink url="geoclue-types.html">geoclue-types.h</ulink>. See also 
+ * convenience functions in 
+ * <ulink url="geoclue-address-details.html">geoclue-address-details.h</ulink>.
  */
 
 #include <geoclue/geoclue-address.h>
@@ -138,20 +143,22 @@ geoclue_address_new (const char *service,
 /**
  * geoclue_address_get_address:
  * @address: A #GeoclueAddress object
- * @timestamp: Pointer to returned Unix timestamp
- * @details: Pointer to returned hashtable with address details
- * @accuracy: Pointer to returned #GeoclueAccuracy
- * @error: Pointer to returned #Gerror
+ * @timestamp: Pointer to returned Unix timestamp or %NULL
+ * @details: Pointer to returned #GHashTable with address details or %NULL
+ * @accuracy: Pointer to returned #GeoclueAccuracy or NULL
+ * @error: Pointer to returned #Gerror or %NULL
  * 
  * Obtains the current address. @timestamp will contain the time of 
- * the actual address measurement. @accuracy is a rough estimate of the
- * accuracy of the current address information. @details is a hashtable 
- * with the address data, see geoclue-types.h for the hashtable keys.
+ * the actual address measurement. @accuracy is the estimated of the
+ * accuracy of the current address information (see #GeoclueAccuracy 
+ * for more details). @details is a hashtable with the address data, 
+ * see <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the 
+ * hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 
  * left %NULL.
  * 
- * Return value: #TRUE if there is no @error
+ * Return value: %TRUE if there is no @error
  */
 gboolean
 geoclue_address_get_address (GeoclueAddress   *address,

@@ -4,9 +4,9 @@
 #include <glib.h>
 
 GHashTable *
-address_details_new ();
+geoclue_address_details_new ();
 
 GHashTable *
-address_details_copy (GHashTable *source);
+geoclue_address_details_copy (GHashTable *source);
 
 #endif

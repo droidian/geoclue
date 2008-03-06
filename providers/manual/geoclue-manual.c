@@ -183,7 +183,7 @@ geoclue_manual_set_address (GeoclueManual *manual,
 {
 	geoclue_manual_set_address_common (manual,
 	                                   valid_for,
-	                                   address_details_copy (address));
+	                                   geoclue_address_details_copy (address));
 	return TRUE;
 }
 
@@ -201,7 +201,7 @@ geoclue_manual_set_address_fields (GeoclueManual *manual,
 {
 	GHashTable *address;
 	
-	address = address_details_new ();
+	address = geoclue_address_details_new ();
 	if (country_code && (strlen (country_code) > 0)) {
 		g_hash_table_insert (address,
 		                     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE), 
@@ -281,7 +281,7 @@ geoclue_manual_init (GeoclueManual *manual)
 	                         "/org/freedesktop/Geoclue/Providers/Manual",
 	                         "Manual", "Manual provider");
 	
-	manual->address = address_details_new ();
+	manual->address = geoclue_address_details_new ();
 	manual->accuracy = 
 		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
 }
@@ -300,7 +300,7 @@ get_address (GcIfaceAddress   *gc,
 		*timestamp = manual->timestamp;
 	}
 	if (address) {
-		*address = address_details_copy (manual->address);
+		*address = geoclue_address_details_copy (manual->address);
 	}
 	if (accuracy) {
 		*accuracy = geoclue_accuracy_copy (manual->accuracy);

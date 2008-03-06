@@ -45,7 +45,8 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
                                              char                 *interface,
                                              char                **name,
-                                             char                **description);
+                                             char                **description,
+                                             GError              **error);
 
 G_END_DECLS
 

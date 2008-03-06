@@ -38,7 +38,7 @@ typedef struct _GcWebServiceClass {
 
 GType gc_web_service_get_type (void);
 
-gboolean gc_web_service_set_base_url (GcWebService *self, gchar *url);
+void gc_web_service_set_base_url (GcWebService *self, gchar *url);
 gboolean gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri);
 
 gboolean gc_web_service_query (GcWebService *self, ...);

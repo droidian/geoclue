@@ -211,7 +211,7 @@ geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet,
 		Gateway *gateway = g_new0 (Gateway, 1);
 		
 		gateway->mac = *g;
-		gateway->address = address_details_new ();
+		gateway->address = geoclue_address_details_new ();
 		
 		/* read all keys in the group as address fields */
 		keys = g_key_file_get_keys (keyfile, *g,
@@ -418,9 +418,9 @@ get_address (GcIfaceAddress   *gc,
 	}
 	if (address) {
 		if (gw) {
-			*address = address_details_copy (gw->address);
+			*address = geoclue_address_details_copy (gw->address);
 		} else {
-			*address = address_details_new ();
+			*address = geoclue_address_details_new ();
 		}
 	}
 	if (accuracy) {

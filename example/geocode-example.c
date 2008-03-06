@@ -33,7 +33,7 @@ int main (int argc, char** argv)
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
 	/* Address we'd like geocoded */
-	address = address_details_new();
+	address = geoclue_address_details_new();
 	g_hash_table_insert (address, g_strdup ("postalcode"), g_strdup ("00330"));
 	g_hash_table_insert (address, g_strdup ("countrycode"), g_strdup ("FI"));
 	g_hash_table_insert (address, g_strdup ("locality"), g_strdup ("Helsinki"));

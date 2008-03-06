@@ -11,8 +11,8 @@
  * @short_description: Geoclue position client API
  *
  * #GeocluePosition contains position-related methods and signals. 
- * It is part of the Geoclue public client API which uses the D-Bus 
- * API to communicate with the actual provider.
+ * It is part of the Geoclue public C client API which uses D-Bus 
+ * to communicate with the actual provider.
  * 
  * After a #GeocluePosition is created with geoclue_position_new(), the 
  * geoclue_position_get_position() method and the PositionChanged signal
@@ -141,12 +141,12 @@ geoclue_position_new (const char *service,
 /**
  * geoclue_position_get_position:
  * @position: A #GeocluePosition object
- * @timestamp: Pointer to returned Unix timestamp
- * @latitude: Pointer to returned latitude in degrees
- * @longitude: Pointer to returned longitude in degrees
- * @altitude: Pointer to returned altitude in meters
- * @accuracy: Pointer to returned #GeoclueAccuracy
- * @error: Pointer to returned #Gerror
+ * @timestamp: Pointer to returned Unix timestamp or %NULL
+ * @latitude: Pointer to returned latitude in degrees or %NULL
+ * @longitude: Pointer to returned longitude in degrees or %NULL
+ * @altitude: Pointer to returned altitude in meters or %NULL
+ * @accuracy: Pointer to returned #GeoclueAccuracy or %NULL
+ * @error: Pointer to returned #Gerror or %NULL
  * 
  * Obtains the current position. @timestamp will contain the time of 
  * the actual position measurement. @accuracy is a rough estimate of the

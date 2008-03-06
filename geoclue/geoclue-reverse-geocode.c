@@ -11,8 +11,8 @@
  * @short_description: Geoclue reverse geocode client API
  *
  * #GeoclueReverseGeocode contains reverse geocoding methods. 
- * It is part of the Geoclue public client API which uses the D-Bus 
- * API to communicate with the actual provider.
+ * It is part of the Geoclue public C client API which uses D-Bus 
+ * to communicate with the actual provider.
  * 
  * After a #GeoclueReverseGeocode is created with 
  * geoclue_reverse_geocode_new(), the 
@@ -86,11 +86,11 @@ geoclue_reverse_geocode_new (const char *service,
  * @geocode: A #GeoclueReverseGeocode object
  * @latitude: latitude in degrees
  * @longitude: longitude in degrees
- * @details: Pointer to returned hashtable with address details
- * @error: Pointer to returned #Gerror
+ * @details: Pointer to returned #GHashTable with address details or %NULL
+ * @error: Pointer to returned #Gerror or %NULL
  * 
  * Obtains an address for the position defined by @latitude and @longitude.
- * @details is a hashtable with the returned address data, see 
+ * @details is a #GHashTable with the returned address data, see 
  * geoclue-types.h for the hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 

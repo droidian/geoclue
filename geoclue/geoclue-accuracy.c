@@ -12,8 +12,9 @@
  * 
  * A #GeoclueAccuracy holds accuracy information: a 
  * #GeoclueAccuracyLevel and metric values for horizontal and vertical
- * accuracy. These values should be set and queried using provided 
- * functions.
+ * accuracy. The last two will only be defined if #GeoclueAccuracyLevel is
+ * %GEOCLUE_ACCURACY_LEVEL_DETAILED. These values should be set and queried 
+ * using provided functions.
  **/
 
 #include <glib-object.h>
@@ -22,11 +23,13 @@
 
 /**
  * geoclue_accuracy_new:
- * @level: The #GeoclueAccuracyLevel
- * @horizontal_accuracy: The horizontal accuracy in meters
- * @vertical_accuracy: The vertical accuracy in meters
+ * @level: A #GeoclueAccuracyLevel
+ * @horizontal_accuracy: Horizontal accuracy in meters
+ * @vertical_accuracy: Vertical accuracy in meters
  *
- * Creates a new #GeoclueAccuracy with given values.
+ * Creates a new #GeoclueAccuracy with given values. Use 0 for 
+ * horizontal_accuracy and vertical_accuracy if @level is not
+ * %GEOCLUE_ACCURACY_LEVEL_DETAILED.
  * 
  * Return value: New #GeoclueAccuracy.
  */
@@ -70,10 +73,12 @@ geoclue_accuracy_free (GeoclueAccuracy *accuracy)
 /**
  * geoclue_accuracy_get_details:
  * @accuracy: A #GeoclueAccuracy
- * @level: The returned #GeoclueAccuracyLevel
- * @horizontal_accuracy: The returned horizontal accuracy in meters
- * @vertical_accuracy: The returned vertical accuracy in meters
- *
+ * @level: Pointer to returned #GeoclueAccuracyLevel or %NULL
+ * @horizontal_accuracy: Pointer to returned horizontal accuracy in meters or %NULL
+ * @vertical_accuracy: Pointer to returned vertical accuracy in meters or %NULL
+ * 
+ * @horizontal_accuracy and @vertical_accuracy will only be defined 
+ * if @level is %GEOCLUE_ACCURACY_LEVEL_DETAILED.
  */
 void
 geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
@@ -98,10 +103,11 @@ geoclue_accuracy_get_details (GeoclueAccuracy      *accuracy,
 /**
  * geoclue_accuracy_set_details:
  * @accuracy: A #GeoclueAccuracy
- * @level:
- * @horizontal_accuracy:
- * @vertical_accuracy:
+ * @level: A #GeoclueAccuracyLevel
+ * @horizontal_accuracy: Horizontal accuracy in meters
+ * @vertical_accuracy: Vertical accuracy in meters
  *
+ * Replaces @accuracy values with given ones. 
  */
 void
 geoclue_accuracy_set_details (GeoclueAccuracy     *accuracy,

@@ -6,17 +6,16 @@
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
 
-/** TODO
+/* TODO:
  * 
- * * init: what to do if gpsd is not there?
+ * 	call to gps_set_callback blocks for a long time if 
+ * 	BT device is not present.
  * 
- * */
-
+ **/
 
 #include <config.h>
 
 #include <math.h>
-
 #include <gps.h>
 
 #include <geoclue/gc-provider.h>
@@ -39,9 +38,11 @@ typedef enum {
 typedef struct {
 	GcProvider parent;
 	
+	pthread_t *gps_thread;
 	gps_data *gpsdata;
 	
 	gps_fix *last_fix;
+	
 	GeoclueStatus last_status;
 	GeocluePositionFields last_pos_fields;
 	GeoclueAccuracy *last_accuracy;
@@ -65,6 +66,9 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGpsd, geoclue_gpsd, GC_TYPE_PROVIDER,
                                                 geoclue_gpsd_position_init)
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_VELOCITY,
                                                 geoclue_gpsd_velocity_init))
+
+static void geoclue_gpsd_stop_gpsd (GeoclueGpsd *self);
+static gboolean geoclue_gpsd_start_gpsd (GeoclueGpsd *self, char *host, char *port);
 
 
 /* defining global GeoclueGpsd because gpsd does not support "user_data"
@@ -95,27 +99,35 @@ shutdown (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
-
+static gboolean
+set_options (GcIfaceGeoclue *gc,
+             GHashTable     *options,
+             GError        **error)
+{
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
+	char *host;
+	char *port;
+	
+	host = g_hash_table_lookup (options, 
+	                                   "org.freedesktop.Geoclue.GPSHost");
+	port = g_hash_table_lookup (options, 
+	                            "org.freedesktop.Geoclue.GPSPort");
+	if (!port) {
+		port = DEFAULT_GPSD_PORT;
+	}
+	
+	geoclue_gpsd_stop_gpsd (gpsd);
+	return geoclue_gpsd_start_gpsd (gpsd, host, port);
+}
 
 static void
 finalize (GObject *object)
 {
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (object);
 	
+	geoclue_gpsd_stop_gpsd (gpsd);
 	g_free (gpsd->last_fix);
 	geoclue_accuracy_free (gpsd->last_accuracy);
-	
-	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
-}
-
-static void
-dispose (GObject *object)
-{
-	GeoclueGpsd *gpsd = GEOCLUE_GPSD (object);
-	
-	if (gpsd->gpsdata) {
-		gps_close (gpsd->gpsdata);     
-	}
 	
 	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
 }
@@ -125,11 +137,11 @@ geoclue_gpsd_class_init (GeoclueGpsdClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 	GcProviderClass *p_class = (GcProviderClass *) klass;
-
+	
 	o_class->finalize = finalize;
-	o_class->dispose = dispose;
-
+	
 	p_class->get_status = get_status;
+	p_class->set_options = set_options;
 	p_class->shutdown = shutdown;
 }
 
@@ -318,33 +330,51 @@ gpsd_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
 	geoclue_gpsd_update_velocity (gpsd, nmea_tag);
 }
 
+static void
+geoclue_gpsd_stop_gpsd (GeoclueGpsd *self)
+{
+	if (self->gpsdata) {
+		gps_del_callback (self->gpsdata, self->gps_thread);
+		gps_close (self->gpsdata);
+		self->gpsdata = NULL;
+		self->last_status = GEOCLUE_STATUS_ERROR;
+	}
+	
+}
+
+static gboolean
+geoclue_gpsd_start_gpsd (GeoclueGpsd *self, char *host, char *port)
+{
+	self->gpsdata = gps_open (host, port);
+	if (self->gpsdata) {
+		self->last_status = GEOCLUE_STATUS_UNAVAILABLE;
+		
+		/* FIXME: This will block for a long time (10-80 seconds) if device is not available */
+		gps_set_callback (self->gpsdata, gpsd_callback, self->gps_thread);
+		return TRUE;
+	} else {
+		self->last_status = GEOCLUE_STATUS_ERROR;
+		return FALSE;
+	}
+}
 
 static void
 geoclue_gpsd_init (GeoclueGpsd *self)
 {
-	pthread_t gps_thread;
-	
+	self->gpsdata = NULL;
+	self->gps_thread = g_new0 (pthread_t, 1);
 	self->last_fix = g_new0 (gps_fix, 1);
-	self->last_status = GEOCLUE_STATUS_UNAVAILABLE;
+	
 	self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
 	self->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
 	self->last_accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
-	
-	/* init gpsd (localhost, default port) */
-	self->gpsdata = gps_open (NULL, DEFAULT_GPSD_PORT);
-	if (self->gpsdata) {
-		/* FIXME: This will block for a long time (10-80 seconds) if device is not available */
-		gps_set_callback (self->gpsdata, gpsd_callback, &gps_thread);
-	} else {
-		g_printerr("Cannot find gpsd!\n");
-		
-		/* TODO: What now? */
-	}
 	
 	gc_provider_set_details (GC_PROVIDER (self),
 				 "org.freedesktop.Geoclue.Providers.Gpsd",
 				 "/org/freedesktop/Geoclue/Providers/Gpsd",
 				 "Gpsd", "Gpsd provider");
+	
+	geoclue_gpsd_start_gpsd (self, NULL, DEFAULT_GPSD_PORT);
 }
 
 static gboolean
@@ -357,8 +387,6 @@ get_position (GcIfacePosition       *gc,
               GeoclueAccuracy      **accuracy,
               GError               **error)
 {
-	GeoclueAccuracyLevel level;
-	double hor, ver;
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
 	
 	*timestamp = (int)(gpsd->last_fix->time+0.5);
@@ -366,10 +394,7 @@ get_position (GcIfacePosition       *gc,
 	*longitude = gpsd->last_fix->longitude;
 	*altitude = gpsd->last_fix->altitude;
 	*fields = gpsd->last_pos_fields;
-	
-	geoclue_accuracy_get_details (gpsd->last_accuracy, &level,
-				      &hor, &ver);
-	*accuracy = geoclue_accuracy_new (level, hor, ver);
+	*accuracy = geoclue_accuracy_copy (gpsd->last_accuracy);
 	
 	return TRUE;
 }
@@ -391,7 +416,6 @@ get_velocity (GcIfaceVelocity       *gc,
 {
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
 	
-	/* return last velocity from gpsd (could be too old?) */
 	*timestamp = (int)(gpsd->last_fix->time+0.5);
 	*speed = gpsd->last_fix->speed;
 	*direction = gpsd->last_fix->track;
@@ -415,10 +439,11 @@ main (int    argc,
 	
 	gpsd = g_object_new (GEOCLUE_TYPE_GPSD, NULL);
 	
-	
 	gpsd->loop = g_main_loop_new (NULL, TRUE);
 	g_main_loop_run (gpsd->loop);
 	
+	g_main_loop_unref (gpsd->loop);
 	g_object_unref (gpsd);
+	
 	return 0;
 }

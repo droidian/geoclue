@@ -10,7 +10,7 @@
 			by implementing defined interfaces (such as Position, Address or Geocode). 
 			Writing a provider is possible in any language with D-Bus, but 
 			Geoclue bindings are provided only for C. This how-to will outline the steps 
-			needed to write a simple provider for Geoclue  and provides the actual 
+			needed to write a provider for Geoclue  and provides  
 			source code in C. The full source code for an exmple provider  and several 
 			other providers can be found in providers/ directory in the Geoclue source tree.
 		</para>
@@ -26,7 +26,7 @@
 		</para>
 		<para>
 			A useful provider will also implement one, or several, other interfaces. It should 
-			also have a .provider-file so GecolueMaster can use it.
+			also have a .provider-file so GeoclueMaster can use it.
 			This howto will use "Position"-interface as an example. Possible interfaces 
 			are listed here:
 		</para>
@@ -75,17 +75,38 @@
 		<sect2 id="service_file">
 			<title>Service file</title>
 			<para>
-				TODO: Add example
+				Once your provider is installed, the service file allows D-Bus to start it
+				on demand. This is what your 
+				org.freedesktop.Geoclue.Providers.MyExample.service.in should look like
+				(see Makefile.am for the processing):
 			</para>
+				<programlisting>
+[D-BUS Service]
+Name=org.freedesktop.Geoclue.Providers.MyExample
+Exec=@libexecdir@/geoclue-my-example
+				</programlisting>
 		
 		</sect2>
 		
 		<sect2 id="provider_file">
 			<title>Provider file</title>
 			<para>
-				TODO
+				Provider files describe the provider for Geoclue Master. This is still 
+				somewhat experimental, but a .provider-file for MyExample should look like this:
 			</para>
-		
+			<programlisting>
+[Geoclue Provider]
+Name=My Example
+Service=org.freedesktop.Geoclue.Providers.MyExample
+Path=/org/freedesktop/Geoclue/Providers/MyExample
+Interfaces=org.freedesktop.Geoclue.Position
+Accuracy=0
+Provides=ProvidesUpdates
+Requires=
+			</programlisting>
+			<para>
+				TODO: list accuracylevels, Requires, Provides...
+			</para>
 		</sect2>
 
 		<sect2>
@@ -96,25 +117,25 @@
 				tree:
 			</para>
 			<programlisting>
-libexec_PROGRAMS = geoclue-example
+libexec_PROGRAMS = geoclue-my-example
 
-geoclue_example_CFLAGS =        \
+geoclue_my_example_CFLAGS =        \
 		-I$(top_srcdir)         \
 		-I$(top_builddir)       \
 		$(GEOCLUE_CFLAGS)
 
-geoclue_example_LDADD =         \
+geoclue_my_example_LDADD =         \
 		$(GEOCLUE_LIBS)         \
 		$(top_builddir)/geoclue/libgeoclue-provider.la
 
-geoclue_example_SOURCES =       \
+geoclue_my_example_SOURCES =       \
 		geoclue-example.c
 
 providersdir = $(datadir)/geoclue-providers
-providers_DATA = geoclue-example.provider
+providers_DATA = geoclue-my-example.provider
 
 servicedir = $(DBUS_SERVICES_DIR)
-service_in_files = org.freedesktop.Geoclue.Providers.Example.service.in
+service_in_files = org.freedesktop.Geoclue.Providers.MyExample.service.in
 service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile

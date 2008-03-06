@@ -174,9 +174,8 @@ gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
  *
  * Requests ownership of the @service name, and if that succeeds registers
  * @provider at @path. @name should be the name of the provider (e.g. 
- * "Hostip"), @description should be a shortdescription of the provider 
- * (e.g. "Web service based Position & Address provider, at best accurate
- * within the city").
+ * "Hostip"), @description should be a short description of the provider 
+ * (e.g. "Web service based Position & Address provider (http://hostip.info)").
  */
 void
 gc_provider_set_details (GcProvider *provider,

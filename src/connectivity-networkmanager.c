@@ -5,8 +5,10 @@
  * Authors: Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
-
 #include <config.h>
+
+#ifdef HAVE_NETWORK_MANAGER
+
 
 #include <dbus/dbus-glib.h>
 #include <NetworkManager.h> /*for DBus strings */
@@ -134,3 +136,5 @@ geoclue_networkmanager_connectivity_init (GeoclueConnectivityInterface *iface)
 {
 	iface->get_status = get_status;
 }
+
+#endif /* HAVE_NETWORK_MANAGER */

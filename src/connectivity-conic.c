@@ -5,10 +5,13 @@
  * Authors: Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  */
-
 #include <config.h>
 
+#ifdef HAVE_CONIC
+
+
 #include <dbus/dbus-glib.h>
+#include <conicconnectionevent.h>
 #include "connectivity-conic.h"
 
 static void geoclue_conic_connectivity_init (GeoclueConnectivityInterface *iface);
@@ -95,7 +98,7 @@ geoclue_conic_init (GeoclueConic *self)
 	
 	self->conic = con_ic_connection_new();
 	if (self->conic == NULL) {
-		warning ("Creating new ConicConnection failed");
+		g_warning ("Creating new ConicConnection failed");
 		return;
 	}
 	
@@ -112,7 +115,7 @@ geoclue_conic_init (GeoclueConic *self)
 	 * There really doesn't seem to be a method that returns a 
 	 * ConIcConnectionStatus */
 	if (con_ic_connection_connect (self->conic, 
-	                               CON_IC_CONNECT_FLAG_AUTOMATICALLY_TRIGGERED) {
+	                               CON_IC_CONNECT_FLAG_AUTOMATICALLY_TRIGGERED)) {
 		self->status = GEOCLUE_CONNECTIVITY_ONLINE;
 	} else {
 		self->status = GEOCLUE_CONNECTIVITY_OFFLINE;
@@ -125,3 +128,5 @@ geoclue_conic_connectivity_init (GeoclueConnectivityInterface *iface)
 {
 	iface->get_status = get_status;
 }
+
+#endif /* HAVE_CONIC*/

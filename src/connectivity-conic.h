@@ -10,8 +10,8 @@
 #define _CONNECTIVITY_CONIC_H
 
 #include <glib-object.h>
+#include <conicconnection.h>
 #include "connectivity.h"
-
 
 G_BEGIN_DECLS
 

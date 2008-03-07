@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	
+	<interface name="org.freedesktop.Geoclue.Position">
+		<doc:doc>
+			<doc:para>Position interface contains a method 
+			and a signal for querying current coordinates.</doc:para>
+		</doc:doc>
+		
+		<method name="GetPosition">
+			<arg type="i" name="fields" direction="out" />
+			<arg type="i" name="timestamp" direction="out" />
+
+			<arg type="d" name="latitude" direction="out" />
+			<arg type="d" name="longitude" direction="out" />
+			<arg type="d" name="altitude" direction="out" />
+
+                        <arg name="accuracy" type="(idd)" direction="out" />
+		</method>
+
+		<signal name="PositionChanged">
+			<arg type="i" name="fields" />
+			<arg type="i" name="timestamp" />
+			<arg type="d" name="latitude" />
+			<arg type="d" name="longitude" />
+			<arg type="d" name="altitude" />
+
+			<arg type="(idd)" name="accuracy" />
+		</signal>
+	</interface>
+</node>

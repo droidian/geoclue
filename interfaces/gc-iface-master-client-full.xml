@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	<interface name="org.freedesktop.Geoclue.MasterClient">
+		<method name="SetRequirements">
+			<arg name="accuracy_level" type="i" direction="in" />
+			<arg name="time" type="i" direction="in" />
+			<arg name="require_updates" type="b" direction="in" />
+			<arg name="allowed_resources" type="i" direction="in" />
+		</method>
+		<method name="GetProvider">
+			<arg name="interface" type="s" direction="in"/>
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+		</method>
+		<signal name="ProviderChanged">
+			<arg name="interface" type="s" direction="out"/>
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+		</signal>
+	</interface>
+</node>

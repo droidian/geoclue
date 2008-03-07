@@ -22,19 +22,14 @@ missing
 .libs
 
 
-*signal_marshal.[ch]
+*-marshal.[ch]
 *.service
 *.pc
-*_glue.h
+*-glue.h
+*-bindings.h
 
 doxygen.conf
 
-backend/geocode_yahoo/geoclue-geocode-server-yahoo
-backend/map_yahoo/geoclue-map-server-yahoo
-backend/position_gpsd/geoclue-position-server-gpsd
-backend/position_hostip/geoclue-position-server-hostip
-backend/position_manual/geoclue-position-server-manual
-backend/position_plazes/geoclue-position-server-plazes
 example/geoclue-find-example
 example/geoclue-geocode-example
 example/geoclue-map-example

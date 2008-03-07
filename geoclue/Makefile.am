@@ -1,164 +1,140 @@
 lib_LTLIBRARIES = libgeoclue.la
-bin_PROGRAMS = geoclue-master
 
-geoclue_master_SOURCES = geoclue_master.c \
-						geoclue_master_signal_marshal.c	
+BUILT_SOURCES =			\
+	geoclue-marshal.c	\
+	geoclue-marshal.h	\
+	gc-iface-address-bindings.h	\
+	gc-iface-address-glue.h	\
+	gc-iface-geoclue-bindings.h	\
+	gc-iface-geoclue-glue.h \
+	gc-iface-geocode-bindings.h	\
+	gc-iface-geocode-glue.h	\
+	gc-iface-master-bindings.h	\
+	gc-iface-master-client-bindings.h	\
+	gc-iface-position-bindings.h	\
+	gc-iface-position-glue.h	\
+	gc-iface-reverse-geocode-bindings.h	\
+	gc-iface-reverse-geocode-glue.h	\
+	gc-iface-velocity-bindings.h	\
+	gc-iface-velocity-glue.h
 
+libgeoclue_la_SOURCES = 	\
+	$(BUILT_SOURCES)	\
+	geoclue-accuracy.c	\
+	geoclue-address.c	\
+	geoclue-address-details.c	\
+	geoclue-common.c	\
+	geoclue-error.c		\
+	geoclue-geocode.c	\
+	geoclue-master.c	\
+	geoclue-master-client.c	\
+	geoclue-position.c	\
+	geoclue-provider.c	\
+	geoclue-reverse-geocode.c	\
+	geoclue-types.c		\
+	geoclue-velocity.c	\
+	gc-provider.c		\
+	gc-web-service.c	\
+	gc-iface-address.c	\
+	gc-iface-geoclue.c      \
+	gc-iface-geocode.c	\
+	gc-iface-position.c	\
+	gc-iface-reverse-geocode.c	\
+	gc-iface-velocity.c
 
-service_in_files = org.freedesktop.geoclue.master.service.in
-service_files = $(service_in_files:.service.in=.service)
-
-
-# D-Bus service descriptor installation
-servicedir = $(DBUS_SERVICES_DIR)
-service_DATA = $(service_files)
-execdir = @bindir@
-$(service_DATA): $(service_in_files) Makefile
-	for f in $(service_in_files) ; do \
-		sed -e 's;@execdir@;$(execdir);' $< > $@ ;\
-	done
-
-
-
-AM_CPPFLAGS = $(DEPS_CFLAGS) -I$(top_srcdir)
-AM_LDFLAGS = $(DEPS_LIBS)
-
-
-
-EXTRA_DIST = \
-		position_glue.xml \
-		position_signal_marshal.list \
-		find_glue.xml \
-		find_signal_marshal.list \
-		map_glue.xml \
-		map_signal_marshal.list \
-		master_glue.xml \
-		master_signal_marshal.list \
-		geoclue_master.h \
-		geocode_glue.xml \
-		$(service_in_files)
-		
-		
-
-libgeoclue_la_SOURCES = 	position.c \
-  				position_signal_marshal.c \
- 				find.c \
-  				find_signal_marshal.c \
-				map.c \
-				map_gtk.c \
-				map_gtk_layout.c \
-				map_signal_marshal.c \
-				geocode.c \
-				geoclue.c
- 
-libgeoclue_la_CFLAGS = $(DEPS_CFLAGS) -I$(top_srcdir)
-libgeoclue_la_LIBADD = $(DEPS_LIBS)
-
-libgeoclue_ladir=$(includedir)/geoclue
-libgeoclue_la_HEADERS = 	position.h \
-				find.h \
-				map.h \
-				map_gtk.h \
-				map_gtk_layout.h \
-				geocode.h \
-				geoclue.h
-
-
-
-BUILT_SOURCES = \
-				position_client_glue.h \
-				position_signal_marshal.h \
-				position_signal_marshal.c \
-				find_client_glue.h \
-				find_signal_marshal.h \
-				find_signal_marshal.c \
-				map_client_glue.h \
-				map_signal_marshal.h \
-				map_signal_marshal.c \
-				geoclue_master_signal_marshal.c	\
-				geoclue_master_server_glue.h \
-				geoclue_master_client_glue.h \
-				geocode_client_glue.h \
-				$(service_files)
-
-CLEANFILES =	\
-				position_client_glue.h \
-				position_signal_marshal.h \
-				position_signal_marshal.c \
-				find_client_glue.h \
-				find_signal_marshal.h \
-				find_signal_marshal.c \
-				map_client_glue.h \
-				map_signal_marshal.h \
-				map_signal_marshal.c \
-				geoclue_master_signal_marshal.c	\
-				geoclue_master_server_glue.h \
-				geoclue_master_client_glue.h \
-				geocode_client_glue.h \
-				$(service_files)
-
-
-dbusspecdir = $(datadir)/geoclue/dbus
-dbusspec_DATA = \
-		position_glue.xml \
-		position_signal_marshal.list \
-		find_glue.xml \
-		find_signal_marshal.list \
-		map_glue.xml \
-		map_signal_marshal.list \
-		geocode_glue.xml 
-
-
-
-
-
-position_client_glue.h:position_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_position --mode=glib-client $< > $@
-
-position_signal_marshal.h:position_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_position --header $< > $@ 
-position_signal_marshal.c:position_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_position --body $< > $@ 
-
-
-
-find_client_glue.h:find_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_find --mode=glib-client $< > $@
-
-find_signal_marshal.h:find_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_find --header $< > $@ 
-find_signal_marshal.c:find_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_find --body $< > $@ 
-
-
-map_client_glue.h:map_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_map --mode=glib-client $< > $@
-
-map_signal_marshal.h:map_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_map --header $< > $@ 
-map_signal_marshal.c:map_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_map --body $< > $@ 
+libgeoclue_la_CFLAGS =		\
+	-I$(top_srcdir)		\
+	-I$(top_builddir)	\
+	$(GEOCLUE_CFLAGS)
 	
-	
-	
-	
-geoclue_master_server_glue.h:master_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_master --mode=glib-server  $< |  sed 's;\data = user_data;\data = (DBusGAsyncData\*)user_data;g' > $@ 
-	
-geoclue_master_client_glue.h:master_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_client --mode=glib-client  $< |  sed 's;\data = user_data;\data = (DBusGAsyncData\*)user_data;g' > $@ 
+geoclue_headers =		\
+	gc-iface-address.h	\
+	gc-iface-geoclue.h	\
+	gc-iface-geocode.h	\
+	gc-iface-position.h	\
+	gc-iface-reverse-geocode.h	\
+	gc-iface-velocity.h	\
+	gc-provider.h		\
+	gc-web-service.h	\
+	geoclue-accuracy.h	\
+	geoclue-address.h	\
+	geoclue-address-details.h	\
+	geoclue-common.h	\
+	geoclue-error.h		\
+	geoclue-geocode.h	\
+	geoclue-master.h	\
+	geoclue-master-client.h	\
+	geoclue-position.h	\
+	geoclue-provider.h	\
+	geoclue-reverse-geocode.h	\
+	geoclue-types.h		\
+	geoclue-velocity.h
 
+libgeoclue_includedir = $(includedir)/geoclue
+libgeoclue_include_HEADERS =	\
+	$(geoclue_headers)
 
+EXTRA_DIST =			\
+	geoclue-marshal.list	\
+	$(BUILT_SOURCES)
 
-geoclue_master_signal_marshal.h:master_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_master --header  $< > $@ 
-geoclue_master_signal_marshal.c:master_signal_marshal.list
-	glib-genmarshal --prefix _geoclue_master --body  $< > $@ 
-	
-geocode_client_glue.h:geocode_glue.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_geocode --mode=glib-client $< > $@
+CLEANFILES = $(BUILT_SOURCES) 	\
+	stamp-gc-iface-address-glue.h	\
+	stamp-gc-iface-geoclue-glue.h	\
+	stamp-gc-iface-geocode-glue.h	\
+	stamp-gc-iface-position-glue.h	\
+	stamp-gc-iface-reverse-geocode-glue.h	\
+	stamp-gc-iface-velocity-glue.h
 
+geoclue-marshal.h: geoclue-marshal.list $(GLIB_GENMARSHAL)
+	$(GLIB_GENMARSHAL) $< --header --prefix=geoclue_marshal > $@
+geoclue-marshal.c: geoclue-marshal.list geoclue-marshal.h $(GLIB_GENMARSHAL)
+	echo "#include \"geoclue-marshal.h\"" > $@ \
+	&& $(GLIB_GENMARSHAL) --prefix=geoclue_marshal $(srcdir)/geoclue-marshal.list --body >> $@
 
+%-glue.h: stamp-%-glue.h
+	@true
 
+stamp-gc-iface-address-glue.h: ../interfaces/gc-iface-address.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_address --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
 
+stamp-gc-iface-geoclue-glue.h: ../interfaces/gc-iface-geoclue.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_geoclue --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
 
+stamp-gc-iface-geocode-glue.h: ../interfaces/gc-iface-geocode.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_geocode --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
+
+stamp-gc-iface-position-glue.h: ../interfaces/gc-iface-position.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_position --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
+
+stamp-gc-iface-reverse-geocode-glue.h: ../interfaces/gc-iface-reverse-geocode.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_reverse_geocode --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
+
+stamp-gc-iface-velocity-glue.h: ../interfaces/gc-iface-velocity.xml
+	$(DBUS_BINDING_TOOL) --prefix=gc_iface_velocity --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)
+
+%-bindings.h: stamp-%-bindings.h
+	@true
+stamp-%-bindings.h: ../interfaces/%.xml
+	$(DBUS_BINDING_TOOL) --mode=glib-client --prefix=geoclue $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)

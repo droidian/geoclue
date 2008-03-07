@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.freedesktop.geoclue.position.manual
-Exec=@execdir@/geoclue-position-server-manual

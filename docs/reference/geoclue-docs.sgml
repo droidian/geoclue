@@ -46,6 +46,8 @@
 	
 	<reference>
 		<title>D-Bus API</title>
+		<xi:include href="gc-iface-master-ref.xml"/>
+		<xi:include href="gc-iface-master-client-ref.xml"/>
 		<xi:include href="gc-iface-geoclue-ref.xml"/>
 		<xi:include href="gc-iface-position-ref.xml"/>
 		<xi:include href="gc-iface-address-ref.xml"/>

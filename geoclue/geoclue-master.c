@@ -139,7 +139,7 @@ geoclue_master_create_client (GeoclueMaster *master,
 			       "object-path", path,
 			       NULL);
 	
-	if (*object_path) {
+	if (object_path) {
 		*object_path = path;
 	} else {
 		g_free (path);

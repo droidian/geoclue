@@ -82,14 +82,12 @@ geoclue_geonames_get_status (GcIfaceGeoclue *iface,
 	return TRUE;
 }
 
-static gboolean
-geoclue_geonames_shutdown (GcIfaceGeoclue  *iface,
-                           GError         **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
+	GeoclueGeonames *obj = GEOCLUE_GEONAMES (provider);
 	
 	g_main_loop_quit (obj->loop);
-	return TRUE;
 }
 
 
@@ -270,7 +268,7 @@ geoclue_geonames_class_init (GeoclueGeonamesClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->shutdown = geoclue_geonames_shutdown;
+	p_class->shutdown = shutdown;
 	p_class->get_status = geoclue_geonames_get_status;
 
 	o_class->finalize = geoclue_geonames_finalize;

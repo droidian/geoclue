@@ -65,13 +65,11 @@ geoclue_plazes_get_status (GcIfaceGeoclue *iface,
 	return TRUE;
 }
 
-static gboolean
-geoclue_plazes_shutdown (GcIfaceGeoclue *iface,
-			 GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeocluePlazes *plazes = GEOCLUE_PLAZES (iface);
+	GeocluePlazes *plazes = GEOCLUE_PLAZES (provider);
 	g_main_loop_quit (plazes->loop);
-	return TRUE;
 }
 
 #define MAC_LEN 18
@@ -285,7 +283,7 @@ geoclue_plazes_class_init (GeocluePlazesClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->shutdown = geoclue_plazes_shutdown;
+	p_class->shutdown = shutdown;
 	p_class->get_status = geoclue_plazes_get_status;
 	
 	o_class->finalize = geoclue_plazes_finalize;

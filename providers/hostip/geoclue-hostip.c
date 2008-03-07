@@ -57,13 +57,11 @@ geoclue_hostip_get_status (GcIfaceGeoclue *iface,
 	return TRUE;
 }
 
-static gboolean
-geoclue_hostip_shutdown (GcIfaceGeoclue *iface,
-			 GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueHostip *obj = GEOCLUE_HOSTIP (iface);
+	GeoclueHostip *obj = GEOCLUE_HOSTIP (provider);
 	g_main_loop_quit (obj->loop);
-	return TRUE;
 }
 
 /* Position interface implementation */
@@ -212,7 +210,7 @@ geoclue_hostip_class_init (GeoclueHostipClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->shutdown = geoclue_hostip_shutdown;
+	p_class->shutdown = shutdown;
 	p_class->get_status = geoclue_hostip_get_status;
 	
 	o_class->finalize = geoclue_hostip_finalize;

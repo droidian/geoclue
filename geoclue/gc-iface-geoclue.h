@@ -41,8 +41,6 @@ struct _GcIfaceGeoclueClass {
         gboolean (*set_options) (GcIfaceGeoclue *geoclue,
                                  GHashTable     *options,
                                  GError        **error);
-	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
-			      GError        **error);
 };
 
 GType gc_iface_geoclue_get_type (void);

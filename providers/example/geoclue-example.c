@@ -59,14 +59,12 @@ set_options (GcIfaceGeoclue *gc,
         return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-	  GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueExample *example = GEOCLUE_EXAMPLE (gc);
-
+	GeoclueExample *example = GEOCLUE_EXAMPLE (provider);
+	
 	g_main_loop_quit (example->loop);
-	return TRUE;
 }
 
 static void

@@ -40,26 +40,6 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 G_DEFINE_TYPE (GeoclueCommon, geoclue_common, GEOCLUE_TYPE_PROVIDER);
 
 static void
-finalize (GObject *object)
-{
-	G_OBJECT_CLASS (geoclue_common_parent_class)->finalize (object);
-}
-
-static void
-dispose (GObject *object)
-{
-	GeoclueProvider *provider = GEOCLUE_PROVIDER (object);
-	GError *error = NULL;
-
-	if (!org_freedesktop_Geoclue_shutdown (provider->proxy, &error)) {
-		g_warning ("Error shutting down: %s", error->message);
-		g_error_free (error);
-	}
-
-	G_OBJECT_CLASS (geoclue_common_parent_class)->dispose (object);
-}
-
-static void
 status_changed (DBusGProxy    *proxy,
 		GeoclueStatus status,
 		GeoclueCommon *common)
@@ -93,8 +73,6 @@ geoclue_common_class_init (GeoclueCommonClass *klass)
 {
 	GObjectClass *o_class = (GObjectClass *) klass;
 
-	o_class->finalize = finalize;
-	o_class->dispose = dispose;
 	o_class->constructor = constructor;
 
 	g_type_class_add_private (klass, sizeof (GeoclueCommonPrivate));

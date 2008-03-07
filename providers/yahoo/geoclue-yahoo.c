@@ -55,14 +55,12 @@ geoclue_yahoo_get_status (GcIfaceGeoclue *iface,
 	return TRUE;
 }
 
-static gboolean
-geoclue_yahoo_shutdown (GcIfaceGeoclue  *iface,
-                           GError         **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueYahoo *yahoo = GEOCLUE_YAHOO (iface);
+	GeoclueYahoo *yahoo = GEOCLUE_YAHOO (provider);
 	
 	g_main_loop_quit (yahoo->loop);
-	return TRUE;
 }
 
 
@@ -183,7 +181,7 @@ geoclue_yahoo_class_init (GeoclueYahooClass *klass)
 	GcProviderClass *p_class = (GcProviderClass *)klass;
 	GObjectClass *o_class = (GObjectClass *)klass;
 	
-	p_class->shutdown = geoclue_yahoo_shutdown;
+	p_class->shutdown = shutdown;
 	p_class->get_status = geoclue_yahoo_get_status;
 	
 	o_class->dispose = geoclue_yahoo_dispose;

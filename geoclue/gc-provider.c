@@ -22,6 +22,7 @@
  */
 #include <config.h>
 
+#include <string.h>
 #include <glib-object.h>
 
 #include <dbus/dbus-glib-bindings.h>
@@ -68,6 +69,8 @@ gc_provider_class_init (GcProviderClass *klass)
 
 	o_class->finalize = finalize;
 	o_class->dispose = dispose;
+	
+	klass->shutdown = NULL;
 	
 	g_type_class_add_private (klass, sizeof (GcProviderPrivate));
 }
@@ -138,30 +141,38 @@ set_options (GcIfaceGeoclue *geoclue,
         return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *geoclue,
-	  GError        **error)
-{
-	GcProviderClass *klass;
-
-	klass = GC_PROVIDER_GET_CLASS (geoclue);
-	if (klass->shutdown) {
-		return klass->shutdown (geoclue, error);
-	} else {
-		*error = g_error_new (GEOCLUE_ERROR,
-				      GEOCLUE_ERROR_NOT_IMPLEMENTED,
-				      "shutdown is not implemented");
-		return FALSE;
-	}
-}
-
 static void
 gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 {
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
-        iface->set_options = set_options;
-	iface->shutdown = shutdown;
+	iface->set_options = set_options;
+}
+
+static void
+gc_provider_shutdown (GcProvider *provider)
+{
+	GC_PROVIDER_GET_CLASS (provider)->shutdown (provider);
+}
+
+static void
+name_owner_changed (DBusGProxy  *proxy,
+		    const char  *name,
+		    const char  *prev_owner,
+		    const char  *new_owner,
+		    GcProvider  *provider)
+{
+	static int ref_count = 0;
+	
+	if (strcmp (new_owner, name) == 0 && strcmp (prev_owner, "") == 0) {
+		ref_count++;
+	} else if (strcmp (new_owner, "") == 0 && strcmp (prev_owner, name) == 0) {
+		ref_count--;
+		if (ref_count == 0) {
+			g_debug ("no clients, shutting down");
+			gc_provider_shutdown (provider);
+		}
+	}
 }
 
 /**
@@ -207,10 +218,17 @@ gc_provider_set_details (GcProvider *provider,
 		g_error_free (error);
 		return;
 	}
-
+	
+	dbus_g_proxy_add_signal (driver, "NameOwnerChanged",
+				 G_TYPE_STRING, G_TYPE_STRING, 
+				 G_TYPE_STRING, G_TYPE_INVALID);
+	dbus_g_proxy_connect_signal (driver, "NameOwnerChanged",
+				     G_CALLBACK (name_owner_changed),
+				     provider, NULL);
+	
 	dbus_g_connection_register_g_object (provider->connection, 
 					     path, G_OBJECT (provider));
-
+	
 	priv->name = g_strdup (name);
 	priv->description = g_strdup (description);
 }

@@ -70,15 +70,13 @@ get_status (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-          GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
 	GeoclueLocalnet *localnet;
 	
-	localnet = GEOCLUE_LOCALNET (gc);
+	localnet = GEOCLUE_LOCALNET (provider);
 	g_main_loop_quit (localnet->loop);
-	return TRUE;
 }
 
 static void

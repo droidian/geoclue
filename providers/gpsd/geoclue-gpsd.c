@@ -89,14 +89,12 @@ get_status (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-          GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
+	GeoclueGpsd *gpsd = GEOCLUE_GPSD (provider);
 	
 	g_main_loop_quit (gpsd->loop);
-	return TRUE;
 }
 
 static gboolean

@@ -29,8 +29,6 @@ static gboolean gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
 static gboolean gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
                                               GHashTable     *options,
                                               GError        **error);
-static gboolean gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
-					   GError        **error);
 
 #include "gc-iface-geoclue-glue.h"
 
@@ -104,13 +102,6 @@ gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
 {
         return GC_IFACE_GEOCLUE_GET_CLASS (gc)->set_options (gc, options, 
                                                              error);
-}
-
-static gboolean
-gc_iface_geoclue_shutdown (GcIfaceGeoclue *gc,
-			   GError        **error)
-{
-	return GC_IFACE_GEOCLUE_GET_CLASS (gc)->shutdown (gc, error);
 }
 
 void

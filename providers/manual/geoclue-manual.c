@@ -118,15 +118,13 @@ get_status (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-	  GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
 	GeoclueManual *manual;
 	
-	manual = GEOCLUE_MANUAL (gc);
+	manual = GEOCLUE_MANUAL (provider);
 	g_main_loop_quit (manual->loop);
-	return TRUE;
 }
 
 gboolean 

@@ -33,7 +33,9 @@ typedef struct _GcProvider {
 
 typedef struct _GcProviderClass {
 	GObjectClass parent_class;
-
+	
+	void (*shutdown) (GcProvider *provider);
+	
 	/* Implements the GcIfaceGeoclue interface */
 	gboolean (*get_status) (GcIfaceGeoclue *geoclue,
 				GeoclueStatus  *status,
@@ -41,8 +43,6 @@ typedef struct _GcProviderClass {
         gboolean (*set_options) (GcIfaceGeoclue *geoclue,
                                  GHashTable     *options,
                                  GError        **error);
-	gboolean (*shutdown) (GcIfaceGeoclue *geoclue,
-			      GError        **error);
 } GcProviderClass;
 
 GType gc_provider_get_type (void);

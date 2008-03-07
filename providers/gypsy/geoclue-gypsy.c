@@ -414,14 +414,12 @@ set_options (GcIfaceGeoclue *gc,
 	return TRUE;
 }
 
-static gboolean
-shutdown (GcIfaceGeoclue *gc,
-          GError        **error)
+static void
+shutdown (GcProvider *provider)
 {
-	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
-
-        g_main_loop_quit (gypsy->loop);
-        return TRUE;
+	GeoclueGypsy *gypsy = GEOCLUE_GYPSY (provider);
+	
+	g_main_loop_quit (gypsy->loop);
 }
 
 static void
@@ -468,7 +466,7 @@ geoclue_gypsy_class_init (GeoclueGypsyClass *klass)
 	o_class->dispose = dispose;
 
 	p_class->get_status = get_status;
-        p_class->set_options = set_options;
+	p_class->set_options = set_options;
 	p_class->shutdown = shutdown;
 }
 

@@ -19,15 +19,18 @@ NOINST_H_FILES =		\
 	main.h			\
 	master.h		\
 	client.h		\
-	connectivity.h
+	connectivity.h		\
+	connectivity-networkmanager.h	\
+	connectivity-conic.h
 
 geoclue_master_SOURCES =	\
 	client.c		\
 	main.c			\
 	master.c		\
 	master-provider.c	\
-	connectivity.c	\
-	connectivity-networkmanager.c
+	connectivity.c		\
+	connectivity-networkmanager.c	\
+	connectivity-conic.c
 
 BUILT_SOURCES =			\
 	gc-iface-master-glue.h	\

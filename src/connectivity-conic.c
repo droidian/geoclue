@@ -11,6 +11,7 @@
 
 
 #include <dbus/dbus-glib.h>
+#include <dbus/dbus-glib-lowlevel.h>
 #include <conicconnectionevent.h>
 #include "connectivity-conic.h"
 
@@ -83,6 +84,7 @@ geoclue_conic_state_changed (ConIcConnection *connection,
 	ConIcConnectionStatus status = con_ic_connection_event_get_status (event);
 	GeoclueNetworkStatus gc_status;
 	
+	g_debug ("conic change");
 	gc_status = conicstatus_to_geocluenetworkstatus (status);
 	if (gc_status != self->status) {
 		self->status = gc_status;
@@ -94,7 +96,18 @@ geoclue_conic_state_changed (ConIcConnection *connection,
 static void
 geoclue_conic_init (GeoclueConic *self)
 {
+	DBusConnection *system_bus = NULL;
+	
 	self->status = GEOCLUE_CONNECTIVITY_UNKNOWN;
+	
+	/* Need to run dbus_connection_setup_with_g_main(),
+	 * otherwise conic signals will not fire... */
+	system_bus = dbus_bus_get (DBUS_BUS_SYSTEM, NULL);
+	if (!system_bus) {
+		g_warning ("D-Bus system bus not available, connection signals not connected.");
+		return;
+	}
+	dbus_connection_setup_with_g_main (system_bus, NULL);
 	
 	self->conic = con_ic_connection_new();
 	if (self->conic == NULL) {
@@ -106,20 +119,12 @@ geoclue_conic_init (GeoclueConic *self)
 	                  "connection-event", 
 	                  G_CALLBACK (geoclue_conic_state_changed), 
 	                  self);
+	
+	/* this should result in a connection-event signal with current 
+	 * connection status. Weird API.*/
 	g_object_set (G_OBJECT (self->conic), 
 	              "automatic-connection-events", 
 	              TRUE, NULL);
-	
-	
-	/* this shouldn't actually connect, just check the connection.
-	 * There really doesn't seem to be a method that returns a 
-	 * ConIcConnectionStatus */
-	if (con_ic_connection_connect (self->conic, 
-	                               CON_IC_CONNECT_FLAG_AUTOMATICALLY_TRIGGERED)) {
-		self->status = GEOCLUE_CONNECTIVITY_ONLINE;
-	} else {
-		self->status = GEOCLUE_CONNECTIVITY_OFFLINE;
-	} 
 }
 
 

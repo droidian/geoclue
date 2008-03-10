@@ -93,6 +93,9 @@ geoclue_networkmanager_state_changed (DBusGProxy *proxy,
 	}
 }
 
+
+#define NM_DBUS_SIGNAL_STATE_CHANGE "StateChange"
+
 static void
 geoclue_networkmanager_init (GeoclueNetworkManager *self)
 {

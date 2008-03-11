@@ -85,11 +85,25 @@ AC_SUBST(CONNECTIVITY_CFLAGS)
 
 PROVIDER_SUBDIRS="example hostip geonames manual plazes localnet yahoo"
 
+PKG_CHECK_MODULES(GSMLOC, [
+		  gammu
+], HAVE_GSMLOC=yes, HAVE_GSMLOC=no)
+if test "x$HAVE_GSMLOC" = "xyes"; then
+	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gsmloc"
+else
+	NO_BUILD_PROVIDERS="$NO_BUILD_PROVIDERS gsmloc"
+fi
+AC_SUBST(GSMLOC_LIBS)
+AC_SUBST(GSMLOC_CFLAGS)
+
+
 PKG_CHECK_MODULES(GYPSY, [
 		  gypsy
 ], HAVE_GYPSY=yes,HAVE_GYPSY=no)
 if test "x$HAVE_GYPSY" = "xyes"; then
 	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gypsy"
+else
+	NO_BUILD_PROVIDERS="$NO_BUILD_PROVIDERS gypsy"
 fi
 AC_SUBST(GYPSY_LIBS)
 AC_SUBST(GYPSY_CFLAGS)
@@ -98,6 +112,8 @@ AC_CHECK_LIB(gps, gps_open,[libgps=yes] )
 if test "x$libgps" = xyes; then
 	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gpsd"
     GPSD_LIBS="-lgps"
+else
+	NO_BUILD_PROVIDERS="$NO_BUILD_PROVIDERS gpsd"
 fi
 AC_SUBST(GPSD_LIBS)
 AC_SUBST(GPSD_CFLAGS)
@@ -122,6 +138,7 @@ providers/manual/Makefile
 providers/plazes/Makefile
 providers/localnet/Makefile
 providers/yahoo/Makefile
+providers/gsmloc/Makefile
 src/Makefile
 ])
 
@@ -132,6 +149,7 @@ echo "Geoclue ${VERSION} has been configured as follows: "
 echo "---------------------------------------------------"
 echo "Source code location:   ${srcdir}"
 echo "Compiler:               ${CC}"
-echo "Providers:              ${PROVIDER_SUBDIRS}"
 echo "Network connectivity:   ${CONNECTIVITY}"
+echo "Providers:              ${PROVIDER_SUBDIRS}"
+echo "Excluded providers:    ${NO_BUILD_PROVIDERS}"
 echo ""

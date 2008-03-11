@@ -58,7 +58,7 @@ IGNORE_HFILES= \
 	gc-iface-address-glue.h \
 	gc-iface-reverse-geocode-glue.h \
 	gc-iface-geoclue-glue.h \
-	gc-iface-velocity-glue.h \     
+	gc-iface-velocity-glue.h \
 	gc-iface-geocode-glue.h \
 	gc-iface-position-glue.h
 

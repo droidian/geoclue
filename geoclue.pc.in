@@ -6,26 +6,8 @@ datarootdir = @datarootdir@
 datadir=@datadir@
 
 Name: geoclue
-Description: This library provide an abstract interface to get Geography Location Information
-Requires: dbus-glib-1
+Description: Geoinformation service
+Requires: dbus-glib-1 libxml-2.0
 Version: @VERSION@
 Libs: -L${libdir} -lgeoclue
-Cflags: -I${includedir}/geoclue -I${libdir}/geoclue/include
-
-
-positionxml=${datadir}/geoclue/dbus/position_glue.xml
-positionmarshallist=${datadir}/geoclue/dbus/position_signal_marshal.list
-
-findxml=${datadir}/geoclue/dbus/find_glue.xml
-findmarshallist=${datadir}/geoclue/dbus/find_signal_marshal.list
-
-mapxml=${datadir}/geoclue/dbus/map_glue.xml
-mapmarshallist=${datadir}/geoclue/dbus/map_signal_marshal.list
-
-geocodexml=${datadir}/geoclue/dbus/geocode_glue.xml
-geocodemarshallist=${datadir}/geoclue/dbus/geocode_signal_marshal.list
-
-masterxml=${datadir}/geoclue/dbus/master_glue.xml
-mastermarshallist=${datadir}/geoclue/dbus/master_signal_marshal.list
-
-desc_dir=${datadir}/geoclue/backend
+Cflags: -I${includedir}/geoclue

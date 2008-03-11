@@ -86,7 +86,7 @@ AC_SUBST(CONNECTIVITY_CFLAGS)
 PROVIDER_SUBDIRS="example hostip geonames manual plazes localnet yahoo"
 
 PKG_CHECK_MODULES(GSMLOC, [
-		  gammu
+		  gammu >= 1.12
 ], HAVE_GSMLOC=yes, HAVE_GSMLOC=no)
 if test "x$HAVE_GSMLOC" = "xyes"; then
 	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gsmloc"
@@ -121,6 +121,7 @@ AC_SUBST(GPSD_CFLAGS)
 AC_SUBST(PROVIDER_SUBDIRS)
 
 AC_CONFIG_FILES([
+geoclue.pc
 Makefile
 docs/Makefile
 docs/reference/Makefile

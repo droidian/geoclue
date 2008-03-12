@@ -50,7 +50,9 @@ GType gc_master_provider_get_type (void);
 GcMasterProvider *gc_master_provider_new (const char *filename,
                                           GeoclueConnectivity *connectivity);
 
-gint gc_master_provider_compare (GcMasterProvider *a, GcMasterProvider *b);
+gint gc_master_provider_compare (GcMasterProvider *a, 
+                                 GcMasterProvider *b,
+                                 GeoclueAccuracyLevel *min_accuracy);
 
 gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
                                      GcInterfaceFlags      iface_types,

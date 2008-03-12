@@ -132,15 +132,17 @@ accuracy_changed (GcMasterProvider     *provider,
 	g_debug ("client: %s accuracy changed, re-choosing current providers", 
 	         gc_master_provider_get_name (provider));
 	priv->position_providers = 
-		g_list_sort (priv->position_providers, 
-		             (GCompareFunc)gc_master_provider_compare);
+		g_list_sort_with_data (priv->position_providers, 
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &priv->min_accuracy);
 	if (gc_master_client_choose_position_provider (client, 
 	                                               priv->position_providers)) {
 		gc_master_client_emit_position_changed (client);
 	}
 	priv->address_providers = 
-		g_list_sort (priv->address_providers, 
-		             (GCompareFunc)gc_master_provider_compare);
+		g_list_sort_with_data (priv->address_providers, 
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &priv->min_accuracy);
 	if (gc_master_client_choose_address_provider (client, 
 	                                              priv->address_providers)) {
 		gc_master_client_emit_address_changed (client);
@@ -421,8 +423,9 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		                         allowed_resources,
 		                         NULL);
 	priv->position_providers = 
-		g_list_sort (priv->position_providers,
-		             (GCompareFunc)gc_master_provider_compare);
+		g_list_sort_with_data (priv->position_providers,
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &min_accuracy);
 	g_debug ("client: %d position providers matching requirements found", 
 	         g_list_length (priv->position_providers));
 	
@@ -433,8 +436,9 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 		                         allowed_resources,
 		                         NULL);
 	priv->address_providers = 
-		g_list_sort (priv->address_providers,
-		             (GCompareFunc)gc_master_provider_compare);
+		g_list_sort_with_data (priv->address_providers,
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &min_accuracy);
 	g_debug ("client: %d address providers matching requirements found", 
 	         g_list_length (priv->address_providers));
 	

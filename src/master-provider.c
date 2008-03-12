@@ -949,17 +949,30 @@ gc_master_provider_get_description (GcMasterProvider *provider)
 	return priv->description;
 }
 
-/* GCompareFunc for sorting providers by accuracy and required resources */
-gint
+/* GCompareDataFunc for sorting providers by accuracy and required resources */
+int
 gc_master_provider_compare (GcMasterProvider *a, 
-                            GcMasterProvider *b)
+                            GcMasterProvider *b,
+                            GeoclueAccuracyLevel *min_accuracy)
 {
 	int diff;
 	
 	GcMasterProviderPrivate *priv_a = GET_PRIVATE (a);
 	GcMasterProviderPrivate *priv_b = GET_PRIVATE (b);
 	
-	diff =  priv_b->cached_accuracy - priv_a->cached_accuracy;
+	/* sort by resource requirements and accuracy, but only if both
+	 * providers meet the accuracy requirement  */
+	if ((priv_b->cached_accuracy >= *min_accuracy) &&
+	    (priv_a->cached_accuracy >= *min_accuracy)) {
+		diff = priv_a->required_resources - priv_b->required_resources;
+		if (diff != 0 ) {
+			return diff;
+		}
+		return priv_b->cached_accuracy - priv_a->cached_accuracy;
+	}
+	
+	/* otherwise sort by accuracy, then resource reqs: */
+	diff = priv_b->cached_accuracy - priv_a->cached_accuracy;
 	if (diff != 0) {
 		return diff;
 	}

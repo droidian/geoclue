@@ -327,8 +327,11 @@ manual_address_changed (GeoclueAddress  *manual,
 	free_gateway_list (localnet->gateways);
 	localnet->gateways = NULL;
 	geoclue_localnet_load_gateways_from_keyfile (localnet, keyfile);
-	
 	g_key_file_free (keyfile);
+	
+	g_debug ("emitting");
+	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (localnet),
+	                                       timestamp, details, accuracy);
 }
 
 static void

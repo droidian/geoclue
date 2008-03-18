@@ -56,6 +56,14 @@ AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir 
 CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
 
 
+
+PKG_CHECK_MODULES(GTK, [
+		  gtk+-2.0
+], HAVE_GTK=yes, HAVE_GTK=no)
+AM_CONDITIONAL(HAVE_GTK, test "x$HAVE_GTK" = "xyes")
+AC_SUBST(GTK_LIBS)
+AC_SUBST(GTK_CFLAGS)
+
 CONNECTIVITY="None"
 
 PKG_CHECK_MODULES(CONIC, [
@@ -77,7 +85,6 @@ if test "x$HAVE_NETWORK_MANAGER" = "xyes"; then
 	CONNECTIVITY_CFLAGS=${NETWORK_MANAGER_CFLAGS}
 	AC_DEFINE(HAVE_NETWORK_MANAGER, 1, [define if Network Manager is installed])
 fi
-
 
 AC_SUBST(CONNECTIVITY_LIBS)
 AC_SUBST(CONNECTIVITY_CFLAGS)
@@ -129,6 +136,7 @@ docs/tools/Makefile
 interfaces/Makefile
 geoclue/Makefile
 example/Makefile
+test/Makefile
 providers/Makefile
 providers/example/Makefile
 providers/gypsy/Makefile

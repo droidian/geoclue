@@ -400,6 +400,25 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	return TRUE;
 }
 
+static void
+gc_master_client_free_provider_lists (GcMasterClient *client)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	/* do not free contents of the lists, Master takes care of them */
+	if (priv->position_providers) {
+		g_list_free (priv->position_providers);
+		priv->position_providers = NULL;
+		priv->position_provider = NULL;
+	}
+	if (priv->address_providers) {
+		g_list_free (priv->address_providers);
+		priv->address_providers = NULL;
+		priv->address_provider = NULL;
+	}
+	
+}
+
 static gboolean
 gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GeoclueAccuracyLevel   min_accuracy,
@@ -410,6 +429,8 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 {
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	GList *all_providers, *l;
+	
+	gc_master_client_free_provider_lists (client);
 	
 	priv->min_accuracy = min_accuracy;
 	priv->min_time = min_time;
@@ -493,6 +514,8 @@ gc_iface_master_client_get_provider (GcMasterClient  *client,
 static void
 finalize (GObject *object)
 {
+	gc_master_client_free_provider_lists (GC_MASTER_CLIENT (object));
+	
 	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }
 

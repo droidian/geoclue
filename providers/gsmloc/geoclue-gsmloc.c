@@ -13,6 +13,9 @@
   * Gammu must be configured before running the provider (test by
   * running "gammu networkinfo"). Currently the first configuration 
   * in gammmu config file is used.
+  * 
+  * Gammu initialization takes a really long time if the configured
+  * phone is not available.
   **/
   
 #include <config.h>
@@ -118,7 +121,9 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
  	/* FIXME: the used configuration should be an option */
  	GSM_SetConfigNum(state, 1);
  	
-	/* Connect to phone. May take up to 10 seconds */
+	/* Connect to phone. May take a really long time if phone is 
+	 * configured but not available... Tens of seconds. Using this 
+	 * is not really feasible at the moment */
  	error = GSM_InitConnection (state, 3); /* magic number */
 	if (error != ERR_NONE) {
 		g_warning ("Gammu: %s\n", GSM_ErrorString (error));

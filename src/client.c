@@ -188,7 +188,6 @@ status_change_requires_provider_change (GList            *provider_list,
                                         GcMasterProvider *changed_provider,
                                         GeoclueStatus     status)
 {
-g_debug ("status_change_requires_provider_change");
 	if (!provider_list) {
 		return FALSE;
 	}

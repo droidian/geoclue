@@ -101,15 +101,16 @@ geoclue_test_gui_master_log_message (GeoclueTestGui *gui, char *message)
 	GtkTextIter iter;
 	char *line;
 	time_t rawtime;
-	struct tm * timeinfo;
+	struct tm *timeinfo;
 	char time_buffer [20];
 	
 	time (&rawtime);
 	timeinfo = localtime (&rawtime);
 	
-	strftime (time_buffer,10,"%X",timeinfo);
+	strftime (time_buffer, 19, "%X", timeinfo);
 	line = g_strdup_printf ("%s: %s\n", time_buffer, message);
 	
+	g_debug (line);
 	gtk_text_buffer_get_end_iter (gui->buffer, &iter);
 	gtk_text_buffer_insert (gui->buffer, &iter, line, -1);
 	
@@ -123,9 +124,7 @@ update_address (GeoclueTestGui *gui, GeoclueAddress *address, GHashTable *detail
 	gboolean valid;
 	GeoclueAddress *a = NULL;
 	
-	if (!details) {
-		return;
-	}
+	g_assert (details);
 	
 	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->address_store), &iter);
 	while (valid) {
@@ -230,7 +229,7 @@ add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 {
 	GeoclueAddress *address = NULL;
 	GeoclueCommon *geoclue = NULL;
-	GHashTable *details;
+	GHashTable *details = NULL;
 	GtkTreeIter iter;
 	char *name = NULL;
 	
@@ -275,20 +274,17 @@ add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 	if (address == NULL) {
 		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
 	} else {
-		
 		g_signal_connect (G_OBJECT (address), "address-changed",
-				  G_CALLBACK (address_changed), gui->address_store);
+				  G_CALLBACK (address_changed), gui);
 		
 		if (!geoclue_address_get_address (address, NULL, 
 						  &details, NULL, 
 						  NULL)) {
 			g_warning ("Error getting address: \n");
+			details = geoclue_address_details_new ();
 		}
 		update_address (gui, address, details);
-		
-		if (details) {
-			g_hash_table_destroy (details);
-		}
+		g_hash_table_destroy (details);
 	}
 	
 }
@@ -312,7 +308,7 @@ add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 	
 	if (strcmp (service, GEOCLUE_MASTER_DBUS_SERVICE) == 0) {
 		/* master does not implement common ATM */
-		char *tmp;
+		char *tmp = NULL;
 		geoclue_master_client_get_provider (gui->client, 
 		                                    GEOCLUE_POSITION_INTERFACE_NAME,
 		                                    &tmp, NULL, NULL);
@@ -345,7 +341,7 @@ add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 		
 	} else {
 		g_signal_connect (G_OBJECT (position), "position-changed",
-				  G_CALLBACK (position_changed), gui->position_store);
+				  G_CALLBACK (position_changed), gui);
 		
 		if (!geoclue_position_get_position (position, NULL, 
 						    &lat, &lon, &alt, 
@@ -360,7 +356,6 @@ add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 		
 		update_position (gui, position, lat, lon, alt);
 	}
-	
 	
 }
 
@@ -561,12 +556,17 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 {
 	GtkWidget *address_view;
 	GtkWidget *position_view;
+	GtkWidget *notebook;
 	GtkWidget *box;
 	GtkWidget *hbox;
 	GtkWidget *label;
 	GtkWidget *scrolled_win;
 	GtkWidget *view;
 	GeoclueMaster *master;
+	
+	gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+	g_signal_connect (G_OBJECT (gui->window), "destroy",
+	                  G_CALLBACK (gtk_main_quit), NULL);
 	
 	view = gtk_text_view_new ();
 	gtk_widget_set_size_request (GTK_WIDGET (view), 500, 200);
@@ -575,6 +575,12 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 	
 	master = geoclue_master_get_default ();
 	gui->client = geoclue_master_create_client (master, &gui->master_client_path, NULL);
+	if (!gui->client) {
+		g_printerr ("No Geoclue master client!");
+		g_object_unref (gui);
+		return;
+	}
+	
 	g_signal_connect (G_OBJECT (gui->client), "provider-changed",
 	                  G_CALLBACK (master_provider_changed), gui);
 	if (!geoclue_master_client_set_requirements (gui->client, 
@@ -587,31 +593,26 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 	}
 	g_object_unref (master);
 	
-	gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-	g_signal_connect (G_OBJECT (gui->window), "destroy",
-	                  G_CALLBACK (gtk_main_quit), NULL);
 	
-	box = gtk_vbox_new (FALSE, 10);
+	box = gtk_vbox_new (FALSE, 5);
 	gtk_container_add (GTK_CONTAINER (gui->window), box);
 	
-	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (box), hbox);
-	label = gtk_label_new ("Address");
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+	notebook = gtk_notebook_new ();
+	gtk_box_pack_start (GTK_BOX (box), notebook, FALSE, FALSE, 0);
+	gtk_notebook_set_show_tabs (GTK_NOTEBOOK (notebook), TRUE);
+	gtk_notebook_set_show_border (GTK_NOTEBOOK (notebook), TRUE);
 	
 	address_view = get_address_tree_view (gui);
-	gtk_container_add (GTK_CONTAINER (box), address_view);
-	
-	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (box), hbox);
-	label = gtk_label_new ("Position");
-	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
+	label = gtk_label_new ("Address");
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), address_view, label);
 	
 	position_view = get_position_tree_view (gui);
-	gtk_container_add (GTK_CONTAINER (box), position_view);
+	label = gtk_label_new ("Position");
+	gtk_notebook_append_page (GTK_NOTEBOOK (notebook), position_view, label);
+	
 	
 	hbox = gtk_hbox_new (FALSE, 0);
-	gtk_container_add (GTK_CONTAINER (box), hbox);
+	gtk_box_pack_start (GTK_BOX (box), hbox, FALSE, FALSE, 0);
 	label = gtk_label_new ("Master log");
 	gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 0);
 	

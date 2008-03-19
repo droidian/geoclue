@@ -188,31 +188,30 @@ status_change_requires_provider_change (GList            *provider_list,
                                         GcMasterProvider *changed_provider,
                                         GeoclueStatus     status)
 {
+g_debug ("status_change_requires_provider_change");
 	if (!provider_list) {
 		return FALSE;
 	}
-	if (current_provider == NULL &&
-	    status == GEOCLUE_STATUS_AVAILABLE) {
-		return TRUE;
+	if (current_provider == NULL) {
+		return (status == GEOCLUE_STATUS_AVAILABLE);
 	}
-	if (current_provider == changed_provider &&
-	    status != GEOCLUE_STATUS_AVAILABLE) {
-		return TRUE;
+	if (current_provider == changed_provider) {
+		return (status != GEOCLUE_STATUS_AVAILABLE);
 	}
+	
 	while (provider_list) {
 		GcMasterProvider *p = provider_list->data;
 		if (p == current_provider) {
 			/* not interested in worse-than-current providers */
 			return FALSE;
 		}
-		if (p == changed_provider &&
-		    status == GEOCLUE_STATUS_AVAILABLE) {
-			/* better-than-current provider */
-			return TRUE;
+		if (p == changed_provider) {
+			/* changed_provider is better than current */
+			return (status == GEOCLUE_STATUS_AVAILABLE);
 		}
 		provider_list = provider_list->next;
 	}
-	g_assert_not_reached();
+	return FALSE;
 }
 
 static void

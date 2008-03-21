@@ -17,11 +17,13 @@
 
 #include <config.h>
 
+#include <geoclue/geoclue-error.h>
+#include <geoclue/geoclue-marshal.h>
+
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-address.h>
 
-#include <geoclue/geoclue-marshal.h>
 #include "client.h"
 
 #define GEOCLUE_POSITION_INTERFACE_NAME "org.freedesktop.Geoclue.Position"
@@ -566,8 +568,11 @@ get_position (GcIfacePosition       *iface,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->position_provider == NULL) {
-		/* TODO: set error*/
-		g_warning ("get_position called, but no provider available");
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+			                      GEOCLUE_ERROR_NOT_AVAILABLE,
+			                      "Geoclue master client has no usable Position providers");
+		}
 		return FALSE;
 	}
 	
@@ -577,7 +582,7 @@ get_position (GcIfacePosition       *iface,
 		 latitude, longitude, altitude,
 		 accuracy,
 		 error);
-	return TRUE;
+	return (!*error);
 }
 
 static gboolean 
@@ -591,8 +596,11 @@ get_address (GcIfaceAddress   *iface,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->address_provider == NULL) {
-		/* TODO: set error*/
-		g_warning ("get_position called, but no provider available");
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+			                      GEOCLUE_ERROR_NOT_AVAILABLE,
+			                      "Geoclue master client has no usable Address providers");
+		}
 		return FALSE;
 	}
 	

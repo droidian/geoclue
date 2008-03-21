@@ -19,6 +19,9 @@
  *  have a "allowOldData" setting)
  * 
  * TODO: 
+ * 	figure out what to do if get_* returns GEOCLUE_ERROR_NOT_AVAILABLE.
+ * 	Should try again, but when?
+ * 
  * 	implement velocity (maybe this should be somehow related to position)
  * 
  * 	implement other (non-updating) ifaces
@@ -40,20 +43,20 @@ typedef enum _GeoclueProvideFlags {
 } GeoclueProvideFlags;
 
 typedef struct _GcPositionCache {
-	/*FIXME: this should probably include GError too ? */
 	int timestamp;
 	GeocluePositionFields fields;
 	double latitude;
 	double longitude;
 	double altitude;
 	GeoclueAccuracy *accuracy;
+	GError *error;
 } GcPositionCache;
 
 typedef struct _GcAddressCache {
-	/*FIXME: this should probably have gboolean (return value) too ? */
 	int timestamp;
 	GHashTable *details;
 	GeoclueAccuracy *accuracy;
+	GError *error;
 } GcAddressCache;
 
 typedef struct _GcMasterProviderPrivate {
@@ -95,7 +98,17 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GC_TYPE_MASTER_PROVIDER, GcMasterProviderPrivate))
 
 G_DEFINE_TYPE (GcMasterProvider, gc_master_provider, G_TYPE_OBJECT)
-
+static void
+copy_error (GError **target, GError *source)
+{
+	if (*target) {
+		g_error_free (*target);
+		*target = NULL;
+	}
+	if (source) {
+		*target = g_error_copy (source);
+	}
+}
 
 static void 
 gc_master_provider_handle_new_accuracy (GcMasterProvider *provider,
@@ -120,13 +133,12 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
                                  double                 latitude,
                                  double                 longitude,
                                  double                 altitude,
-                                 GeoclueAccuracy       *accuracy)
+                                 GeoclueAccuracy       *accuracy,
+                                 GError                *error)
 {
 	GeoclueAccuracyLevel level;
 	double hor_acc, ver_acc;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
-	
-	gc_master_provider_handle_new_accuracy (provider, accuracy);
 	
 	priv->position_cache.timestamp = timestamp;
 	priv->position_cache.fields = fields;
@@ -138,23 +150,30 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
 	geoclue_accuracy_set_details (priv->position_cache.accuracy,
 	                              level, hor_acc, ver_acc);
 	
-	g_signal_emit (provider, signals[POSITION_CHANGED], 0, 
-	               fields, timestamp, 
-	               latitude, longitude, altitude, 
-	               priv->position_cache.accuracy);
+	copy_error (&priv->position_cache.error, error);
+	
+	/* emit accuracy-changed if needed, so masterclient can re-choose providers 
+	 * before we emit position-changed */
+	gc_master_provider_handle_new_accuracy (provider, accuracy);
+	
+	if (!error) {
+		g_signal_emit (provider, signals[POSITION_CHANGED], 0, 
+		               fields, timestamp, 
+		               latitude, longitude, altitude, 
+		               priv->position_cache.accuracy);
+	}
 }
 
 static void
 gc_master_provider_set_address (GcMasterProvider *provider,
                                 int               timestamp,
                                 GHashTable       *details,
-                                GeoclueAccuracy  *accuracy)
+                                GeoclueAccuracy  *accuracy,
+                                GError           *error)
 {
 	GeoclueAccuracyLevel level;
 	double hor_acc, ver_acc;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
-	
-	gc_master_provider_handle_new_accuracy (provider, accuracy);
 	
 	priv->address_cache.timestamp = timestamp;
 	
@@ -162,13 +181,21 @@ gc_master_provider_set_address (GcMasterProvider *provider,
 	priv->address_cache.details = geoclue_address_details_copy (details);
 	
 	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
-	geoclue_accuracy_set_details (priv->position_cache.accuracy,
+	geoclue_accuracy_set_details (priv->address_cache.accuracy,
 	                              level, hor_acc, ver_acc);
 	
-	g_signal_emit (provider, signals[ADDRESS_CHANGED], 0, 
-	               priv->address_cache.timestamp, 
-	               priv->address_cache.details, 
-	               priv->address_cache.accuracy);
+	copy_error (&priv->address_cache.error, error);
+	
+	/* emit accuracy-changed if needed, so masterclient can re-choose providers 
+	 * before we emit position-changed */
+	gc_master_provider_handle_new_accuracy (provider, accuracy);
+	
+	if (!error) {
+		g_signal_emit (provider, signals[ADDRESS_CHANGED], 0, 
+		               priv->address_cache.timestamp, 
+		               priv->address_cache.details, 
+		               priv->address_cache.accuracy);
+	}
 }
 
 
@@ -233,27 +260,13 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 							&lat, &lon, &alt,
 							&accuracy, 
 							&error);
-		if (error)
-		{
-			/* FIXME should cache the error too ? */
-			
+		if (error){
 			g_warning ("Error updating position cache: %s", error->message);
-			g_error_free (error);
-		} else {
-			
-			priv->position_cache.timestamp = timestamp; /* this is debatable */
-			
-			if (fields != priv->position_cache.fields || 
-			    lat != priv->position_cache.latitude || 
-			    lon != priv->position_cache.longitude ||
-			    alt != priv->position_cache.altitude) {
-				
-				gc_master_provider_set_position (provider,
-								 fields, timestamp,
-								 lat, lon, alt,
-								 accuracy);
-			}
 		}
+		gc_master_provider_set_position (provider,
+		                                 fields, timestamp,
+		                                 lat, lon, alt,
+		                                 accuracy, error);
 	}
 	
 	if (priv->address) {
@@ -267,21 +280,13 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 		                                  &details,
 		                                  &accuracy,
 		                                  &error)) {
-			/* FIXME should cache the error or return value too ? */
-			
 			g_warning ("Error updating address cache: %s", error->message);
-			g_error_free (error);
-			return;
-		} else {
-			priv->address_cache.timestamp = timestamp;
-			
-			/*FIXME should check if address has changed from currently cached one */
-			gc_master_provider_set_address (provider,
-			                                timestamp,
-			                                details,
-			                                accuracy);
-			
 		}
+		gc_master_provider_set_address (provider,
+		                                timestamp,
+		                                details,
+		                                accuracy,
+		                                error);
 	}
 }
 
@@ -366,7 +371,7 @@ position_changed (GeocluePosition      *position,
 	gc_master_provider_set_position (provider,
 	                                 fields, timestamp,
 	                                 latitude, longitude, altitude,
-	                                 accuracy);
+	                                 accuracy, NULL);
 }
 
 static void
@@ -381,7 +386,8 @@ address_changed (GeoclueAddress   *address,
 	gc_master_provider_set_address (provider,
 	                                timestamp,
 	                                details,
-                                        accuracy);
+                                        accuracy,
+                                        NULL);
 }
 
 
@@ -391,8 +397,13 @@ finalize (GObject *object)
 	GcMasterProviderPrivate *priv = GET_PRIVATE (object);
 	
 	geoclue_accuracy_free (priv->position_cache.accuracy);
-	
 	geoclue_accuracy_free (priv->address_cache.accuracy);
+	if (priv->position_cache.error) {
+		g_error_free (priv->position_cache.error);
+	}
+	if (priv->address_cache.error) {
+		g_error_free (priv->address_cache.error);
+	}
 	
 	g_free (priv->name);
 	g_free (priv->description);
@@ -493,11 +504,13 @@ gc_master_provider_init (GcMasterProvider *provider)
 	priv->position = NULL;
 	priv->position_cache.accuracy = 
 		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0 ,0);
+	priv->position_cache.error = NULL;
 	
 	priv->address = NULL;
 	priv->address_cache.accuracy = 
 		geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0 ,0);
 	priv->address_cache.details = geoclue_address_details_new ();
+	priv->address_cache.error = NULL;
 }
 
 
@@ -545,7 +558,7 @@ gc_master_provider_dump_address (GcMasterProvider *provider)
 {
 	int time;
 	GHashTable *details;
-	GError *error;
+	GError *error = NULL;
 	
 	g_print ("     Address Information:\n");
 	g_print ("     --------------------\n");
@@ -819,6 +832,7 @@ gc_master_provider_get_position (GcMasterProvider *provider,
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
+	
 	if (priv->provides & GEOCLUE_PROVIDE_UPDATES) {
 		if (timestamp != NULL) {
 			*timestamp = priv->position_cache.timestamp;
@@ -834,6 +848,10 @@ gc_master_provider_get_position (GcMasterProvider *provider,
 		}
 		if (accuracy != NULL) {
 			*accuracy = geoclue_accuracy_copy (priv->position_cache.accuracy);
+		}
+		if (error != NULL) {
+			g_assert (!*error);
+			copy_error (error, priv->position_cache.error);
 		}
 		return priv->position_cache.fields;
 	} else {
@@ -866,7 +884,11 @@ gc_master_provider_get_address (GcMasterProvider  *provider,
 		if (accuracy != NULL) {
 			*accuracy = geoclue_accuracy_copy (priv->address_cache.accuracy);
 		}
-		return TRUE;
+		if (error != NULL) {
+			g_assert (!*error);
+			copy_error (error, priv->address_cache.error);
+		}
+		return (!priv->address_cache.error);
 	} else {
 		return geoclue_address_get_address (priv->address,
 		                                    timestamp,

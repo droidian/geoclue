@@ -100,7 +100,7 @@ position_changed_cb (GeocluePosition      *position,
 		g_print ("\tAccuracy level %d (%.0f meters)\n", level, horiz_acc);
 		
 	} else {
-		g_print ("Latitude and longitude not available.\n");
+		g_print ("Current position: latitude and longitude not valid.\n");
 	}
 }
 
@@ -120,7 +120,7 @@ get_position (const char *path)
 						&lat, &lon, &alt,
 						&accuracy, &error);
 	if (error != NULL) {
-		g_warning ("Error: %s", error->message);
+		g_warning ("%s", error->message);
 		g_error_free (error);
 		g_object_unref (position);
 		return;

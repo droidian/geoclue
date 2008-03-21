@@ -168,7 +168,7 @@ name_owner_changed (DBusGProxy  *proxy,
 		ref_count++;
 	} else if (strcmp (new_owner, "") == 0 && strcmp (prev_owner, name) == 0) {
 		ref_count--;
-		if (ref_count == 0) {
+		if (ref_count <= 0) {
 			g_debug ("no clients, shutting down");
 			gc_provider_shutdown (provider);
 		}

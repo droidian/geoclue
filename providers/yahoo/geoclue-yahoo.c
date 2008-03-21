@@ -107,7 +107,7 @@ geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
 	                           "zip", postalcode,
 	                           "city", locality,
 	                           "state", region,
-	                           NULL)) {
+	                           (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;

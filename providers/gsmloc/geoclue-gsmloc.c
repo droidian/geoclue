@@ -205,7 +205,7 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	                           "nid2", mnc,
 	                           "lac", lac,
 	                           "cid", cid,
-	                           NULL)) {
+	                           (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, 
 		             "Web service query failed");

@@ -118,7 +118,7 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 		                           "country", countrycode,
 		                           "maxRows", "1",
 		                           "style", "FULL",
-		                           NULL)) {
+		                           (char *)0)) {
 			g_set_error (error, GEOCLUE_ERROR, 
 			             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 			return FALSE;
@@ -138,7 +138,7 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 		                           "country", countrycode,
 		                           "maxRows", "1",
 		                           "style", "FULL",
-		                           NULL)) {
+		                           (char *)0)) {
 			g_set_error (error, GEOCLUE_ERROR, 
 			             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 			return FALSE;
@@ -191,7 +191,7 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 	                           "featureCode","PPLS",
 	                           "maxRows", "1",
 	                           "style", "FULL",
-	                           NULL)) {
+	                           (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;

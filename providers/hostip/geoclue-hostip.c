@@ -81,7 +81,7 @@ geoclue_hostip_get_position (GcIfacePosition        *iface,
 	
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
 	
-	if (!gc_web_service_query (obj->web_service, NULL)) {
+	if (!gc_web_service_query (obj->web_service, (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
@@ -123,7 +123,7 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 	gchar *country = NULL;
 	gchar *country_code = NULL;
 	
-	if (!gc_web_service_query (obj->web_service, NULL)) {
+	if (!gc_web_service_query (obj->web_service, (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;

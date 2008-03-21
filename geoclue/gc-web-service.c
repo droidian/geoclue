@@ -37,7 +37,7 @@
  * if (!gc_web_service_query (web_service, 
  *                            "key1", "val1"
  *                            "key2", val2"
- *                            NULL)) {
+ *                            (char *)0)) {
  * 	/ * error * /
  * 	return;
  * }

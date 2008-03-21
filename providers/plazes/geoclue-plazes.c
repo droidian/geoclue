@@ -146,7 +146,8 @@ geoclue_plazes_get_position (GcIfacePosition        *iface,
 	}
 	
 	if (!gc_web_service_query (plazes->web_service, 
-	                           PLAZES_KEY_MAC, mac, NULL)) {
+	                           PLAZES_KEY_MAC, mac, 
+	                           (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, 
 		             "Web service query failed");
@@ -207,7 +208,8 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 	}
 	
 	if (!gc_web_service_query (plazes->web_service, 
-	                           PLAZES_KEY_MAC, mac, NULL)) {
+	                           PLAZES_KEY_MAC, mac, 
+	                           (char *)0)) {
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, 
 		             "Web service query failed");

@@ -50,6 +50,19 @@ GeocluePositionFields geoclue_position_get_position (GeocluePosition  *position,
 						     GeoclueAccuracy **accuracy,
 						     GError          **error);
 
+typedef void (*GeocluePositionCallback) (GeocluePosition      *position,
+					 GeocluePositionFields fields,
+					 int                   timestamp,
+					 double                latitude,
+					 double                longitude,
+					 double                altitude,
+					 GeoclueAccuracy      *accuracy,
+					 GError               *error,
+					 gpointer              userdata);
+
+void geoclue_position_get_position_async (GeocluePosition  *position,
+					  GeocluePositionCallback callback,
+					  gpointer userdata);
 
 G_END_DECLS
 

@@ -200,3 +200,53 @@ geoclue_position_get_position (GeocluePosition  *position,
 
 	return fields;
 }
+
+
+typedef struct _GeocluePositionAsyncData {
+	GeocluePosition *position;
+	GCallback callback;
+	gpointer userdata;
+} GeocluePositionAsyncData;
+
+static void
+get_position_async_callback (DBusGProxy               *proxy, 
+			     GeocluePositionFields     fields,
+			     int                       timestamp,
+			     double                    latitude,
+			     double                    longitude,
+			     double                    altitude,
+			     GeoclueAccuracy          *accuracy,
+			     GError                   *error,
+			     GeocluePositionAsyncData *data)
+{
+	(*(GeocluePositionCallback)data->callback) (data->position,
+	                                            fields,
+	                                            timestamp,
+	                                            latitude,
+	                                            longitude,
+	                                            altitude,
+	                                            accuracy,
+	                                            error,
+	                                            data->userdata);
+	g_free (data);
+}
+
+void 
+geoclue_position_get_position_async (GeocluePosition  *position,
+				     GeocluePositionCallback callback,
+				     gpointer userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (position);
+	GeocluePositionAsyncData *data;
+	
+	data = g_new (GeocluePositionAsyncData, 1);
+	data->position = position;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_Position_get_position_async
+			(provider->proxy,
+			 (org_freedesktop_Geoclue_Position_get_position_reply)get_position_async_callback,
+			 data);
+	/*do we need "call" ?*/
+}

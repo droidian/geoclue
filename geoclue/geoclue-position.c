@@ -232,9 +232,9 @@ get_position_async_callback (DBusGProxy               *proxy,
 }
 
 void 
-geoclue_position_get_position_async (GeocluePosition  *position,
-				     GeocluePositionCallback callback,
-				     gpointer userdata)
+geoclue_position_get_position_async (GeocluePosition         *position,
+				     GeocluePositionCallback  callback,
+				     gpointer                 userdata)
 {
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (position);
 	GeocluePositionAsyncData *data;
@@ -248,5 +248,4 @@ geoclue_position_get_position_async (GeocluePosition  *position,
 			(provider->proxy,
 			 (org_freedesktop_Geoclue_Position_get_position_reply)get_position_async_callback,
 			 data);
-	/*do we need "call" ?*/
 }

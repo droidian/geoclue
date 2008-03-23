@@ -1,11 +1,13 @@
 /*
  * Geoclue
  * position-example.c - Example using the Position client API 
- *                      asynchronous method call
+ *                      (asynchronous method call)
  *
  * Author: Jussi Kukkonen <jku@openedhand.com>
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  */
+
+/* NOTE: provider options are not used in this example  */
 
 #include <glib.h>
 #include <geoclue/geoclue-common.h>
@@ -29,17 +31,13 @@ position_callback (GeocluePosition      *pos,
 	} else {
 		if (fields & GEOCLUE_POSITION_FIELDS_LATITUDE &&
 		    fields & GEOCLUE_POSITION_FIELDS_LONGITUDE) {
-			
 			GeoclueAccuracyLevel level;
-			double horiz_acc;
 			
-			geoclue_accuracy_get_details (accuracy, &level, &horiz_acc, NULL);
-			g_print ("Current position:\n");
+			geoclue_accuracy_get_details (accuracy, &level, NULL, NULL);
+			g_print ("Current position (accuracy %d):\n", level);
 			g_print ("\t%f, %f\n", latitude, longitude);
-			g_print ("\tAccuracy level %d (%.0f meters)\n", level, horiz_acc);
-			
 		} else {
-			g_print ("Latitude and longitude not available.\n");
+			g_print ("Current position not available.\n");
 		}
 	}
 	g_main_loop_quit ((GMainLoop *)userdata);

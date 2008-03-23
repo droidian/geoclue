@@ -60,9 +60,9 @@ typedef void (*GeocluePositionCallback) (GeocluePosition      *position,
 					 GError               *error,
 					 gpointer              userdata);
 
-void geoclue_position_get_position_async (GeocluePosition  *position,
-					  GeocluePositionCallback callback,
-					  gpointer userdata);
+void geoclue_position_get_position_async (GeocluePosition         *position,
+					  GeocluePositionCallback  callback,
+					  gpointer                 userdata);
 
 G_END_DECLS
 

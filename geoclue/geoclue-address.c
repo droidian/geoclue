@@ -177,3 +177,46 @@ geoclue_address_get_address (GeoclueAddress   *address,
 
 	return TRUE;
 }
+
+
+typedef struct _GeoclueAddressAsyncData {
+	GeoclueAddress *address;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueAddressAsyncData;
+
+static void
+get_address_async_callback (DBusGProxy              *proxy, 
+			    int                      timestamp,
+			    GHashTable              *details,
+			    GeoclueAccuracy         *accuracy,
+			    GError                  *error,
+			    GeoclueAddressAsyncData *data)
+{
+	(*(GeoclueAddressCallback)data->callback) (data->address,
+	                                           timestamp,
+	                                           details,
+	                                           accuracy,
+	                                           error,
+	                                           data->userdata);
+	g_free (data);
+}
+
+void 
+geoclue_address_get_address_async (GeoclueAddress         *address,
+				   GeoclueAddressCallback  callback,
+				   gpointer                userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (address);
+	GeoclueAddressAsyncData *data;
+	
+	data = g_new (GeoclueAddressAsyncData, 1);
+	data->address = address;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_Address_get_address_async
+			(provider->proxy,
+			 (org_freedesktop_Geoclue_Address_get_address_reply) get_address_async_callback,
+			 data);
+}

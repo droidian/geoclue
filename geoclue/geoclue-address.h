@@ -45,6 +45,18 @@ gboolean geoclue_address_get_address (GeoclueAddress   *address,
 				      GHashTable      **details,
 				      GeoclueAccuracy **accuracy,
 				      GError          **error);
+
+typedef void (*GeoclueAddressCallback) (GeoclueAddress   *address,
+					int               timestamp,
+					GHashTable       *details,
+					GeoclueAccuracy  *accuracy,
+					GError           *error,
+					gpointer          userdata);
+
+void geoclue_address_get_address_async (GeoclueAddress         *address,
+					GeoclueAddressCallback  callback,
+					gpointer                userdata);
+
 G_END_DECLS
 
 #endif

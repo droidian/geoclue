@@ -34,12 +34,24 @@ GeoclueReverseGeocode *geoclue_reverse_geocode_new (const char *service,
 						    const char *path);
 
 gboolean 
-geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *geocode,
+geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *revgeocode,
 					     double                   latitude,
 					     double                   longitude,
 					     GHashTable             **details,
 					     GError                 **error);
-	
+
+typedef void (*GeoclueReverseGeocodeCallback) (GeoclueReverseGeocode *revgeocode,
+					       GHashTable            *details,
+					       GError                *error,
+					       gpointer               userdata);
+
+void geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        *revgeocode,
+							double                        latitude,
+							double                        longitude,
+							GeoclueReverseGeocodeCallback callback,
+							gpointer                      userdata);
+
+
 G_END_DECLS
 
 #endif

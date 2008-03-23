@@ -48,6 +48,18 @@ GeoclueVelocityFields geoclue_velocity_get_velocity (GeoclueVelocity  *velocity,
 						     double           *climb,
 						     GError          **error);
 
+typedef void (*GeoclueVelocityCallback) (GeoclueVelocity      *velocity,
+					 GeoclueVelocityFields fields,
+					 int                   timestamp,
+					 double                speed,
+					 double                direction,
+					 double                climb,
+					 GError               *error,
+					 gpointer              userdata);
+
+void geoclue_velocity_get_velocity_async (GeoclueVelocity         *velocity,
+					  GeoclueVelocityCallback  callback,
+					  gpointer                 userdata);
 
 G_END_DECLS
 

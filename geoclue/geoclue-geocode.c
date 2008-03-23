@@ -138,3 +138,52 @@ geoclue_geocode_address_to_position (GeoclueGeocode   *geocode,
 
 	return fields;
 }
+
+
+typedef struct _GeoclueGeocodeAsyncData {
+	GeoclueGeocode *geocode;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueGeocodeAsyncData;
+
+static void
+address_to_position_callback (DBusGProxy              *proxy, 
+			      GeocluePositionFields    fields,
+			      double                   latitude,
+			      double                   longitude,
+			      double                   altitude,
+			      GeoclueAccuracy         *accuracy,
+			      GError                  *error,
+			      GeoclueGeocodeAsyncData *data)
+{
+	(*(GeoclueGeocodeCallback)data->callback) (data->geocode,
+	                                           fields,
+	                                           latitude,
+	                                           longitude,
+	                                           altitude,
+	                                           accuracy,
+	                                           error,
+	                                           data->userdata);
+	g_free (data);
+}
+
+void 
+geoclue_geocode_address_to_position_async (GeoclueGeocode         *geocode,
+					   GHashTable             *details,
+					   GeoclueGeocodeCallback  callback,
+					   gpointer                userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (geocode);
+	GeoclueGeocodeAsyncData *data;
+	
+	data = g_new (GeoclueGeocodeAsyncData, 1);
+	data->geocode = geocode;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_Geocode_address_to_position_async
+			(provider->proxy,
+			 details,
+			 (org_freedesktop_Geoclue_Geocode_address_to_position_reply)address_to_position_callback,
+			 data);
+}

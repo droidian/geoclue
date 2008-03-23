@@ -191,3 +191,49 @@ geoclue_velocity_get_velocity (GeoclueVelocity *velocity,
 
 	return fields;
 }
+
+typedef struct _GeoclueVelocityAsyncData {
+	GeoclueVelocity *velocity;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueVelocityAsyncData;
+
+static void
+get_velocity_async_callback (DBusGProxy               *proxy, 
+			     GeoclueVelocityFields     fields,
+			     int                       timestamp,
+			     double                    speed,
+			     double                    direction,
+			     double                    climb,
+			     GError                   *error,
+			     GeoclueVelocityAsyncData *data)
+{
+	(*(GeoclueVelocityCallback)data->callback) (data->velocity,
+	                                            fields,
+	                                            timestamp,
+	                                            speed,
+	                                            direction,
+	                                            climb,
+	                                            error,
+	                                            data->userdata);
+	g_free (data);
+}
+
+void 
+geoclue_velocity_get_velocity_async (GeoclueVelocity         *velocity,
+				     GeoclueVelocityCallback  callback,
+				     gpointer                 userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (velocity);
+	GeoclueVelocityAsyncData *data;
+	
+	data = g_new (GeoclueVelocityAsyncData, 1);
+	data->velocity = velocity;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_Velocity_get_velocity_async
+			(provider->proxy,
+			 (org_freedesktop_Geoclue_Velocity_get_velocity_reply)get_velocity_async_callback,
+			 data);
+}

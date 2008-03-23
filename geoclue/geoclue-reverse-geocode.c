@@ -115,3 +115,46 @@ geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *geocode,
 
 	return TRUE;
 }
+
+
+typedef struct _GeoclueRevGeocodeAsyncData {
+	GeoclueReverseGeocode *revgeocode;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueRevGeocodeAsyncData;
+
+static void
+position_to_address_callback (DBusGProxy                 *proxy, 
+			      GHashTable                 *details,
+			      GError                     *error,
+			      GeoclueRevGeocodeAsyncData *data)
+{
+	(*(GeoclueReverseGeocodeCallback)data->callback) (data->revgeocode,
+	                                                  details,
+	                                                  error,
+	                                                  data->userdata);
+	g_free (data);
+}
+
+void 
+geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        *revgeocode,
+						   double                        latitude,
+						   double                        longitude,
+						   GeoclueReverseGeocodeCallback callback,
+						   gpointer                      userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (revgeocode);
+	GeoclueRevGeocodeAsyncData *data;
+	
+	data = g_new (GeoclueRevGeocodeAsyncData, 1);
+	data->revgeocode = revgeocode;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_ReverseGeocode_position_to_address_async
+			(provider->proxy,
+			 latitude,
+			 longitude,
+			 (org_freedesktop_Geoclue_ReverseGeocode_position_to_address_reply)position_to_address_callback,
+			 data);
+}

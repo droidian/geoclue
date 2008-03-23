@@ -43,7 +43,22 @@ geoclue_geocode_address_to_position (GeoclueGeocode   *geocode,
 				     double           *altitude,
 				     GeoclueAccuracy **accuracy,
 				     GError          **error);
-	
+
+typedef void (*GeoclueGeocodeCallback) (GeoclueGeocode       *geocode,
+					GeocluePositionFields fields,
+					double                latitude,
+					double                longitude,
+					double                altitude,
+					GeoclueAccuracy      *accuracy,
+					GError               *error,
+					gpointer              userdata);
+
+void geoclue_geocode_address_to_position_async (GeoclueGeocode         *geocode,
+						GHashTable             *details,
+						GeoclueGeocodeCallback  callback,
+						gpointer                userdata);
+
+
 G_END_DECLS
 
 #endif

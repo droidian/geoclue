@@ -151,7 +151,7 @@ main (int    argc,
 	                  G_CALLBACK (provider_changed_cb), NULL);
 	
 	if (!geoclue_master_client_set_requirements (client, 
-	                                             GEOCLUE_ACCURACY_LEVEL_NONE,
+	                                             GEOCLUE_ACCURACY_LEVEL_LOCALITY,
 	                                             0,
 	                                             FALSE,
 	                                             GEOCLUE_RESOURCE_NETWORK,

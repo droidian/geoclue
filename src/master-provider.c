@@ -98,6 +98,7 @@ static guint32 signals[LAST_SIGNAL] = {0, };
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GC_TYPE_MASTER_PROVIDER, GcMasterProviderPrivate))
 
 G_DEFINE_TYPE (GcMasterProvider, gc_master_provider, G_TYPE_OBJECT)
+
 static void
 copy_error (GError **target, GError *source)
 {
@@ -136,8 +137,9 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
                                  GeoclueAccuracy       *accuracy,
                                  GError                *error)
 {
-	GeoclueAccuracyLevel level;
-	double hor_acc, ver_acc;
+	GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+	double hor_acc = 0.0;
+	double ver_acc = 0.0;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	priv->position_cache.timestamp = timestamp;
@@ -146,11 +148,13 @@ gc_master_provider_set_position (GcMasterProvider      *provider,
 	priv->position_cache.longitude = longitude;
 	priv->position_cache.altitude = altitude;
 	
-	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	copy_error (&priv->position_cache.error, error);
+	
+	if (accuracy) {
+		geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	}
 	geoclue_accuracy_set_details (priv->position_cache.accuracy,
 	                              level, hor_acc, ver_acc);
-	
-	copy_error (&priv->position_cache.error, error);
 	
 	/* emit accuracy-changed if needed, so masterclient can re-choose providers 
 	 * before we emit position-changed */
@@ -171,8 +175,9 @@ gc_master_provider_set_address (GcMasterProvider *provider,
                                 GeoclueAccuracy  *accuracy,
                                 GError           *error)
 {
-	GeoclueAccuracyLevel level;
-	double hor_acc, ver_acc;
+	GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+	double hor_acc = 0.0;
+	double ver_acc = 0.0;
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	priv->address_cache.timestamp = timestamp;
@@ -180,11 +185,13 @@ gc_master_provider_set_address (GcMasterProvider *provider,
 	g_hash_table_destroy (priv->address_cache.details);
 	priv->address_cache.details = geoclue_address_details_copy (details);
 	
-	geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	copy_error (&priv->address_cache.error, error);
+	
+	if (accuracy) {
+		geoclue_accuracy_get_details (accuracy, &level, &hor_acc, &ver_acc);
+	}
 	geoclue_accuracy_set_details (priv->address_cache.accuracy,
 	                              level, hor_acc, ver_acc);
-	
-	copy_error (&priv->address_cache.error, error);
 	
 	/* emit accuracy-changed if needed, so masterclient can re-choose providers 
 	 * before we emit position-changed */
@@ -252,7 +259,7 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 		int timestamp;
 		double lat, lon, alt;
 		GeocluePositionFields fields;
-		GeoclueAccuracy *accuracy;
+		GeoclueAccuracy *accuracy = NULL;
 		GError *error = NULL;
 		
 		fields = geoclue_position_get_position (priv->position,
@@ -267,12 +274,13 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 		                                 fields, timestamp,
 		                                 lat, lon, alt,
 		                                 accuracy, error);
+		g_debug ("set ok");
 	}
 	
 	if (priv->address) {
 		int timestamp;
 		GHashTable *details;
-		GeoclueAccuracy *accuracy;
+		GeoclueAccuracy *accuracy = NULL;
 		GError *error = NULL;
 		
 		if (!geoclue_address_get_address (priv->address,
@@ -650,7 +658,6 @@ gc_master_provider_initialize (GcMasterProvider *provider,
 		g_warning ("Error setting options: %s\n", (*error)->message);
 		g_object_unref (priv->geoclue);
 		priv->geoclue = NULL;
-		g_error_free (*error);
 		return FALSE;
 	}
 	/* priv->name has been read from .provider-file earlier...
@@ -658,8 +665,9 @@ gc_master_provider_initialize (GcMasterProvider *provider,
 	if (!geoclue_common_get_provider_info (priv->geoclue, NULL, 
 	                                       &priv->description, error)) {
 		g_warning ("Error getting provider info: %s\n", (*error)->message);
-		g_error_free (*error);
-		priv->description = "";
+		g_object_unref (priv->geoclue);
+		priv->geoclue = NULL;
+		return FALSE;
 	}
 	
 	g_signal_connect (G_OBJECT (priv->geoclue), "status-changed",

@@ -8,6 +8,10 @@
 			<arg name="require_updates" type="b" direction="in" />
 			<arg name="allowed_resources" type="i" direction="in" />
 		</method>
+		
+		<method name="AddressStart"/>
+		<method name="PositionStart"/>
+		
 		<method name="GetProvider">
 			<arg name="interface" type="s" direction="in"/>
 			<arg name="name" type="s" direction="out"/>

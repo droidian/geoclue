@@ -252,6 +252,34 @@ geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 	return TRUE;
 }
 
+GeoclueAddress *
+geoclue_master_client_address_create (GeoclueMasterClient *client, 
+                                      GError **error)
+{
+	GeoclueMasterClientPrivate *priv;
+	
+	priv = GET_PRIVATE (client);
+	
+	if (!org_freedesktop_Geoclue_MasterClient_address_start (priv->proxy, error)) {
+		return NULL;
+	}
+	return geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, priv->object_path);
+}
+
+GeocluePosition *
+geoclue_master_client_position_create (GeoclueMasterClient *client,
+                                       GError **error)
+{
+	GeoclueMasterClientPrivate *priv;
+	
+	priv = GET_PRIVATE (client);
+	
+	if (!org_freedesktop_Geoclue_MasterClient_position_start (priv->proxy, error)) {
+		return NULL;
+	}
+	return geoclue_position_new (GEOCLUE_MASTER_DBUS_SERVICE, priv->object_path);
+}
+
 /**
  * geoclue_master_client_get_provider:
  * @client: A #GeoclueMasterClient

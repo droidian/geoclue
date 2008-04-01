@@ -12,6 +12,8 @@
 #include <glib-object.h>
 #include <geoclue/geoclue-types.h>
 #include <geoclue/geoclue-accuracy.h>
+#include <geoclue/geoclue-position.h>
+#include <geoclue/geoclue-address.h>
 
 G_BEGIN_DECLS
 
@@ -41,6 +43,9 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 						 gboolean               require_updates,
 						 GeoclueResourceFlags   allowed_resources,
 						 GError               **error);
+
+GeoclueAddress *geoclue_master_client_address_create (GeoclueMasterClient *client, GError **error);
+GeocluePosition *geoclue_master_client_position_create (GeoclueMasterClient *client, GError **error);
 
 gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
                                              char                 *interface,

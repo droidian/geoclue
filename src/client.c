@@ -61,6 +61,8 @@ static gboolean gc_iface_master_client_set_requirements (GcMasterClient       *c
                                                          gboolean              require_updates, 
                                                          GeoclueResourceFlags  allowed_resources, 
                                                          GError              **error);
+static gboolean gc_iface_master_client_position_start (GcMasterClient *client, GError **error);
+static gboolean gc_iface_master_client_address_start (GcMasterClient *client, GError **error);
 static gboolean gc_iface_master_client_get_provider (GcMasterClient  *client,
                                                      char            *interface,
                                                      char           **name,
@@ -218,18 +220,25 @@ status_change_requires_provider_change (GList            *provider_list,
 static void
 gc_master_client_connect_common_signals (GcMasterClient *client, GList *providers)
 {
-	while (providers) {
-		GcMasterProvider *provider = providers->data;
-		
-		g_signal_connect (G_OBJECT (provider),
-				  "status-changed",
-				  G_CALLBACK (status_changed),
-				  client);
-		g_signal_connect (G_OBJECT (provider),
-				  "accuracy-changed",
-				  G_CALLBACK (accuracy_changed),
-				  client);
-		providers = providers->next;
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	GList *l;
+	
+	/* connect to common signals if the provider is not already connected */
+	l = providers;
+	while (l) {
+		GcMasterProvider *p = l->data;
+		if (!g_list_find (priv->address_providers, p) &&
+		    !g_list_find (priv->position_providers, p)) {
+			g_signal_connect (G_OBJECT (p),
+					  "status-changed",
+					  G_CALLBACK (status_changed),
+					  client);
+			g_signal_connect (G_OBJECT (p),
+					  "accuracy-changed",
+					  G_CALLBACK (accuracy_changed),
+					  client);
+		}
+		l = l->next;
 	}
 }
 
@@ -409,14 +418,14 @@ gc_master_client_free_provider_lists (GcMasterClient *client)
 	if (priv->position_providers) {
 		g_list_free (priv->position_providers);
 		priv->position_providers = NULL;
-		priv->position_provider = NULL;
 	}
 	if (priv->address_providers) {
 		g_list_free (priv->address_providers);
 		priv->address_providers = NULL;
-		priv->address_provider = NULL;
 	}
 	
+	priv->position_provider = NULL;
+	priv->address_provider = NULL;
 }
 
 static gboolean
@@ -428,56 +437,74 @@ gc_iface_master_client_set_requirements (GcMasterClient        *client,
 					 GError               **error)
 {
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
-	GList *all_providers, *l;
-	
-	gc_master_client_free_provider_lists (client);
 	
 	priv->min_accuracy = min_accuracy;
 	priv->min_time = min_time;
 	priv->require_updates = require_updates;
 	priv->allowed_resources = allowed_resources;
 	
-	priv->position_providers = 
-		gc_master_get_providers (GC_IFACE_POSITION,
-		                         min_accuracy,
-		                         require_updates,
-		                         allowed_resources,
-		                         NULL);
-	priv->position_providers = 
-		g_list_sort_with_data (priv->position_providers,
-		                       (GCompareDataFunc)gc_master_provider_compare,
-		                       &min_accuracy);
-	g_debug ("client: %d position providers matching requirements found", 
-	         g_list_length (priv->position_providers));
+	return TRUE;
+}
+
+static gboolean 
+gc_iface_master_client_position_start (GcMasterClient *client, 
+                                       GError         **error)
+{
+	GList *providers;
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
-	priv->address_providers = 
-		gc_master_get_providers (GC_IFACE_ADDRESS,
-		                         min_accuracy,
-		                         require_updates,
-		                         allowed_resources,
-		                         NULL);
-	priv->address_providers = 
-		g_list_sort_with_data (priv->address_providers,
-		                       (GCompareDataFunc)gc_master_provider_compare,
-		                       &min_accuracy);
-	g_debug ("client: %d address providers matching requirements found", 
-	         g_list_length (priv->address_providers));
-	
-	
-	/* connect status and accuracy signals */
-	all_providers = g_list_copy (priv->position_providers);
-	l = priv->address_providers;
-	while (l) {
-		if (!g_list_find (all_providers, l->data)) {
-			all_providers = g_list_prepend (all_providers, l->data);
-		}
-		l = l->next;
+	if (priv->position_providers) {
+		/* TODO set error */
+		return FALSE;
 	}
-	gc_master_client_connect_common_signals (client, all_providers);
-	g_list_free (all_providers);
 	
-	/*TODO: do something with return values? */
+	providers = gc_master_get_providers (GC_IFACE_POSITION,
+	                                     priv->min_accuracy,
+	                                     priv->require_updates,
+	                                     priv->allowed_resources,
+	                                     NULL);
+	g_debug ("client: %d position providers matching requirements found", 
+	         g_list_length (providers));
+	
+	gc_master_client_connect_common_signals (client, providers);
+	
+	priv->position_providers = 
+		g_list_sort_with_data (providers,
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &priv->min_accuracy);
+	
 	gc_master_client_choose_position_provider (client, priv->position_providers);
+	
+	return TRUE;
+}
+
+static gboolean 
+gc_iface_master_client_address_start (GcMasterClient *client,
+                                      GError         **error)
+{
+	GList *providers;
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	if (priv->address_providers) {
+		/* TODO set error */
+		return FALSE;
+	}
+	
+	providers = gc_master_get_providers (GC_IFACE_ADDRESS,
+	                                     priv->min_accuracy,
+	                                     priv->require_updates,
+	                                     priv->allowed_resources,
+	                                     NULL);
+	g_debug ("client: %d address providers matching requirements found", 
+	         g_list_length (providers));
+	
+	gc_master_client_connect_common_signals (client, providers);
+	
+	priv->address_providers = 
+		g_list_sort_with_data (providers,
+		                       (GCompareDataFunc)gc_master_provider_compare,
+		                       &priv->min_accuracy);
+	
 	gc_master_client_choose_address_provider (client, priv->address_providers);
 	
 	return TRUE;

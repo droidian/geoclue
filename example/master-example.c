@@ -45,7 +45,7 @@ address_changed_cb (GeoclueAddress  *address,
 }
 
 static void
-get_address (const char *path)
+get_address (GeoclueMasterClient *client)
 {
 	GError *error = NULL;
 	GeoclueAddress *address;
@@ -54,7 +54,12 @@ get_address (const char *path)
 	GeoclueAccuracy *accuracy = NULL;
 	int timestamp = 0;
 
-	address = geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+	address = geoclue_master_client_address_create (client, &error);
+	if (!address) {
+		g_warning ("Creating GeoclueAddress failed: %s", error->message);
+		g_error_free (error);
+		return;
+	}
 	
 	if (!geoclue_address_get_address (address, &timestamp, 
 					  &details, &accuracy, 
@@ -105,7 +110,7 @@ position_changed_cb (GeocluePosition      *position,
 }
 
 static void
-get_position (const char *path)
+get_position (GeoclueMasterClient *client)
 {
 	GeocluePosition *position;
 	GError *error = NULL;
@@ -114,7 +119,12 @@ get_position (const char *path)
 	double lat = 0.0, lon = 0.0, alt = 0.0;
 	GeoclueAccuracy *accuracy = NULL;
 
-	position = geoclue_position_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+	position = geoclue_master_client_position_create (client, &error);
+	if (!position) {
+		g_warning ("Creating GeocluePosition failed: %s", error->message);
+		g_error_free (error);
+		return;
+	}
 	
 	fields = geoclue_position_get_position (position,  &timestamp,
 						&lat, &lon, &alt,
@@ -159,9 +169,9 @@ main (int    argc,
 		g_printerr ("set_requirements failed");
 	}
 	
-	get_address (path);
+	get_address (client);
 	
-	get_position (path);
+	get_position (client);
 	
 	mainloop = g_main_loop_new (NULL, FALSE);
 	g_main_loop_run (mainloop);

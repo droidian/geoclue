@@ -78,7 +78,7 @@ typedef struct _GcMasterProviderPrivate {
 	GeoclueNetworkStatus net_status;
 	
 	GeoclueCommon *geoclue;
-	GeoclueStatus status;
+	GeoclueStatus status; /* cached status from actual provider */
 	
 	GeocluePosition *position;
 	GcPositionCache position_cache;
@@ -917,8 +917,32 @@ gc_master_provider_deactivate (GcMasterProvider *provider,
 	priv->clients = g_list_remove (priv->clients, client);
 	
 	if (!priv->clients) {
-		/* TODO deinit */
-		g_warning ("provider deinit not implemented yet");
+		if (priv->geoclue) {
+			g_object_unref (priv->geoclue);
+		}
+		
+		if (priv->position) {
+			g_object_unref (priv->position);
+		}
+		if (priv->position_cache.error) {
+			g_error_free (priv->position_cache.error);
+		}
+		
+		if (priv->address) {
+			g_object_unref (priv->address);
+		}
+		if (priv->address_cache.details) {
+			g_hash_table_destroy (priv->address_cache.details);
+		}
+		if (priv->address_cache.accuracy) {
+			geoclue_accuracy_free (priv->address_cache.accuracy);
+		}
+		if (priv->address_cache.error) {
+			g_error_free (priv->address_cache.error);
+		}
+		
+		/* initialize privates */
+		gc_master_provider_init (provider);
 	}
 }
 

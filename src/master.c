@@ -139,7 +139,7 @@ gc_master_load_providers (GcMaster *master)
 	while (filename) {
 		char *fullname, *ext;
 
-		g_print ("\nFound %s", filename);
+		g_print ("Found %s\n", filename);
 		ext = strrchr (filename, '.');
 		if (ext == NULL || strcmp (ext, PROVIDER_EXTENSION) != 0) {
 			g_print (" - Ignored\n");
@@ -149,7 +149,6 @@ gc_master_load_providers (GcMaster *master)
 
 		fullname = g_build_filename (GEOCLUE_PROVIDERS_DIR, 
 					     filename, NULL);
-		g_print ("\n");
 		gc_master_add_new_provider (master, fullname);
 		g_free (fullname);
 		

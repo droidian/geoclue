@@ -1,10 +1,16 @@
 libexec_PROGRAMS = geoclue-localnet
 
+BUILT_SOURCES = \
+	geoclue-localnet-glue.h
+
 geoclue_localnet_SOURCES = \
+	$(BUILT_SOURCES) \
 	geoclue-localnet.c     
 
+
 CLEANFILES = \
-	$(BUILT_SOURCES)
+	$(BUILT_SOURCES) \
+	stamp-geoclue-localnet-glue.h
 
 EXTRA_DIST =         \
 	$(BUILT_SOURCES)
@@ -28,3 +34,12 @@ service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+
+%-glue.h: stamp-%-glue.h
+	@true
+
+stamp-geoclue-localnet-glue.h: geoclue-localnet.xml
+	$(DBUS_BINDING_TOOL) --prefix=geoclue_localnet --mode=glib-server $< > xgen-$(@F) \
+	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
+	&& rm -f xgen-$(@F) \
+	&& echo timestamp > $(@F)

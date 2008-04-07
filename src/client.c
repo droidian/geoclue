@@ -5,11 +5,10 @@
  * Authors: Iain Holmes <iain@openedhand.com>
  *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
+ *                2008 OpenedHand Ltd
  */
 
 /** TODO
- * 
- * 	finalize/dispose.... (remember gc_master_provider_stop())
  * 
  * 	might want to write a testing-provider with a gui for 
  * 	choosing what to emit...
@@ -145,8 +144,8 @@ accuracy_changed (GcMasterProvider     *provider,
 	GcInterfaceAccuracy *accuracy_data;
 	
 	accuracy_data = g_new0 (GcInterfaceAccuracy, 1);
-	g_debug ("client: %s accuracy changed", 
-	         gc_master_provider_get_name (provider));
+	g_debug ("client: %s accuracy changed (%d)", 
+	         gc_master_provider_get_name (provider), level);
 	
 	accuracy_data->interface = interface;
 	accuracy_data->accuracy_level = priv->min_accuracy;
@@ -157,7 +156,7 @@ accuracy_changed (GcMasterProvider     *provider,
 					       (GCompareDataFunc)gc_master_provider_compare,
 					       accuracy_data);
 		if (priv->provider_choice_in_progress) {
-			g_debug ("client: already choosing providers...", 
+			g_debug ("        ...but provider choice in progress", 
 				 gc_master_provider_get_name (provider));
 		} else if (gc_master_client_choose_position_provider (client, 
 								      priv->position_providers)) {
@@ -172,7 +171,7 @@ accuracy_changed (GcMasterProvider     *provider,
 					       (GCompareDataFunc)gc_master_provider_compare,
 					       accuracy_data);
 		if (priv->provider_choice_in_progress) {
-			g_debug ("client: already choosing providers...", 
+			g_debug ("        ...but provider choice in progress", 
 				 gc_master_provider_get_name (provider));
 		} else if (gc_master_client_choose_address_provider (client, 
 							      priv->address_providers)) {
@@ -263,11 +262,11 @@ gc_master_client_connect_common_signals (GcMasterClient *client, GList *provider
 		GcMasterProvider *p = l->data;
 		if (!g_list_find (priv->address_providers, p) &&
 		    !g_list_find (priv->position_providers, p)) {
+			g_debug ("client: connecting to '%s' accuracy-changed and status-changed", gc_master_provider_get_name (p));
 			g_signal_connect (G_OBJECT (p),
 					  "status-changed",
 					  G_CALLBACK (status_changed),
 					  client);
-			g_debug ("client: connecting to '%s' accuracy-changed", gc_master_provider_get_name (p));
 			g_signal_connect (G_OBJECT (p),
 					  "accuracy-changed",
 					  G_CALLBACK (accuracy_changed),
@@ -289,7 +288,7 @@ gc_master_client_get_best_position_provider (GcMasterClient *client)
 		GcMasterStatus status;
 		
 		status = gc_master_provider_get_status (provider);
-		g_debug ("Client trying position provider %s (status %d)", gc_master_provider_get_name (provider), status);
+		g_debug ("client: trying position provider %s (status %d)", gc_master_provider_get_name (provider), status);
 		
 		if (priv->position_provider && provider == priv->position_provider) {
 			return provider;
@@ -330,7 +329,7 @@ gc_master_client_get_best_address_provider (GcMasterClient *client)
 		GcMasterStatus status;
 		
 		status = gc_master_provider_get_status (provider);
-		g_debug ("Client trying address provider %s (status %d)", gc_master_provider_get_name (provider), status);
+		g_debug ("client: trying address provider %s (status %d)", gc_master_provider_get_name (provider), status);
 		
 		if (priv->address_provider && provider == priv->address_provider) {
 			return provider;
@@ -405,7 +404,6 @@ gc_master_client_emit_address_changed (GcMasterClient *client)
 	GeoclueAccuracy *accuracy = NULL;
 	GError *error = NULL;
 	
-	
 	if (priv->address_provider == NULL) {
 		return;
 	}
@@ -446,16 +444,21 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	}
 	
 	if (priv->position_provider) {
-		g_signal_handler_disconnect (priv->position_provider, signals[POSITION_CHANGED]);
+		if (signals[POSITION_CHANGED] > 0) {
+			g_signal_handler_disconnect (priv->position_provider, signals[POSITION_CHANGED]);
+			signals[POSITION_CHANGED] = 0;
+		}
 		gc_master_provider_deactivate (priv->position_provider, client);
 	}
 	
 	priv->position_provider = new_p;
+	
 	if (priv->position_provider == NULL) {
 		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
 		               GEOCLUE_POSITION_INTERFACE_NAME, 
 		               NULL, NULL);
 		/* empty cache ? */
+		/* TODO should probably emit address chhanged ? */
 		return FALSE;
 	}
 	
@@ -487,7 +490,6 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	
 	if (priv->address_provider && new_p == priv->address_provider) {
 		/* keep using the same provider */
-		g_debug ("0. same provider");
 		return FALSE;
 	}
 	
@@ -497,23 +499,23 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 			                             signals[ADDRESS_CHANGED]);
 			signals[ADDRESS_CHANGED] = 0;
 		}
+		g_debug ("client: deactivating %s", gc_master_provider_get_name (priv->address_provider));
 		gc_master_provider_deactivate (priv->address_provider, client);
 	}
 	
 	priv->address_provider = new_p;
 	
 	if (priv->address_provider == NULL) {
-		g_debug ("emitting provider changed");
+		g_debug ("client: provider changed (to NULL)");
 		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
 		               GEOCLUE_ADDRESS_INTERFACE_NAME, 
 		               NULL, NULL);
 		/* empty cache ? */
-		/* TODO should probably return true -- so address would get emitted 
-		 * and clients would know address is no longer valid */
+		/* TODO should probably emit address chhanged ? */
 		return FALSE;
 	}
 	
-	g_debug ("emitting provider changed");
+	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
 	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
 		       GEOCLUE_ADDRESS_INTERFACE_NAME, 
 		       gc_master_provider_get_name (priv->address_provider),
@@ -524,25 +526,6 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 				  G_CALLBACK (address_changed),
 				  client);
 	return TRUE;
-}
-
-static void
-gc_master_client_free_provider_lists (GcMasterClient *client)
-{
-	GcMasterClientPrivate *priv = GET_PRIVATE (client);
-	
-	/* do not free contents of the lists, Master takes care of them */
-	if (priv->position_providers) {
-		g_list_free (priv->position_providers);
-		priv->position_providers = NULL;
-	}
-	if (priv->address_providers) {
-		g_list_free (priv->address_providers);
-		priv->address_providers = NULL;
-	}
-	
-	priv->position_provider = NULL;
-	priv->address_provider = NULL;
 }
 
 static gboolean
@@ -687,7 +670,34 @@ gc_iface_master_client_get_provider (GcMasterClient  *client,
 static void
 finalize (GObject *object)
 {
-	gc_master_client_free_provider_lists (GC_MASTER_CLIENT (object));
+	GcMasterClient *client = GC_MASTER_CLIENT (object);
+	GcMasterClientPrivate *priv = GET_PRIVATE (object);
+	
+	/* do not free contents of the lists, Master takes care of them */
+	if (priv->position_providers) {
+		g_list_free (priv->position_providers);
+		priv->position_providers = NULL;
+	}
+	if (priv->address_providers) {
+		g_list_free (priv->address_providers);
+		priv->address_providers = NULL;
+	}
+	
+	
+	if (priv->position_provider) {
+		g_signal_handler_disconnect (priv->position_provider, signals[POSITION_CHANGED]);
+		gc_master_provider_deactivate (priv->position_provider, client);
+		
+		priv->position_provider = NULL;
+		signals[POSITION_CHANGED] = 0;
+	}
+	if (priv->address_provider) {
+		g_signal_handler_disconnect (priv->address_provider, signals[POSITION_CHANGED]);
+		gc_master_provider_deactivate (priv->address_provider, client);
+		
+		priv->address_provider = NULL;
+		signals[ADDRESS_CHANGED] = 0;
+	}
 	
 	((GObjectClass *) gc_master_client_parent_class)->finalize (object);
 }

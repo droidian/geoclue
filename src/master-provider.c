@@ -5,6 +5,7 @@
  * Author: Jussi Kukkonen <jku@o-hand.com>
  * 
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
+ *                2008 OpenedHand Ltd
  */
 
 /**
@@ -132,7 +133,6 @@ gc_master_provider_handle_new_position_accuracy (GcMasterProvider *provider,
 	                              new_level, new_hor_acc, new_vert_acc);
 	
 	if (old_level != new_level) {
-		g_debug("'%s' emitting (position) accuracy-changed (%d->%d)", priv->name, old_level, new_level);
 		g_signal_emit (provider, signals[ACCURACY_CHANGED], 0,
 		               GC_IFACE_POSITION, new_level);
 	}
@@ -157,7 +157,6 @@ gc_master_provider_handle_new_address_accuracy (GcMasterProvider *provider,
 	                              new_level, new_hor_acc, new_vert_acc);
 	
 	if (old_level != new_level) {
-		g_debug("'%s' emitting (address) accuracy-changed (%d->%d)", priv->name, old_level, new_level);
 		g_signal_emit (provider, signals[ACCURACY_CHANGED], 0,
 		               GC_IFACE_ADDRESS, new_level);
 	}
@@ -578,7 +577,7 @@ gc_master_provider_init (GcMasterProvider *provider)
 	priv->address_cache.error = NULL;
 }
 
-
+#if DEBUG_INFO
 static void
 gc_master_provider_dump_position (GcMasterProvider *provider)
 {
@@ -696,7 +695,7 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 		gc_master_provider_dump_address (provider);
 	}
 }
-
+#endif
 
 
 static void
@@ -777,8 +776,9 @@ gc_master_provider_initialize (GcMasterProvider *provider,
 	gc_master_provider_handle_status_change (provider);
 	gc_master_provider_initialize_interfaces (provider);
 	gc_master_provider_update_cache (provider);
+#if DEBUG_INFO
 	gc_master_provider_dump_provider_details (provider);
-	
+#endif
 	return TRUE;
 }
 
@@ -893,8 +893,6 @@ gc_master_provider_activate (GcMasterProvider *provider,
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
-	g_debug ("Activating '%s', refcount was %d", priv->name, g_list_length (priv->clients));
-	
 	if (!gc_master_provider_initialize (provider, error)) {
 		g_debug ("provider activation failed");
 		return FALSE;
@@ -912,37 +910,39 @@ gc_master_provider_deactivate (GcMasterProvider *provider,
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
-	g_debug ("deactivating '%s', refcount was %d", priv->name, g_list_length (priv->clients));
-	
 	priv->clients = g_list_remove (priv->clients, client);
 	
 	if (!priv->clients) {
+		/* not clearing cached accuracies on purpose */
+		
 		if (priv->geoclue) {
 			g_object_unref (priv->geoclue);
+			priv->geoclue = NULL;
 		}
 		
 		if (priv->position) {
 			g_object_unref (priv->position);
+			priv->position = NULL;
 		}
 		if (priv->position_cache.error) {
 			g_error_free (priv->position_cache.error);
+			priv->position_cache.error = NULL;
 		}
 		
 		if (priv->address) {
 			g_object_unref (priv->address);
+			priv->address = NULL;
 		}
 		if (priv->address_cache.details) {
 			g_hash_table_destroy (priv->address_cache.details);
-		}
-		if (priv->address_cache.accuracy) {
-			geoclue_accuracy_free (priv->address_cache.accuracy);
+			priv->address_cache.details = geoclue_address_details_new ();
 		}
 		if (priv->address_cache.error) {
 			g_error_free (priv->address_cache.error);
+			priv->address_cache.error = NULL;
 		}
 		
-		/* initialize privates */
-		gc_master_provider_init (provider);
+		priv->master_status = GC_MASTER_STATUS_NOT_STARTED;
 	}
 }
 

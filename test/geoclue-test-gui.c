@@ -223,46 +223,11 @@ position_changed (GeocluePosition      *position,
 	}
 }
 
-
-static void
-add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
+static void 
+append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address, char *name)
 {
-	GeoclueAddress *address = NULL;
-	GeoclueCommon *geoclue = NULL;
 	GHashTable *details = NULL;
 	GtkTreeIter iter;
-	char *name = NULL;
-	
-	char *msg = g_strdup_printf ("Adding address provider %s", path);
-	geoclue_test_gui_master_log_message (gui, msg);
-	g_free (msg);
-	
-	if (strcmp (service, GEOCLUE_MASTER_DBUS_SERVICE) == 0) {
-		/* master does not implement common ATM */
-		char *tmp;
-		geoclue_master_client_get_provider (gui->client, 
-		                                    GEOCLUE_ADDRESS_INTERFACE_NAME,
-		                                    &tmp, NULL, NULL);
-		
-		name = g_strdup_printf ("Master (%s)", tmp);
-		g_free (tmp);
-		
-	} else {
-		/*TODO: should unref these at some point? */
-		geoclue = geoclue_common_new (service, path);
-		if (geoclue == NULL) {
-			g_printerr ("Error while creating GeoclueAddress %s.\n", path);
-		} else {
-			geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
-		}
-	}
-	if (!name) {
-		name = "(error)";
-	}
-	
-	
-	/*TODO: should unref these at some point? */
-	address = geoclue_address_new (service, path);
 	
 	gtk_list_store_append (gui->address_store, &iter);
 	gtk_list_store_set (gui->address_store, &iter,
@@ -272,7 +237,7 @@ add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 	
 	
 	if (address == NULL) {
-		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
+		g_printerr ("Error while creating GeoclueAddress %s", name);
 	} else {
 		g_signal_connect (G_OBJECT (address), "address-changed",
 				  G_CALLBACK (address_changed), gui);
@@ -280,55 +245,61 @@ add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 		if (!geoclue_address_get_address (address, NULL, 
 						  &details, NULL, 
 						  NULL)) {
-			g_warning ("Error getting address: \n");
+			g_warning ("Error getting address\n");
 			details = geoclue_address_details_new ();
 		}
 		update_address (gui, address, details);
 		g_hash_table_destroy (details);
 	}
-	
 }
 
-
 static void
-add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
+add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 {
-	GeocluePosition *position = NULL;
+	GeoclueAddress *address = NULL;
 	GeoclueCommon *geoclue = NULL;
-	double lat, lon, alt;
-	GtkTreeIter iter;
-	GError *error = NULL;
 	char *name = NULL;
 	
-	char *msg = g_strdup_printf ("Adding position provider %s", path);
+	char *msg = g_strdup_printf ("Adding address provider %s", path);
 	geoclue_test_gui_master_log_message (gui, msg);
 	g_free (msg);
 	
-	lat = lon = alt = 0.0/0.0;
-	
-	if (strcmp (service, GEOCLUE_MASTER_DBUS_SERVICE) == 0) {
-		/* master does not implement common ATM */
-		char *tmp = NULL;
-		geoclue_master_client_get_provider (gui->client, 
-		                                    GEOCLUE_POSITION_INTERFACE_NAME,
-		                                    &tmp, NULL, NULL);
-		
-		name = g_strdup_printf ("Master (%s)", tmp);
-		g_free (tmp);
-	} else {
-		geoclue = geoclue_common_new (service, path);
-		if (geoclue == NULL) {
-			g_printerr ("Error while creating GeoclueAddress %s.\n", path);
-		} else {
-			geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
-		}
-	}
-	if (!name) {
+	/*TODO: should unref these at some point? */
+	geoclue = geoclue_common_new (service, path);
+	if (geoclue == NULL) {
+		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
 		name = "(error)";
+	} else {
+		geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
 	}
+	
 	
 	/*TODO: should unref these at some point? */
-	position = geoclue_position_new (service, path);
+	address = geoclue_address_new (service, path);
+	
+	append_to_address_store (gui, address, name);
+}
+
+static void
+add_master_address_provider_to_store (GeoclueTestGui *gui)
+{
+	GeoclueAddress *address = NULL;
+	
+	geoclue_test_gui_master_log_message (gui, "Adding master address provider");
+	
+	/*TODO: should unref these at some point? */
+	address = geoclue_master_client_address_create (gui->client, NULL);
+	
+	append_to_address_store (gui, address, "master");
+}
+
+static void 
+append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, char *name)
+{
+	double lat, lon, alt;
+	GtkTreeIter iter;
+	
+	lat = lon = alt = 0.0/0.0;
 	
 	gtk_list_store_append (gui->position_store, &iter);
 	gtk_list_store_set (gui->position_store, &iter,
@@ -337,7 +308,7 @@ add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 	                    -1);
 	
 	if (!position) {
-		g_printerr ("Error while creating GeocluePosition %s.\n", path);
+		g_printerr ("Error while creating GeocluePosition %s.\n", name);
 		
 	} else {
 		g_signal_connect (G_OBJECT (position), "position-changed",
@@ -345,18 +316,50 @@ add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 		
 		if (!geoclue_position_get_position (position, NULL, 
 						    &lat, &lon, &alt, 
-						    NULL, &error)) {
-			if (error) {
-				g_warning ("Error getting position (%s): %s\n", path, error->message);
-				g_error_free (error);
-			} else {
-				g_warning ("Error getting position (%s)\n", path);
-			}
+						    NULL, NULL)) {
+			g_warning ("Error getting position\n");
 		}
 		
 		update_position (gui, position, lat, lon, alt);
 	}
+}
+
+static void
+add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
+{
+	GeocluePosition *position = NULL;
+	GeoclueCommon *geoclue = NULL;
+	char *name = NULL;
 	
+	char *msg = g_strdup_printf ("Adding position provider %s", path);
+	geoclue_test_gui_master_log_message (gui, msg);
+	g_free (msg);
+	
+	geoclue = geoclue_common_new (service, path);
+	if (geoclue == NULL) {
+		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
+		name = "(error)";
+	} else {
+		geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
+	}
+	
+	/*TODO: should unref these at some point? */
+	position = geoclue_position_new (service, path);
+	
+	append_to_position_store (gui, position, name);
+}
+
+static void
+add_master_position_provider_to_store (GeoclueTestGui *gui)
+{
+	GeocluePosition *position = NULL;
+	
+	geoclue_test_gui_master_log_message (gui, "Adding master position provider");
+	
+	/*TODO: should unref these at some point? */
+	position = geoclue_master_client_position_create (gui->client, NULL);
+	
+	append_to_position_store (gui, position, "master");
 }
 
 
@@ -438,7 +441,7 @@ get_address_tree_view (GeoclueTestGui *gui)
 	                            G_TYPE_STRING,
 	                            G_TYPE_STRING);
 	
-	add_address_provider_to_store (gui, GEOCLUE_MASTER_DBUS_SERVICE, gui->master_client_path);
+	add_master_address_provider_to_store (gui);
 	i = 0;
 	while (address_providers[i]) {
 		service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", address_providers[i]);
@@ -500,7 +503,7 @@ get_position_tree_view (GeoclueTestGui *gui)
 	                            G_TYPE_DOUBLE,
 	                            G_TYPE_DOUBLE);
 	
-	add_position_provider_to_store (gui, GEOCLUE_MASTER_DBUS_SERVICE, gui->master_client_path);
+	add_master_position_provider_to_store (gui);
 	i = 0;
 	while (position_providers[i]) {
 		service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", position_providers[i]);

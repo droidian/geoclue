@@ -659,10 +659,18 @@ gc_iface_master_client_get_provider (GcMasterClient  *client,
 	}
 	
 	if (name) {
-		*name = g_strdup (gc_master_provider_get_name (provider));
+		if (!provider) {
+			name = NULL;
+		} else {
+			*name = g_strdup (gc_master_provider_get_name (provider));
+		}
 	}
 	if (description) {
-		*description = g_strdup (gc_master_provider_get_description (provider));
+		if (!provider) {
+			description = NULL;
+		} else {
+			*description = g_strdup (gc_master_provider_get_description (provider));
+		}
 	}
 	return TRUE;
 }

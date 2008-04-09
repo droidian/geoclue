@@ -2,7 +2,7 @@
 Name=Plazes
 Service=org.freedesktop.Geoclue.Providers.Plazes
 Path=/org/freedesktop/Geoclue/Providers/Plazes
-Accuracy=6
+Accuracy=5
 Requires=RequiresNetwork
 Provides=ProvidesCacheableOnConnection
 Interfaces=org.freedesktop.Geoclue.Position;org.freedesktop.Geoclue.Address

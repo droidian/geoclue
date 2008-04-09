@@ -1,5 +1,5 @@
 [Geoclue Provider]
-Name=Gypsy Provider
+Name=Gypsy
 Service=org.freedesktop.Geoclue.Providers.Gypsy
 Path=/org/freedesktop/Geoclue/Providers/Gypsy
 Requires=RequiresGPS

@@ -17,7 +17,9 @@
 
 #include <math.h>
 #include <gps.h>
+#include <string.h>
 
+#include <geoclue/geoclue-error.h>
 #include <geoclue/gc-provider.h>
 #include <geoclue/gc-iface-position.h>
 #include <geoclue/gc-iface-velocity.h>
@@ -37,6 +39,9 @@ typedef enum {
 
 typedef struct {
 	GcProvider parent;
+	
+	char *host;
+	char *port;
 	
 	pthread_t *gps_thread;
 	gps_data *gpsdata;
@@ -68,7 +73,7 @@ G_DEFINE_TYPE_WITH_CODE (GeoclueGpsd, geoclue_gpsd, GC_TYPE_PROVIDER,
                                                 geoclue_gpsd_velocity_init))
 
 static void geoclue_gpsd_stop_gpsd (GeoclueGpsd *self);
-static gboolean geoclue_gpsd_start_gpsd (GeoclueGpsd *self, char *host, char *port);
+static gboolean geoclue_gpsd_start_gpsd (GeoclueGpsd *self);
 
 
 /* defining global GeoclueGpsd because gpsd does not support "user_data"
@@ -97,25 +102,69 @@ shutdown (GcProvider *provider)
 	g_main_loop_quit (gpsd->loop);
 }
 
+static void
+geoclue_gpsd_set_status (GeoclueGpsd *self, GeoclueStatus status)
+{
+	if (status != self->last_status) {
+		self->last_status = status;
+		
+		/* make position and velocity invalid if no fix */
+		if (status != GEOCLUE_STATUS_AVAILABLE) {
+			self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
+			self->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
+		}
+		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (self),
+		                                      status);
+	}
+}
+
 static gboolean
 set_options (GcIfaceGeoclue *gc,
              GHashTable     *options,
              GError        **error)
 {
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
-	char *host;
-	char *port;
+	char *port, *host;
+	gboolean changed = FALSE;
 	
 	host = g_hash_table_lookup (options, 
-	                                   "org.freedesktop.Geoclue.GPSHost");
+	                                  "org.freedesktop.Geoclue.GPSHost");
 	port = g_hash_table_lookup (options, 
-	                            "org.freedesktop.Geoclue.GPSPort");
-	if (!port) {
+	                                  "org.freedesktop.Geoclue.GPSPort");
+	
+	if (port == NULL) {
 		port = DEFAULT_GPSD_PORT;
 	}
 	
+	/* new values? */
+	if (host != NULL && gpsd->host != NULL) {
+		changed = (strcmp (host, gpsd->host) != 0);
+	} else if (!(host == NULL && gpsd->host == NULL)) {
+		changed = TRUE;
+	}
+	if (!changed) {
+		changed = (strcmp (port, gpsd->port) != 0);
+	}
+	
+	if (!changed) {
+		return TRUE;
+	}
+	
+	/* update private values with new ones, restart gpsd */
+	g_free (gpsd->port);
+	if (gpsd->host) {
+		g_free (gpsd->host);
+	}
 	geoclue_gpsd_stop_gpsd (gpsd);
-	return geoclue_gpsd_start_gpsd (gpsd, host, port);
+	gpsd->port = g_strdup (port);
+	gpsd->host = g_strdup (host);
+	if (!geoclue_gpsd_start_gpsd (gpsd)) {
+		geoclue_gpsd_set_status (gpsd, GEOCLUE_STATUS_ERROR);
+		g_set_error (error, GEOCLUE_ERROR,
+		             GEOCLUE_ERROR_FAILED, "Gpsd not found");
+		return FALSE;
+	}
+	return TRUE;
 }
 
 static void
@@ -127,7 +176,12 @@ finalize (GObject *object)
 	g_free (gpsd->last_fix);
 	geoclue_accuracy_free (gpsd->last_accuracy);
 	
-	((GObjectClass *) geoclue_gpsd_parent_class)->dispose (object);
+	g_free (gpsd->port);
+	if (gpsd->host) {
+		g_free (gpsd->host);
+	}
+	
+	((GObjectClass *) geoclue_gpsd_parent_class)->finalize (object);
 }
 
 static void
@@ -269,42 +323,24 @@ geoclue_gpsd_update_velocity (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 static void
 geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 {
-	gboolean changed = FALSE;
-	gboolean online = (gpsd->gpsdata->online > 0);
+	GeoclueStatus status;
 	
 	/* gpsdata->online is supposedly always up-to-date */
-	if (online && (gpsd->last_status == GEOCLUE_STATUS_UNAVAILABLE)) {
-		gpsd->last_status = GEOCLUE_STATUS_ACQUIRING;
-		changed = TRUE;
-	} else if (!online && (gpsd->last_status != GEOCLUE_STATUS_UNAVAILABLE)) {
-		gpsd->last_status = GEOCLUE_STATUS_UNAVAILABLE;
-		changed = TRUE;
-	}
-	
-	if ((gpsd->last_status != GEOCLUE_STATUS_UNAVAILABLE) && 
-	    (gpsd->gpsdata->set & STATUS_SET)) {
-		gboolean fix = (gpsd->gpsdata->status > 0);
-		
+	if (gpsd->gpsdata->online <= 0) {
+		status = GEOCLUE_STATUS_UNAVAILABLE;
+	} else if (gpsd->gpsdata->set & STATUS_SET) {
 		gpsd->gpsdata->set &= ~(STATUS_SET);
 		
-		if (fix && gpsd->last_status != GEOCLUE_STATUS_AVAILABLE) {
-			gpsd->last_status = GEOCLUE_STATUS_AVAILABLE;
-			changed = TRUE;
-		} else if (!fix && gpsd->last_status == GEOCLUE_STATUS_AVAILABLE) {
-			gpsd->last_status = GEOCLUE_STATUS_UNAVAILABLE;
-			changed = TRUE;
+		if (gpsd->gpsdata->status > 0) {
+			status = GEOCLUE_STATUS_AVAILABLE;
+		} else {
+			status = GEOCLUE_STATUS_ACQUIRING;
 		}
+	} else {
+		return;
 	}
-	if (changed) {
-		/* make position and velocity invalid if no fix */
-		if (gpsd->last_status != GEOCLUE_STATUS_AVAILABLE) {
-			gpsd->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
-			gpsd->last_velo_fields = GEOCLUE_VELOCITY_FIELDS_NONE;
-		}
-		
-		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (gpsd),
-		                                      gpsd->last_status);
-	}
+	
+	geoclue_gpsd_set_status (gpsd, status);
 }
 
 static void 
@@ -335,23 +371,19 @@ geoclue_gpsd_stop_gpsd (GeoclueGpsd *self)
 		gps_del_callback (self->gpsdata, self->gps_thread);
 		gps_close (self->gpsdata);
 		self->gpsdata = NULL;
-		self->last_status = GEOCLUE_STATUS_ERROR;
 	}
-	
 }
 
 static gboolean
-geoclue_gpsd_start_gpsd (GeoclueGpsd *self, char *host, char *port)
+geoclue_gpsd_start_gpsd (GeoclueGpsd *self)
 {
-	self->gpsdata = gps_open (host, port);
+	self->gpsdata = gps_open (self->host, self->port);
 	if (self->gpsdata) {
-		self->last_status = GEOCLUE_STATUS_UNAVAILABLE;
-		
-		/* FIXME: This will block for a long time (10-80 seconds) if device is not available */
+		/* This can block for some time if device is not available */
 		gps_set_callback (self->gpsdata, gpsd_callback, self->gps_thread);
 		return TRUE;
 	} else {
-		self->last_status = GEOCLUE_STATUS_ERROR;
+		g_warning ("gps_open() failed, is gpsd running (host=%s,port=%s)?", self->host, self->port);
 		return FALSE;
 	}
 }
@@ -372,7 +404,12 @@ geoclue_gpsd_init (GeoclueGpsd *self)
 				 "/org/freedesktop/Geoclue/Providers/Gpsd",
 				 "Gpsd", "Gpsd provider");
 	
-	geoclue_gpsd_start_gpsd (self, NULL, DEFAULT_GPSD_PORT);
+	self->port = g_strdup (DEFAULT_GPSD_PORT);
+	self->host = NULL;
+	geoclue_gpsd_set_status (self, GEOCLUE_STATUS_ACQUIRING);
+	if (!geoclue_gpsd_start_gpsd (self)) {
+		geoclue_gpsd_set_status (self, GEOCLUE_STATUS_ERROR);
+	}
 }
 
 static gboolean

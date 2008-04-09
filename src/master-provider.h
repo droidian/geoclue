@@ -20,16 +20,10 @@ typedef enum {
 	GC_IFACE_ADDRESS = 1 << 2,
 	GC_IFACE_VELOCITY = 1 << 3,
 	GC_IFACE_GEOCODE = 1 << 4,
-	GC_IFACE_REVERSE_GEOCOE = 1 << 5,
+	GC_IFACE_REVERSE_GEOCODE = 1 << 5,
+	
+	GC_IFACE_ALL = (1 << 6) - 1 
 } GcInterfaceFlags;
-
-typedef enum {
-	GC_MASTER_STATUS_ERROR,
-	GC_MASTER_STATUS_NOT_STARTED,
-	GC_MASTER_STATUS_UNAVAILABLE,
-	GC_MASTER_STATUS_ACQUIRING,
-	GC_MASTER_STATUS_AVAILABLE
-} GcMasterStatus;
 
 
 typedef struct _GcMasterProvider {
@@ -62,11 +56,12 @@ GType gc_master_provider_get_type (void);
 GcMasterProvider *gc_master_provider_new (const char *filename,
                                           GeoclueConnectivity *connectivity);
 
-gboolean gc_master_provider_activate (GcMasterProvider *provider, 
-                                      gpointer          client,
-                                      GError          **error);
-void gc_master_provider_deactivate (GcMasterProvider *provider,
-                                    gpointer          client);
+gboolean gc_master_provider_subscribe (GcMasterProvider *provider, 
+                                       gpointer          client,
+                                       GcInterfaceFlags  interface);
+void gc_master_provider_unsubscribe (GcMasterProvider *provider,
+                                     gpointer          client,
+                                     GcInterfaceFlags  interface);
 
 /* for gc_master_provider_compare */
 typedef struct _GcInterfaceAccuracy {
@@ -89,9 +84,8 @@ void gc_master_provider_network_status_changed (GcMasterProvider *provider,
 char* gc_master_provider_get_name (GcMasterProvider *provider);
 char* gc_master_provider_get_description (GcMasterProvider *provider);
 
-GcMasterStatus gc_master_provider_get_status (GcMasterProvider *provider);
-GcMasterStatus gc_master_provider_get_accuracy (GcMasterProvider *provider, GcInterfaceFlags iface);
-
+GeoclueStatus gc_master_provider_get_status (GcMasterProvider *provider);
+GeoclueAccuracyLevel gc_master_provider_get_accuracy (GcMasterProvider *provider, GcInterfaceFlags iface);
 
 GeocluePositionFields gc_master_provider_get_position (GcMasterProvider *master_provider,
                                                        int              *timestamp,

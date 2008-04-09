@@ -440,7 +440,7 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 		return FALSE;
 	}
 	
-	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
+	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->position_provider));
 	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
 		       GEOCLUE_POSITION_INTERFACE_NAME, 
 		       gc_master_provider_get_name (priv->position_provider),

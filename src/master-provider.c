@@ -692,15 +692,18 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 	g_print ("   Service - %s\n", priv->service);
 	g_print ("   Path - %s\n", priv->path);
 	g_print ("   Accuracy level - %d\n", priv->expected_accuracy);
-
+	g_print ("   Provider is currently %srunning, status %d\n", 
+	         priv->geoclue ? "" : "not ",
+	         priv->master_status);
 	gc_master_provider_dump_required_resources (provider);
 	gc_master_provider_dump_provides (provider);
 	
-	if (priv->position) {
+	
+	if (priv->interfaces & GC_IFACE_POSITION) {
 		g_print ("   Interface - Position\n");
 		gc_master_provider_dump_position (provider);
 	}
-	if (priv->address) {
+	if (priv->interfaces & GC_IFACE_ADDRESS) {
 		g_print ("   Interface - Address\n");
 		gc_master_provider_dump_address (provider);
 	}

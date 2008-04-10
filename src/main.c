@@ -46,6 +46,7 @@ load_options (void)
         }
 
         ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
+        g_print ("Master options:\n");
         for (e = entries; e; e = e->next) {
                 GConfEntry *entry = e->data;
                 const char *key, *value;
@@ -55,7 +56,7 @@ load_options (void)
                 v = gconf_entry_get_value (entry);
                 value = gconf_value_get_string (v);
 
-                g_print ("%s = %s\n", key, value);
+                g_print ("  %s = %s\n", key, value);
                 g_hash_table_insert (ht, g_path_get_basename (key), 
                                      g_strdup (value));
                  gconf_entry_free (entry);

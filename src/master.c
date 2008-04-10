@@ -129,20 +129,25 @@ gc_master_load_providers (GcMaster *master)
 
 	dir = g_dir_open (GEOCLUE_PROVIDERS_DIR, 0, &error);
 	if (dir == NULL) {
-		g_warning ("Error opening %s: %s", GEOCLUE_PROVIDERS_DIR,
+		g_warning ("Error opening %s: %s\n", GEOCLUE_PROVIDERS_DIR,
 			   error->message);
 		g_error_free (error);
 		return;
 	}
 
 	filename = g_dir_read_name (dir);
+	if (!filename) {
+		g_print ("No providers found in %s\n", dir);
+	} else {
+		g_print ("Found providers:\n");
+	}
 	while (filename) {
 		char *fullname, *ext;
 
-		g_print ("Found %s\n", filename);
+		g_print ("  %s\n", filename);
 		ext = strrchr (filename, '.');
 		if (ext == NULL || strcmp (ext, PROVIDER_EXTENSION) != 0) {
-			g_print (" - Ignored\n");
+			g_print ("   - Ignored\n");
 			filename = g_dir_read_name (dir);
 			continue;
 		}

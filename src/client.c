@@ -111,7 +111,7 @@ status_changed (GcMasterProvider *provider,
 {
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
-	g_debug ("client: provider %s status changed", gc_master_provider_get_name (provider));
+	g_debug ("client: provider %s status changed: %d", gc_master_provider_get_name (provider), status);
 	
 	/* change providers if needed (and if we're not choosing provider already) */
 	
@@ -310,7 +310,9 @@ gc_master_client_get_best_provider (GcMasterClient    *client,
 		g_debug ("        ...trying provider %s", gc_master_provider_get_name (provider));
 		if (gc_master_provider_subscribe (provider, client, iface)) {
 			/* provider was started, so accuracy may have changed 
-			 * (which re-sorts provider lists), restart provider selection */
+			   (which re-sorts provider lists), restart provider selection */
+			/* TODO re-think this: restarting provider selection leads to potentially
+			   never-ending looping */
 			g_debug ("        ...started %s (status %d), re-starting provider selection",
 			         gc_master_provider_get_name (provider),
 			         gc_master_provider_get_status (provider));

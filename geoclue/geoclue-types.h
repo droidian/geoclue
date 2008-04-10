@@ -161,7 +161,10 @@ typedef enum {
 typedef enum _GeoclueResourceFlags {
 	GEOCLUE_RESOURCE_NONE = 0,
 	GEOCLUE_RESOURCE_NETWORK = 1 << 0,
-	GEOCLUE_RESOURCE_GPS = 1 << 1,
+	GEOCLUE_RESOURCE_CELL = 1 << 1,
+	GEOCLUE_RESOURCE_GPS = 1 << 2,
+	
+	GEOCLUE_RESOURCE_ALL = (1 << 10) - 1
 } GeoclueResourceFlags;
 
 

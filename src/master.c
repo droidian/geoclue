@@ -55,8 +55,10 @@ gc_iface_master_create (GcMaster    *master,
 	client = g_object_new (GC_TYPE_MASTER_CLIENT, NULL);
 	dbus_g_connection_register_g_object (master->connection, path,
 					     G_OBJECT (client));
-
-	*object_path = path;
+	
+	if (object_path) {
+		*object_path = path;
+	}
 	return TRUE;
 }
 

@@ -245,6 +245,8 @@ parse_resource_strings (char **flags)
 	for (i = 0; flags[i]; i++) {
 		if (strcmp (flags[i], "RequiresNetwork") == 0) {
 			resources |= GEOCLUE_RESOURCE_NETWORK;
+		} else if (strcmp (flags[i], "RequiresCell") == 0) {
+			resources |= GEOCLUE_RESOURCE_CELL;
 		} else if (strcmp (flags[i], "RequiresGPS") == 0) {
 			resources |= GEOCLUE_RESOURCE_GPS;
 		}

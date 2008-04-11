@@ -288,6 +288,30 @@ parse_interface_strings (char **strs)
 	return ifaces;
 }
 
+static GeoclueAccuracyLevel
+parse_accuracy_string (char *str)
+{
+	GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+	if (!str || strcmp (str, "None") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_NONE;
+	} else if (strcmp (str, "Country") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+	} else if (strcmp (str, "Region") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_REGION;
+	} else if (strcmp (str, "Locality") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_LOCALITY;
+	} else if (strcmp (str, "Postalcode") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
+	} else if  (strcmp (str, "Street") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_STREET;
+	} else if  (strcmp (str, "Detailed") == 0) {
+		level = GEOCLUE_ACCURACY_LEVEL_DETAILED;
+	} else {
+		g_warning ("'%s' is not a recognised accuracy level value", str);
+	} 
+	return level;
+}
+
 static void
 gc_master_provider_handle_error (GcMasterProvider *provider, GError *error)
 {
@@ -862,6 +886,7 @@ gc_master_provider_new (const char *filename,
 	GKeyFile *keyfile;
 	GError *error = NULL;
 	gboolean ret;
+	char *accuracy_str; 
 	char **flags, **interfaces;
 	
 	keyfile = g_key_file_new ();
@@ -884,9 +909,14 @@ gc_master_provider_new (const char *filename,
 	priv->path = g_key_file_get_value (keyfile, "Geoclue Provider",
 	                                   "Path", NULL);
 	
-	priv->expected_accuracy = 
-		g_key_file_get_integer (keyfile, "Geoclue Provider",
-		                        "Accuracy", NULL);
+	accuracy_str = g_key_file_get_value (keyfile, "Geoclue Provider",
+	                                     "Accuracy", NULL);
+	g_debug (accuracy_str);
+	priv->expected_accuracy = parse_accuracy_string (accuracy_str);
+	if (accuracy_str){
+		g_free (accuracy_str);
+	}
+	
 	/* set cached accuracies to a default value */
 	geoclue_accuracy_set_details (priv->position_cache.accuracy,
 	                              priv->expected_accuracy, 0.0, 0.0);

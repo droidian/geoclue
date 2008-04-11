@@ -4,4 +4,4 @@ Service=org.freedesktop.Geoclue.Providers.Manual
 Path=/org/freedesktop/Geoclue/Providers/Manual
 Interfaces=org.freedesktop.Geoclue.Address
 Provides=ProvidesUpdates
-Accuracy=5
+Accuracy=Street

@@ -4,5 +4,5 @@ Service=org.freedesktop.Geoclue.Providers.Gpsd
 Path=/org/freedesktop/Geoclue/Providers/Gpsd
 Requires=RequiresGPS
 Provides=ProvidesUpdates
-Accuracy=6
+Accuracy=Detailed
 Interfaces=org.freedesktop.Geoclue.Position;org.freedesktop.Geoclue.Velocity

@@ -3,5 +3,5 @@ Name=Yahoo
 Service=org.freedesktop.Geoclue.Providers.Yahoo
 Path=/org/freedesktop/Geoclue/Providers/Yahoo
 Requires=RequiresNetwork
-Accuracy=6
+Accuracy=Street
 Interfaces=org.freedesktop.Geoclue.Geocode

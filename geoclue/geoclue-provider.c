@@ -13,6 +13,8 @@
 
 #include "gc-iface-geoclue-bindings.h"
 
+#define GEOCLUE_INTERFACE_NAME "org.freedesktop.Geoclue"
+
 typedef struct _GeoclueProviderPrivate {
 	char *service;
 	char *path;
@@ -28,9 +30,24 @@ enum {
 	PROP_INTERFACE
 };
 
+enum {
+	STATUS_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint32 signals[LAST_SIGNAL] = {0, };
+
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GEOCLUE_TYPE_PROVIDER, GeoclueProviderPrivate))
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GeoclueProvider, geoclue_provider, G_TYPE_OBJECT, geoclue_types_init (););
+
+static void
+status_changed (DBusGProxy      *proxy,
+		GeoclueStatus    status,
+		GeoclueProvider *provider)
+{
+	g_signal_emit (provider, signals[STATUS_CHANGED], 0, status);
+}
 
 static void
 finalize (GObject *object)
@@ -94,16 +111,19 @@ constructor (GType                  type,
 		return object;
 	}
 	
-	/* Create a proxy for org.freedesktop.Geoclue and call Ref(), 
-	 * even if our interface is something different -- this way we 
-	 * can hide reference counting from clients */
+	/* Create a special proxy for org.freedesktop.Geoclue */
 	priv->geoclue_proxy = dbus_g_proxy_new_for_name (connection, priv->service,
 							 priv->path, 
-							 "org.freedesktop.Geoclue");
+							 GEOCLUE_INTERFACE_NAME);
 	if (!org_freedesktop_Geoclue_ref (priv->geoclue_proxy, &error)){
 		g_printerr ("Could not reference provider: %s", error->message);
 		g_error_free (error);
 	}
+	dbus_g_proxy_add_signal (priv->geoclue_proxy, "StatusChanged",
+				 G_TYPE_INT, G_TYPE_INVALID);
+	dbus_g_proxy_connect_signal (priv->geoclue_proxy, "StatusChanged",
+				     G_CALLBACK (status_changed),
+				     object, NULL);
 	
 	provider->proxy = dbus_g_proxy_new_for_name (connection, priv->service,
 						     priv->path, 
@@ -190,10 +210,99 @@ geoclue_provider_class_init (GeoclueProviderClass *klass)
 				      G_PARAM_STATIC_NICK |
 				      G_PARAM_STATIC_BLURB |
 				      G_PARAM_STATIC_NAME));
+	
+	signals[STATUS_CHANGED] = g_signal_new ("status-changed",
+						G_TYPE_FROM_CLASS (klass),
+						G_SIGNAL_RUN_FIRST |
+						G_SIGNAL_NO_RECURSE,
+						G_STRUCT_OFFSET (GeoclueProviderClass, status_changed), 
+						NULL, NULL,
+						g_cclosure_marshal_VOID__INT,
+						G_TYPE_NONE, 1, G_TYPE_INT);
+
 }
 
 static void
 geoclue_provider_init (GeoclueProvider *provider)
 {
 	provider->proxy = NULL;
+}
+
+/**
+ * geoclue_provider_get_status:
+ * @provider: A #GeoclueProvider object
+ * @status: Pointer for returned status as #GeoclueStatus
+ * @error:  Pointer for returned #GError or %NULL
+ * 
+ * Obtains the current status of the provider.
+ * 
+ * Return value: %TRUE on success
+ */
+gboolean
+geoclue_provider_get_status (GeoclueProvider *provider,
+                             GeoclueStatus   *status,
+                             GError         **error)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	int i;
+	
+	if (status == NULL) {
+		return TRUE;
+	}
+	
+	if (org_freedesktop_Geoclue_get_status (priv->geoclue_proxy, 
+	                                        &i, error)) {
+		return FALSE;
+	}
+	*status = i;
+	return TRUE;
+}
+
+/**
+ * geoclue_provider_set_options:
+ * @provider: A #Geoclueprovider object
+ * @options: A #GHashTable containing the options
+ * @error: Pointer for returned #GError or %NULL
+ *
+ * Sets the options on the provider.
+ *
+ * Return value: %TRUE if setting options succeeded
+ */
+gboolean
+geoclue_provider_set_options (GeoclueProvider *provider,
+                              GHashTable      *options,
+                              GError         **error)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	if (options == NULL) {
+		return TRUE;
+	}
+	
+	return org_freedesktop_Geoclue_set_options (priv->geoclue_proxy, 
+	                                            options, error);
+}
+
+/**
+ * geoclue_provider_get_provider_info:
+ * @provider: A #GeoclueProvider object
+ * @name: Pointer for returned provider name or %NULL
+ * @description: Pointer for returned provider description or %NULL
+ * @error:  Pointer for returned #GError or %NULL
+ * 
+ * Obtains name and a short description of the provider.
+ * 
+ * Return value: %TRUE on success
+ */
+gboolean
+geoclue_provider_get_provider_info (GeoclueProvider  *provider,
+                                    char            **name,
+                                    char            **description,
+                                    GError          **error)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return org_freedesktop_Geoclue_get_provider_info (priv->geoclue_proxy,
+	                                                  name, description,
+	                                                  error);
 }

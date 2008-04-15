@@ -12,6 +12,9 @@
 #include <glib-object.h>
 #include <dbus/dbus-glib.h>
 
+#include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-accuracy.h>
+
 G_BEGIN_DECLS
 
 #define GEOCLUE_TYPE_PROVIDER (geoclue_provider_get_type ())
@@ -26,9 +29,23 @@ typedef struct _GeoclueProvider {
 
 typedef struct _GeoclueProviderClass {
 	GObjectClass object_class;
+	
+	void (*status_changed) (GeoclueProvider *provider,
+	                        GeoclueStatus    status);
 } GeoclueProviderClass;
 
 GType geoclue_provider_get_type (void);
+
+gboolean geoclue_provider_get_status (GeoclueProvider  *provider,
+                                      GeoclueStatus    *status,
+                                      GError          **error);
+gboolean geoclue_provider_get_provider_info (GeoclueProvider  *provider,
+                                             char            **name,
+                                             char            **description,
+                                             GError          **error);
+gboolean geoclue_provider_set_options (GeoclueProvider  *provider,
+                                       GHashTable       *options,
+                                       GError          **error);
 
 G_END_DECLS
 

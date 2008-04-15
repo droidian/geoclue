@@ -41,6 +41,13 @@
 		<method name="SetOptions">
 			<arg type="a{ss}" name="options" direction="in" />
 		</method>
+		
+		<method name="Ref">
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+		</method>
+		<method name="Unref">
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+		</method>
 	</interface>
 </node>
 

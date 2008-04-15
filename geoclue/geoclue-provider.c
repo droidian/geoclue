@@ -2,17 +2,23 @@
  * Geoclue
  * geoclue-provider.c - Client object for accessing Geoclue Providers
  *
- * Author: Iain Holmes <iain@openedhand.com>
+ * Authors: Iain Holmes <iain@openedhand.com>
+ *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *           2008 OpenedHand Ltd
  */
 
 #include <geoclue/geoclue-provider.h>
 #include <geoclue/geoclue-types.h>
 
+#include "gc-iface-geoclue-bindings.h"
+
 typedef struct _GeoclueProviderPrivate {
 	char *service;
 	char *path;
 	char *interface;
+	
+	DBusGProxy *geoclue_proxy;
 } GeoclueProviderPrivate;
 
 enum {
@@ -41,8 +47,19 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
-	GeoclueProvider *provider = (GeoclueProvider *) object;
-
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (object);
+	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
+	GError *error = NULL;
+	
+	if (!org_freedesktop_Geoclue_unref (priv->geoclue_proxy, &error)){
+		g_printerr ("Could not unreference provider: %s", error->message);
+		g_error_free (error);
+	}
+	if (priv->geoclue_proxy) {
+		g_object_unref (priv->geoclue_proxy);
+		priv->geoclue_proxy = NULL;
+	}
+	
 	if (provider->proxy) {
 		g_object_unref (provider->proxy);
 		provider->proxy = NULL;
@@ -76,11 +93,22 @@ constructor (GType                  type,
 
 		return object;
 	}
-
+	
+	/* Create a proxy for org.freedesktop.Geoclue and call Ref(), 
+	 * even if our interface is something different -- this way we 
+	 * can hide reference counting from clients */
+	priv->geoclue_proxy = dbus_g_proxy_new_for_name (connection, priv->service,
+							 priv->path, 
+							 "org.freedesktop.Geoclue");
+	if (!org_freedesktop_Geoclue_ref (priv->geoclue_proxy, &error)){
+		g_printerr ("Could not reference provider: %s", error->message);
+		g_error_free (error);
+	}
+	
 	provider->proxy = dbus_g_proxy_new_for_name (connection, priv->service,
 						     priv->path, 
 						     priv->interface);
-
+	
 	return object;
 }
 	

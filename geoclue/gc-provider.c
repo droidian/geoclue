@@ -25,8 +25,9 @@
 #include <string.h>
 #include <glib-object.h>
 
-#include <dbus/dbus-glib-bindings.h>
 #include <dbus/dbus.h>
+#include <dbus/dbus-glib-bindings.h>
+#include <dbus/dbus-glib-lowlevel.h>
 
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-provider.h>
@@ -35,6 +36,8 @@
 typedef struct {
 	char *name;
 	char *description;
+	
+	GHashTable *connections;
 } GcProviderPrivate;
 
 #define GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), GC_TYPE_PROVIDER, GcProviderPrivate))
@@ -59,6 +62,10 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
+	GcProviderPrivate *priv = GET_PRIVATE (object);
+	
+	g_hash_table_destroy (priv->connections);
+	
 	((GObjectClass *) gc_provider_parent_class)->dispose (object);
 }
 
@@ -79,14 +86,27 @@ static void
 gc_provider_init (GcProvider *provider)
 {
 	GError *error = NULL;
-
+	GcProviderPrivate *priv = GET_PRIVATE (provider);
+	
 	provider->connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
 	if (provider->connection == NULL) {
 		g_warning ("%s was unable to create a connection to D-Bus: %s",
 			   G_OBJECT_TYPE_NAME (provider), error->message);
 		g_error_free (error);
 	}
+	
+	priv->connections = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
 }
+
+
+/*
+static void
+gc_provider_shutdown (GcProvider *provider)
+{
+	GC_PROVIDER_GET_CLASS (provider)->shutdown (provider);
+}
+*/
+
 
 static gboolean 
 get_provider_info (GcIfaceGeoclue *geoclue,
@@ -142,17 +162,62 @@ set_options (GcIfaceGeoclue *geoclue,
 }
 
 static void
+ref (GcIfaceGeoclue *geoclue,
+     DBusGMethodInvocation *context)
+{
+	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
+	char *sender;
+	int *pcount;
+	
+	dbus_g_method_return (context);
+	
+	/* Update the hash of open connections */
+	sender = dbus_g_method_get_sender (context);
+	pcount = g_hash_table_lookup (priv->connections, sender);
+	if (!pcount) {
+		pcount = g_malloc0 (sizeof (int));
+		g_hash_table_insert (priv->connections, sender, pcount);
+	}
+	(*pcount)++;
+	g_debug ("reffed");
+}
+
+static void 
+unref (GcIfaceGeoclue *geoclue,
+       DBusGMethodInvocation *context)
+{
+	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
+	char *sender;
+	int *pcount;
+	
+	dbus_g_method_return (context);
+	
+	/* Update the hash of open connections */
+	sender = dbus_g_method_get_sender (context);
+	pcount = g_hash_table_lookup (priv->connections, sender);
+	if (pcount) {
+		(*pcount)--;
+		g_debug ("unreffed");
+		if (*pcount == 0) {
+			g_hash_table_remove (priv->connections, sender);
+		}
+		if (g_hash_table_size (priv->connections) == 0) {
+			/* gc_provider_shutdown (provider); */
+			g_debug ("TODO: shutdown");
+		}
+	} else {
+		g_warning ("Unreffed by client that has not been referenced");
+	}
+}
+
+static void
 gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 {
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
 	iface->set_options = set_options;
-}
-
-static void
-gc_provider_shutdown (GcProvider *provider)
-{
-	GC_PROVIDER_GET_CLASS (provider)->shutdown (provider);
+	iface->ref = ref;
+	iface->unref = unref;
 }
 
 static void
@@ -162,17 +227,8 @@ name_owner_changed (DBusGProxy  *proxy,
 		    const char  *new_owner,
 		    GcProvider  *provider)
 {
-	static int ref_count = 0;
-	
-	if (strcmp (new_owner, name) == 0 && strcmp (prev_owner, "") == 0) {
-		ref_count++;
-	} else if (strcmp (new_owner, "") == 0 && strcmp (prev_owner, name) == 0) {
-		ref_count--;
-		if (ref_count <= 0) {
-			g_debug ("no clients, shutting down");
-			gc_provider_shutdown (provider);
-		}
-	}
+	g_debug ("name owner changed (FIXME)");
+	 /* gc_provider_shutdown (provider); */
 }
 
 /**

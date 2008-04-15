@@ -86,10 +86,8 @@ int main (int argc, char** argv)
                         break;
 		}
 	}
-
-	g_object_unref (geoclue);
-
-	g_free (geoclue);
-	return 0;
 	
+	g_object_unref (geoclue);
+	
+	return 0;
 }

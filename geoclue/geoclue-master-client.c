@@ -263,6 +263,7 @@ geoclue_master_client_address_create (GeoclueMasterClient *client,
 	if (!org_freedesktop_Geoclue_MasterClient_address_start (priv->proxy, error)) {
 		return NULL;
 	}
+	
 	return geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, priv->object_path);
 }
 

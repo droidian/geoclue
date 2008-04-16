@@ -159,26 +159,6 @@ set_options (GcIfaceGeoclue *geoclue,
         return TRUE;
 }
 
-static void
-ref (GcIfaceGeoclue *geoclue,
-     DBusGMethodInvocation *context)
-{
-	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
-	char *sender;
-	int *pcount;
-	
-	dbus_g_method_return (context);
-	
-	/* Update the hash of open connections */
-	sender = dbus_g_method_get_sender (context);
-	pcount = g_hash_table_lookup (priv->connections, sender);
-	if (!pcount) {
-		pcount = g_malloc0 (sizeof (int));
-		g_hash_table_insert (priv->connections, sender, pcount);
-	}
-	(*pcount)++;
-}
-
 static gboolean 
 gc_provider_remove_client (GcProvider *provider, const char *client)
 {
@@ -200,6 +180,26 @@ gc_provider_remove_client (GcProvider *provider, const char *client)
 	return TRUE;
 }
 
+static void
+ref (GcIfaceGeoclue *geoclue,
+     DBusGMethodInvocation *context)
+{
+	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
+	char *sender;
+	int *pcount;
+	
+	dbus_g_method_return (context);
+	
+	/* Update the hash of open connections */
+	sender = dbus_g_method_get_sender (context);
+	pcount = g_hash_table_lookup (priv->connections, sender);
+	if (!pcount) {
+		pcount = g_malloc0 (sizeof (int));
+		g_hash_table_insert (priv->connections, sender, pcount);
+	}
+	(*pcount)++;
+}
+
 static void 
 unref (GcIfaceGeoclue *geoclue,
        DBusGMethodInvocation *context)
@@ -216,16 +216,6 @@ unref (GcIfaceGeoclue *geoclue,
 }
 
 static void
-gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
-{
-	iface->get_provider_info = get_provider_info;
-	iface->get_status = get_status;
-	iface->set_options = set_options;
-	iface->ref = ref;
-	iface->unref = unref;
-}
-
-static void
 name_owner_changed (DBusGProxy  *proxy,
 		    const char  *name,
 		    const char  *prev_owner,
@@ -238,6 +228,17 @@ name_owner_changed (DBusGProxy  *proxy,
 		}
 	}
 }
+
+static void
+gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
+{
+	iface->get_provider_info = get_provider_info;
+	iface->get_status = get_status;
+	iface->set_options = set_options;
+	iface->ref = ref;
+	iface->unref = unref;
+}
+
 
 /**
  * gc_provider_set_details:

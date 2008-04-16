@@ -7,7 +7,6 @@
 
 #include <geoclue/geoclue-master.h>
 #include <geoclue/geoclue-master-client.h>
-#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-address.h>
 #include <geoclue/geoclue-position.h>
 
@@ -257,7 +256,6 @@ static void
 add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 {
 	GeoclueAddress *address = NULL;
-	GeoclueCommon *geoclue = NULL;
 	char *name = NULL;
 	
 	char *msg = g_strdup_printf ("Adding address provider %s", path);
@@ -265,17 +263,16 @@ add_address_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 	g_free (msg);
 	
 	/*TODO: should unref these at some point? */
-	geoclue = geoclue_common_new (service, path);
-	if (geoclue == NULL) {
+	address = geoclue_address_new (service, path);
+	
+	if (address == NULL) {
 		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
 		name = "(error)";
 	} else {
-		geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
+		geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (address), &name, NULL, NULL);
 	}
 	
 	
-	/*TODO: should unref these at some point? */
-	address = geoclue_address_new (service, path);
 	
 	append_to_address_store (gui, address, name);
 }
@@ -328,23 +325,21 @@ static void
 add_position_provider_to_store (GeoclueTestGui *gui, char *service, char *path)
 {
 	GeocluePosition *position = NULL;
-	GeoclueCommon *geoclue = NULL;
 	char *name = NULL;
 	
 	char *msg = g_strdup_printf ("Adding position provider %s", path);
 	geoclue_test_gui_master_log_message (gui, msg);
 	g_free (msg);
 	
-	geoclue = geoclue_common_new (service, path);
-	if (geoclue == NULL) {
+	/*TODO: should unref these at some point? */
+	position = geoclue_position_new (service, path);
+	
+	if (position == NULL) {
 		g_printerr ("Error while creating GeoclueAddress %s.\n", path);
 		name = "(error)";
 	} else {
-		geoclue_common_get_provider_info (geoclue, &name, NULL, NULL);
+		geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (position), &name, NULL, NULL);
 	}
-	
-	/*TODO: should unref these at some point? */
-	position = geoclue_position_new (service, path);
 	
 	append_to_position_store (gui, position, name);
 }

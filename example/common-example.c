@@ -7,12 +7,12 @@
  */
 
 #include <glib.h>
-#include <geoclue/geoclue-common.h>
+#include <geoclue/geoclue-position.h>
 
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-	GeoclueCommon *geoclue = NULL;
+	GeocluePosition *pos = NULL;
 	gchar *name = NULL;
 	gchar *desc = NULL;
 	GeoclueStatus status;
@@ -31,19 +31,20 @@ int main (int argc, char** argv)
 	
 	
 	/* Create new GeoclueCommon */
-	geoclue = geoclue_common_new (service, path);
+	pos = geoclue_position_new (service, path);
 	g_free (service);
 	g_free (path);
-	if (geoclue == NULL) {
-		g_printerr ("Error while creating GeoclueGeocode object.\n");
+	if (pos == NULL) {
+		g_printerr ("Error while creating GeocluePosition object.\n");
 		return 1;
 	}
+	
 	
 	options = g_hash_table_new (g_str_hash, g_str_equal);
         g_hash_table_insert (options, "GPSProvider", "Gypsy");
         g_hash_table_insert (options, "PlaySong", "MGMT-Kids.mp3");
 
-        if (!geoclue_common_set_options (geoclue, options, &error)) {
+        if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (pos), options, &error)) {
                 g_printerr ("Error setting options: %s\n\n", error->message);
                 g_error_free (error);
                 error = NULL;
@@ -52,9 +53,9 @@ int main (int argc, char** argv)
         }
         g_hash_table_destroy (options);
 
-	if (!geoclue_common_get_provider_info (geoclue, 
-	                                       &name, &desc,
-	                                       &error)) {
+	if (!geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos), 
+	                                         &name, &desc,
+	                                         &error)) {
 		g_printerr ("Error getting provider info: %s\n\n", error->message);
 		g_error_free (error);
 		error = NULL;
@@ -66,8 +67,8 @@ int main (int argc, char** argv)
 		g_free (desc);
 	}
 	
-	if (!geoclue_common_get_status (geoclue, &status, &error)) {
-		g_printerr ("Error getting provider info: %s\n\n", error->message);
+	if (!geoclue_provider_get_status (GEOCLUE_PROVIDER (pos), &status, &error)) {
+		g_printerr ("Error getting status: %s\n\n", error->message);
 		g_error_free (error);
 		error = NULL;
 	} else {
@@ -87,7 +88,7 @@ int main (int argc, char** argv)
 		}
 	}
 	
-	g_object_unref (geoclue);
+	g_object_unref (pos);
 	
 	return 0;
 }

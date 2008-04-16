@@ -35,7 +35,6 @@ parse_options (int    argc,
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-        GeoclueCommon *common = NULL;
 	GeoclueReverseGeocode *revgeocoder = NULL;
 	GHashTable *address = NULL;
 	double lat, lon;
@@ -51,18 +50,21 @@ int main (int argc, char** argv)
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
-        common = geoclue_common_new (service, path);
-        if (common == NULL) {
-                g_printerr ("Error while creating GeoclueCommon object.\n");
-                return 1;
-        }
-        
+	/* Create new GeoclueReverseGeocode */
+	revgeocoder = geoclue_reverse_geocode_new (service, path);
+	g_free (service);
+	g_free (path);
+	if (revgeocoder == NULL) {
+		g_printerr ("Error while creating GeoclueGeocode object.\n");
+		return 1;
+	}
+	
         /* Set options */
         if (argc > 2) {
                 GHashTable *options;
                 
                 options = parse_options (argc, argv);
-                if (!geoclue_common_set_options (common, options, &error)) {
+                if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (revgeocoder), options, &error)) {
                         g_printerr ("Error setting options: %s\n", 
                                     error->message);
                         g_error_free (error);
@@ -74,15 +76,6 @@ int main (int argc, char** argv)
 	address = g_hash_table_new_full (g_str_hash, g_str_equal,
 	                                 (GDestroyNotify)g_free, 
 	                                 (GDestroyNotify)g_free);
-	
-	/* Create new GeoclueReverseGeocode */
-	revgeocoder = geoclue_reverse_geocode_new (service, path);
-	g_free (service);
-	g_free (path);
-	if (revgeocoder == NULL) {
-		g_printerr ("Error while creating GeoclueGeocode object.\n");
-		return 1;
-	}
 	
 	lat = 60.2;
 	lon = 24.9;

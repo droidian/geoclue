@@ -1,9 +1,11 @@
 /* 
  * Geoclue
- * geoclue-provider.h -
+ * geoclue-provider.h - Client object for accessing Geoclue Providers
  *
- * Author: Iain Holmes <iain@openedhand.com>
+ * Authors: Iain Holmes <iain@openedhand.com>
+ *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *           2008 OpenedHand Ltd
  */
 
 #ifndef _GEOCLUE_PROVIDER_H
@@ -13,7 +15,6 @@
 #include <dbus/dbus-glib.h>
 
 #include <geoclue/geoclue-types.h>
-#include <geoclue/geoclue-accuracy.h>
 
 G_BEGIN_DECLS
 
@@ -23,7 +24,7 @@ G_BEGIN_DECLS
 
 typedef struct _GeoclueProvider {
 	GObject object;
-
+	
 	DBusGProxy *proxy;
 } GeoclueProvider;
 

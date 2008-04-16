@@ -99,13 +99,11 @@ gc_provider_init (GcProvider *provider)
 }
 
 
-/*
 static void
 gc_provider_shutdown (GcProvider *provider)
 {
 	GC_PROVIDER_GET_CLASS (provider)->shutdown (provider);
 }
-*/
 
 
 static gboolean 
@@ -179,33 +177,40 @@ ref (GcIfaceGeoclue *geoclue,
 		g_hash_table_insert (priv->connections, sender, pcount);
 	}
 	(*pcount)++;
-	g_debug ("reffed");
+}
+
+static gboolean 
+gc_provider_remove_client (GcProvider *provider, const char *client)
+{
+	int *pcount;
+	GcProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	pcount = g_hash_table_lookup (priv->connections, client);
+	if (!pcount) {
+		return FALSE;
+	}
+	
+	(*pcount)--;
+	if (*pcount == 0) {
+		g_hash_table_remove (priv->connections, client);
+	}
+	if (g_hash_table_size (priv->connections) == 0) {
+		gc_provider_shutdown (provider);
+	}
+	return TRUE;
 }
 
 static void 
 unref (GcIfaceGeoclue *geoclue,
        DBusGMethodInvocation *context)
 {
-	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
+	GcProvider *provider = GC_PROVIDER (geoclue);
 	char *sender;
-	int *pcount;
 	
 	dbus_g_method_return (context);
 	
-	/* Update the hash of open connections */
 	sender = dbus_g_method_get_sender (context);
-	pcount = g_hash_table_lookup (priv->connections, sender);
-	if (pcount) {
-		(*pcount)--;
-		g_debug ("unreffed");
-		if (*pcount == 0) {
-			g_hash_table_remove (priv->connections, sender);
-		}
-		if (g_hash_table_size (priv->connections) == 0) {
-			/* gc_provider_shutdown (provider); */
-			g_debug ("TODO: shutdown");
-		}
-	} else {
+	if (!gc_provider_remove_client (provider, sender)) {
 		g_warning ("Unreffed by client that has not been referenced");
 	}
 }
@@ -227,8 +232,11 @@ name_owner_changed (DBusGProxy  *proxy,
 		    const char  *new_owner,
 		    GcProvider  *provider)
 {
-	g_debug ("name owner changed (FIXME)");
-	 /* gc_provider_shutdown (provider); */
+	if (strcmp (new_owner, "") == 0 && strcmp (name, prev_owner) == 0) {
+		if (gc_provider_remove_client (provider, prev_owner)) {
+			g_warning ("Impolite client %s disconnected without unreferencing\n", prev_owner);
+		}
+	}
 }
 
 /**

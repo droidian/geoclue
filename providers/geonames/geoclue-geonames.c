@@ -24,6 +24,7 @@
 
 
 #include <geoclue/gc-provider.h>
+#include <geoclue/geoclue-address-details.h>
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-geocode.h>
 #include <geoclue/gc-iface-reverse-geocode.h>
@@ -166,7 +167,9 @@ static gboolean
 geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
                                       double                  latitude,
                                       double                  longitude,
+                                      GeoclueAccuracy        *position_accuracy,
                                       GHashTable            **address,
+                                      GeoclueAccuracy       **address_accuracy,
                                       GError                **error)
 {
 	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
@@ -176,7 +179,11 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 	gchar *region = NULL;
 	gchar *country = NULL;
 	gchar *countrycode = NULL;
+	GeoclueAccuracyLevel in_acc = GEOCLUE_ACCURACY_LEVEL_DETAILED;
 	
+	if (!address) {
+		return TRUE;
+	}
 	g_ascii_dtostr (lat, G_ASCII_DTOSTR_BUF_SIZE, latitude);
 	g_ascii_dtostr (lon, G_ASCII_DTOSTR_BUF_SIZE, longitude);
 	if (!gc_web_service_query (obj->rev_place_geocoder,
@@ -197,31 +204,44 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 		return FALSE;
 	}
 	
+	if (position_accuracy) {
+		geoclue_accuracy_get_details (position_accuracy, &in_acc, NULL, NULL);
+	}
+	
 	*address = g_hash_table_new (g_str_hash, g_str_equal);
 	
-	if (gc_web_service_get_string (obj->rev_place_geocoder,
+	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_COUNTRY && 
+	    gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &countrycode, GEONAME_COUNTRYCODE)) {
 		g_hash_table_insert (*address, 
 		                     GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
 		                     countrycode);
 	}
-	if (gc_web_service_get_string (obj->rev_place_geocoder,
+	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_COUNTRY && 
+	    gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &country, GEONAME_COUNTRY)) {
 		g_hash_table_insert (*address, 
 		                     GEOCLUE_ADDRESS_KEY_COUNTRY, 
 		                     country);
 	}
-	if (gc_web_service_get_string (obj->rev_place_geocoder,
+	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_REGION && 
+	    gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &region, GEONAME_ADMIN1)) {
 		g_hash_table_insert (*address, 
 		                     GEOCLUE_ADDRESS_KEY_REGION, 
 		                     region);
 	}
-	if (gc_web_service_get_string (obj->rev_place_geocoder,
+	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_LOCALITY && 
+	    gc_web_service_get_string (obj->rev_place_geocoder,
 	                               &locality, GEONAME_NAME)) {
 		g_hash_table_insert (*address, 
 		                     GEOCLUE_ADDRESS_KEY_LOCALITY, 
 		                     locality);
+	}
+	
+	if (address_accuracy) { 
+		GeoclueAccuracyLevel level = geoclue_address_details_get_accuracy_level (*address);
+		*address_accuracy = geoclue_accuracy_new (level, 0.0, 0.0);
 	}
 	return TRUE;
 }

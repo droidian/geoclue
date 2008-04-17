@@ -86,7 +86,9 @@ geoclue_reverse_geocode_new (const char *service,
  * @geocode: A #GeoclueReverseGeocode object
  * @latitude: latitude in degrees
  * @longitude: longitude in degrees
+ * @position_accuracy: Accuracy of the given latitude and longitude or %NULL
  * @details: Pointer to returned #GHashTable with address details or %NULL
+ * @address_accuracy: Pointer to accuracy of the returned address or %NULL 
  * @error: Pointer to returned #Gerror or %NULL
  * 
  * Obtains an address for the position defined by @latitude and @longitude.
@@ -94,7 +96,8 @@ geoclue_reverse_geocode_new (const char *service,
  * geoclue-types.h for the hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 
- * left %NULL.
+ * left %NULL. IF position_accuracy is not provided, the returned address_accuracy
+ * may be unreliable.
  * 
  * Return value: %TRUE if there is no @error
  */
@@ -102,18 +105,16 @@ gboolean
 geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *geocode,
 					     double                   latitude,
 					     double                   longitude,
+					     GeoclueAccuracy         *position_accuracy,
 					     GHashTable             **details,
+					     GeoclueAccuracy        **address_accuracy,
 					     GError                 **error)
 {
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (geocode);
 	
-	if (!org_freedesktop_Geoclue_ReverseGeocode_position_to_address 
-	    (provider->proxy, latitude, longitude, details, error)) {
-
-		return FALSE;
-	}
-
-	return TRUE;
+	return org_freedesktop_Geoclue_ReverseGeocode_position_to_address 
+		(provider->proxy, latitude, longitude, position_accuracy, 
+		 details, address_accuracy, error);
 }
 
 
@@ -126,11 +127,13 @@ typedef struct _GeoclueRevGeocodeAsyncData {
 static void
 position_to_address_callback (DBusGProxy                 *proxy, 
 			      GHashTable                 *details,
+			      GeoclueAccuracy            *accuracy,
 			      GError                     *error,
 			      GeoclueRevGeocodeAsyncData *data)
 {
 	(*(GeoclueReverseGeocodeCallback)data->callback) (data->revgeocode,
 	                                                  details,
+	                                                  accuracy,
 	                                                  error,
 	                                                  data->userdata);
 	g_free (data);
@@ -140,6 +143,7 @@ void
 geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        *revgeocode,
 						   double                        latitude,
 						   double                        longitude,
+						   GeoclueAccuracy              *accuracy,
 						   GeoclueReverseGeocodeCallback callback,
 						   gpointer                      userdata)
 {
@@ -155,6 +159,7 @@ geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        
 			(provider->proxy,
 			 latitude,
 			 longitude,
+			 accuracy,
 			 (org_freedesktop_Geoclue_ReverseGeocode_position_to_address_reply)position_to_address_callback,
 			 data);
 }

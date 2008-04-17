@@ -36,6 +36,7 @@ int main (int argc, char** argv)
 {
 	gchar *service, *path;
 	GeoclueReverseGeocode *revgeocoder = NULL;
+	GeoclueAccuracy *accuracy, *out_accuracy;
 	GHashTable *address = NULL;
 	double lat, lon;
 	GError *error = NULL;
@@ -79,17 +80,20 @@ int main (int argc, char** argv)
 	
 	lat = 60.2;
 	lon = 24.9;
-	if (!geoclue_reverse_geocode_position_to_address (revgeocoder, 
-	                                                  lat, lon, 
-	                                                  &address, &error)) {
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_POSTALCODE, 0.0, 0.0);
+	if (!geoclue_reverse_geocode_position_to_address (revgeocoder,  
+	                                                  lat, lon, accuracy,
+	                                                  &address, &out_accuracy, &error)) {
 		g_printerr ("Error while reverse geocoding: %s\n", error->message);
 		g_error_free (error);
-		g_free (revgeocoder);
+		g_object_unref (revgeocoder);
 		return 1;
 	}
 	
 	/* Print out the address */
-	g_print ("Reverse Geocoded  [%.2f, %.2f] to address:\n", lat, lon);
+	GeoclueAccuracyLevel level;
+	geoclue_accuracy_get_details (out_accuracy, &level, NULL, NULL);
+	g_print ("Reverse Geocoded  [%.2f, %.2f] to address (accuracy %d):\n", lat, lon, level);
 	g_hash_table_foreach (address, (GHFunc)print_address_key_and_value, NULL);
 	
 	g_hash_table_destroy (address);

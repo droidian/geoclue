@@ -141,3 +141,34 @@ geoclue_accuracy_copy (GeoclueAccuracy *accuracy)
 	geoclue_accuracy_get_details (accuracy, &level, &hor, &ver);
 	return geoclue_accuracy_new (level, hor, ver);
 }
+
+/**
+ * geoclue_accuracy_comapre:
+ * @accuracy1: First GeoclueAccuracy
+ * @accuracy1: Second GeoclueAccuracy
+ *
+ * Compares two accuracies.
+ *
+ * Return value: 0 if accuracies are same, negative value if accuracy1 is more accurate than accuracy2, or positive value if accuracy1 is less accurate than accuracy2
+ */
+int
+geoclue_accuracy_compare (GeoclueAccuracy *accuracy1, GeoclueAccuracy *accuracy2)
+{
+	GeoclueAccuracyLevel level1, level2;
+	double hor1, hor2;
+	
+	geoclue_accuracy_get_details (accuracy1, &level1, &hor1, NULL);
+	geoclue_accuracy_get_details (accuracy2, &level2, &hor2, NULL);
+	
+	if (level1 == GEOCLUE_ACCURACY_LEVEL_DETAILED &&
+	    level2 == GEOCLUE_ACCURACY_LEVEL_DETAILED) {
+		if (hor1 > hor2) {
+			return 1;
+		} else if (hor1 < hor2) {
+			return -1;
+		}
+		return 0;
+	}
+	return level1 -level2;
+	
+}

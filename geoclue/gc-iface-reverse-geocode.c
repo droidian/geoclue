@@ -17,7 +17,9 @@ static gboolean
 gc_iface_reverse_geocode_position_to_address (GcIfaceReverseGeocode  *gc,
 					      double                  latitude,
 					      double                  longitude,
+					      GeoclueAccuracy        *position_accuracy,
 					      GHashTable            **address,
+					      GeoclueAccuracy       **address_accuracy,
 					      GError                **error);
 #include "gc-iface-reverse-geocode-glue.h"
 
@@ -58,9 +60,12 @@ static gboolean
 gc_iface_reverse_geocode_position_to_address (GcIfaceReverseGeocode  *gc,
 					      double                  latitude,
 					      double                  longitude,
+					      GeoclueAccuracy        *position_accuracy,
 					      GHashTable            **address,
+					      GeoclueAccuracy       **address_accuracy,
 					      GError                **error)
 {
 	return GC_IFACE_REVERSE_GEOCODE_GET_CLASS (gc)->position_to_address 
-		(gc, latitude, longitude, address, error);
+		(gc, latitude, longitude, position_accuracy, 
+		 address, address_accuracy, error);
 }

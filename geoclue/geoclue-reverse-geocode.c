@@ -86,7 +86,7 @@ geoclue_reverse_geocode_new (const char *service,
  * @geocode: A #GeoclueReverseGeocode object
  * @latitude: latitude in degrees
  * @longitude: longitude in degrees
- * @position_accuracy: Accuracy of the given latitude and longitude or %NULL
+ * @position_accuracy: Accuracy of the given latitude and longitude
  * @details: Pointer to returned #GHashTable with address details or %NULL
  * @address_accuracy: Pointer to accuracy of the returned address or %NULL 
  * @error: Pointer to returned #Gerror or %NULL
@@ -96,8 +96,8 @@ geoclue_reverse_geocode_new (const char *service,
  * geoclue-types.h for the hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 
- * left %NULL. IF position_accuracy is not provided, the returned address_accuracy
- * may be unreliable.
+ * left %NULL. If accuracy of the position is not known, an accuracy with
+ * GeoclueAccuracyLevel GEOCLUE_ACCURACY_DETAILED should be used.
  * 
  * Return value: %TRUE if there is no @error
  */

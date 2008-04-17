@@ -368,8 +368,8 @@ static void
 geoclue_gpsd_stop_gpsd (GeoclueGpsd *self)
 {
 	if (self->gpsdata) {
-		gps_del_callback (self->gpsdata, self->gps_thread);
 		gps_close (self->gpsdata);
+		g_free (self->gps_thread);
 		self->gpsdata = NULL;
 	}
 }

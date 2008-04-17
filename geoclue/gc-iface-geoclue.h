@@ -41,10 +41,10 @@ struct _GcIfaceGeoclueClass {
         gboolean (*set_options) (GcIfaceGeoclue *geoclue,
                                  GHashTable     *options,
                                  GError        **error);
-        void (*ref) (GcIfaceGeoclue        *geoclue,
-                     DBusGMethodInvocation *context);
-        void (*unref) (GcIfaceGeoclue        *geoclue,
-                       DBusGMethodInvocation *context);
+        void (*add_reference) (GcIfaceGeoclue        *geoclue,
+                               DBusGMethodInvocation *context);
+        void (*remove_reference) (GcIfaceGeoclue        *geoclue,
+                                  DBusGMethodInvocation *context);
 };
 
 GType gc_iface_geoclue_get_type (void);

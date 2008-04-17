@@ -15,7 +15,7 @@
 			<title>C API</title>
 			<xi:include href="xml/geoclue-master.xml"/>
 			<xi:include href="xml/geoclue-master-client.xml"/>
-			<xi:include href="xml/geoclue-common.xml"/>
+			<xi:include href="xml/geoclue-provider.xml"/>
 			<xi:include href="xml/geoclue-position.xml"/>
 			<xi:include href="xml/geoclue-address.xml"/>
 			<xi:include href="xml/geoclue-velocity.xml"/>

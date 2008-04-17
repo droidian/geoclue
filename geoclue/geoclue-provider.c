@@ -8,6 +8,40 @@
  *           2008 OpenedHand Ltd
  */
 
+/**
+ * SECTION:geoclue-provider
+ * @short_description: Common client API for Geoclue providers
+ *
+ * #GeoclueProvider contains the methods and signals common to all Geoclue
+ * providers. It is part of the public C client API which uses D-Bus
+ * to communicate with the actual provider.
+ *
+ * A #GeoclueProvider is not explicitly created. Instead any provider
+ * object can be cast to #GeoclueProvider. Using a #GeocluePosition as
+ * example here:
+ * <informalexample>
+ * <programlisting>
+ * GeocluePosition *pos;
+ * char *name;
+ * GError *error;
+ * 
+ * pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
+ *                             "/org/freedesktop/Geoclue/Providers/Example");
+ * if (pos == NULL) {
+ * 	/ * error * / 
+ * }
+ * if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
+ *                                         &name, NULL, &error)) {
+ * 	g_print ("name = %s", name);
+ * }
+ * </programlisting>
+ * </informalexample>
+ * 
+ * #GeoclueProvider can be used to obtain  generic
+ * information about the provider and to set provider
+ * options.
+ */
+
 #include <geoclue/geoclue-provider.h>
 #include "gc-iface-geoclue-bindings.h"
 
@@ -65,7 +99,7 @@ dispose (GObject *object)
 	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
 	GError *error = NULL;
 	
-	if (!org_freedesktop_Geoclue_unref (priv->geoclue_proxy, &error)){
+	if (!org_freedesktop_Geoclue_remove_reference (priv->geoclue_proxy, &error)){
 		g_printerr ("Could not unreference provider: %s", error->message);
 		g_error_free (error);
 	}
@@ -118,7 +152,7 @@ constructor (GType                  type,
 	priv->geoclue_proxy = dbus_g_proxy_new_for_name (connection, 
 	                                                 priv->service, priv->path, 
 	                                                 GEOCLUE_INTERFACE_NAME);
-	if (!org_freedesktop_Geoclue_ref (priv->geoclue_proxy, &error)){
+	if (!org_freedesktop_Geoclue_add_reference (priv->geoclue_proxy, &error)){
 		g_printerr ("Could not reference provider: %s", error->message);
 		g_error_free (error);
 	}
@@ -204,13 +238,21 @@ geoclue_provider_class_init (GeoclueProviderClass *klass)
 	g_object_class_install_property
 		(o_class, PROP_INTERFACE,
 		 g_param_spec_string ("interface", "Interface",
-				      "The interface this object uses",
+				      "The D-Bus interface implemented by the object",
 				      "", G_PARAM_WRITABLE |
 				      G_PARAM_CONSTRUCT_ONLY |
 				      G_PARAM_STATIC_NICK |
 				      G_PARAM_STATIC_BLURB |
 				      G_PARAM_STATIC_NAME));
 	
+	/**
+ 	* GeoclueProvider::status-changed:
+	* @provider: the provider object emitting the signal
+	* @status: New provider status as #GeoclueStatus
+	*
+ 	* The status-changed signal is emitted each time the provider
+ 	* status changes
+	**/
 	signals[STATUS_CHANGED] = g_signal_new ("status-changed",
 						G_TYPE_FROM_CLASS (klass),
 						G_SIGNAL_RUN_FIRST |

@@ -777,9 +777,9 @@ get_status (GcIfaceGeoclue *geoclue,
             GeoclueStatus  *status,
             GError        **error)
 {
-	/* TODO: implement */
+	/* not really meaningful */
 	*status = GEOCLUE_STATUS_AVAILABLE;
-	return FALSE;
+	return TRUE;
 }
 
 static gboolean
@@ -787,8 +787,7 @@ set_options (GcIfaceGeoclue *geoclue,
              GHashTable     *options,
              GError        **error)
 {
-	/* TODO implement if needed */
-	
+	/* not meaningful, options come from master */
 	
 	/* It is not an error to not have a SetOptions implementation */
 	return TRUE;
@@ -810,28 +809,29 @@ get_provider_info (GcIfaceGeoclue  *geoclue,
 }
 
 static void
-ref (GcIfaceGeoclue *geoclue,
-     DBusGMethodInvocation *context)
+add_reference (GcIfaceGeoclue *geoclue,
+               DBusGMethodInvocation *context)
 {
 	/* TODO implement if needed */
 	dbus_g_method_return (context);
 }
 
 static void
-unref (GcIfaceGeoclue *geoclue,
-     DBusGMethodInvocation *context)
+remove_reference (GcIfaceGeoclue *geoclue,
+                  DBusGMethodInvocation *context)
 {
 	/* TODO implement if needed */
 	dbus_g_method_return (context);
 }
+
 static void
 gc_master_client_geoclue_init (GcIfaceGeoclueClass *iface)
 {
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
 	iface->set_options = set_options;
-	iface->ref = ref;
-	iface->unref = unref;
+	iface->add_reference = add_reference;
+	iface->remove_reference = remove_reference;
 }
 
 static void

@@ -69,6 +69,7 @@ HTML_IMAGES=
 dbus_docs = \
 	gc-iface-master-ref.xml \
 	gc-iface-master-client-ref.xml \
+	gc-iface-geoclue-ref.xml \
 	gc-iface-position-ref.xml \
 	gc-iface-address-ref.xml \
 	gc-iface-geocode-ref.xml \

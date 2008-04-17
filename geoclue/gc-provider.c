@@ -181,8 +181,8 @@ gc_provider_remove_client (GcProvider *provider, const char *client)
 }
 
 static void
-ref (GcIfaceGeoclue *geoclue,
-     DBusGMethodInvocation *context)
+add_reference (GcIfaceGeoclue *geoclue,
+               DBusGMethodInvocation *context)
 {
 	GcProviderPrivate *priv = GET_PRIVATE (geoclue);
 	char *sender;
@@ -201,8 +201,8 @@ ref (GcIfaceGeoclue *geoclue,
 }
 
 static void 
-unref (GcIfaceGeoclue *geoclue,
-       DBusGMethodInvocation *context)
+remove_reference (GcIfaceGeoclue *geoclue,
+                  DBusGMethodInvocation *context)
 {
 	GcProvider *provider = GC_PROVIDER (geoclue);
 	char *sender;
@@ -235,8 +235,8 @@ gc_provider_geoclue_init (GcIfaceGeoclueClass *iface)
 	iface->get_provider_info = get_provider_info;
 	iface->get_status = get_status;
 	iface->set_options = set_options;
-	iface->ref = ref;
-	iface->unref = unref;
+	iface->add_reference = add_reference;
+	iface->remove_reference = remove_reference;
 }
 
 

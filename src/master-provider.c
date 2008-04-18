@@ -857,6 +857,7 @@ gc_master_provider_deinitialize (GcMasterProvider *provider)
 		g_object_unref (priv->address);
 		priv->address = NULL;
 	}
+	priv->geoclue = NULL;
 	g_debug ("deinited %s", priv->name);
 }
 

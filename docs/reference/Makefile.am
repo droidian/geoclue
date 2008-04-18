@@ -81,6 +81,7 @@ dbus_docs = \
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
 content_files= \
 	implementing-providers.xml \
+	using-geoclue.xml \
 	$(dbus_docs)
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded

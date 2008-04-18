@@ -1,0 +1,323 @@
+<?xml version="1.0"?>
+<!DOCTYPE chapter PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+
+<chapter>
+	<title>Using Geoclue in applications</title>
+	<section id="overview">
+		<title>Overview</title>
+		<sect2>
+			<subtitle>Why use Geoclue</subtitle>
+			<para>
+				Building context-sensitive applications is difficult. Location-sensitivy is no 
+				exception, but Geoclue tries to help there. With Geoclue it is possible to build
+				location-aware applications with less work and less knowledge about the actual 
+				geoinformation sources.
+			</para>
+			<para> Main features of Geoclue are:
+				<itemizedlist>
+				<listitem>Standardized D-Bus (and GObject) interfaces to various geographical data sources</listitem>
+				<listitem>Easy and fast to implement: Need to get data from provider XYZ? 
+				Chances are, Geoclue is the easiest way to do that...</listitem>
+				<listitem>Adding new providers (data sources) is straight-forward: Even when the geoinformation
+				source you want is not already in Geoclue, Implementing a Geoclue provider may
+				well turn out to be the easiest way forward.</listitem>
+				<listitem>Geoclue Master provider (experimental at the moment) makes things eaven easier: 
+				you don't even have to choose a data provider, just let Geoclue choose the
+				best possible provider for you.</listitem>
+				</itemizedlist>
+			</para>
+		</sect2>
+		<sect2>
+			<subtitle>Requirements</subtitle>
+			<para>
+				Geoclue is a collection of D-Bus APIs. Internally it's implemented with GLib and GObject. There (as is the C wrapper library). 
+				Several included providers also use Libxml2, and the master provider uses GConf. 
+			</para>
+			<para>
+				There is a GObject-based C API, but using Geoclue is possible from any programming language 
+				with D-Bus support. 
+			</para>
+		</sect2>
+		<sect2>
+			<subtitle>Using specific Geoclue providers</subtitle>
+			<para>
+				D-Bus can automatically start services as they're needed so basic method calls
+				can be made without any preparation. However, geoclue providers may shut down when 
+				they're not used. This means that clients using signals and clients that set any options
+				should always use AddReference() and RemoveReference() methods to ensure server
+				persistence. In C the wrapper takes care of this.
+			</para>
+			<para>
+				Clients should not assume that method calls will return instantly or that the 
+				response will contain valid data. Examples of possible problems
+				<itemizedlist>
+					<listitem>Many geoclue providers use web services so method calls may take seconds or even time out.</listitem>
+					<listitem>GPS providers usually respond instantly, but will not have a valid data until after getting a fix (which may take anything from a few seconds to minutes)</listitem>
+				</itemizedlist>
+				Using signals should be the first option whenever the used provider supports them.
+				When signals are not available, asynchronous method calls can be used in 
+				applications where UI responsiveness is important.
+			</para>
+		</sect2>
+		<sect2>
+			<subtitle>Using Geoclue Master</subtitle>
+			<para>Master provider was designed to solve the following problems:
+				<itemizedlist>
+					<listitem>A single provider cannot be the best solution to all problems</listitem>
+					<listitem>The "best" providers will be different depending on the user</listitem>
+					<listitem>Supporting a single geodata source can be a big job for an application developer, supporting several would be a nightmare</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				Master provider implements the same interfaces as regular providers, but internally 
+				it uses whichever regular provider happens to be the best one (with "best" defined as 
+				a provider that fulfills the accuracy requirements and does not surpass resource restrictions).
+				The internally used provider may change over time -- this does not interrupt clients use in any way,
+				but the changes can be observed using the MasterClient API.
+			</para>
+			<para>
+				A typical Master provider use includes:
+				<itemizedlist>
+				<listitem>Getting a client-specific GeoclueMasterClient from GeoclueMaster</listitem>
+				<listitem>Setting GeoclueMasterClient requirements (such as accuracy)</listitem>
+				<listitem>Starting the wanted interfaces (such as Position) </listitem>
+				<listitem>Using the client just like a regular provider</listitem>
+				</itemizedlist>
+			</para>
+			
+			<para>
+				Master provider is fairly new and may not be as stable as the rest of Geoclue.
+			</para>
+		</sect2>
+	</section>
+	<section id="simple-example">
+		<title>Using specific Geoclue providers: simple example in C</title>
+		<para>There are several examples in the geoclue source, these are included here to 
+		give a quick overview.
+		</para>
+		<para>
+			Here is a very simple example of using a specific Geoclue Position provider. 
+			Note that we're using the synchronous version of the method call here, so 
+			geoclue_position_get_position() will block until the response comes (or until D-Bus timeouts).
+		</para>
+		<programlisting>
+#include &lt;geoclue/geoclue-position.h&gt;
+
+int main() 
+{
+	GeocluePosition *pos;
+	GeocluePositionFields fields;
+	double lat, lon;
+	GError *error = NULL;
+	
+	g_type_init ();
+	
+	/ * Create the position object * /
+	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Hostip",
+	                            "/org/freedesktop/Geoclue/Providers/Hostip");
+	
+	/ * call get_position. Note that unneeded output variables (here 
+	    timestamp, altitude and accuracy) can be left NULL * /
+	fields = geoclue_position_get_position (pos, NULL,
+	                                        &amp;lat, &amp;lon, NULL,
+	                                        NULL, &amp;error);
+	if (error) {
+		g_printerr ("Error in get_position: %s.\n", error->message);
+		g_error_free (error);
+		g_object_unref (pos);
+		return 1;
+	}
+	
+	if (fields &amp; GEOCLUE_POSITION_FIELDS_LATITUDE &amp;&amp;
+	    fields &amp; GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+		g_print ("According to Hostip.info we're at %.3f, %.3f.\n",
+		          lat, lon);
+	} else {
+		g_print ("Hostip does not have a valid location available.\nVisit http://www.hostip.info/ to correct this");
+	}
+	g_object_unref (pos);
+	
+	return 0;
+}
+		</programlisting>
+		<para>Save as test-hostip.c and compile with 
+		</para>
+		<programlisting>
+gcc `pkg-config --libs --cflags geoclue`  -o test-hostip test-hostip.c
+		</programlisting>
+		<para>Here is a similarly simple example using GLib mainloop and Gypsy provider with 
+		position-changed signals: 
+		</para>
+		<programlisting>
+#include &lt;geoclue/geoclue-position.h&gt;
+
+/ * device name or bluetooth address * /
+#define GPS_DEVICE_NAME "00:02:76:C5:81:BF" 
+
+static void
+position_changed (GeocluePosition      *position,
+                  GeocluePositionFields fields,
+                  int                   timestamp,
+                  double                latitude,
+                  double                longitude,
+                  double                altitude,
+                  GeoclueAccuracy      *accuracy,
+                  gpointer              userdata)
+{
+	g_print ("Position changed:\n");
+	if (fields &amp; GEOCLUE_POSITION_FIELDS_LATITUDE &amp;&amp;
+	    fields &amp; GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+		g_print ("\t%f, %f\n\n", latitude, longitude);
+	} else {
+		g_print ("\tLatitude and longitude not available.\n\n");
+	}
+}
+
+int main() 
+{
+	GMainLoop *loop;
+	GHashTable *options;
+	GeocluePosition *pos;
+	GError *error = NULL;
+	
+	g_type_init ();
+	
+	/ * Create the position object * /
+	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Gypsy",
+	                            "/org/freedesktop/Geoclue/Providers/Gypsy");
+	
+	/ * Set GPS device name option for Gypsy * /
+	options = g_hash_table_new (g_str_hash, g_str_equal);
+	g_hash_table_insert (options, "org.freedesktop.Geoclue.GPSDevice", GPS_DEVICE_NAME);
+	if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (pos), options, &amp;error)) {
+		g_printerr ("Error setting options: %s\n", error->message);
+		g_error_free (error);
+		g_hash_table_destroy (options);
+		g_object_unref (pos);
+                return 1;
+	}
+	g_hash_table_destroy (options);
+	
+	/ * connect to signal * /
+	g_signal_connect (G_OBJECT (pos), "position-changed",
+			  G_CALLBACK (position_changed), NULL);
+	
+	g_print ("Waiting for position change signals...\n");
+	loop = g_main_loop_new (NULL, FALSE);
+	g_main_loop_run (loop);
+	
+	g_main_loop_unref (loop);
+	g_object_unref (pos);
+	
+	return 0;
+}
+		</programlisting>
+	</section>
+	<section id="simple-master-example">
+		<title>Master provider: simple example in C</title>
+		<para>
+			Here is the "Hello World" for Geoclue Master. It shows one of the advantages of 
+			using the Master provider: Even most web service
+			providers can be used as signal emitting providers (master queries them whenever
+			network connection changes).
+		</para>
+
+		<programlisting>
+#include &lt;geoclue/geoclue-master.h&gt;
+
+static void
+position_changed (GeocluePosition      *position,
+                  GeocluePositionFields fields,
+                  int                   timestamp,
+                  double                latitude,
+                  double                longitude,
+                  double                altitude,
+                  GeoclueAccuracy      *accuracy,
+                  gpointer              userdata)
+{
+	g_print ("Position changed:\n");
+	if (fields &amp; GEOCLUE_POSITION_FIELDS_LATITUDE &amp;&amp;
+	    fields &amp; GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+		g_print ("\t%f, %f\n\n", latitude, longitude);
+	} else {
+		g_print ("\tLatitude and longitude not available.\n\n");
+	}
+}
+
+int main()
+{
+	GMainLoop *loop;
+	GeoclueMaster *master;
+	GeoclueMasterClient *client;
+	GeocluePosition *pos;
+	GeocluePositionFields fields;
+	double lat, lon;
+	GError *error = NULL;
+	
+	g_type_init ();
+	
+	/ * create a MasterClient using Master * /
+	master = geoclue_master_get_default ();
+	client = geoclue_master_create_client (master, NULL, &amp;error);
+	g_object_unref (master);
+	
+	if (!client) {
+		g_printerr ("Error creating GeoclueMasterClient: %s\n", error->message);
+		g_error_free (error);
+		return 1;
+	}
+	
+	/ * Set our requirements: We want at least city level accuracy, require signals, 
+	    and allow the use of network (but not e.g. GPS) * /
+	if (!geoclue_master_client_set_requirements (client,
+	                                             GEOCLUE_ACCURACY_LEVEL_LOCALITY,
+	                                             0, TRUE,
+	                                             GEOCLUE_RESOURCE_NETWORK,
+	                                             &amp;error)){
+		g_printerr ("set_requirements failed: %s", error->message);
+		g_error_free (error);
+		g_object_unref (client);
+		return 1;
+		
+	}
+	
+	/ * Get a Position object * /
+	pos = geoclue_master_client_position_create (client, NULL);
+	if (!pos) {
+		g_printerr ("Failed to get a position object");
+		g_object_unref (client);
+		return 1;
+	}
+	
+	/ * call get_position. We do not know which provider actually provides 
+	    the answer (although we could find out using MasterClient API) * /
+	fields = geoclue_position_get_position (pos, NULL,
+	                                        &amp;lat, &amp;lon, NULL,
+	                                        NULL, &amp;error);
+	if (error) {
+		g_printerr ("Error in geoclue_position_get_position: %s.\n", error->message);
+		g_error_free (error);
+		error = NULL;
+	} else {
+		if (fields &amp; GEOCLUE_POSITION_FIELDS_LATITUDE &amp;&amp;
+		    fields &amp; GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+			g_print ("We're at %.3f, %.3f.\n", lat, lon);
+		}
+	}
+	
+	
+	g_signal_connect (G_OBJECT (pos), "position-changed",
+			  G_CALLBACK (position_changed), NULL);
+	
+	g_print ("Waiting for position change signals...\n");
+	loop = g_main_loop_new (NULL, FALSE);
+	g_main_loop_run (loop);
+	
+	g_main_loop_unref (loop);
+	g_object_unref (pos);
+	g_object_unref (client);
+	return 0;
+}
+		</programlisting>
+	</section>
+</chapter>

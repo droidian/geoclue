@@ -147,7 +147,7 @@ typedef enum {
 /**
  * GEOCLUE_ADDRESS_KEY_STREET:
  * 
- * A key for address hashtables. The hash value should be a full street 
+ * A key for address hashtables. The hash value should be a partial or full street 
  * address.
  */
 #define GEOCLUE_ADDRESS_KEY_STREET "street"

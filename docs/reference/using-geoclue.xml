@@ -18,19 +18,19 @@
 				<listitem>Standardized D-Bus (and GObject) interfaces to various geographical data sources</listitem>
 				<listitem>Easy and fast to implement: Need to get data from provider XYZ? 
 				Chances are, Geoclue is the easiest way to do that...</listitem>
-				<listitem>Adding new providers (data sources) is straight-forward: Even when the geoinformation
-				source you want is not already in Geoclue, Implementing a Geoclue provider may
-				well turn out to be the easiest way forward.</listitem>
 				<listitem>Geoclue Master provider (experimental at the moment) makes things eaven easier: 
 				you don't even have to choose a data provider, just let Geoclue choose the
 				best possible provider for you.</listitem>
+				<listitem>Adding new providers (data sources) is straight-forward: Even when the geoinformation
+				source you want is not already in Geoclue, Implementing a Geoclue provider may
+				well turn out to be the easiest way forward.</listitem>
 				</itemizedlist>
 			</para>
 		</sect2>
 		<sect2>
 			<subtitle>Requirements</subtitle>
 			<para>
-				Geoclue is a collection of D-Bus APIs. Internally it's implemented with GLib and GObject. There (as is the C wrapper library). 
+				Geoclue is a collection of D-Bus APIs. Internally it's implemented with GLib and GObject (as is the C wrapper library). 
 				Several included providers also use Libxml2, and the master provider uses GConf. 
 			</para>
 			<para>
@@ -39,7 +39,7 @@
 			</para>
 		</sect2>
 		<sect2>
-			<subtitle>Using specific Geoclue providers</subtitle>
+			<subtitle>Using basic Geoclue providers</subtitle>
 			<para>
 				D-Bus can automatically start services as they're needed so basic method calls
 				can be made without any preparation. However, geoclue providers may shut down when 
@@ -89,9 +89,13 @@
 				Master provider is fairly new and may not be as stable as the rest of Geoclue.
 			</para>
 		</sect2>
+		<sect2>
+			<subtitle>Current providers</subtitle>
+			TODO: list the providers shipped with geoclue, shortly explain their features.
+		</sect2>
 	</section>
 	<section id="simple-example">
-		<title>Using specific Geoclue providers: simple example in C</title>
+		<title>Using basic Geoclue providers: simple example in C</title>
 		<para>There are several examples in the geoclue source, these are included here to 
 		give a quick overview.
 		</para>

@@ -16,7 +16,8 @@
  * 
  * After a #GeoclueReverseGeocode is created with 
  * geoclue_reverse_geocode_new(), the 
- * geoclue_reverse_geocode_position_to_address() method can be used to 
+ * geoclue_reverse_geocode_position_to_address() and 
+ * geoclue_reverse_geocode_position_to_address_async() method can be used to 
  * obtain the address of a known position.
  */
 
@@ -93,7 +94,7 @@ geoclue_reverse_geocode_new (const char *service,
  * 
  * Obtains an address for the position defined by @latitude and @longitude.
  * @details is a #GHashTable with the returned address data, see 
- * geoclue-types.h for the hashtable keys.
+ * <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the hashtable keys.
  * 
  * If the caller is not interested in some values, the pointers can be 
  * left %NULL. If accuracy of the position is not known, an accuracy with
@@ -139,6 +140,32 @@ position_to_address_callback (DBusGProxy                 *proxy,
 	g_free (data);
 }
 
+/**
+ * GeoclueReverseGeocodeCallback:
+ * @revgeocode: A #GeoclueReverseGeocode object
+ * @details: Address details as #GHashTable.
+ * @accuracy: Accuracy of measurement as #GeoclueAccuracy
+ * @error: Error as #Gerror (may be %NULL)
+ * @userdata: User data pointer set in geoclue_reverse_geocode_position_to_address_async()
+ * 
+ * Callback function for geoclue_reverse_geocode_position_to_address_async().
+ * 
+ * see <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the 
+ * hashtable keys used in @details.
+ */
+
+/**
+ * geoclue_reverse_geocode_position_to_address_async:
+ * @geocode: A #GeoclueReverseGeocode object
+ * @latitude: Latitude in degrees
+ * @longitude: Longitude in degrees
+ * @accuracy: Accuracy of the given position as #GeoclueAccuracy
+ * @callback: A #GeoclueAddressCallback function that should be called when return values are available
+ * @userdata: pointer for user specified data
+ * 
+ * Function returns (essentially) immediately and calls @callback when the reverse-geocoded 
+ * address data is available or when D-Bus timeouts.
+ */
 void 
 geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        *revgeocode,
 						   double                        latitude,

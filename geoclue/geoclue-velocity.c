@@ -97,7 +97,21 @@ geoclue_velocity_class_init (GeoclueVelocityClass *klass)
 	o_class->constructor = constructor;
 
 	g_type_class_add_private (klass, sizeof (GeoclueVelocityPrivate));
-
+	
+	/**
+	 * GeoclueVelocity::velocity-changed:
+	 * @velocity: the #GeoclueVelocity object emitting the signal
+	 * @fields: A #GeoclueVelocityFields bitfield representing the validity of the velocity values
+	 * @timestamp: Time of velocity measurement (Unix timestamp)
+	 * @speed: horizontal speed
+	 * @direction: horizontal direction (bearing)
+	 * @climb: vertical speed
+	 * @error: Returned error as #GError (may be %NULL)
+	 * 
+	 * The geoclue-changed signal is emitted each time the velocity changes. 
+	 * 
+	 * Note that not all providers support signals.
+	 */
 	signals[VELOCITY_CHANGED] = g_signal_new ("velocity-changed",
 						  G_TYPE_FROM_CLASS (klass),
 						  G_SIGNAL_RUN_FIRST |
@@ -139,7 +153,7 @@ geoclue_velocity_new (const char *service,
 /**
  * geoclue_velocity_get_velocity:
  * @velocity: A #GeoclueVelocity object
- * @timestamp: Pointer to returned unix timestamp or %NULL
+ * @timestamp: Pointer to returned time of velocity measurement (unix timestamp) or %NULL
  * @speed: Pointer to returned horizontal speed or %NULL
  * @direction: Pointer to returned horizontal direction (bearing) or %NULL
  * @climb: Pointer to returned vertical speed or %NULL
@@ -219,6 +233,29 @@ get_velocity_async_callback (DBusGProxy               *proxy,
 	g_free (data);
 }
 
+/**
+ * GeoclueVelocityCallback:
+ * @velocity: A #GeoclueVelocity object
+ * @fields: A #GeoclueVelocityFields bitfield representing the validity of the velocity values
+ * @timestamp: Time of velocity measurement (unix timestamp)
+ * @speed: Horizontal speed
+ * @direction: Horizontal direction (bearing)
+ * @climb: Vertical speed
+ * @error: Error as #GError (may be %NULL)
+ * @userdata: User data pointer set in geoclue_velocity_get_velocity_async()
+ * 
+ * Callback function for geoclue_velocity_get_velocity_async().
+ */
+
+/**
+ * geoclue_velocity_get_velocity_async:
+ * @velocity: A #GeoclueVelocity object
+ * @callback: A #GeoclueVelocityCallback function that should be called when return values are available
+ * @userdata: pointer for user specified data
+ * 
+ * Function returns (essentially) immediately and calls @callback when current velocity
+ * is available or when D-Bus timeouts.
+ */
 void 
 geoclue_velocity_get_velocity_async (GeoclueVelocity         *velocity,
 				     GeoclueVelocityCallback  callback,

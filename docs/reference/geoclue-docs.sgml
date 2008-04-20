@@ -6,42 +6,22 @@
 		<title>Geoclue Reference Manual</title>
 	</bookinfo>
 
-	<reference>
-		<title>Geoclue for client applications</title>
-		
-		<xi:include href="using-geoclue.xml"/>
-		
-		<chapter>
-			<title>C API</title>
-			<xi:include href="xml/geoclue-master.xml"/>
-			<xi:include href="xml/geoclue-master-client.xml"/>
-			<xi:include href="xml/geoclue-provider.xml"/>
-			<xi:include href="xml/geoclue-position.xml"/>
-			<xi:include href="xml/geoclue-address.xml"/>
-			<xi:include href="xml/geoclue-velocity.xml"/>
-			<xi:include href="xml/geoclue-geocode.xml"/>
-			<xi:include href="xml/geoclue-reverse-geocode.xml"/>
-			<xi:include href="xml/geoclue-types.xml"/>
-			<xi:include href="xml/geoclue-accuracy.xml"/>
-			<xi:include href="xml/geoclue-address-details.xml"/>
-			<xi:include href="xml/geoclue-error.xml"/>
-		</chapter>
-	</reference>
+	<xi:include href="using-geoclue.xml"/>
 	
 	<reference>
-		<title>Geoclue for providers</title>
-		<xi:include href="implementing-providers.xml"/>
-		<chapter>
-			<title>Provider C API</title>
-			<xi:include href="xml/gc-provider.xml"/>
-			<xi:include href="xml/gc-web-service.xml"/>
-			<xi:include href="xml/gc-iface-geoclue.xml"/>
-			<xi:include href="xml/gc-iface-position.xml"/>
-			<xi:include href="xml/gc-iface-address.xml"/>
-			<xi:include href="xml/gc-iface-velocity.xml"/>
-			<xi:include href="xml/gc-iface-geocode.xml"/>
-			<xi:include href="xml/gc-iface-reverse-geocode.xml"/>
-		</chapter>
+		<title>C API</title>
+		<xi:include href="xml/geoclue-master.xml"/>
+		<xi:include href="xml/geoclue-master-client.xml"/>
+		<xi:include href="xml/geoclue-provider.xml"/>
+		<xi:include href="xml/geoclue-position.xml"/>
+		<xi:include href="xml/geoclue-address.xml"/>
+		<xi:include href="xml/geoclue-velocity.xml"/>
+		<xi:include href="xml/geoclue-geocode.xml"/>
+		<xi:include href="xml/geoclue-reverse-geocode.xml"/>
+		<xi:include href="xml/geoclue-types.xml"/>
+		<xi:include href="xml/geoclue-accuracy.xml"/>
+		<xi:include href="xml/geoclue-address-details.xml"/>
+		<xi:include href="xml/geoclue-error.xml"/>
 	</reference>
 	
 	<reference>

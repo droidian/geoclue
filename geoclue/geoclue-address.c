@@ -14,9 +14,10 @@
  * It is part of the Geoclue public C client API which uses D-Bus 
  * to communicate with the actual provider.
  * 
- * After a #GeoclueAddress is created with geoclue_address_new(), the 
- * geoclue_address_get_address() method and the AddressChanged signal
- * can be used to obtain the current address. 
+ * After a #GeoclueAddress is created with geoclue_address_new() or 
+ * geoclue_master_client_address_create() , the 
+ * geoclue_address_get_address() and geoclue_address_get_address_async() methods 
+ * and the address-changed signal can be used to obtain the current address. 
  * 
  * Address #GHashTable keys are defined in 
  * <ulink url="geoclue-types.html">geoclue-types.h</ulink>. See also 
@@ -78,7 +79,7 @@ constructor (GType                  type,
 	object = G_OBJECT_CLASS (geoclue_address_parent_class)->constructor
 		(type, n_props, props);
 	provider = GEOCLUE_PROVIDER (object);
-
+	
 	dbus_g_proxy_add_signal (provider->proxy, "AddressChanged",
 				 G_TYPE_INT, 
 				 DBUS_TYPE_G_STRING_STRING_HASHTABLE,
@@ -101,7 +102,21 @@ geoclue_address_class_init (GeoclueAddressClass *klass)
 	o_class->constructor = constructor;
 
 	g_type_class_add_private (klass, sizeof (GeoclueAddressPrivate));
-
+	
+	/**
+	 * GeoclueAddress::address-changed:
+	 * @address: the #GeoclueAddress object emitting the signal
+	 * @timestamp: Time of address measurement (Unix timestamp)
+	 * @details: Address details as #GHashTable.
+	 * @accuracy: Accuracy of measurement as #GeoclueAccuracy
+	 * @error: Returned error as  #Gerror (may be %NULL)
+	 * 
+	 * The address-changed signal is emitted each time the address changes. 
+	 * See <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the possible 
+	 * GEOCLUE_ADDRESS_KEY_* keys used in @details.
+	 * 
+	 * Note that not all providers support signals.
+	 */
 	signals[ADDRESS_CHANGED] = g_signal_new ("address-changed",
 						 G_TYPE_FROM_CLASS (klass),
 						 G_SIGNAL_RUN_FIRST |
@@ -143,7 +158,7 @@ geoclue_address_new (const char *service,
 /**
  * geoclue_address_get_address:
  * @address: A #GeoclueAddress object
- * @timestamp: Pointer to returned Unix timestamp or %NULL
+ * @timestamp: Pointer to returned time of address measurement (Unix timestamp) or %NULL
  * @details: Pointer to returned #GHashTable with address details or %NULL
  * @accuracy: Pointer to returned #GeoclueAccuracy or NULL
  * @error: Pointer to returned #Gerror or %NULL
@@ -202,6 +217,27 @@ get_address_async_callback (DBusGProxy              *proxy,
 	g_free (data);
 }
 
+/**
+ * GeoclueAddressCallback:
+ * @address: the #GeoclueAddress object emitting the signal
+ * @timestamp: Time of address measurement (Unix timestamp)
+ * @details: Address details as #GHashTable.
+ * @accuracy: Accuracy of measurement as #GeoclueAccuracy
+ * @error: Error as #Gerror (may be %NULL)
+ * @userdata: User data pointer set in geoclue_position_get_position_async()
+ * 
+ * Callback function for geoclue_address_get_address_async().
+ */
+
+/**
+ * geoclue_address_get_address_async:
+ * @address: A #GeoclueAddress object
+ * @callback: A #GeoclueAddressCallback function that should be called when return values are available
+ * @userdata: pointer for user specified data
+ * 
+ * Function returns (essentially) immediately and calls @callback when current address
+ * is available or when D-Bus timeouts.
+ */
 void 
 geoclue_address_get_address_async (GeoclueAddress         *address,
 				   GeoclueAddressCallback  callback,

@@ -13,28 +13,21 @@
  * #GeoclueMasterClient is part of the Geoclue public C client API. It uses  
  * D-Bus to communicate with the actual Master service.
  * 
- * #GeoclueMasterClient is the easy way to use Geoclue: There's 
- * no need to choose a specific provider and hope it can provide whatever
- * is needed, just set requirements with 
- * geoclue_master_client_set_requirements() and use the wanted Geoclue 
- * interface. #GeoclueMasterClient will make sure the best possible 
- * provider is used at all times, even when provider availabilities and 
- * accuracies change. In other words, the data may actually come from 
- * different providers in different situations.
+ * #GeoclueMasterClient is used to control the client specific behaviour 
+ * of Geoclue Master. Chapter "Master provider: simple example in C" contains a
+ * more complete example, but here are the main parts:
  * 
  * <informalexample>
  * <programlisting>
  * GeoclueMaster *master;
  * GeoclueMasterClient *client;
  * GeoclueAddress *address;
- * char* path;
- * GError *error;
- * 
+ *
  * ...
  * 
  * master = geoclue_master_get_default ();
  * 
- * client = geoclue_master_create_client (master, &path, &error);
+ * client = geoclue_master_create_client (master, NULL, NULL);
  * if (!client) {
  * 	/ * handle error * /
  * }
@@ -47,7 +40,10 @@
  * 	/ * handle error * /
  * }
  * 
- * address = geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, path);
+ * address = geoclue_master_client_address_create (client, error);
+ * if (!address) {
+ * 	/ * handle error * /
+ * }
  * 
  * / * Now we can use address just like we'd use a normal address provider, 
  *     but GeoclueMasterClient makes sure that underneath the provider
@@ -204,6 +200,16 @@ geoclue_master_client_class_init (GeoclueMasterClientClass *klass)
 				      G_PARAM_STATIC_BLURB |
 				      G_PARAM_STATIC_NAME));
 	
+	/**
+	* GeoclueMasterClient::provider-changed:
+	* @client: the #GeoclueMasterClient object emitting the signal
+	* @interface: name of the interface which had a provider change (e.g. "org.freedesktop.Geoclue.Position") 
+	* @name: name of the new provider (e.g. "Hostip") or %NULL if there is no provider
+	* @description: a short description of the new provider or %NULL if there is no provider
+	* 
+	* The provider-changed signal is emitted each time the used provider
+	* changes.
+	**/
 	signals[PROVIDER_CHANGED] = g_signal_new ("provider-changed",
 	                            G_TYPE_FROM_CLASS (klass),
 	                            G_SIGNAL_RUN_FIRST |
@@ -252,6 +258,16 @@ geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 	return TRUE;
 }
 
+/**
+ * geoclue_master_client_address_create:
+ * @client: A #GeoclueMasterClient
+ * @error: A pointer to returned #GError or %NULL.
+ *
+ * Starts the GeoclueMasterClient address provider and returns 
+ * a #GeoclueAddress that uses the same D-Bus object as the #GeoclueMasterClient.
+ *
+ * Return value: New #GeoclueAddress or %NULL on error
+ */
 GeoclueAddress *
 geoclue_master_client_address_create (GeoclueMasterClient *client, 
                                       GError **error)
@@ -267,6 +283,16 @@ geoclue_master_client_address_create (GeoclueMasterClient *client,
 	return geoclue_address_new (GEOCLUE_MASTER_DBUS_SERVICE, priv->object_path);
 }
 
+/**
+ * geoclue_master_client_position_create:
+ * @client: A #GeoclueMasterClient
+ * @error: A pointer to returned #GError or %NULL.
+ *
+ * Starts the GeoclueMasterClient position provider and returns 
+ * a #GeocluePosition that uses the same D-Bus object as the #GeoclueMasterClient.
+ *
+ * Return value: New #GeocluePosition or %NULL on error
+ */
 GeocluePosition *
 geoclue_master_client_position_create (GeoclueMasterClient *client,
                                        GError **error)

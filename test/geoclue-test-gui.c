@@ -514,40 +514,48 @@ get_position_tree_view (GeoclueTestGui *gui)
 }
 
 static void
-master_provider_changed (GeoclueMasterClient *client,
-                         char *iface,
-                         char *name,
-                         char *description, 
-                         GeoclueTestGui *gui)
+master_position_provider_changed (GeoclueMasterClient *client,
+                                  char *name,
+                                  char *description, 
+                                  char *service,
+                                  char *path,
+                                  GeoclueTestGui *gui)
 {
 	GtkTreeIter iter;
-	char *msg = NULL;
+	char *msg;
 	
-	if (strcmp (iface, GEOCLUE_POSITION_INTERFACE_NAME) == 0) {
-		if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->position_store), 
-		                                   &iter)) {
-			gtk_list_store_set (gui->position_store, &iter,
-			                    COL_POSITION_PROVIDER_NAME, g_strdup_printf ("Master (%s)", name),
-			                    -1);
-		}
-		msg = g_strdup_printf ("Master: position provider changed: %s", name);
-		
-	} else if (strcmp (iface, GEOCLUE_ADDRESS_INTERFACE_NAME) == 0) {
-		if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->address_store), 
-		                                   &iter)) {
-			gtk_list_store_set (gui->address_store, &iter,
-			                    COL_POSITION_PROVIDER_NAME, g_strdup_printf ("Master (%s)", name),
-			                    -1);
-		}
-		msg = g_strdup_printf ("Master: address provider changed: %s", name);
+	if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->position_store), 
+					   &iter)) {
+		gtk_list_store_set (gui->position_store, &iter,
+				    COL_POSITION_PROVIDER_NAME, g_strdup_printf ("Master (%s)", name),
+				    -1);
 	}
-	
-	if (msg) {
-		geoclue_test_gui_master_log_message (gui, msg);
-		g_free (msg);
-	}
+	msg = g_strdup_printf ("Master: position provider changed: %s", name);
+	geoclue_test_gui_master_log_message (gui, msg);
+	g_free (msg);
 }
 
+static void
+master_address_provider_changed (GeoclueMasterClient *client,
+                                 char *name,
+                                 char *description, 
+                                 char *service,
+                                 char *path,
+                                 GeoclueTestGui *gui)
+{
+	GtkTreeIter iter;
+	char *msg;
+	
+	if (gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->address_store), 
+					   &iter)) {
+		gtk_list_store_set (gui->address_store, &iter,
+				    COL_ADDRESS_PROVIDER_NAME, g_strdup_printf ("Master (%s)", name),
+				    -1);
+	}
+	msg = g_strdup_printf ("Master: position provider changed: %s", name);
+	geoclue_test_gui_master_log_message (gui, msg);
+	g_free (msg);
+}
 
 static void
 geoclue_test_gui_init (GeoclueTestGui *gui)
@@ -579,8 +587,10 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 		return;
 	}
 	
-	g_signal_connect (G_OBJECT (gui->client), "provider-changed",
-	                  G_CALLBACK (master_provider_changed), gui);
+	g_signal_connect (G_OBJECT (gui->client), "position-provider-changed",
+	                  G_CALLBACK (master_position_provider_changed), gui);
+	g_signal_connect (G_OBJECT (gui->client), "address-provider-changed",
+	                  G_CALLBACK (master_address_provider_changed), gui);
 	if (!geoclue_master_client_set_requirements (gui->client, 
 	                                             GEOCLUE_ACCURACY_LEVEL_COUNTRY,
 	                                             0,

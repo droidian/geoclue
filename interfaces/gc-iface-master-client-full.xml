@@ -12,15 +12,30 @@
 		<method name="AddressStart"/>
 		<method name="PositionStart"/>
 		
-		<method name="GetProvider">
-			<arg name="interface" type="s" direction="in"/>
+		<method name="GetAddressProvider">
 			<arg name="name" type="s" direction="out"/>
 			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
 		</method>
-		<signal name="ProviderChanged">
-			<arg name="interface" type="s" direction="out"/>
+		<method name="GetPositionProvider">
 			<arg name="name" type="s" direction="out"/>
 			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</method>
+		
+		<signal name="AddressProviderChanged">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</signal>
+		<signal name="PositionProviderChanged">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
 		</signal>
 	</interface>
 </node>

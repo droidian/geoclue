@@ -443,9 +443,7 @@ provider_status_changed (GeoclueProvider  *provider,
                          GeoclueStatus     status,
                          GcMasterProvider *master_provider)
 {
-	g_debug ("!");
 	GcMasterProviderPrivate *priv = GET_PRIVATE (master_provider);
-	g_debug ("!!");
 	
 	priv->status = status;
 	gc_master_provider_handle_status_change (master_provider);
@@ -791,10 +789,8 @@ gc_master_provider_initialize_interfaces (GcMasterProvider *provider)
 	if (priv->interfaces & GC_IFACE_POSITION) {
 		g_assert (priv->position == NULL);
 		
-		g_debug ("!");
 		priv->position = geoclue_position_new (priv->service, 
 		                                       priv->path);
-		g_debug ("!!");
 		g_signal_connect (G_OBJECT (priv->position), "position-changed",
 		                  G_CALLBACK (position_changed), provider);
 		
@@ -1207,6 +1203,20 @@ gc_master_provider_get_description (GcMasterProvider *provider)
 	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
 	
 	return priv->description;
+}
+char * 
+gc_master_provider_get_service (GcMasterProvider *provider)
+{
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return priv->service;
+}
+char * 
+gc_master_provider_get_path (GcMasterProvider *provider)
+{
+	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	
+	return priv->path;
 }
 
 /* GCompareDataFunc for sorting providers by accuracy and required resources */

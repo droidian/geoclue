@@ -29,10 +29,16 @@ typedef struct _GeoclueMasterClient {
 
 typedef struct _GeoclueMasterClientClass {
 	GObjectClass parent_class;
-	void (* provider_changed) (GeoclueMasterClient  *client,
-	                           char                 *interface,
-	                           char                 *name,
-	                           char                 *description);
+	void (* address_provider_changed) (GeoclueMasterClient  *client,
+	                                   char                 *name,
+	                                   char                 *description,
+	                                   char                 *service,
+	                                   char                 *path);
+	void (* position_provider_changed) (GeoclueMasterClient  *client,
+	                                    char                 *name,
+	                                    char                 *description,
+	                                    char                 *service,
+	                                    char                 *path);
 } GeoclueMasterClientClass;
 
 GType geoclue_master_client_get_type (void);
@@ -47,11 +53,18 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 GeoclueAddress *geoclue_master_client_create_address (GeoclueMasterClient *client, GError **error);
 GeocluePosition *geoclue_master_client_create_position (GeoclueMasterClient *client, GError **error);
 
-gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
-                                             char                 *interface,
-                                             char                **name,
-                                             char                **description,
-                                             GError              **error);
+gboolean geoclue_master_client_get_address_provider (GeoclueMasterClient  *client,
+                                                     char                **name,
+                                                     char                **description,
+                                                     char                **service,
+                                                     char                **path,
+                                                     GError              **error);
+gboolean geoclue_master_client_get_position_provider (GeoclueMasterClient  *client,
+                                                     char                **name,
+                                                     char                **description,
+                                                     char                **service,
+                                                     char                **path,
+                                                     GError              **error);
 
 G_END_DECLS
 

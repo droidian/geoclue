@@ -35,8 +35,8 @@ parse_options (int    argc,
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-        GeoclueCommon *common = NULL;
 	GeoclueReverseGeocode *revgeocoder = NULL;
+	GeoclueAccuracy *accuracy, *out_accuracy;
 	GHashTable *address = NULL;
 	double lat, lon;
 	GError *error = NULL;
@@ -51,18 +51,21 @@ int main (int argc, char** argv)
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
-        common = geoclue_common_new (service, path);
-        if (common == NULL) {
-                g_printerr ("Error while creating GeoclueCommon object.\n");
-                return 1;
-        }
-        
+	/* Create new GeoclueReverseGeocode */
+	revgeocoder = geoclue_reverse_geocode_new (service, path);
+	g_free (service);
+	g_free (path);
+	if (revgeocoder == NULL) {
+		g_printerr ("Error while creating GeoclueGeocode object.\n");
+		return 1;
+	}
+	
         /* Set options */
         if (argc > 2) {
                 GHashTable *options;
                 
                 options = parse_options (argc, argv);
-                if (!geoclue_common_set_options (common, options, &error)) {
+                if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (revgeocoder), options, &error)) {
                         g_printerr ("Error setting options: %s\n", 
                                     error->message);
                         g_error_free (error);
@@ -75,28 +78,22 @@ int main (int argc, char** argv)
 	                                 (GDestroyNotify)g_free, 
 	                                 (GDestroyNotify)g_free);
 	
-	/* Create new GeoclueReverseGeocode */
-	revgeocoder = geoclue_reverse_geocode_new (service, path);
-	g_free (service);
-	g_free (path);
-	if (revgeocoder == NULL) {
-		g_printerr ("Error while creating GeoclueGeocode object.\n");
-		return 1;
-	}
-	
 	lat = 60.2;
 	lon = 24.9;
-	if (!geoclue_reverse_geocode_position_to_address (revgeocoder, 
-	                                                  lat, lon, 
-	                                                  &address, &error)) {
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_POSTALCODE, 0.0, 0.0);
+	if (!geoclue_reverse_geocode_position_to_address (revgeocoder,  
+	                                                  lat, lon, accuracy,
+	                                                  &address, &out_accuracy, &error)) {
 		g_printerr ("Error while reverse geocoding: %s\n", error->message);
 		g_error_free (error);
-		g_free (revgeocoder);
+		g_object_unref (revgeocoder);
 		return 1;
 	}
 	
 	/* Print out the address */
-	g_print ("Reverse Geocoded  [%.2f, %.2f] to address:\n", lat, lon);
+	GeoclueAccuracyLevel level;
+	geoclue_accuracy_get_details (out_accuracy, &level, NULL, NULL);
+	g_print ("Reverse Geocoded  [%.2f, %.2f] to address (accuracy %d):\n", lat, lon, level);
 	g_hash_table_foreach (address, (GHFunc)print_address_key_and_value, NULL);
 	
 	g_hash_table_destroy (address);

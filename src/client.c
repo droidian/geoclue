@@ -79,11 +79,13 @@ static gboolean gc_iface_master_client_get_provider (GcMasterClient  *client,
                                                      char           **description,
                                                      GError         **error);
 
+static void gc_master_client_geoclue_init (GcIfaceGeoclueClass *iface);
 static void gc_master_client_position_init (GcIfacePositionClass *iface);
 static void gc_master_client_address_init (GcIfaceAddressClass *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client, 
-			 G_TYPE_OBJECT,
+G_DEFINE_TYPE_WITH_CODE (GcMasterClient, gc_master_client, G_TYPE_OBJECT,
+			 G_IMPLEMENT_INTERFACE(GC_TYPE_IFACE_GEOCLUE,
+						gc_master_client_geoclue_init)
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
 						gc_master_client_position_init)
 			 G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
@@ -768,6 +770,68 @@ get_address (GcIfaceAddress   *iface,
 		 address,
 		 accuracy,
 		 error);
+}
+
+static gboolean
+get_status (GcIfaceGeoclue *geoclue,
+            GeoclueStatus  *status,
+            GError        **error)
+{
+	/* not really meaningful */
+	*status = GEOCLUE_STATUS_AVAILABLE;
+	return TRUE;
+}
+
+static gboolean
+set_options (GcIfaceGeoclue *geoclue,
+             GHashTable     *options,
+             GError        **error)
+{
+	/* not meaningful, options come from master */
+	
+	/* It is not an error to not have a SetOptions implementation */
+	return TRUE;
+}
+
+static gboolean 
+get_provider_info (GcIfaceGeoclue  *geoclue,
+		   gchar          **name,
+		   gchar          **description,
+		   GError         **error)
+{
+	if (name) {
+		*name = g_strdup ("Geoclue Master");
+	}
+	if (description) {
+		*description = g_strdup ("Meta-provider that internally uses what ever provider is the best ");
+	}
+	return TRUE;
+}
+
+static void
+add_reference (GcIfaceGeoclue *geoclue,
+               DBusGMethodInvocation *context)
+{
+	/* TODO implement if needed */
+	dbus_g_method_return (context);
+}
+
+static void
+remove_reference (GcIfaceGeoclue *geoclue,
+                  DBusGMethodInvocation *context)
+{
+	/* TODO implement if needed */
+	dbus_g_method_return (context);
+}
+
+static void
+gc_master_client_geoclue_init (GcIfaceGeoclueClass *iface)
+{
+	iface->get_provider_info = get_provider_info;
+	iface->get_status = get_status;
+	iface->set_options = set_options;
+	iface->add_reference = add_reference;
+	iface->remove_reference = remove_reference;
 }
 
 static void

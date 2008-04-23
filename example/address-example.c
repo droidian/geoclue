@@ -7,7 +7,6 @@
  */
 
 #include <glib.h>
-#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-address.h>
 
 /* GHFunc, use with g_hash_table_foreach */
@@ -35,7 +34,6 @@ parse_options (int    argc,
 int main (int argc, char** argv)
 {
 	gchar *service, *path;
-	GeoclueCommon *common = NULL;
 	GeoclueAddress *address = NULL;
 	int timestamp;
 	GHashTable *details = NULL;
@@ -53,12 +51,6 @@ int main (int argc, char** argv)
 	service = g_strdup_printf ("org.freedesktop.Geoclue.Providers.%s", argv[1]);
 	path = g_strdup_printf ("/org/freedesktop/Geoclue/Providers/%s", argv[1]);
 	
-        common = geoclue_common_new (service, path);
-        if (common == NULL) {
-                g_printerr ("Error while creating GeoclueCommon object.\n");
-                return 1;
-        }
-
 	/* Create new GeoclueAddress */
 	address = geoclue_address_new (service, path);
 	g_free (service);
@@ -73,7 +65,7 @@ int main (int argc, char** argv)
                 GHashTable *options;
 
                 options = parse_options (argc, argv);
-                if (!geoclue_common_set_options (common, options, &error)) {
+                if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (address), options, &error)) {
                         g_printerr ("Error setting options: %s\n", 
                                     error->message);
                         g_error_free (error);

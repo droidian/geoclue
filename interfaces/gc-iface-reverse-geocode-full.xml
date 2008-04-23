@@ -5,8 +5,10 @@
 		<method name="PositionToAddress">
 			<arg name="latitude" type="d" direction="in" /> 
 			<arg name="longitude" type="d" direction="in" /> 
+			<arg name="position_accuracy" type="(idd)" direction="in" />
 			
 			<arg type="a{ss}" name="address" direction="out" />
+			<arg name="address_accuracy" type="(idd)" direction="out" />
 		</method>
 	</interface>
 </node>

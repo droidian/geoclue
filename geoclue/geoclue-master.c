@@ -16,7 +16,7 @@
  * 
  * #GeoclueMaster is a singleton service, so it should not be created
  * explicitly: instead one should use geoclue_master_get_default() to
- * get a reference to it. It can be used to set Master options and to 
+ * get a reference to it. It can be used to 
  * create a #GeoclueMasterClient object.
  *
  */
@@ -85,8 +85,8 @@ geoclue_master_init (GeoclueMaster *master)
 /**
  * geoclue_master_get_default:
  *
- * Returns the default #GeoclueMaster object. This should be unreffed once
- * the client is finished with it
+ * Returns the default #GeoclueMaster object. Should be unreferenced once
+ * the client is finished with it.
  *
  * Return value: A reference to the default #GeoclueMaster object
  */
@@ -108,7 +108,7 @@ geoclue_master_get_default (void)
 /**
  * geoclue_master_create_client:
  * @master: A #GeoclueMaster object
- * @object_path: Pointer for #GeoclueMasterClient D-Bus object path
+ * @object_path: Pointer to returned #GeoclueMasterClient D-Bus object path or %NULL
  * @error: Pointer to returned #GError or %NULL
  *
  * Creates a #GeoclueMasterClient and puts the D-Bus object path in

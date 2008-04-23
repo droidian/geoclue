@@ -69,6 +69,7 @@ HTML_IMAGES=
 dbus_docs = \
 	gc-iface-master-ref.xml \
 	gc-iface-master-client-ref.xml \
+	gc-iface-geoclue-ref.xml \
 	gc-iface-position-ref.xml \
 	gc-iface-address-ref.xml \
 	gc-iface-geocode-ref.xml \
@@ -80,6 +81,7 @@ dbus_docs = \
 # e.g. content_files=running.sgml building.sgml changes-2.0.sgml
 content_files= \
 	implementing-providers.xml \
+	using-geoclue.xml \
 	$(dbus_docs)
 
 # SGML files where gtk-doc abbrevations (#GtkWidget) are expanded

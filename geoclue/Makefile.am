@@ -23,13 +23,12 @@ libgeoclue_la_SOURCES = 	\
 	geoclue-accuracy.c	\
 	geoclue-address.c	\
 	geoclue-address-details.c	\
-	geoclue-common.c	\
+	geoclue-provider.c	\
 	geoclue-error.c		\
 	geoclue-geocode.c	\
 	geoclue-master.c	\
 	geoclue-master-client.c	\
 	geoclue-position.c	\
-	geoclue-provider.c	\
 	geoclue-reverse-geocode.c	\
 	geoclue-types.c		\
 	geoclue-velocity.c	\
@@ -59,13 +58,12 @@ geoclue_headers =		\
 	geoclue-accuracy.h	\
 	geoclue-address.h	\
 	geoclue-address-details.h	\
-	geoclue-common.h	\
+	geoclue-provider.h	\
 	geoclue-error.h		\
 	geoclue-geocode.h	\
 	geoclue-master.h	\
 	geoclue-master-client.h	\
 	geoclue-position.h	\
-	geoclue-provider.h	\
 	geoclue-reverse-geocode.h	\
 	geoclue-types.h		\
 	geoclue-velocity.h

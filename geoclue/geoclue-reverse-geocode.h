@@ -10,6 +10,7 @@
 #define _GEOCLUE_REVERSE_GEOCODE_H
 
 #include <geoclue/geoclue-provider.h>
+#include <geoclue/geoclue-accuracy.h>
 #include <geoclue/geoclue-types.h>
 
 G_BEGIN_DECLS
@@ -37,17 +38,21 @@ gboolean
 geoclue_reverse_geocode_position_to_address (GeoclueReverseGeocode   *revgeocode,
 					     double                   latitude,
 					     double                   longitude,
+					     GeoclueAccuracy         *position_accuracy,
 					     GHashTable             **details,
+					     GeoclueAccuracy        **address_accuracy,
 					     GError                 **error);
 
 typedef void (*GeoclueReverseGeocodeCallback) (GeoclueReverseGeocode *revgeocode,
 					       GHashTable            *details,
+					       GeoclueAccuracy       *accuracy,
 					       GError                *error,
 					       gpointer               userdata);
 
 void geoclue_reverse_geocode_position_to_address_async (GeoclueReverseGeocode        *revgeocode,
 							double                        latitude,
 							double                        longitude,
+							GeoclueAccuracy              *accuracy,
 							GeoclueReverseGeocodeCallback callback,
 							gpointer                      userdata);
 

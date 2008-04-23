@@ -31,7 +31,9 @@ struct _GcIfaceReverseGeocodeClass {
 	gboolean (*position_to_address) (GcIfaceReverseGeocode  *gc,
 					 double                  latitude,
 					 double                  longitude,
+					 GeoclueAccuracy        *position_accuracy,
 					 GHashTable            **address,
+					 GeoclueAccuracy       **address_accuracy,
 					 GError                **error);
 };
 

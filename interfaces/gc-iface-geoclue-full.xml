@@ -41,6 +41,24 @@
 		<method name="SetOptions">
 			<arg type="a{ss}" name="options" direction="in" />
 		</method>
+		
+		<method name="AddReference">
+			<doc:doc>
+				<doc:description>Increase the reference count on the provider. 
+				Provider may shutdown if reference count reaches zero, so 
+				using AddReference()/RemoveReference is important for clients needing server
+				persistence -- basically any client that uses SetOptions() or connects to
+				signals.</doc:description>
+			</doc:doc>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+		</method>
+		
+		<method name="RemoveReference">
+			<doc:doc>
+				<doc:description>Decrease the reference count on the provider</doc:description>
+			</doc:doc>
+			<annotation name="org.freedesktop.DBus.GLib.Async" value=""/>
+		</method>
 	</interface>
 </node>
 

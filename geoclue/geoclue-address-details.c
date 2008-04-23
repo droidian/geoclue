@@ -39,7 +39,6 @@ geoclue_address_details_new ()
 
 /**
  * geoclue_address_details_copy:
- * 
  * @source: #GHashTable to copy
  * 
  * Deep-copies a #GHashTable.
@@ -61,9 +60,8 @@ geoclue_address_details_copy (GHashTable *source)
 }
 
 /**
- * geoclue_address_details_get_accuracy:
- * 
- * @address: A #GHashTable
+ * geoclue_address_details_get_accuracy_level:
+ * @address: A #GHashTable with address hash values
  * 
  * Returns a #GeoclueAccuracy that best describes the accuracy of @address
  * 

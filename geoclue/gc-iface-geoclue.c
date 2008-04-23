@@ -29,6 +29,10 @@ static gboolean gc_iface_geoclue_get_status (GcIfaceGeoclue *gc,
 static gboolean gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
                                               GHashTable     *options,
                                               GError        **error);
+static void gc_iface_geoclue_add_reference (GcIfaceGeoclue *gc,
+                                            DBusGMethodInvocation *context);
+static void gc_iface_geoclue_remove_reference (GcIfaceGeoclue *gc,
+                                               DBusGMethodInvocation *context);
 
 #include "gc-iface-geoclue-glue.h"
 
@@ -102,6 +106,19 @@ gc_iface_geoclue_set_options (GcIfaceGeoclue *gc,
 {
         return GC_IFACE_GEOCLUE_GET_CLASS (gc)->set_options (gc, options, 
                                                              error);
+}
+
+static void 
+gc_iface_geoclue_add_reference (GcIfaceGeoclue *gc,
+                                DBusGMethodInvocation *context)
+{
+	GC_IFACE_GEOCLUE_GET_CLASS (gc)->add_reference (gc, context);
+}
+static void 
+gc_iface_geoclue_remove_reference (GcIfaceGeoclue *gc,
+                                   DBusGMethodInvocation *context)
+{
+	GC_IFACE_GEOCLUE_GET_CLASS (gc)->remove_reference (gc, context);
 }
 
 void

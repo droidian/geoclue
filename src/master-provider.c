@@ -78,7 +78,6 @@ typedef struct _GcMasterProviderPrivate {
 	GeoclueStatus master_status; /* net_status and status affect this */
 	GeoclueNetworkStatus net_status;
 	
-	GeoclueProvider *geoclue;
 	GeoclueStatus status; /* cached status from actual provider */
 	
 	GeocluePosition *position;
@@ -114,12 +113,24 @@ copy_error (GError **target, GError *source)
 	}
 }
 
-static gboolean
-gc_master_provider_is_running (GcMasterProvider *provider)
+static GeoclueProvider*
+gc_master_provider_get_provider (GcMasterProvider *master_provider)
 {
-	GcMasterProviderPrivate *priv = GET_PRIVATE (provider);
+	GcMasterProviderPrivate *priv = GET_PRIVATE (master_provider);
 	
-	return (priv->geoclue != NULL);
+	if (priv->address) {
+		return GEOCLUE_PROVIDER (priv->address);
+	}
+	if (priv->position) {
+		return GEOCLUE_PROVIDER (priv->address);
+	}
+	return NULL;
+}
+
+static gboolean
+gc_master_provider_is_running (GcMasterProvider *master_provider)
+{
+	return (gc_master_provider_get_provider (master_provider) != NULL);
 }
 
 static void 
@@ -374,21 +385,21 @@ gc_master_provider_handle_status_change (GcMasterProvider *provider)
 
 
 static void 
-gc_master_provider_update_cache (GcMasterProvider *provider)
+gc_master_provider_update_cache (GcMasterProvider *master_provider)
 {
 	GcMasterProviderPrivate *priv;
 	
-	priv = GET_PRIVATE (provider);
+	priv = GET_PRIVATE (master_provider);
 	
 	if ((!(priv->provides & GEOCLUE_PROVIDE_UPDATES)) ||
-	    (!priv->geoclue)) {
+	    (!gc_master_provider_get_provider (master_provider))) {
 		/* non-cacheable provider or provider not running */
 		return;
 	}
 	
 	g_debug ("%s: Updating cache ", priv->name);
 	priv->master_status = GEOCLUE_STATUS_ACQUIRING;
-	g_signal_emit (provider, signals[STATUS_CHANGED], 0, priv->master_status);
+	g_signal_emit (master_provider, signals[STATUS_CHANGED], 0, priv->master_status);
 	
 	if (priv->position) {
 		int timestamp;
@@ -404,9 +415,9 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 							&error);
 		if (error){
 			g_warning ("Error updating position cache: %s", error->message);
-			gc_master_provider_handle_error (provider, error);
+			gc_master_provider_handle_error (master_provider, error);
 		}
-		gc_master_provider_set_position (provider,
+		gc_master_provider_set_position (master_provider,
 		                                 fields, timestamp,
 		                                 lat, lon, alt,
 		                                 accuracy, error);
@@ -424,16 +435,16 @@ gc_master_provider_update_cache (GcMasterProvider *provider)
 		                                  &accuracy,
 		                                  &error)) {
 			g_warning ("Error updating address cache: %s", error->message);
-			gc_master_provider_handle_error (provider, error);
+			gc_master_provider_handle_error (master_provider, error);
 		}
-		gc_master_provider_set_address (provider,
+		gc_master_provider_set_address (master_provider,
 		                                timestamp,
 		                                details,
 		                                accuracy,
 		                                error);
 	}
 	
-	gc_master_provider_handle_status_change (provider);
+	gc_master_provider_handle_status_change (master_provider);
 }
 
 /* signal handlers for the actual providers signals */
@@ -514,8 +525,6 @@ dispose (GObject *object)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (object);
 	
-	priv->geoclue = NULL;
-	
 	if (priv->position) {
 		g_object_unref (priv->position);
 		priv->position = NULL;
@@ -594,8 +603,6 @@ gc_master_provider_init (GcMasterProvider *provider)
 	priv->address_clients = NULL;
 	
 	priv->master_status = GEOCLUE_STATUS_UNAVAILABLE;
-	
-	priv->geoclue = NULL;
 	
 	priv->position = NULL;
 	priv->position_cache.accuracy = 
@@ -715,7 +722,7 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 	g_print ("   Path - %s\n", priv->path);
 	g_print ("   Accuracy level - %d\n", priv->expected_accuracy);
 	g_print ("   Provider is currently %srunning, status %d\n", 
-	         priv->geoclue ? "" : "not ",
+	         gc_master_provider_get_provider (master_provider) ? "" : "not ",
 	         priv->master_status);
 	gc_master_provider_dump_required_resources (provider);
 	gc_master_provider_dump_provides (provider);
@@ -733,53 +740,49 @@ gc_master_provider_dump_provider_details (GcMasterProvider *provider)
 #endif
 
 static gboolean
-gc_master_provider_initialize_geoclue (GcMasterProvider *master_provider,
-                                       GeoclueProvider *provider)
+gc_master_provider_initialize_geoclue (GcMasterProvider *master_provider)
 {
 	GcMasterProviderPrivate *priv = GET_PRIVATE (master_provider);
+	GeoclueProvider *geoclue;
 	GError *error = NULL;
 	
-	priv->geoclue = provider;
+	geoclue = gc_master_provider_get_provider (master_provider);
 	
-	if (!geoclue_provider_set_options (priv->geoclue,
+	if (!geoclue_provider_set_options (geoclue,
 	                                   geoclue_get_main_options (),
 	                                   &error)) {
 		g_warning ("Error setting provider options: %s\n", error->message);
 		g_error_free (error);
-		priv->geoclue = NULL;
 		return FALSE;
 	}
 	
 	/* priv->name has been read from .provider-file earlier...
 	 * could ask the provider anyway, just to be consistent */
-	if (!geoclue_provider_get_provider_info (priv->geoclue, NULL, 
+	if (!geoclue_provider_get_provider_info (geoclue, NULL, 
 	                                         &priv->description, &error)) {
 		g_warning ("Error getting provider info: %s\n", error->message);
 		g_error_free (error);
-		priv->geoclue = NULL;
 		return FALSE;
 	}
 	
-	g_signal_connect (G_OBJECT (priv->geoclue), "status-changed",
+	g_signal_connect (G_OBJECT (geoclue), "status-changed",
 			  G_CALLBACK (provider_status_changed), master_provider);
 	
 	
-	if (!geoclue_provider_get_status (priv->geoclue, &priv->status, &error)) {
+	if (!geoclue_provider_get_status (geoclue, &priv->status, &error)) {
 		g_warning ("Error getting provider status: %s\n", error->message);
 		g_error_free (error);
-		priv->geoclue = NULL;
 		return FALSE;
 	}
 	return TRUE;
 }
+
 static gboolean
 gc_master_provider_initialize_interfaces (GcMasterProvider *provider)
 {
 	GcMasterProviderPrivate *priv;
 	
 	priv = GET_PRIVATE (provider);
-	
-	g_assert (!priv->geoclue);
 	
 	if (priv->interfaces <= GC_IFACE_GEOCLUE) {
 		g_warning ("No interfaces defined for %s", priv->name);
@@ -793,14 +796,6 @@ gc_master_provider_initialize_interfaces (GcMasterProvider *provider)
 		                                       priv->path);
 		g_signal_connect (G_OBJECT (priv->position), "position-changed",
 		                  G_CALLBACK (position_changed), provider);
-		
-		if (!priv->geoclue) {
-			if (!gc_master_provider_initialize_geoclue (provider, 
-			                                            GEOCLUE_PROVIDER (priv->position))) {
-				return FALSE;
-			}
-		}
-		
 	}
 	if (priv->interfaces & GC_IFACE_ADDRESS) {
 		g_assert (priv->address == NULL);
@@ -809,13 +804,10 @@ gc_master_provider_initialize_interfaces (GcMasterProvider *provider)
 		                                     priv->path);
 		g_signal_connect (G_OBJECT (priv->address), "address-changed",
 		                  G_CALLBACK (address_changed), provider);
-		
-		if (!priv->geoclue) {
-			if (!gc_master_provider_initialize_geoclue (provider, 
-			                                            GEOCLUE_PROVIDER (priv->address))) {
-				return FALSE;
-			}
-		}
+	}
+	
+	if (!gc_master_provider_initialize_geoclue (provider)) {
+		return FALSE;
 	}
 	
 	return TRUE;
@@ -853,7 +845,6 @@ gc_master_provider_deinitialize (GcMasterProvider *provider)
 		g_object_unref (priv->address);
 		priv->address = NULL;
 	}
-	priv->geoclue = NULL;
 	g_debug ("deinited %s", priv->name);
 }
 

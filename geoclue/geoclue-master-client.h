@@ -44,8 +44,8 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 						 GeoclueResourceFlags   allowed_resources,
 						 GError               **error);
 
-GeoclueAddress *geoclue_master_client_address_create (GeoclueMasterClient *client, GError **error);
-GeocluePosition *geoclue_master_client_position_create (GeoclueMasterClient *client, GError **error);
+GeoclueAddress *geoclue_master_client_create_address (GeoclueMasterClient *client, GError **error);
+GeocluePosition *geoclue_master_client_create_position (GeoclueMasterClient *client, GError **error);
 
 gboolean geoclue_master_client_get_provider (GeoclueMasterClient  *client,
                                              char                 *interface,

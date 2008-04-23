@@ -73,7 +73,7 @@ init_address (GeoclueMasterClient *client)
 	int timestamp = 0;
 	
 	/* create the object and connect to signal */
-	address = geoclue_master_client_address_create (client, &error);
+	address = geoclue_master_client_create_address (client, &error);
 	if (!address) {
 		g_warning ("Creating GeoclueAddress failed: %s", error->message);
 		g_error_free (error);
@@ -133,7 +133,7 @@ init_position (GeoclueMasterClient *client)
 	double lat = 0.0, lon = 0.0;
 	GeoclueAccuracy *accuracy;
 	
-	position = geoclue_master_client_position_create (client, &error);
+	position = geoclue_master_client_create_position (client, &error);
 	if (!position) {
 		g_warning ("Creating GeocluePosition failed: %s", error->message);
 		g_error_free (error);

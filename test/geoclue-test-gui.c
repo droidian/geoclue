@@ -285,7 +285,7 @@ add_master_address_provider_to_store (GeoclueTestGui *gui)
 	geoclue_test_gui_master_log_message (gui, "Adding master address provider");
 	
 	/*TODO: should unref these at some point? */
-	address = geoclue_master_client_address_create (gui->client, NULL);
+	address = geoclue_master_client_create_address (gui->client, NULL);
 	
 	append_to_address_store (gui, address, "master");
 }
@@ -352,7 +352,7 @@ add_master_position_provider_to_store (GeoclueTestGui *gui)
 	geoclue_test_gui_master_log_message (gui, "Adding master position provider");
 	
 	/*TODO: should unref these at some point? */
-	position = geoclue_master_client_position_create (gui->client, NULL);
+	position = geoclue_master_client_create_position (gui->client, NULL);
 	
 	append_to_position_store (gui, position, "master");
 }

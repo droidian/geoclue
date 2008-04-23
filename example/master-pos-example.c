@@ -102,7 +102,7 @@ main (int    argc,
 		return 1;
 	}
 	
-	position = geoclue_master_client_position_create (client, &error);
+	position = geoclue_master_client_create_position (client, &error);
 	if (!position) {
 		g_warning ("Creating GeocluePosition failed: %s", error->message);
 		g_error_free (error);

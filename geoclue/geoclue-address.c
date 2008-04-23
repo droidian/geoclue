@@ -15,7 +15,7 @@
  * to communicate with the actual provider.
  * 
  * After a #GeoclueAddress is created with geoclue_address_new() or 
- * geoclue_master_client_address_create() , the 
+ * geoclue_master_client_create_address(), the 
  * geoclue_address_get_address() and geoclue_address_get_address_async() methods 
  * and the address-changed signal can be used to obtain the current address. 
  * 

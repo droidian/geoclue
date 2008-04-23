@@ -32,10 +32,6 @@ static gboolean gc_iface_master_create (GcMaster    *master,
 					const char **object_path,
 					GError     **error);
 
-static gboolean gc_iface_master_set_options (GcMaster   *master,
-                                             GHashTable *options,
-                                             GError    **error);
-
 static gboolean gc_iface_master_shutdown (GcMaster *master,
 					  GError  **error);
 
@@ -62,30 +58,6 @@ gc_iface_master_create (GcMaster    *master,
 	return TRUE;
 }
 
-
-static void
-merge_options (gpointer k,
-               gpointer v,
-               gpointer data)
-{
-	GHashTable *options = data;
-	const char *key = k;
-	const char *value = v;
-	
-	// For each option that has been passed in we need to 
-	//   check if it overrides one already in the options table
-	g_hash_table_replace (options, g_strdup (key), g_strdup (value));
-}
-
-static gboolean
-gc_iface_master_set_options (GcMaster   *master,
-                             GHashTable *options,
-                             GError    **error)
-{
-	g_hash_table_foreach (options, merge_options, 
-	                      geoclue_get_main_options ());
-	return TRUE;
-}
 
 static gboolean
 gc_iface_master_shutdown (GcMaster *master,

@@ -32,9 +32,6 @@ static gboolean gc_iface_master_create (GcMaster    *master,
 					const char **object_path,
 					GError     **error);
 
-static gboolean gc_iface_master_shutdown (GcMaster *master,
-					  GError  **error);
-
 #include "gc-iface-master-glue.h"
 
 #define GEOCLUE_MASTER_PATH "/org/freedesktop/Geoclue/Master/client"
@@ -55,14 +52,6 @@ gc_iface_master_create (GcMaster    *master,
 	if (object_path) {
 		*object_path = path;
 	}
-	return TRUE;
-}
-
-
-static gboolean
-gc_iface_master_shutdown (GcMaster *master,
-			  GError  **error)
-{
 	return TRUE;
 }
 

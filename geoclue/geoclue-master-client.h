@@ -51,7 +51,23 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 						 GError               **error);
 
 GeoclueAddress *geoclue_master_client_create_address (GeoclueMasterClient *client, GError **error);
+typedef void (*CreateAddressCallback) (GeoclueMasterClient *client,
+				       GeoclueAddress      *address,
+				       GError              *error,
+				       gpointer             userdata);
+void geoclue_master_client_create_address_async (GeoclueMasterClient   *client,
+						 CreateAddressCallback  callback,
+						 gpointer               userdata);
+
+
 GeocluePosition *geoclue_master_client_create_position (GeoclueMasterClient *client, GError **error);
+typedef void (*CreatePositionCallback) (GeoclueMasterClient *client,
+					GeocluePosition     *position,
+					GError              *error,
+					gpointer             userdata);
+void geoclue_master_client_create_position_async (GeoclueMasterClient   *client,
+						  CreatePositionCallback  callback,
+						  gpointer               userdata);
 
 gboolean geoclue_master_client_get_address_provider (GeoclueMasterClient  *client,
                                                      char                **name,

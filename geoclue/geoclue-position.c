@@ -110,7 +110,6 @@ geoclue_position_class_init (GeocluePositionClass *klass)
 	 * @longitude: Longitude in degrees
 	 * @altitude: Altitude in meters
 	 * @accuracy: Accuracy of measurement as #GeoclueAccuracy
-	 * @error: Returned error as #Gerror (may be %NULL)
 	 * 
 	 * The position-changed signal is emitted each time the position changes. Clients should note
 	 * that not all providers support signals.

@@ -109,7 +109,6 @@ geoclue_address_class_init (GeoclueAddressClass *klass)
 	 * @timestamp: Time of address measurement (Unix timestamp)
 	 * @details: Address details as #GHashTable.
 	 * @accuracy: Accuracy of measurement as #GeoclueAccuracy
-	 * @error: Returned error as  #Gerror (may be %NULL)
 	 * 
 	 * The address-changed signal is emitted each time the address changes. 
 	 * See <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the possible 

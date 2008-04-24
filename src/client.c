@@ -358,6 +358,14 @@ gc_master_client_emit_position_changed (GcMasterClient *client)
 	
 	
 	if (priv->position_provider == NULL) {
+		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+		gc_iface_position_emit_position_changed
+			(GC_IFACE_POSITION (client),
+			 GEOCLUE_POSITION_FIELDS_NONE,
+			 time (NULL),
+			 0.0, 0.0, 0.0,
+			 accuracy);
+		geoclue_accuracy_free (accuracy);
 		return;
 	}
 	
@@ -393,6 +401,15 @@ gc_master_client_emit_address_changed (GcMasterClient *client)
 	GError *error = NULL;
 	
 	if (priv->address_provider == NULL) {
+		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+		details = g_hash_table_new (g_str_hash, g_str_equal);
+		gc_iface_address_emit_address_changed
+			(GC_IFACE_ADDRESS (client),
+			 time (NULL),
+			 details,
+			 accuracy);
+		g_hash_table_destroy (details);
+		geoclue_accuracy_free (accuracy);
 		return;
 	}
 	if (!gc_master_provider_get_address
@@ -446,12 +463,10 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 		g_debug ("client: position provider changed (to NULL)");
 		g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
 		               NULL, NULL, NULL, NULL);
-		/* empty cache ? */
-		/* TODO should probably emit address changed ? */
-		return FALSE;
+		return TRUE;
 	}
 	
-	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->position_provider));
+	g_debug ("client: position provider changed (to %s)", gc_master_provider_get_name (priv->position_provider));
 	g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
 		       gc_master_provider_get_name (priv->position_provider),
 		       gc_master_provider_get_description (priv->position_provider),
@@ -496,15 +511,13 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	
 	if (priv->address_provider == NULL) {
 		g_debug ("client: address provider changed (to NULL)");
-		g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
+		g_signal_emit (client, signals[ADDRESS_PROVIDER_CHANGED], 0, 
 		               NULL, NULL, NULL, NULL);
-		/* empty cache ? */
-		/* TODO should probably emit address changed ? */
-		return FALSE;
+		return TRUE;
 	}
 	
-	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
-	g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
+	g_debug ("client: address provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
+	g_signal_emit (client, signals[ADDRESS_PROVIDER_CHANGED], 0, 
 		       gc_master_provider_get_name (priv->address_provider),
 		       gc_master_provider_get_description (priv->address_provider),
 		       gc_master_provider_get_service (priv->address_provider),

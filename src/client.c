@@ -597,7 +597,11 @@ gc_iface_master_client_position_start (GcMasterClient *client,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->position_providers) {
-		/* TODO set error */
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+			                      GEOCLUE_ERROR_FAILED,
+			                      "Position interface already started");
+		}
 		return FALSE;
 	}
 	
@@ -623,7 +627,11 @@ gc_iface_master_client_address_start (GcMasterClient *client,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->address_providers) {
-		/* TODO set error */
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+					      GEOCLUE_ERROR_FAILED,
+					      "Address interface already started");
+		}
 		return FALSE;
 	}
 	

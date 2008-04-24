@@ -367,7 +367,8 @@ address_start_async_callback (DBusGProxy                   *proxy,
  * @callback: A #CreateAddressCallback function that should be called when return values are available
  * @userdata: pointer for user specified data
  * 
- * Function returns (essentially) immediately and calls @callback when an address provider is available.
+ * Function returns (essentially) immediately and calls @callback when it has started the address provider
+ * and a #GeoclueAddress is available.
  */
 void 
 geoclue_master_client_create_address_async (GeoclueMasterClient  *client,
@@ -449,7 +450,8 @@ position_start_async_callback (DBusGProxy                   *proxy,
  * @callback: A #CreatePositionCallback function that should be called when return values are available
  * @userdata: pointer for user specified data
  * 
- * Function returns (essentially) immediately and calls @callback when a position provider is available.
+ * Function returns (essentially) immediately and calls @callback when it has started the position provider
+ * and a #GeocluePosition is available.
  */
 void 
 geoclue_master_client_create_position_async (GeoclueMasterClient    *client,

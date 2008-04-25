@@ -31,7 +31,8 @@
 #define GEOCLUE_ADDRESS_INTERFACE_NAME "org.freedesktop.Geoclue.Address"
 
 enum {
-	PROVIDER_CHANGED,
+	ADDRESS_PROVIDER_CHANGED,
+	POSITION_PROVIDER_CHANGED,
 	LAST_SIGNAL
 };
 static guint32 signals[LAST_SIGNAL] = {0, };
@@ -73,11 +74,18 @@ static gboolean gc_iface_master_client_set_requirements (GcMasterClient       *c
                                                          GError              **error);
 static gboolean gc_iface_master_client_position_start (GcMasterClient *client, GError **error);
 static gboolean gc_iface_master_client_address_start (GcMasterClient *client, GError **error);
-static gboolean gc_iface_master_client_get_provider (GcMasterClient  *client,
-                                                     char            *interface,
-                                                     char           **name,
-                                                     char           **description,
-                                                     GError         **error);
+static gboolean gc_iface_master_client_get_address_provider (GcMasterClient  *client,
+                                                             char           **name,
+                                                             char           **description,
+                                                             char           **service,
+                                                             char           **path,
+                                                             GError         **error);
+static gboolean gc_iface_master_client_get_position_provider (GcMasterClient  *client,
+                                                              char           **name,
+                                                              char           **description,
+                                                              char           **service,
+                                                              char           **path,
+                                                              GError         **error);
 
 static void gc_master_client_geoclue_init (GcIfaceGeoclueClass *iface);
 static void gc_master_client_position_init (GcIfacePositionClass *iface);
@@ -350,6 +358,14 @@ gc_master_client_emit_position_changed (GcMasterClient *client)
 	
 	
 	if (priv->position_provider == NULL) {
+		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+		gc_iface_position_emit_position_changed
+			(GC_IFACE_POSITION (client),
+			 GEOCLUE_POSITION_FIELDS_NONE,
+			 time (NULL),
+			 0.0, 0.0, 0.0,
+			 accuracy);
+		geoclue_accuracy_free (accuracy);
 		return;
 	}
 	
@@ -385,6 +401,15 @@ gc_master_client_emit_address_changed (GcMasterClient *client)
 	GError *error = NULL;
 	
 	if (priv->address_provider == NULL) {
+		accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+		details = g_hash_table_new (g_str_hash, g_str_equal);
+		gc_iface_address_emit_address_changed
+			(GC_IFACE_ADDRESS (client),
+			 time (NULL),
+			 details,
+			 accuracy);
+		g_hash_table_destroy (details);
+		geoclue_accuracy_free (accuracy);
 		return;
 	}
 	if (!gc_master_provider_get_address
@@ -436,19 +461,17 @@ gc_master_client_choose_position_provider (GcMasterClient *client,
 	
 	if (priv->position_provider == NULL) {
 		g_debug ("client: position provider changed (to NULL)");
-		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		               GEOCLUE_POSITION_INTERFACE_NAME, 
-		               NULL, NULL);
-		/* empty cache ? */
-		/* TODO should probably emit address changed ? */
-		return FALSE;
+		g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
+		               NULL, NULL, NULL, NULL);
+		return TRUE;
 	}
 	
-	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->position_provider));
-	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		       GEOCLUE_POSITION_INTERFACE_NAME, 
+	g_debug ("client: position provider changed (to %s)", gc_master_provider_get_name (priv->position_provider));
+	g_signal_emit (client, signals[POSITION_PROVIDER_CHANGED], 0, 
 		       gc_master_provider_get_name (priv->position_provider),
-		       gc_master_provider_get_description (priv->position_provider));
+		       gc_master_provider_get_description (priv->position_provider),
+		       gc_master_provider_get_service (priv->position_provider),
+		       gc_master_provider_get_path (priv->position_provider));
 	priv->signals[POSITION_CHANGED] =
 		g_signal_connect (G_OBJECT (priv->position_provider),
 				  "position-changed",
@@ -488,19 +511,17 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	
 	if (priv->address_provider == NULL) {
 		g_debug ("client: address provider changed (to NULL)");
-		g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		               GEOCLUE_ADDRESS_INTERFACE_NAME, 
-		               NULL, NULL);
-		/* empty cache ? */
-		/* TODO should probably emit address changed ? */
-		return FALSE;
+		g_signal_emit (client, signals[ADDRESS_PROVIDER_CHANGED], 0, 
+		               NULL, NULL, NULL, NULL);
+		return TRUE;
 	}
 	
-	g_debug ("client: provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
-	g_signal_emit (client, signals[PROVIDER_CHANGED], 0, 
-		       GEOCLUE_ADDRESS_INTERFACE_NAME, 
+	g_debug ("client: address provider changed (to %s)", gc_master_provider_get_name (priv->address_provider));
+	g_signal_emit (client, signals[ADDRESS_PROVIDER_CHANGED], 0, 
 		       gc_master_provider_get_name (priv->address_provider),
-		       gc_master_provider_get_description (priv->address_provider));
+		       gc_master_provider_get_description (priv->address_provider),
+		       gc_master_provider_get_service (priv->address_provider),
+		       gc_master_provider_get_path (priv->address_provider));
 	priv->signals[ADDRESS_CHANGED] = 
 		g_signal_connect (G_OBJECT (priv->address_provider),
 				  "address-changed",
@@ -576,7 +597,11 @@ gc_iface_master_client_position_start (GcMasterClient *client,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->position_providers) {
-		/* TODO set error */
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+			                      GEOCLUE_ERROR_FAILED,
+			                      "Position interface already started");
+		}
 		return FALSE;
 	}
 	
@@ -602,7 +627,11 @@ gc_iface_master_client_address_start (GcMasterClient *client,
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
 	if (priv->address_providers) {
-		/* TODO set error */
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+					      GEOCLUE_ERROR_FAILED,
+					      "Address interface already started");
+		}
 		return FALSE;
 	}
 	
@@ -619,39 +648,71 @@ gc_iface_master_client_address_start (GcMasterClient *client,
 	return TRUE;
 }
 
-static gboolean 
-gc_iface_master_client_get_provider (GcMasterClient  *client,
-                                     char            *iface,
-                                     char           **name,
-                                     char           **description,
-                                     GError         **error)
+static void
+get_master_provider_details (GcMasterProvider  *provider,
+                             char             **name,
+                             char             **description,
+                             char             **service,
+                             char             **path)
 {
-	GcMasterClientPrivate *priv = GET_PRIVATE (client);
-	GcMasterProvider *provider;
-	
-	if (g_ascii_strcasecmp (iface, GEOCLUE_ADDRESS_INTERFACE_NAME) == 0) {
-		provider = priv->address_provider;
-	} else if (g_ascii_strcasecmp (iface, GEOCLUE_POSITION_INTERFACE_NAME) == 0) {
-		provider = priv->position_provider;
-	} else {
-		g_warning ("unknown interface in get_provider");
-		return FALSE;
-	}
-	
 	if (name) {
 		if (!provider) {
-			name = NULL;
+			*name = NULL;
 		} else {
 			*name = g_strdup (gc_master_provider_get_name (provider));
 		}
 	}
 	if (description) {
 		if (!provider) {
-			description = NULL;
+			*description = NULL;
 		} else {
 			*description = g_strdup (gc_master_provider_get_description (provider));
 		}
 	}
+	if (service) {
+		if (!provider) {
+			*service = NULL;
+		} else {
+			*service = g_strdup (gc_master_provider_get_service (provider));
+		}
+	}
+	if (path) {
+		if (!provider) {
+			*path = NULL;
+		} else {
+			*path = g_strdup (gc_master_provider_get_path (provider));
+		}
+	}
+}
+                             
+
+static gboolean 
+gc_iface_master_client_get_address_provider (GcMasterClient  *client,
+                                             char           **name,
+                                             char           **description,
+                                             char           **service,
+                                             char           **path,
+                                             GError         **error)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	get_master_provider_details (priv->address_provider,
+	                             name, description, service, path);
+	return TRUE;
+}
+
+static gboolean 
+gc_iface_master_client_get_position_provider (GcMasterClient  *client,
+                                              char           **name,
+                                              char           **description,
+                                              char           **service,
+                                              char           **path,
+                                              GError         **error)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	get_master_provider_details (priv->position_provider,
+	                             name, description, service, path);
 	return TRUE;
 }
 
@@ -685,13 +746,22 @@ gc_master_client_class_init (GcMasterClientClass *klass)
 	
 	g_type_class_add_private (klass, sizeof (GcMasterClientPrivate));
 	
-	signals[PROVIDER_CHANGED] = g_signal_new ("provider-changed",
-	                                          G_OBJECT_CLASS_TYPE (klass),
-	                                          G_SIGNAL_RUN_LAST, 0,
-	                                          NULL, NULL,
-	                                          geoclue_marshal_VOID__STRING_STRING_STRING,
-	                                          G_TYPE_NONE, 3,
-	                                          G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	signals[ADDRESS_PROVIDER_CHANGED] = 
+		g_signal_new ("address-provider-changed",
+		              G_OBJECT_CLASS_TYPE (klass),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL,
+		              geoclue_marshal_VOID__STRING_STRING_STRING_STRING,
+		              G_TYPE_NONE, 4,
+		              G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+	signals[POSITION_PROVIDER_CHANGED] = 
+		g_signal_new ("position-provider-changed",
+		              G_OBJECT_CLASS_TYPE (klass),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL,
+		              geoclue_marshal_VOID__STRING_STRING_STRING_STRING,
+		              G_TYPE_NONE, 4,
+		              G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
 	
 	dbus_g_object_type_install_info (gc_master_client_get_type (),
 					 &dbus_glib_gc_iface_master_client_object_info);

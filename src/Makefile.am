@@ -18,12 +18,14 @@ geoclue_master_LDADD =		\
 NOINST_H_FILES =		\
 	main.h			\
 	master.h		\
+	master-provider.h		\
 	client.h		\
 	connectivity.h		\
 	connectivity-networkmanager.h	\
 	connectivity-conic.h
 
 geoclue_master_SOURCES =	\
+	$(NOINST_H_FILES)	\
 	client.c		\
 	main.c			\
 	master.c		\
@@ -35,13 +37,6 @@ geoclue_master_SOURCES =	\
 BUILT_SOURCES =			\
 	gc-iface-master-glue.h	\
 	gc-iface-master-client-glue.h
-
-EXTRA_DIST =			\
-	$(BUILT_SOURCES)
-
-CLEANFILES = $(BUILT_SOURCES) 	\
-	stamp-gc-iface-master-glue.h	\
-	stamp-gc-iface-master-client-glue.h
 
 %-glue.h: stamp-%-glue.h
 	@true
@@ -63,3 +58,14 @@ service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+
+EXTRA_DIST =			\
+	$(service_in_files)
+
+CLEANFILES = 				\
+	$(BUILT_SOURCES) 		\
+	stamp-gc-iface-master-glue.h	\
+	stamp-gc-iface-master-client-glue.h
+
+DISTCLEANFILES = \
+	$(service_DATA)

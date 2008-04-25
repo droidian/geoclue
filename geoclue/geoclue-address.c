@@ -15,7 +15,7 @@
  * to communicate with the actual provider.
  * 
  * After a #GeoclueAddress is created with geoclue_address_new() or 
- * geoclue_master_client_address_create() , the 
+ * geoclue_master_client_create_address(), the 
  * geoclue_address_get_address() and geoclue_address_get_address_async() methods 
  * and the address-changed signal can be used to obtain the current address. 
  * 
@@ -109,7 +109,6 @@ geoclue_address_class_init (GeoclueAddressClass *klass)
 	 * @timestamp: Time of address measurement (Unix timestamp)
 	 * @details: Address details as #GHashTable.
 	 * @accuracy: Accuracy of measurement as #GeoclueAccuracy
-	 * @error: Returned error as  #Gerror (may be %NULL)
 	 * 
 	 * The address-changed signal is emitted each time the address changes. 
 	 * See <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the possible 

@@ -33,12 +33,13 @@
 /* Provider methods */
 static void
 provider_changed_cb (GeoclueMasterClient *client,
-                     char *iface,
                      char *name,
                      char *description, 
+                     char *service, 
+                     char *path, 
                      gpointer userdata)
 {
-	g_print ("%s provider changed: %s\n", iface, name);
+	g_print ("%s provider changed: %s\n", (char *)userdata, name);
 }
 
 
@@ -73,7 +74,7 @@ init_address (GeoclueMasterClient *client)
 	int timestamp = 0;
 	
 	/* create the object and connect to signal */
-	address = geoclue_master_client_address_create (client, &error);
+	address = geoclue_master_client_create_address (client, &error);
 	if (!address) {
 		g_warning ("Creating GeoclueAddress failed: %s", error->message);
 		g_error_free (error);
@@ -133,7 +134,7 @@ init_position (GeoclueMasterClient *client)
 	double lat = 0.0, lon = 0.0;
 	GeoclueAccuracy *accuracy;
 	
-	position = geoclue_master_client_position_create (client, &error);
+	position = geoclue_master_client_create_position (client, &error);
 	if (!position) {
 		g_warning ("Creating GeocluePosition failed: %s", error->message);
 		g_error_free (error);
@@ -185,8 +186,10 @@ main (int    argc,
 	client = geoclue_master_create_client (master, NULL, NULL);
 	g_object_unref (master);
 	
-	g_signal_connect (G_OBJECT (client), "provider-changed",
-	                  G_CALLBACK (provider_changed_cb), NULL);
+	g_signal_connect (G_OBJECT (client), "address-provider-changed",
+	                  G_CALLBACK (provider_changed_cb), "Address");
+	g_signal_connect (G_OBJECT (client), "position-provider-changed",
+	                  G_CALLBACK (provider_changed_cb), "Position");
 	
 	if (!geoclue_master_client_set_requirements (client, 
 	                                             GEOCLUE_ACCURACY_LEVEL_LOCALITY,

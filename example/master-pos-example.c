@@ -42,9 +42,9 @@ provider_changed_cb (GeoclueMasterClient *client,
                      gpointer userdata)
 {
 	if (strlen (name) == 0) {
-		g_print ("%s: No provider available\n", iface);
+		g_print ("No provider available\n");
 	} else {
-		g_print ("%s: now using provider: %s\n", iface, name);
+		g_print ("now using provider: %s\n", name);
 	}
 }
 
@@ -87,7 +87,7 @@ main (int    argc,
 	client = geoclue_master_create_client (master, NULL, NULL);
 	g_object_unref (master);
 	
-	g_signal_connect (G_OBJECT (client), "provider-changed",
+	g_signal_connect (G_OBJECT (client), "position-provider-changed",
 	                  G_CALLBACK (provider_changed_cb), NULL);
 	
 	/* We want provider that has detailed accuracy and emits signals.
@@ -102,7 +102,7 @@ main (int    argc,
 		return 1;
 	}
 	
-	position = geoclue_master_client_position_create (client, &error);
+	position = geoclue_master_client_create_position (client, &error);
 	if (!position) {
 		g_warning ("Creating GeocluePosition failed: %s", error->message);
 		g_error_free (error);

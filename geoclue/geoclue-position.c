@@ -15,7 +15,7 @@
  * to communicate with the actual provider.
  * 
  * After a #GeocluePosition is created with geoclue_position_new() or 
- * using geoclye_master_client_position_create(), the 
+ * using geoclye_master_client_create_position(), the 
  * geoclue_position_get_position() and geoclue_position_get_position_async() 
  * method and the position-changed signal can be used to obtain the current position.
  */
@@ -110,7 +110,6 @@ geoclue_position_class_init (GeocluePositionClass *klass)
 	 * @longitude: Longitude in degrees
 	 * @altitude: Altitude in meters
 	 * @accuracy: Accuracy of measurement as #GeoclueAccuracy
-	 * @error: Returned error as #Gerror (may be %NULL)
 	 * 
 	 * The position-changed signal is emitted each time the position changes. Clients should note
 	 * that not all providers support signals.

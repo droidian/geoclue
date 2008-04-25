@@ -106,7 +106,6 @@ geoclue_velocity_class_init (GeoclueVelocityClass *klass)
 	 * @speed: horizontal speed
 	 * @direction: horizontal direction (bearing)
 	 * @climb: vertical speed
-	 * @error: Returned error as #GError (may be %NULL)
 	 * 
 	 * The geoclue-changed signal is emitted each time the velocity changes. 
 	 * 

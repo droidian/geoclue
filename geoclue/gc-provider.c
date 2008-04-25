@@ -188,8 +188,6 @@ add_reference (GcIfaceGeoclue *geoclue,
 	char *sender;
 	int *pcount;
 	
-	dbus_g_method_return (context);
-	
 	/* Update the hash of open connections */
 	sender = dbus_g_method_get_sender (context);
 	pcount = g_hash_table_lookup (priv->connections, sender);
@@ -198,6 +196,8 @@ add_reference (GcIfaceGeoclue *geoclue,
 		g_hash_table_insert (priv->connections, sender, pcount);
 	}
 	(*pcount)++;
+	
+	dbus_g_method_return (context);
 }
 
 static void 
@@ -207,12 +207,12 @@ remove_reference (GcIfaceGeoclue *geoclue,
 	GcProvider *provider = GC_PROVIDER (geoclue);
 	char *sender;
 	
-	dbus_g_method_return (context);
-	
 	sender = dbus_g_method_get_sender (context);
 	if (!gc_provider_remove_client (provider, sender)) {
 		g_warning ("Unreffed by client that has not been referenced");
 	}
+	
+	dbus_g_method_return (context);
 }
 
 static void

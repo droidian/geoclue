@@ -1,7 +1,11 @@
 libexec_PROGRAMS = \
 	geoclue-geonames
 
-geoclue_geonames_SOURCES = \
+NOINST_H_FILES = 		\
+	geoclue-geonames.h
+
+geoclue_geonames_SOURCES = 	\
+	$(NOINST_H_FILES)	\
 	geoclue-geonames.c
 
 geoclue_geonames_CFLAGS = \
@@ -22,3 +26,10 @@ service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+
+EXTRA_DIST = 			\
+	$(service_in_files)	\
+	$(providers_DATA)
+
+DISTCLEANFILES = \
+	$(service_DATA)

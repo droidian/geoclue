@@ -1,18 +1,15 @@
 libexec_PROGRAMS = geoclue-manual
 
-BUILT_SOURCES = \
+noinst_DATA = \
+	geoclue-manual.xml
+
+BUILT_SOURCES = 		\
+	$(noinst_DATA)		\
 	geoclue-manual-glue.h
 
-geoclue_manual_SOURCES = \
-	$(BUILT_SOURCES) \
+geoclue_manual_SOURCES = 	\
+	$(BUILT_SOURCES) 	\
 	geoclue-manual.c     
-
-CLEANFILES = \
-	$(BUILT_SOURCES)             \
-	stamp-geoclue-manual-glue.h
-
-EXTRA_DIST =         \
-	$(BUILT_SOURCES)
 
 geoclue_manual_CFLAGS = \
 	-I$(top_srcdir)     \
@@ -33,6 +30,18 @@ service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+
+CLEANFILES = \
+	$(BUILT_SOURCES) \
+	stamp-geoclue-manual-glue.h
+
+EXTRA_DIST = 			\
+	$(service_in_files)	\
+	$(providers_DATA)	\
+	$(noinst_DATA)
+
+DISTCLEANFILES = \
+	$(service_DATA)
 
 %-glue.h: stamp-%-glue.h
 	@true

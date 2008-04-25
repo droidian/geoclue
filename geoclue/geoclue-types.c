@@ -38,10 +38,6 @@ geoclue_types_init (void)
 					   G_TYPE_BOXED,
 					   G_TYPE_INVALID);
 	
-	dbus_g_object_register_marshaller (geoclue_marshal_VOID__STRING_STRING_STRING,
-	                                   G_TYPE_STRING,
-	                                   G_TYPE_STRING,
-	                                   G_TYPE_STRING);
 	dbus_g_object_register_marshaller (geoclue_marshal_VOID__STRING_STRING_STRING_STRING,
 	                                   G_TYPE_NONE,
 	                                   G_TYPE_STRING,

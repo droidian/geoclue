@@ -8,3 +8,5 @@ DISTCLEANFILES = \
 
 EXTRA_DIST = \
         geoclue.pc.in
+
+DISTCHECK_CONFIGURE_FLAGS = --enable-gtk-doc

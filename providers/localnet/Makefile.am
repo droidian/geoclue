@@ -3,12 +3,13 @@ libexec_PROGRAMS = geoclue-localnet
 noinst_DATA = \
 	geoclue-localnet.xml
 
-BUILT_SOURCES = 		\
-	$(noinst_DATA)		\
+nodist_geoclue_localnet_SOURCES = \
 	geoclue-localnet-glue.h
 
+BUILT_SOURCES =			\
+	$(nodist_geoclue_localnet_SOURCES)
+
 geoclue_localnet_SOURCES = 	\
-	$(BUILT_SOURCES) 	\
 	geoclue-localnet.c     
 
 geoclue_localnet_CFLAGS = \
@@ -32,7 +33,6 @@ $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 CLEANFILES = \
-	$(BUILT_SOURCES) \
 	stamp-geoclue-localnet-glue.h
 
 EXTRA_DIST = 			\
@@ -41,7 +41,8 @@ EXTRA_DIST = 			\
 	$(noinst_DATA)
 
 DISTCLEANFILES = \
-	$(service_DATA)
+	$(service_DATA)		\
+	$(nodist_geoclue_localnet_SOURCES)
 
 %-glue.h: stamp-%-glue.h
 	@true

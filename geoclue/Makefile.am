@@ -1,6 +1,6 @@
 lib_LTLIBRARIES = libgeoclue.la
 
-BUILT_SOURCES =			\
+nodist_libgeoclue_la_SOURCES = \
 	geoclue-marshal.c	\
 	geoclue-marshal.h	\
 	gc-iface-address-bindings.h	\
@@ -18,8 +18,10 @@ BUILT_SOURCES =			\
 	gc-iface-velocity-bindings.h	\
 	gc-iface-velocity-glue.h
 
+BUILT_SOURCES = \
+	$(nodist_libgeoclue_la_SOURCES)
+
 libgeoclue_la_SOURCES = 	\
-	$(BUILT_SOURCES)	\
 	geoclue-accuracy.c	\
 	geoclue-address.c	\
 	geoclue-address-details.c	\
@@ -73,8 +75,7 @@ libgeoclue_include_HEADERS =	\
 	$(geoclue_headers)
 
 EXTRA_DIST =			\
-	geoclue-marshal.list	\
-	$(BUILT_SOURCES)
+	geoclue-marshal.list
 
 CLEANFILES = $(BUILT_SOURCES) 	\
 	stamp-gc-iface-address-glue.h	\
@@ -83,6 +84,9 @@ CLEANFILES = $(BUILT_SOURCES) 	\
 	stamp-gc-iface-position-glue.h	\
 	stamp-gc-iface-reverse-geocode-glue.h	\
 	stamp-gc-iface-velocity-glue.h
+
+DISTCLEANFILES = \
+	$(nodist_libgeoclue_la_SOURCES)
 
 geoclue-marshal.h: geoclue-marshal.list $(GLIB_GENMARSHAL)
 	$(GLIB_GENMARSHAL) $< --header --prefix=geoclue_marshal > $@

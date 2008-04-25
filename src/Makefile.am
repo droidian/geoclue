@@ -60,8 +60,7 @@ $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 EXTRA_DIST =			\
-	$(service_in_files)	\
-	$(BUILT_SOURCES)
+	$(service_in_files)
 
 CLEANFILES = 				\
 	$(BUILT_SOURCES) 		\

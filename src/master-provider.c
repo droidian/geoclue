@@ -122,7 +122,7 @@ gc_master_provider_get_provider (GcMasterProvider *master_provider)
 		return GEOCLUE_PROVIDER (priv->address);
 	}
 	if (priv->position) {
-		return GEOCLUE_PROVIDER (priv->address);
+		return GEOCLUE_PROVIDER (priv->position);
 	}
 	return NULL;
 }

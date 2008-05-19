@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * geoclue-example.c - Example provider
+ * geoclue-example.c - Example provider which doesn't do anything.
  *
  * Author: Iain Holmes <iain@openedhand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries

@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * geoclue-manual.c - Manual provider
+ * geoclue-manual.c - Manual address provider
  *
  * Author: Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2008 by Garmin Ltd. or its subsidiaries

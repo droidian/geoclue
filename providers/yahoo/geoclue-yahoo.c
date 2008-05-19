@@ -1,6 +1,7 @@
 /*
  * Geoclue
- * geoclue-yahoo.c - A "local.yahooapis.com"-based Geocode-provider
+ * geoclue-yahoo.c - A "local.yahooapis.com"-based Geocode-provider which
+ * converts from street address to position.
  * 
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  * 

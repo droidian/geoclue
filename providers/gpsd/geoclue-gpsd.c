@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * geoclue-gpsd.c - Geoclue backend for gpsd
+ * geoclue-gpsd.c - Geoclue Position backend for gpsd
  *
  * Authors: Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries

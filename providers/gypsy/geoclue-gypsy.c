@@ -1,6 +1,6 @@
 /*
  * Geoclue
- * geoclue-gypsy.c - Geoclue backend for Gypsy
+ * geoclue-gypsy.c - Geoclue backend for Gypsy which provides the Position.
  *
  * Authors: Iain Holmes <iain@openedhand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries

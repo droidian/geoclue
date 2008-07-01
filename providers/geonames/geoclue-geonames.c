@@ -114,14 +114,12 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 	*fields = GEOCLUE_POSITION_FIELDS_NONE;
 	
 	if (countrycode && postalcode) {
-		if (!gc_web_service_query (obj->postalcode_geocoder,
+		if (!gc_web_service_query (obj->postalcode_geocoder, error,
 		                           "postalcode", postalcode,
 		                           "country", countrycode,
 		                           "maxRows", "1",
 		                           "style", "FULL",
 		                           (char *)0)) {
-			g_set_error (error, GEOCLUE_ERROR, 
-			             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 			return FALSE;
 		}
 		if (gc_web_service_get_double (obj->postalcode_geocoder, 
@@ -134,14 +132,12 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 			                                  0, 0);
 		}
 	} else if (countrycode && locality) {
-		if (!gc_web_service_query (obj->place_geocoder,
+		if (!gc_web_service_query (obj->place_geocoder, error,
 		                           "name", locality,
 		                           "country", countrycode,
 		                           "maxRows", "1",
 		                           "style", "FULL",
 		                           (char *)0)) {
-			g_set_error (error, GEOCLUE_ERROR, 
-			             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 			return FALSE;
 		}
 		if (gc_web_service_get_double (obj->place_geocoder, 
@@ -186,7 +182,7 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 	}
 	g_ascii_dtostr (lat, G_ASCII_DTOSTR_BUF_SIZE, latitude);
 	g_ascii_dtostr (lon, G_ASCII_DTOSTR_BUF_SIZE, longitude);
-	if (!gc_web_service_query (obj->rev_place_geocoder,
+	if (!gc_web_service_query (obj->rev_place_geocoder, error,
 	                           "lat", lat,
 	                           "lng", lon,
 	                           "featureCode","PPL",  /* http://www.geonames.org/export/codes.html*/
@@ -199,8 +195,6 @@ geoclue_geonames_position_to_address (GcIfaceReverseGeocode  *iface,
 	                           "maxRows", "1",
 	                           "style", "FULL",
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	

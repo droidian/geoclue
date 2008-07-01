@@ -145,12 +145,9 @@ geoclue_plazes_get_position (GcIfacePosition        *iface,
 		return FALSE;
 	}
 	
-	if (!gc_web_service_query (plazes->web_service, 
+	if (!gc_web_service_query (plazes->web_service, error,
 	                           PLAZES_KEY_MAC, mac, 
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, 
-		             "Web service query failed");
 		g_free (mac);
 		return FALSE;
 	}
@@ -207,12 +204,9 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 		return FALSE;
 	}
 	
-	if (!gc_web_service_query (plazes->web_service, 
+	if (!gc_web_service_query (plazes->web_service, error,
 	                           PLAZES_KEY_MAC, mac, 
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, 
-		             "Web service query failed");
 		g_free (mac);
 		return FALSE;
 	}

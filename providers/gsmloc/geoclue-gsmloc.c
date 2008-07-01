@@ -198,7 +198,7 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 		*timestamp = time (NULL);
 	}
 	
-	if (!gc_web_service_query (gsmloc->web_service, 
+	if (!gc_web_service_query (gsmloc->web_service, error,
 	                           "action", "get",
 	                           "format", "xml",
 	                           "nid1", mcc,
@@ -206,10 +206,6 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	                           "lac", lac,
 	                           "cid", cid,
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, 
-		             "Web service query failed");
-		
 		g_free (mcc);
 		g_free (mnc);
 		g_free (lac);

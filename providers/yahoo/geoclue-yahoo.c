@@ -102,15 +102,13 @@ geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
 	locality = get_address_value (address, GEOCLUE_ADDRESS_KEY_LOCALITY);
 	region = get_address_value (address, GEOCLUE_ADDRESS_KEY_REGION);
 	
-	if (!gc_web_service_query (yahoo->web_service,
+	if (!gc_web_service_query (yahoo->web_service, error,
 	                           "appid", YAHOO_GEOCLUE_APP_ID,
 	                           "street", street,
 	                           "zip", postalcode,
 	                           "city", locality,
 	                           "state", region,
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	

@@ -380,13 +380,15 @@ geoclue_localnet_set_address (GeoclueLocalnet *localnet,
 	geoclue_localnet_load_gateways_from_keyfile (localnet, keyfile);
 	g_key_file_free (keyfile);
 	
-	g_debug ("emitting");
-	
 	gw = geoclue_localnet_find_gateway (localnet, mac);
 	g_free (mac);
 	
-	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (localnet),
-	                                       time (NULL), gw->address, gw->accuracy);
+	if (gw) {
+		gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (localnet),
+		                                       time (NULL), gw->address, gw->accuracy);
+	} else {
+		/* empty address -- should emit anyway? */
+	}
 	return TRUE;
 }
 

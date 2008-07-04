@@ -1,6 +1,6 @@
 if HAVE_GTK
 
-bin_PROGRAMS = geoclue-test-gui
+noinst_PROGRAMS = geoclue-test-gui
 
 geoclue_test_gui_LDADD = \
 	$(GTK_LIBS) \

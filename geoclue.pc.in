@@ -10,4 +10,4 @@ Description: Geoinformation service
 Requires: dbus-glib-1 libxml-2.0
 Version: @VERSION@
 Libs: -L${libdir} -lgeoclue
-Cflags: -I${includedir}/geoclue
+Cflags: -I${includedir}

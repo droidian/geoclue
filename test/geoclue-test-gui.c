@@ -182,10 +182,26 @@ position_changed (GeocluePosition      *position,
 	update_position (gui, position, latitude, longitude, altitude);
 }
 
+static void
+address_callback (GeoclueAddress *address,
+                  int timestamp,
+                  GHashTable *details,
+                  GeoclueAccuracy *accuracy,
+                  GError *error,
+                  gpointer userdata)
+{
+	if (error) {
+		g_warning ("Error getting address: %s\n", error->message);
+		g_error_free (error);
+		details = geoclue_address_details_new ();
+	}
+	
+	update_address (GEOCLUE_TEST_GUI (userdata), address, details);
+}
+
 static void 
 append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address)
 {
-	GHashTable *details = NULL;
 	GtkTreeIter iter;
 	char *name;
 	
@@ -203,14 +219,8 @@ append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address)
 	g_signal_connect (G_OBJECT (address), "address-changed",
 				G_CALLBACK (address_changed), gui);
 	
-	if (!geoclue_address_get_address (address, NULL, 
-						&details, NULL, 
-						NULL)) {
-		g_warning ("Error getting address\n");
-		details = geoclue_address_details_new ();
-	}
-	update_address (gui, address, details);
-	g_hash_table_destroy (details);
+	geoclue_address_get_address_async (address, address_callback, gui);
+	
 }
 
 static gboolean
@@ -254,16 +264,30 @@ get_next_provider (GDir *dir, char **name, char **service, char **path, char **i
 }
 
 static void 
+position_callback (GeocluePosition *position,
+                   GeocluePositionFields fields,
+                   int timestamp,
+                   double lat, double lon, double alt,
+                   GeoclueAccuracy *accuracy,
+                   GError *error,
+                   gpointer userdata)
+{
+	if (error) {
+		g_warning ("Error getting position: %s\n", error->message);
+		g_error_free (error);
+		lat = lon = alt = 0.0/0.0;
+	}
+	update_position (GEOCLUE_TEST_GUI (userdata), position, lat, lon, alt);
+}
+
+static void 
 append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position)
 {
-	double lat, lon, alt;
 	GtkTreeIter iter;
-	GError *error = NULL;
 	char *name;
 	
 	g_assert (position);
 	
-	lat = lon = alt = 0.0/0.0;
 	geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (position), 
 	                                    &name, NULL, NULL);
 	
@@ -276,16 +300,7 @@ append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position)
 	g_signal_connect (G_OBJECT (position), "position-changed",
 				G_CALLBACK (position_changed), gui);
 	
-	if (!geoclue_position_get_position (position, NULL, 
-	                                    &lat, &lon, &alt, 
-	                                    NULL, &error)) {
-		if (error) {
-			g_warning ("Error getting position: %s\n", error->message);
-			g_error_free (error);
-		}
-	}
-	
-	update_position (gui, position, lat, lon, alt);
+	geoclue_position_get_position_async (position, position_callback, gui);
 }
 
 

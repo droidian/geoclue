@@ -40,13 +40,37 @@ GType geoclue_provider_get_type (void);
 gboolean geoclue_provider_get_status (GeoclueProvider  *provider,
                                       GeoclueStatus    *status,
                                       GError          **error);
+typedef void (*GeoclueProviderStatusCallback) (GeoclueProvider *provider,
+                                               GeoclueStatus    status,
+                                               GError          *error,
+                                               gpointer         userdata);
+void geoclue_provider_get_status_async (GeoclueProvider               *provider,
+                                        GeoclueProviderStatusCallback  callback,
+                                        gpointer                       userdata);
+
 gboolean geoclue_provider_get_provider_info (GeoclueProvider  *provider,
                                              char            **name,
                                              char            **description,
                                              GError          **error);
+typedef void (*GeoclueProviderInfoCallback) (GeoclueProvider *provider,
+                                             char            *name,
+                                             char            *description,
+                                             GError          *error,
+                                             gpointer         userdata);
+void geoclue_provider_get_provider_info_async (GeoclueProvider             *provider,
+                                               GeoclueProviderInfoCallback  callback,
+                                               gpointer                     userdata);
+
 gboolean geoclue_provider_set_options (GeoclueProvider  *provider,
                                        GHashTable       *options,
                                        GError          **error);
+typedef void (*GeoclueProviderOptionsCallback) (GeoclueProvider *provider,
+                                                GError          *error,
+                                                gpointer         userdata);
+void geoclue_provider_set_options_async (GeoclueProvider                *provider,
+                                         GHashTable                     *options,
+                                         GeoclueProviderOptionsCallback  callback,
+                                         gpointer                        userdata);
 
 G_END_DECLS
 

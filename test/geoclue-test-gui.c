@@ -1,3 +1,12 @@
+/*
+ * Geoclue
+ * client-test-gui.c - Geoclue Test GUI
+ *
+ * Authors: Jussi Kukkonen <jku@linux.intel.com>
+ * 
+ * Copyright 2008 OpenedHand Ltd
+ *           2008 Intel Corporation
+ */
 
 #include <time.h>
 #include <string.h>
@@ -13,6 +22,7 @@
 enum {
 	COL_ADDRESS_PROVIDER = 0,
 	COL_ADDRESS_PROVIDER_NAME,
+	COL_ADDRESS_IS_MASTER,
 	COL_ADDRESS_COUNTRY,
 	COL_ADDRESS_COUNTRYCODE,
 	COL_ADDRESS_REGION,
@@ -25,6 +35,7 @@ enum {
 enum {
 	COL_POSITION_PROVIDER = 0,
 	COL_POSITION_PROVIDER_NAME,
+	COL_POSITION_IS_MASTER,
 	COL_POSITION_LAT,
 	COL_POSITION_LON,
 	COL_POSITION_ALT,
@@ -45,6 +56,8 @@ typedef struct {
 	
 	GeoclueMasterClient *client;
 	char *master_client_path;
+	GeoclueAccuracyLevel master_accuracy;
+	GeoclueResourceFlags master_resources;
 	
 	GtkListStore *position_store;
 	GList *position_providers; /* PositionProviders, first one is master */
@@ -98,35 +111,50 @@ geoclue_test_gui_master_log_message (GeoclueTestGui *gui, char *message)
 	g_free (line);
 }
 
+static gboolean
+get_matching_tree_iter (GtkTreeModel *model, GeoclueProvider *provider, GtkTreeIter *iter)
+{
+	GeoclueProvider *p = NULL;
+	gboolean valid;
+	
+	g_assert (model);
+	g_assert (provider);
+	
+	valid = gtk_tree_model_get_iter_first (model, iter);
+	while (valid) {
+		gtk_tree_model_get (model, iter,
+		                    COL_ADDRESS_PROVIDER, &p,
+		                    -1);
+		if (p == provider) {
+			return TRUE;
+		}
+		
+		valid = gtk_tree_model_iter_next (model, iter);
+	}
+	
+	return FALSE;
+}
+
 static void
 update_address (GeoclueTestGui *gui, GeoclueAddress *address, GHashTable *details)
 {
 	GtkTreeIter iter;
-	gboolean valid;
-	GeoclueAddress *a = NULL;
 	
 	g_assert (details);
 	
-	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->address_store), &iter);
-	while (valid) {
-		gtk_tree_model_get (GTK_TREE_MODEL (gui->address_store), &iter,
-		                    COL_ADDRESS_PROVIDER, &a,
+	if (get_matching_tree_iter (GTK_TREE_MODEL (gui->address_store),
+	                            GEOCLUE_PROVIDER (address),
+	                            &iter)) {
+		gtk_list_store_set (gui->address_store, &iter,
+		                    COL_ADDRESS_COUNTRY, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_COUNTRY),
+		                    COL_ADDRESS_COUNTRYCODE, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
+		                    COL_ADDRESS_REGION, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_REGION),
+		                    COL_ADDRESS_LOCALITY, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_LOCALITY),
+		                    COL_ADDRESS_AREA, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_AREA),
+		                    COL_ADDRESS_POSTALCODE, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_POSTALCODE),
+		                    COL_ADDRESS_STREET, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_STREET),
 		                    -1);
-		if (address == a) {
-			gtk_list_store_set (gui->address_store, &iter,
-			                    COL_ADDRESS_COUNTRY, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_COUNTRY),
-			                    COL_ADDRESS_COUNTRYCODE, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
-			                    COL_ADDRESS_REGION, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_REGION),
-			                    COL_ADDRESS_LOCALITY, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_LOCALITY),
-			                    COL_ADDRESS_AREA, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_AREA),
-			                    COL_ADDRESS_POSTALCODE, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_POSTALCODE),
-			                    COL_ADDRESS_STREET, g_hash_table_lookup (details, GEOCLUE_ADDRESS_KEY_STREET),
-			                    -1);
-			break;
-		}
-		valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (gui->address_store), &iter);
 	}
-	
 }
 
 
@@ -135,26 +163,16 @@ update_position (GeoclueTestGui *gui, GeocluePosition *position,
                  double lat, double lon, double alt)
 {
 	GtkTreeIter iter;
-	gboolean valid;
-	GeocluePosition *p = NULL;
 	
-	valid = gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->position_store), &iter);
-	
-	while (valid) {
-		gtk_tree_model_get (GTK_TREE_MODEL (gui->position_store), &iter,
-		                    COL_POSITION_PROVIDER, &p,
+	if (get_matching_tree_iter (GTK_TREE_MODEL (gui->position_store),
+	                            GEOCLUE_PROVIDER (position),
+	                            &iter)) {
+		gtk_list_store_set (gui->position_store, &iter,
+		                    COL_POSITION_LAT, lat,
+		                    COL_POSITION_LON, lon,
+		                    COL_POSITION_ALT, alt,
 		                    -1);
-		if (position == p) {
-			gtk_list_store_set (gui->position_store, &iter,
-			                    COL_POSITION_LAT, lat,
-			                    COL_POSITION_LON, lon,
-			                    COL_POSITION_ALT, alt,
-			                    -1);
-			break;
-		}
-		valid = gtk_tree_model_iter_next (GTK_TREE_MODEL (gui->position_store), &iter);
 	}
-	
 }
 
 
@@ -200,25 +218,64 @@ address_callback (GeoclueAddress *address,
 }
 
 static void 
-append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address)
+info_callback (GeoclueProvider *provider,
+               char *name,
+               char *description,
+               GError *error,
+               gpointer userdata)
 {
 	GtkTreeIter iter;
-	char *name;
+	GeoclueTestGui *gui = GEOCLUE_TEST_GUI (userdata);
 	
+	if (error) {
+		g_warning ("Error getting provider info: %s\n", error->message);
+		g_error_free (error);
+		return;
+	}
+	
+	if (get_matching_tree_iter (GTK_TREE_MODEL (gui->address_store),
+	                            provider,
+	                            &iter)) {
+		/* skip master, that's handled in master_*_provider_changed */
+		if (strcmp (name, "Geoclue Master") != 0) {
+			gtk_list_store_set (gui->address_store, &iter,
+					    COL_ADDRESS_PROVIDER_NAME, name,
+					    -1);
+		}
+	}
+	
+	if (get_matching_tree_iter (GTK_TREE_MODEL (gui->position_store),
+	                            provider,
+	                            &iter)) {
+		/* skip master, that's handled in master_*_provider_changed */
+		if (strcmp (name, "Geoclue Master") != 0) {
+			gtk_list_store_set (gui->position_store, &iter,
+			                    COL_POSITION_PROVIDER_NAME, name,
+			                    -1);
+		}
+	}
+}
+
+static void 
+append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address, gboolean is_master)
+{
+	GtkTreeIter iter;
+	
+	g_assert (gui->address_store);
 	g_assert (address);
-	
-	geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (address), 
-	                                    &name, NULL, NULL);
 	
 	gtk_list_store_append (gui->address_store, &iter);
 	gtk_list_store_set (gui->address_store, &iter,
 	                    COL_ADDRESS_PROVIDER, address,
-	                    COL_ADDRESS_PROVIDER_NAME, name,
+	                    COL_ADDRESS_IS_MASTER, is_master,
 	                    -1);
 	
 	g_signal_connect (G_OBJECT (address), "address-changed",
 				G_CALLBACK (address_changed), gui);
 	
+	geoclue_provider_get_provider_info_async (GEOCLUE_PROVIDER (address), 
+	                                          info_callback,
+	                                          gui);
 	geoclue_address_get_address_async (address, address_callback, gui);
 	
 }
@@ -281,25 +338,25 @@ position_callback (GeocluePosition *position,
 }
 
 static void 
-append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position)
+append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, gboolean is_master)
 {
 	GtkTreeIter iter;
-	char *name;
 	
+	g_assert (gui->position_store);
 	g_assert (position);
-	
-	geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (position), 
-	                                    &name, NULL, NULL);
 	
 	gtk_list_store_append (gui->position_store, &iter);
 	gtk_list_store_set (gui->position_store, &iter,
 	                    COL_POSITION_PROVIDER, position,
-	                    COL_POSITION_PROVIDER_NAME, name,
+	                    COL_POSITION_IS_MASTER, is_master,
 	                    -1);
 	
 	g_signal_connect (G_OBJECT (position), "position-changed",
 				G_CALLBACK (position_changed), gui);
 	
+	geoclue_provider_get_provider_info_async (GEOCLUE_PROVIDER (position), 
+	                                          info_callback,
+	                                          gui);
 	geoclue_position_get_position_async (position, position_callback, gui);
 }
 
@@ -309,7 +366,6 @@ get_address_tree_view (GeoclueTestGui *gui)
 {
 	GtkTreeView *view;
 	GtkCellRenderer *renderer;
-	GList *l;
 	
 	view = GTK_TREE_VIEW (gtk_tree_view_new ());
 	
@@ -374,6 +430,7 @@ get_address_tree_view (GeoclueTestGui *gui)
 	gui->address_store = gtk_list_store_new (NUM_ADDRESS_COLS, 
 	                            G_TYPE_POINTER, 
 	                            G_TYPE_STRING,
+	                            G_TYPE_BOOLEAN,
 	                            G_TYPE_STRING,
 	                            G_TYPE_STRING,
 	                            G_TYPE_STRING,
@@ -381,10 +438,6 @@ get_address_tree_view (GeoclueTestGui *gui)
 	                            G_TYPE_STRING,
 	                            G_TYPE_STRING,
 	                            G_TYPE_STRING);
-	
-	for (l = gui->address_providers; l; l = l->next) {
-		append_to_address_store (gui, l->data);
-	}
 	
 	gtk_tree_view_set_model (view, GTK_TREE_MODEL(gui->address_store));
 	
@@ -397,7 +450,6 @@ get_position_tree_view (GeoclueTestGui *gui)
 {
 	GtkTreeView *view;
 	GtkCellRenderer *renderer;
-	GList *l;
 	
 	view = GTK_TREE_VIEW (gtk_tree_view_new ());
 	
@@ -433,14 +485,11 @@ get_position_tree_view (GeoclueTestGui *gui)
 	gui->position_store = gtk_list_store_new (NUM_POSITION_COLS, 
 	                            G_TYPE_POINTER, 
 	                            G_TYPE_STRING,
+	                            G_TYPE_BOOLEAN,
 	                            G_TYPE_DOUBLE,
 	                            G_TYPE_DOUBLE,
 	                            G_TYPE_DOUBLE);
 	
-	for (l = gui->position_providers; l; l = l->next) {
-		append_to_position_store (gui, l->data);
-	}
-
 	gtk_tree_view_set_model (view, GTK_TREE_MODEL(gui->position_store));
 	
 	return GTK_WIDGET (view);
@@ -491,6 +540,19 @@ master_address_provider_changed (GeoclueMasterClient *client,
 }
 
 static void
+update_master_requirements (GeoclueTestGui *gui)
+{
+	if (!geoclue_master_client_set_requirements (gui->client, 
+	                                             gui->master_accuracy,
+	                                             0,
+	                                             FALSE,
+	                                             gui->master_resources,
+	                                             NULL)) {
+		g_printerr ("set_requirements failed");
+	}
+}
+
+static void
 geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 {
 	GeoclueMaster *master;
@@ -511,16 +573,12 @@ geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 	                  G_CALLBACK (master_position_provider_changed), gui);
 	g_signal_connect (G_OBJECT (gui->client), "address-provider-changed",
 	                  G_CALLBACK (master_address_provider_changed), gui);
+	update_master_requirements (gui);
 	
-	if (!geoclue_master_client_set_requirements (gui->client, 
-	                                             GEOCLUE_ACCURACY_LEVEL_COUNTRY,
-	                                             0,
-	                                             FALSE,
-	                                             GEOCLUE_RESOURCE_GPS | GEOCLUE_RESOURCE_NETWORK,
-	                                             NULL)){
-		g_printerr ("set_requirements failed");
-	}
 	
+	/* add master providers to the lists */
+	append_to_position_store (gui, geoclue_master_client_create_position (gui->client, NULL), TRUE);
+	append_to_address_store (gui, geoclue_master_client_create_address (gui->client, NULL), TRUE);
 	
 	/* add individual providers based on files in GEOCLUE_PROVIDERS_DIR  */
 	dir = g_dir_open (GEOCLUE_PROVIDERS_DIR, 0, &error);
@@ -534,30 +592,119 @@ geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 	name = service = path = ifaces = NULL;
 	while (get_next_provider (dir, &name, &service, &path, &ifaces)) {
 		if (ifaces && strstr (ifaces, "org.freedesktop.Geoclue.Position")) {
-			gui->position_providers = 
-				g_list_prepend (gui->position_providers,
-				                geoclue_position_new (service, path));
+			append_to_position_store (gui, geoclue_position_new (service, path), FALSE);
 		}
-		
 		if (ifaces && strstr (ifaces, "org.freedesktop.Geoclue.Address")) {
-			gui->address_providers = 
-				g_list_prepend (gui->address_providers,
-				                geoclue_address_new (service, path));
+			append_to_address_store (gui, geoclue_address_new (service, path), FALSE);
 		}
 		g_free (name);
 		g_free (path);
 		g_free (service);
 		g_free (ifaces);
 	}
-	g_dir_close (dir);
 	
-	/* add master providers to the lists */
-	gui->position_providers = 
-		g_list_prepend (gui->position_providers,
-		                geoclue_master_client_create_position (gui->client, NULL));
-	gui->address_providers = 
-		g_list_prepend (gui->address_providers,
-		                geoclue_master_client_create_address (gui->client, NULL));
+	g_dir_close (dir);
+}
+
+static void
+accuracy_combo_changed (GtkComboBox *combo, GeoclueTestGui *gui)
+{
+	GtkTreeIter iter;
+	
+	if (gtk_combo_box_get_active_iter (combo, &iter)) {
+		GtkTreeModel *model;
+		
+		model = gtk_combo_box_get_model (combo);
+		gtk_tree_model_get (model, &iter, 0, &gui->master_accuracy, -1); 
+		
+		update_master_requirements (gui);
+	}
+}
+
+static void
+gps_check_toggled (GtkCheckButton *btn, GeoclueTestGui *gui)
+{
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (btn))) {
+		gui->master_resources |= GEOCLUE_RESOURCE_GPS;
+	} else {
+		gui->master_resources &= ~GEOCLUE_RESOURCE_GPS;
+	}
+	update_master_requirements (gui);
+}
+
+static void
+network_check_toggled (GtkCheckButton *btn, GeoclueTestGui *gui)
+{
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (btn))) {
+		gui->master_resources |= GEOCLUE_RESOURCE_NETWORK;
+	} else {
+		gui->master_resources &= ~GEOCLUE_RESOURCE_NETWORK;
+	}
+	update_master_requirements (gui);
+}
+
+static void
+cell_check_toggled (GtkCheckButton *btn, GeoclueTestGui *gui)
+{
+	if (gtk_toggle_button_get_active (GTK_TOGGLE_BUTTON (btn))) {
+		gui->master_resources |= GEOCLUE_RESOURCE_CELL;
+	} else {
+		gui->master_resources &= ~GEOCLUE_RESOURCE_CELL;
+	}
+	update_master_requirements (gui);
+}
+
+static GtkWidget*
+get_accuracy_combo (GeoclueTestGui *gui)
+{
+	GtkListStore *store;
+	GtkWidget *combo;
+	GtkTreeIter iter;
+	GtkCellRenderer *renderer;
+	
+	store = gtk_list_store_new (2, G_TYPE_UINT, G_TYPE_STRING);
+	
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_COUNTRY, 
+	                    1, "Country",
+	                    -1);
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_REGION, 
+	                    1, "Region",
+	                    -1);
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_LOCALITY, 
+	                    1, "Locality",
+	                    -1);
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_POSTALCODE, 
+	                    1, "Postalcode",
+	                    -1);
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_STREET, 
+	                    1, "Street",
+	                    -1);
+	gtk_list_store_append (store, &iter);
+	gtk_list_store_set (store, &iter, 
+	                    0, GEOCLUE_ACCURACY_LEVEL_DETAILED, 
+	                    1, "Detailed",
+	                    -1);
+	
+	combo = gtk_combo_box_new_with_model (GTK_TREE_MODEL (store));
+	renderer = gtk_cell_renderer_text_new ();
+	gtk_cell_layout_pack_start (GTK_CELL_LAYOUT (combo), renderer, TRUE);
+	gtk_cell_layout_set_attributes (GTK_CELL_LAYOUT (combo), renderer,
+	                                "text", 1, NULL);
+	
+	gtk_combo_box_set_active (GTK_COMBO_BOX (combo), 0);
+	gui->master_accuracy = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+	
+	return combo;
 }
 
 
@@ -568,12 +715,12 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 	GtkWidget *position_view;
 	GtkWidget *notebook;
 	GtkWidget *box;
-	GtkWidget *hbox;
+	GtkWidget *frame;
+	GtkWidget *hbox, *vbox;
 	GtkWidget *label;
+	GtkWidget *combo, *check;
 	GtkWidget *scrolled_win;
 	GtkWidget *view;
-	
-	geoclue_test_gui_load_providers (gui);
 	
 	gui->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
 	g_signal_connect (G_OBJECT (gui->window), "destroy",
@@ -585,8 +732,47 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 	gui->buffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (view));
 	
 	
-	box = gtk_vbox_new (FALSE, 5);
+	box = gtk_vbox_new (FALSE, 8);
 	gtk_container_add (GTK_CONTAINER (gui->window), box);
+	
+	frame = gtk_frame_new ("Master settings");
+	gtk_box_pack_start (GTK_BOX (box), frame, FALSE, FALSE, 4);
+	
+	
+	hbox = gtk_hbox_new (FALSE, 24);
+	gtk_container_add (GTK_CONTAINER (frame), hbox);
+	
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 8);
+	label = gtk_label_new ("Required accuracy level:");
+	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	
+	combo = get_accuracy_combo (gui); 
+	g_signal_connect (combo, "changed",
+	                  G_CALLBACK (accuracy_combo_changed), gui);
+	gtk_box_pack_start (GTK_BOX (vbox), combo, FALSE, FALSE, 0);
+	
+	vbox = gtk_vbox_new (FALSE, 0);
+	gtk_box_pack_start (GTK_BOX (hbox), vbox, FALSE, FALSE, 0);
+	label = gtk_label_new ("Allow resources:");
+	gtk_box_pack_start (GTK_BOX (vbox), label, FALSE, FALSE, 0);
+	
+	check = gtk_check_button_new_with_label ("Network");
+	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (check), TRUE);
+	gui->master_resources |= GEOCLUE_RESOURCE_NETWORK;
+	g_signal_connect (check, "toggled",
+	                  G_CALLBACK (network_check_toggled), gui);
+	gtk_box_pack_start (GTK_BOX (vbox), check, FALSE, FALSE, 0);
+	
+	check = gtk_check_button_new_with_label ("GPS");
+	g_signal_connect (check, "toggled",
+	                  G_CALLBACK (gps_check_toggled), gui);
+	gtk_box_pack_start (GTK_BOX (vbox), check, FALSE, FALSE, 0);
+	
+	check = gtk_check_button_new_with_label ("Cell");
+	g_signal_connect (check, "toggled",
+	                  G_CALLBACK (cell_check_toggled), gui);
+	gtk_box_pack_start (GTK_BOX (vbox), check, FALSE, FALSE, 0);
 	
 	notebook = gtk_notebook_new ();
 	gtk_box_pack_start (GTK_BOX (box), notebook, FALSE, FALSE, 0);
@@ -612,6 +798,8 @@ geoclue_test_gui_init (GeoclueTestGui *gui)
 	                                GTK_POLICY_NEVER, GTK_POLICY_ALWAYS);
 	gtk_container_add (GTK_CONTAINER (box), scrolled_win);
 	gtk_container_add (GTK_CONTAINER (scrolled_win), view);
+	
+	geoclue_test_gui_load_providers (gui);
 	
 	geoclue_test_gui_master_log_message (gui, "Started Geoclue test UI");
 	

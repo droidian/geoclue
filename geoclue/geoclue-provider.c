@@ -85,6 +85,24 @@ status_changed (DBusGProxy      *proxy,
 }
 
 static void
+add_reference_callback (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+	if (error) {
+		g_printerr ("Could not reference provider: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
+remove_reference_callback (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+	if (error) {
+		g_printerr ("Could not unreference provider: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
 finalize (GObject *object)
 {
 	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
@@ -101,12 +119,10 @@ dispose (GObject *object)
 {
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (object);
 	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
-	GError *error = NULL;
 	
-	if (!org_freedesktop_Geoclue_remove_reference (priv->geoclue_proxy, &error)){
-		g_printerr ("Could not unreference provider: %s", error->message);
-		g_error_free (error);
-	}
+	org_freedesktop_Geoclue_remove_reference_async (priv->geoclue_proxy,
+	                                                remove_reference_callback,
+	                                                NULL);
 	if (priv->geoclue_proxy) {
 		g_object_unref (priv->geoclue_proxy);
 		priv->geoclue_proxy = NULL;
@@ -156,10 +172,9 @@ constructor (GType                  type,
 	priv->geoclue_proxy = dbus_g_proxy_new_for_name (connection, 
 	                                                 priv->service, priv->path, 
 	                                                 GEOCLUE_INTERFACE_NAME);
-	if (!org_freedesktop_Geoclue_add_reference (priv->geoclue_proxy, &error)){
-		g_printerr ("Could not reference provider: %s", error->message);
-		g_error_free (error);
-	}
+	org_freedesktop_Geoclue_add_reference_async (priv->geoclue_proxy,
+	                                             add_reference_callback,
+	                                             NULL);
 	dbus_g_proxy_add_signal (priv->geoclue_proxy, "StatusChanged",
 	                         G_TYPE_INT, G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (priv->geoclue_proxy, "StatusChanged",

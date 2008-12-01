@@ -33,9 +33,18 @@ typedef struct _GeoclueMasterClass {
 GType geoclue_master_get_type (void);
 
 GeoclueMaster *geoclue_master_get_default (void);
+
 GeoclueMasterClient *geoclue_master_create_client (GeoclueMaster *master,
 						   char         **object_path,
 						   GError       **error);
+typedef void (*GeoclueCreateClientCallback) (GeoclueMaster       *master,
+					     GeoclueMasterClient *client,
+					     char                *object_path,
+					     GError              *error,
+					     gpointer             userdata);
+void geoclue_master_create_client_async (GeoclueMaster              *master,
+					 GeoclueCreateClientCallback callback,
+					 gpointer                    userdata);
 
 G_END_DECLS
 

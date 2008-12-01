@@ -257,14 +257,19 @@ info_callback (GeoclueProvider *provider,
 }
 
 static void 
-append_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address, gboolean is_master)
+add_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address, gboolean is_master)
 {
 	GtkTreeIter iter;
 	
 	g_assert (gui->address_store);
 	g_assert (address);
 	
-	gtk_list_store_append (gui->address_store, &iter);
+	if (is_master) {
+		/* master is already on the first line */
+		gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->address_store), &iter);
+	} else {
+		gtk_list_store_append (gui->address_store, &iter);
+	}
 	gtk_list_store_set (gui->address_store, &iter,
 	                    COL_ADDRESS_PROVIDER, address,
 	                    COL_ADDRESS_IS_MASTER, is_master,
@@ -338,14 +343,19 @@ position_callback (GeocluePosition *position,
 }
 
 static void 
-append_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, gboolean is_master)
+add_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, gboolean is_master)
 {
 	GtkTreeIter iter;
 	
 	g_assert (gui->position_store);
 	g_assert (position);
 	
-	gtk_list_store_append (gui->position_store, &iter);
+	if (is_master) {
+		/* master is already on the first line */
+		gtk_tree_model_get_iter_first (GTK_TREE_MODEL (gui->position_store), &iter);
+	} else {
+		gtk_list_store_append (gui->position_store, &iter);
+	}
 	gtk_list_store_set (gui->position_store, &iter,
 	                    COL_POSITION_PROVIDER, position,
 	                    COL_POSITION_IS_MASTER, is_master,
@@ -540,34 +550,80 @@ master_address_provider_changed (GeoclueMasterClient *client,
 }
 
 static void
-update_master_requirements (GeoclueTestGui *gui)
+set_requirements_callback (GeoclueMasterClient *client,
+                           GError *error,
+                           gpointer userdata)
 {
-	if (!geoclue_master_client_set_requirements (gui->client, 
-	                                             gui->master_accuracy,
-	                                             0,
-	                                             FALSE,
-	                                             gui->master_resources,
-	                                             NULL)) {
-		g_printerr ("set_requirements failed");
+	if (error) {
+		g_printerr ("Setting requirements failed : %s", error->message);
+		g_error_free (error);
 	}
 }
 
 static void
-geoclue_test_gui_load_providers (GeoclueTestGui *gui)
+update_master_requirements (GeoclueTestGui *gui)
 {
-	GeoclueMaster *master;
-	GDir *dir;
-	char *name, *path, *service, *ifaces;
-	GError *error;
+	geoclue_master_client_set_requirements_async (gui->client, 
+	                                              gui->master_accuracy,
+	                                              0,
+	                                              FALSE,
+	                                              gui->master_resources,
+	                                              set_requirements_callback,
+	                                              NULL);
+}
+
+static void 
+create_address_callback (GeoclueMasterClient *client,
+                         GeoclueAddress      *address,
+                         GError              *error,
+                         gpointer             userdata)
+{
+	GeoclueTestGui *gui = GEOCLUE_TEST_GUI (userdata);
 	
-	master = geoclue_master_get_default ();
-	gui->client = geoclue_master_create_client (master, &gui->master_client_path, NULL);
-	g_object_unref (master);
-	
-	if (!gui->client) {
-		g_printerr ("No Geoclue master client!");
+	if (error) {
+		g_printerr ("Master Client: Failed to create address: %s", error->message);
+		g_error_free (error);
 		return;
 	}
+	add_to_address_store (gui, address, TRUE);
+}
+
+static void 
+create_position_callback (GeoclueMasterClient *client,
+                          GeocluePosition     *position,
+                          GError              *error,
+                          gpointer             userdata)
+{
+	GeoclueTestGui *gui = GEOCLUE_TEST_GUI (userdata);
+	
+	if (error) {
+		g_printerr ("Master Client: Failed to create position: %s", error->message);
+		g_error_free (error);
+		return;
+	}
+	add_to_position_store (gui, position, TRUE);
+}
+
+
+static void
+create_client_callback (GeoclueMaster       *master,
+			GeoclueMasterClient *client,
+			char                *object_path,
+			GError              *error,
+			gpointer             userdata)
+{
+	GDir *dir;
+	char *name, *path, *service, *ifaces;
+	GtkTreeIter iter;
+	GeoclueTestGui *gui = GEOCLUE_TEST_GUI (userdata);
+	
+	if (error) {
+		g_printerr ("Failed to create master client: %s", error->message);
+		g_error_free (error);
+		return;
+	}
+	
+	gui->client = client;
 	
 	g_signal_connect (G_OBJECT (gui->client), "position-provider-changed",
 	                  G_CALLBACK (master_position_provider_changed), gui);
@@ -575,10 +631,15 @@ geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 	                  G_CALLBACK (master_address_provider_changed), gui);
 	update_master_requirements (gui);
 	
-	
 	/* add master providers to the lists */
-	append_to_position_store (gui, geoclue_master_client_create_position (gui->client, NULL), TRUE);
-	append_to_address_store (gui, geoclue_master_client_create_address (gui->client, NULL), TRUE);
+	gtk_list_store_append (gui->position_store, &iter);
+	geoclue_master_client_create_position_async (gui->client, 
+	                                             create_position_callback,
+	                                             gui);
+	gtk_list_store_append (gui->address_store, &iter);
+	geoclue_master_client_create_address_async (gui->client, 
+	                                            create_address_callback,
+	                                            gui);
 	
 	/* add individual providers based on files in GEOCLUE_PROVIDERS_DIR  */
 	dir = g_dir_open (GEOCLUE_PROVIDERS_DIR, 0, &error);
@@ -592,10 +653,10 @@ geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 	name = service = path = ifaces = NULL;
 	while (get_next_provider (dir, &name, &service, &path, &ifaces)) {
 		if (ifaces && strstr (ifaces, "org.freedesktop.Geoclue.Position")) {
-			append_to_position_store (gui, geoclue_position_new (service, path), FALSE);
+			add_to_position_store (gui, geoclue_position_new (service, path), FALSE);
 		}
 		if (ifaces && strstr (ifaces, "org.freedesktop.Geoclue.Address")) {
-			append_to_address_store (gui, geoclue_address_new (service, path), FALSE);
+			add_to_address_store (gui, geoclue_address_new (service, path), FALSE);
 		}
 		g_free (name);
 		g_free (path);
@@ -604,6 +665,18 @@ geoclue_test_gui_load_providers (GeoclueTestGui *gui)
 	}
 	
 	g_dir_close (dir);
+	g_object_unref (master);
+}
+
+static void
+geoclue_test_gui_load_providers (GeoclueTestGui *gui)
+{
+	GeoclueMaster *master;
+	
+	master = geoclue_master_get_default ();
+	geoclue_master_create_client_async (master, 
+	                                    create_client_callback,
+	                                    gui);
 }
 
 static void

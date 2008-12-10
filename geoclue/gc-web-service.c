@@ -401,7 +401,7 @@ gc_web_service_get_string (GcWebService *self, gchar **value, gchar* xpath)
 	if (!obj) {
 		return FALSE;
 	}
-	*value = g_strdup ((char*)xmlXPathCastNodeSetToString (obj->nodesetval));
+	*value = (char*)xmlXPathCastNodeSetToString (obj->nodesetval);
 	xmlXPathFreeObject (obj);
 	return TRUE;
 }

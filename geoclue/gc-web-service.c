@@ -110,6 +110,22 @@ gc_web_service_register_namespaces (GcWebService *self)
 	g_list_foreach (self->namespaces, (GFunc)gc_web_service_register_ns, self);
 }
 
+static void
+gc_web_service_reset (GcWebService *self)
+{
+	g_free (self->response);
+	self->response = NULL;
+	self->response_length = 0;
+	
+	if (self->xpath_ctx) {
+		if (self->xpath_ctx->doc) {
+			xmlFreeDoc (self->xpath_ctx->doc);
+		}
+		xmlXPathFreeContext (self->xpath_ctx);
+		self->xpath_ctx = NULL;
+	}
+}
+
 /* Parse data (self->response), build xpath context and register 
  * namespaces. Nothing will be done if xpath context exists already. */
 static gboolean
@@ -117,8 +133,6 @@ gc_web_service_build_xpath_context (GcWebService *self)
 {
 	xmlDocPtr doc;
 	xmlChar *tmp;
-	
-	g_assert (self->response);
 	
 	/* don't rebuild if there's no need */
 	if (self->xpath_ctx) {
@@ -153,12 +167,9 @@ gc_web_service_fetch (GcWebService *self, gchar *url, GError **error)
 	xmlChar buf[1024];
 	xmlBuffer *output;
 	
-	g_free (self->response);
-	self->response = NULL;
-	xmlXPathFreeContext (self->xpath_ctx);
-	self->xpath_ctx = NULL;
-	
 	g_assert (url);
+	
+	gc_web_service_reset (self);
 	
 	xmlNanoHTTPInit();
 	ctxt = xmlNanoHTTPMethod (url, "GET", NULL, NULL, NULL, 0);
@@ -196,7 +207,6 @@ gc_web_service_get_xpath_object (GcWebService *self, gchar* xpath)
 {
 	xmlXPathObject *obj = NULL;
 	
-	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
 	
 	/* parse the doc if not parsed yet and register namespaces */
@@ -230,13 +240,12 @@ gc_web_service_finalize (GObject *obj)
 {
 	GcWebService *self = (GcWebService *) obj;
 	
+	gc_web_service_reset (self);
+	
 	g_free (self->base_url);
-	g_free (self->response);
 	
 	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
 	g_list_free (self->namespaces);
-	
-	xmlXPathFreeContext (self->xpath_ctx);
 	
 	((GObjectClass *) gc_web_service_parent_class)->finalize (obj);
 }
@@ -261,18 +270,9 @@ gc_web_service_set_base_url (GcWebService *self, gchar *url)
 {
 	g_assert (url);
 	
+	gc_web_service_reset (self);
+	
 	g_free (self->base_url);
-	g_free (self->response);
-	self->response = NULL;
-	self->response_length = 0;
-	
-	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
-	g_list_free (self->namespaces);
-	self->namespaces = NULL;
-	
-	xmlXPathFreeContext (self->xpath_ctx);
-	self->xpath_ctx = NULL;
-	
 	self->base_url = g_strdup (url);
 }
  
@@ -349,7 +349,6 @@ gc_web_service_query (GcWebService *self, GError **error, ...)
 		g_free (url);
 		return FALSE;
 	}
-	g_assert (self->response);
 	g_free (url);
 	
 	return TRUE;
@@ -421,8 +420,6 @@ gc_web_service_get_string (GcWebService *self, gchar **value, gchar* xpath)
 gboolean
 gc_web_service_get_response (GcWebService *self, guchar **response, gint *response_length)
 {
-	g_return_val_if_fail (self->response, FALSE);
-	
 	*response = g_memdup (self->response, self->response_length);
 	*response_length = self->response_length;
 	return TRUE;

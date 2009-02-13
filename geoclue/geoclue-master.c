@@ -36,6 +36,14 @@ typedef struct _GeoclueMasterPrivate {
 
 G_DEFINE_TYPE (GeoclueMaster, geoclue_master, G_TYPE_OBJECT);
 
+
+typedef struct _GeoclueMasterAsyncData {
+	GeoclueMaster *master;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueMasterAsyncData;
+
+
 static void
 finalize (GObject *object)
 {
@@ -146,4 +154,51 @@ geoclue_master_create_client (GeoclueMaster *master,
 	}
 	
 	return client;
+}
+
+static void
+create_client_callback (DBusGProxy             *proxy, 
+			char                   *path, 
+			GError                 *error, 
+			GeoclueMasterAsyncData *data)
+{
+	GeoclueMasterClient *client;
+	
+	client = NULL;
+	
+	if (!error) {
+		client = g_object_new (GEOCLUE_TYPE_MASTER_CLIENT,
+		                       "object-path", path,
+		                       NULL);
+	}
+	
+	(*(GeoclueCreateClientCallback)data->callback) (data->master,
+	                                                client,
+	                                                path,
+	                                                error,
+	                                                data->userdata);
+	
+	g_free (data);
+}
+
+void 
+geoclue_master_create_client_async (GeoclueMaster              *master,
+				    GeoclueCreateClientCallback callback,
+				    gpointer                    userdata)
+{
+	GeoclueMasterPrivate *priv;
+	GeoclueMasterAsyncData *data;
+	
+	g_return_if_fail (GEOCLUE_IS_MASTER (master));
+	
+	priv = GET_PRIVATE (master);
+	data = g_new (GeoclueMasterAsyncData, 1);
+	data->master = master;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_Master_create_async
+			(priv->proxy,
+			 (org_freedesktop_Geoclue_Master_create_reply)create_client_callback,
+			 data);
 }

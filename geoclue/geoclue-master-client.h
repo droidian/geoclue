@@ -49,6 +49,16 @@ gboolean geoclue_master_client_set_requirements (GeoclueMasterClient   *client,
 						 gboolean               require_updates,
 						 GeoclueResourceFlags   allowed_resources,
 						 GError               **error);
+typedef void (*GeoclueSetRequirementsCallback) (GeoclueMasterClient  *client,
+						GError               *error,
+						gpointer              userdata);
+void geoclue_master_client_set_requirements_async (GeoclueMasterClient           *client,
+						   GeoclueAccuracyLevel           min_accuracy,
+						   int                            min_time,
+						   gboolean                       require_updates,
+						   GeoclueResourceFlags           allowed_resources,
+						   GeoclueSetRequirementsCallback callback,
+						   gpointer                       userdata);
 
 GeoclueAddress *geoclue_master_client_create_address (GeoclueMasterClient *client, GError **error);
 typedef void (*CreateAddressCallback) (GeoclueMasterClient *client,
@@ -75,12 +85,26 @@ gboolean geoclue_master_client_get_address_provider (GeoclueMasterClient  *clien
                                                      char                **service,
                                                      char                **path,
                                                      GError              **error);
+typedef void (*GeoclueGetProviderCallback) (GeoclueMasterClient  *client,
+                                            char                 *name,
+                                            char                 *description,
+                                            char                 *service,
+                                            char                 *path,
+                                            GError               *error,
+                                            gpointer              userdata);
+void geoclue_master_client_get_address_provider_async (GeoclueMasterClient        *client,
+                                                       GeoclueGetProviderCallback  callback,
+                                                       gpointer                    userdata);
+
 gboolean geoclue_master_client_get_position_provider (GeoclueMasterClient  *client,
                                                      char                **name,
                                                      char                **description,
                                                      char                **service,
                                                      char                **path,
                                                      GError              **error);
+void geoclue_master_client_get_position_provider_async (GeoclueMasterClient        *client,
+                                                       GeoclueGetProviderCallback  callback,
+                                                       gpointer userdata);
 
 G_END_DECLS
 

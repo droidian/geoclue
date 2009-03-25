@@ -1,0 +1,3 @@
+/usr/bin/geoclue-master
+/usr/bin/geoclue-test-gui
+/usr/share/dbus-1/services/org.freedesktop.Geoclue.Master.service

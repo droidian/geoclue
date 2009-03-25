@@ -1,0 +1,3 @@
+/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Gsmloc.service
+/usr/share/geoclue-providers/geoclue-gsmloc.provider
+/usr/bin/geoclue-gsmloc

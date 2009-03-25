@@ -1,0 +1,3 @@
+/usr/bin/geoclue-example
+/usr/share/geoclue-providers/geoclue-example.provider
+/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Example.service

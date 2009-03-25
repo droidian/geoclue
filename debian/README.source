@@ -1,0 +1,4 @@
+* The packaging of geoclue uses quilt to manage patches
+  at build time. Please install the package 'quilt' and see
+  /usr/share/doc/quilt/README.source
+  for details.

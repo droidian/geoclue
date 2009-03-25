@@ -1,0 +1,4 @@
+/usr/bin/geoclue-hostip
+/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Hostip.service
+/usr/share/geoclue-providers/geoclue-hostip.provider
+

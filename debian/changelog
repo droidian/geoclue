@@ -1,0 +1,39 @@
+geoclue (0.11.1-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Adding quilt patch system and a patch to fix a FTBFS due to a changed
+    API of libgammu (Closes: #518586). Also adding debian/README.source
+    as required by policy. 
+
+ -- Bernd Zeimetz <bzed@debian.org>  Wed, 25 Mar 2009 20:20:54 +0100
+
+geoclue (0.11.1-1) unstable; urgency=low
+
+  * New upstream version (stable)
+
+ -- Craig Andrews <candrews@integralblue.com>  Tue, 11 Nov 2008 16:16:16 -0500
+
+geoclue (0.8svn20070820-1) unstable; urgency=low
+
+  * New upstream version from git
+
+ -- Jussi Kukkonen <jhkukkon@cc.hut.fi>  Mon, 20 Aug 2007 15:05:59 +0300
+
+geoclue (0.8svn20070815-1) unstable; urgency=low
+
+  * New upstream version from git
+
+ -- Jussi Kukkonen <jhkukkon@cc.hut.fi>  Wed, 15 Aug 2007 16:17:22 +0300
+
+geoclue (0.2svn20070715-1) unstable; urgency=low
+
+  * New upstream version from git
+
+ -- Jussi Kukkonen <jhkukkon@cc.hut.fi>  Sun, 15 Jul 2007 23:40:36 +0300
+
+geoclue (0.2svn20070704-1) unstable; urgency=low
+
+  * Initial release 
+
+ -- Jussi Kukkonen <jhkukkon@cc.hut.fi>  Wed, 04 Jul 2007 11:27:36 +0300
+

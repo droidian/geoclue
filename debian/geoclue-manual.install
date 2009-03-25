@@ -1,0 +1,3 @@
+/usr/bin/geoclue-manual
+/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Manual.service
+/usr/share/geoclue-providers/geoclue-manual.provider

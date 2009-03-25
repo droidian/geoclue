@@ -1,0 +1,77 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+include /usr/share/quilt/quilt.make
+
+
+package = geoclue
+
+CFLAGS = -Wall -g
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+# no need to guess the platform in configure:
+DEB_HOST_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
+configure: configure-stamp
+configure-stamp: patch
+	dh_testdir		
+	ln -sf /usr/share/misc/config.sub config.sub
+	ln -sf /usr/share/misc/config.guess config.guess
+	./configure --libexecdir=/usr/bin/ --enable-gpsd --prefix=/usr --sysconfdir=/etc --mandir=/usr/share/man --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+	touch configure-stamp
+	
+build: build-stamp
+build-stamp: configure-stamp 
+	dh_testdir
+	$(MAKE) CFLAGS="$(CFLAGS)"
+	touch build-stamp
+
+clean: clean-patched unpatch
+clean-patched:
+	dh_testdir
+	dh_testroot
+	if [ -f Makefile ]; then $(MAKE) -i distclean; fi;
+	rm -f build-stamp configure-stamp
+	rm -f config.sub config.guess
+	dh_clean
+	rm -rf debian/geoclue-tmp
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k 
+	dh_installdirs
+	$(MAKE) DESTDIR=$(CURDIR)/debian/geoclue-tmp install
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs ChangeLog
+	dh_installdocs
+	dh_installexamples
+	dh_install --sourcedir=debian/geoclue-tmp --fail-missing
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_gconf
+	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_makeshlibs
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

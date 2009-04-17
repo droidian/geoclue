@@ -1,2 +1,2 @@
-examples/*.c
-examples/Makefile
+example/*.c
+example/Makefile

@@ -1,5 +1,6 @@
 geoclue (0.11.1-2) unstable; urgency=low
 
+  [ Craig Andrews ]
   * Fix warnings reported by lintian
   * Resolve circular dependency between geoclue and libgeoclue0
     (Closes: #520129). libgeoclue no longer depends on geoclue.
@@ -10,7 +11,16 @@ geoclue (0.11.1-2) unstable; urgency=low
   * Added debian/watch for update detection
   * Thanks Bernd Zeimetz <bzed@debian.org> for the previous NMU
     (Closes: #518586)
-  * Install examples as examples in the geoclue package
+  * Install examples as examples in the libgeoclue-dev package
+
+  [ Bernd Zeimetz ]
+  * Adding myself to Uploaders.
+  * Bumping Standards-Version to 3.8.1, no changes needed.
+  * Add dependency on geoclue for location providers where
+    it was missing.
+  * Raise build-dependency on libgammu-dev to >= 1.24.0 as
+    we're applying a patch which needs the API change.
+  * Update Vcs information in to point to git.debian.org. 
 
  -- Craig Andrews <candrews@integralblue.com>  Wed, 1 Apr 2009 15:15:15 -0600
 

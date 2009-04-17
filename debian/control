@@ -2,11 +2,12 @@ Source: geoclue
 Section: utils
 Priority: optional
 Maintainer: Craig Andrews <candrews@integralblue.com>
-Build-Depends: cdbs (>= 0.4.27), autotools-dev, quilt, patchutils (>= 0.2.25), debhelper (>= 5), libgammu-dev (>=1.18), libgps-dev, pkg-config, libglib-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev
+Uploaders: Bernd Zeimetz <bzed@debian.org>
+Build-Depends: cdbs (>= 0.4.27), autotools-dev, quilt, patchutils (>= 0.2.25), debhelper (>= 5), libgammu-dev (>= 1.24.0), libgps-dev, pkg-config, libglib-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
-Standards-Version: 3.8.0
-Vcs-Svn: http://www.integralblue.com/svn/pkg-geoclue/trunk
-Vcs-Browser: http://www.integralblue.com/trac/pkg-geoclue/browser
+Standards-Version: 3.8.1
+Vcs-Git: git://git.debian.org/collab-maint/geoclue.git
+Vcs-Browser: http://git.debian.org/?p=collab-maint/geoclue.git
 
 Package: geoclue
 Architecture: any
@@ -46,7 +47,7 @@ Description: Position server for GeoClue (manual)
 
 Package: geoclue-hostip
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
 Description: Position server for GeoClue (hostip)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -56,7 +57,7 @@ Description: Position server for GeoClue (hostip)
 
 Package: geoclue-plazes
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
 Description: Position server for GeoClue (Plazes)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -67,7 +68,7 @@ Description: Position server for GeoClue (Plazes)
 
 Package: geoclue-gpsd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
 Description: Position server for GeoClue (GPS)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -77,7 +78,7 @@ Description: Position server for GeoClue (GPS)
 
 Package: geoclue-geonames
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
 Description: Geocoder provider for GeoClue (geonames)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 

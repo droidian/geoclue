@@ -1,4 +1,3 @@
-/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Localnet.service
-/usr/share/geoclue-providers/geoclue-localnet.provider
-/usr/bin/geoclue-localnet
-
+debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Localnet.service
+debian/tmp/usr/share/geoclue-providers/geoclue-localnet.provider
+debian/tmp/usr/lib/geoclue/geoclue-localnet

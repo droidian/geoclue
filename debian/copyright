@@ -1,15 +1,15 @@
-This package was debianized by Jussi Kukkonen <jhkukkon@cc.hut.fi>  
+This package is maintained by Craig Andrews <candrews@integralblue.com>.
+This package was first debianized by Jussi Kukkonen <jhkukkon@cc.hut.fi> 
 (using earlier packaging by Santtu Lakkala as inspiration) on
-Fri,  1 Jun 2007 12:00:47 +0300. Original source was git-cloned from 
-freedesktop.org:
-   got clone git://anongit.freedesktop.org/git/geoclue
+Fri,  1 Jun 2007 12:00:47 +0300. Original source can be downloaded from
+http://www.freedesktop.org/wiki/Software/GeoClue
 
 
 Original author: 
    Keith Preston and others <geoclue@lists.freedesktop.org>
 
 Copyright: 
-   Copyright (C) 2007 original authors
+   Copyright © 2007 original authors
 
 License:
    This library is free software; you can redistribute it and/or
@@ -30,5 +30,5 @@ License:
 On Debian systems, the complete text of the GNU Lesser General
 Public License can be found in `/usr/share/common-licenses/LGPL'.
 
-The Debian packaging is (C) 2007, Jussi Kukkonen <jhkukkon@cc.hut.fi> and
-is licensed under the LGPL.
+The Debian packaging is © 2007, Jussi Kukkonen <jhkukkon@cc.hut.fi>,
+Craig Andrews <candrews@integralblue.com> and is licensed under the LGPL.

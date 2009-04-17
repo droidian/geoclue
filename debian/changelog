@@ -1,3 +1,19 @@
+geoclue (0.11.1-2) unstable; urgency=low
+
+  * Fix warnings reported by lintian
+  * Resolve circular dependency between geoclue and libgeoclue0
+    (Closes: #520129). libgeoclue no longer depends on geoclue.
+    libgeoclue instead suggests geoclue.
+  * Changed --libexecdir to point to /usr/lib/geoclue.
+    (Closes: #518822).
+  * Use cdbs (Thanks Stefan Jenkner <stefan@jenkner.org>)
+  * Added debian/watch for update detection
+  * Thanks Bernd Zeimetz <bzed@debian.org> for the previous NMU
+    (Closes: #518586)
+  * Install examples as examples in the geoclue package
+
+ -- Craig Andrews <candrews@integralblue.com>  Wed, 1 Apr 2009 15:15:15 -0600
+
 geoclue (0.11.1-1.1) unstable; urgency=low
 
   * Non-maintainer upload.

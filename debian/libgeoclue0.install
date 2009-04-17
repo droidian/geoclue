@@ -1,1 +1,1 @@
-/usr/lib/libgeoclue.so.*
+debian/tmp/usr/lib/*.so.*

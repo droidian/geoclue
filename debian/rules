@@ -3,7 +3,6 @@
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
-DEB_INSTALL_EXAMPLES_libgeoclue-dev=example/*
 
 include /usr/share/cdbs/1/rules/patchsys-quilt.mk
 include /usr/share/cdbs/1/rules/debhelper.mk

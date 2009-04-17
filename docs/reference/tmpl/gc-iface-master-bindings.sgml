@@ -1,0 +1,59 @@
+<!-- ##### SECTION Title ##### -->
+gc-iface-master-bindings
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_Master_create ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@OUT_path: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_Master_create_reply ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@OUT_path: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_Master_create_async ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@callback: 
+@Returns: 
+
+
+<!-- ##### FUNCTION dbus_g_proxy_begin_call ##### -->
+<para>
+
+</para>
+
+@Param1: 
+@Returns: 
+
+

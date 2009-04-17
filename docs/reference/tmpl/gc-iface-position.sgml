@@ -1,0 +1,39 @@
+<!-- ##### SECTION Title ##### -->
+GcIfacePosition
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcIfacePosition ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_iface_position_emit_position_changed ##### -->
+<para>
+
+</para>
+
+@gc: 
+@fields: 
+@timestamp: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+
+

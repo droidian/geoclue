@@ -1,0 +1,478 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GeoclueMasterClient">
+<refmeta>
+<refentrytitle role="top_of_page" id="GeoclueMasterClient.top_of_page">GeoclueMasterClient</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GeoclueMasterClient</refname>
+<refpurpose>Geoclue MasterClient API</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GeoclueMasterClient.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+#define             <link linkend="GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS">GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE</link>
+                    <link linkend="GeoclueMasterClient-struct">GeoclueMasterClient</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-master-client-set-requirements">geoclue_master_client_set_requirements</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeoclueAccuracyLevel">GeoclueAccuracyLevel</link> min_accuracy,
+                                                         <link linkend="int">int</link> min_time,
+                                                         <link linkend="gboolean">gboolean</link> require_updates,
+                                                         <link linkend="GeoclueResourceFlags">GeoclueResourceFlags</link> allowed_resources,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="GeoclueAddress">GeoclueAddress</link>*     <link linkend="geoclue-master-client-create-address">geoclue_master_client_create_address</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="CreateAddressCallback">*CreateAddressCallback</link>)            (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeoclueAddress">GeoclueAddress</link> *address,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+<link linkend="void">void</link>                <link linkend="geoclue-master-client-create-address-async">geoclue_master_client_create_address_async</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="CreateAddressCallback">CreateAddressCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+<link linkend="GeocluePosition">GeocluePosition</link>*    <link linkend="geoclue-master-client-create-position">geoclue_master_client_create_position</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="CreatePositionCallback">*CreatePositionCallback</link>)           (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeocluePosition">GeocluePosition</link> *position,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+<link linkend="void">void</link>                <link linkend="geoclue-master-client-create-position-async">geoclue_master_client_create_position_async</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="CreatePositionCallback">CreatePositionCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-master-client-get-address-provider">geoclue_master_client_get_address_provider</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="char">char</link> **service,
+                                                         <link linkend="char">char</link> **path,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-master-client-get-position-provider">geoclue_master_client_get_position_provider</link>
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="char">char</link> **service,
+                                                         <link linkend="char">char</link> **path,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GeoclueMasterClient.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----GeoclueMasterClient
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+<refsect1 id="GeoclueMasterClient.properties" role="properties">
+<title role="properties.title">Properties</title>
+<synopsis>
+  &quot;<link linkend="GeoclueMasterClient--object-path">object-path</link>&quot;              <link linkend="gchar">gchar</link>*                : Write / Construct Only
+</synopsis>
+</refsect1>
+
+<refsect1 id="GeoclueMasterClient.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="GeoclueMasterClient-address-provider-changed">address-provider-changed</link>&quot;                       : Run First / No Recursion
+  &quot;<link linkend="GeoclueMasterClient-position-provider-changed">position-provider-changed</link>&quot;                      : Run First / No Recursion
+</synopsis>
+</refsect1>
+
+
+<refsect1 id="GeoclueMasterClient.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> is part of the Geoclue public C client API. It uses  
+D-Bus to communicate with the actual Master service.
+</para>
+<para>
+<link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> is used to control the client specific behaviour 
+of Geoclue Master. Chapter "Master provider: simple example in C" contains a
+more complete example, but here are the main parts:
+</para>
+<para>
+<informalexample>
+<programlisting>
+GeoclueMaster *master;
+GeoclueMasterClient *client;
+GeoclueAddress *address;
+
+...
+
+master = geoclue_master_get_default ();
+
+client = geoclue_master_create_client (master, NULL, NULL);
+if (!client) {
+	/ * handle error * /
+}
+
+if (!geoclue_master_client_set_requirements (client,
+                                             GEOCLUE_ACCURACY_LEVEL_NONE,
+                                             0, FALSE,
+                                             GEOCLUE_RESOURCE_NETWORK,
+                                             &amp;error)) {
+	/ * handle error * /
+}
+
+address = geoclue_master_client_create_address (client, error);
+if (!address) {
+	/ * handle error * /
+}
+
+/ * Now we can use address just like we'd use a normal address provider, 
+    but GeoclueMasterClient makes sure that underneath the provider
+    that best matches our requirements is used * /
+</programlisting>
+</informalexample></para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GeoclueMasterClient.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS" role="macro">
+<title>GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE</title>
+<indexterm zone="GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS"><primary>GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE</primary></indexterm><programlisting>#define GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE "org.freedesktop.Geoclue.MasterClient"
+</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueMasterClient-struct" role="struct">
+<title>GeoclueMasterClient</title>
+<indexterm zone="GeoclueMasterClient-struct"><primary>GeoclueMasterClient</primary></indexterm><programlisting>typedef struct _GeoclueMasterClient GeoclueMasterClient;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="geoclue-master-client-set-requirements" role="function">
+<title>geoclue_master_client_set_requirements ()</title>
+<indexterm zone="geoclue-master-client-set-requirements"><primary>geoclue_master_client_set_requirements</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_master_client_set_requirements
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeoclueAccuracyLevel">GeoclueAccuracyLevel</link> min_accuracy,
+                                                         <link linkend="int">int</link> min_time,
+                                                         <link linkend="gboolean">gboolean</link> require_updates,
+                                                         <link linkend="GeoclueResourceFlags">GeoclueResourceFlags</link> allowed_resources,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Sets the criteria that should be used when selecting the used provider</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>min_accuracy</parameter>&nbsp;:</term>
+<listitem><simpara> The required minimum accuracy as a <link linkend="GeoclueAccuracyLevel"><type>GeoclueAccuracyLevel</type></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>min_time</parameter>&nbsp;:</term>
+<listitem><simpara> The minimum time between update signals (currently not implemented)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>require_updates</parameter>&nbsp;:</term>
+<listitem><simpara> Whether the updates (signals) are required. Only applies to interfaces with signals
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>allowed_resources</parameter>&nbsp;:</term>
+<listitem><simpara> The resources that are allowed to be used as a <link linkend="GeoclueResourceFlags"><type>GeoclueResourceFlags</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-create-address" role="function">
+<title>geoclue_master_client_create_address ()</title>
+<indexterm zone="geoclue-master-client-create-address"><primary>geoclue_master_client_create_address</primary></indexterm><programlisting><link linkend="GeoclueAddress">GeoclueAddress</link>*     geoclue_master_client_create_address
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Starts the GeoclueMasterClient address provider and returns 
+a <link linkend="GeoclueAddress"><type>GeoclueAddress</type></link> that uses the same D-Bus object as the <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> New <link linkend="GeoclueAddress"><type>GeoclueAddress</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="CreateAddressCallback" role="function">
+<title>CreateAddressCallback ()</title>
+<indexterm zone="CreateAddressCallback"><primary>CreateAddressCallback</primary></indexterm><programlisting><link linkend="void">void</link>                (*CreateAddressCallback)            (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeoclueAddress">GeoclueAddress</link> *address,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>address</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara>
+
+
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-create-address-async" role="function">
+<title>geoclue_master_client_create_address_async ()</title>
+<indexterm zone="geoclue-master-client-create-address-async"><primary>geoclue_master_client_create_address_async</primary></indexterm><programlisting><link linkend="void">void</link>                geoclue_master_client_create_address_async
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="CreateAddressCallback">CreateAddressCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+Function returns (essentially) immediately and calls <parameter>callback</parameter> when it has started the address provider
+and a <link linkend="GeoclueAddress"><type>GeoclueAddress</type></link> is available.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="CreateAddressCallback"><type>CreateAddressCallback</type></link> function that should be called when return values are available
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara> pointer for user specified data
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-create-position" role="function">
+<title>geoclue_master_client_create_position ()</title>
+<indexterm zone="geoclue-master-client-create-position"><primary>geoclue_master_client_create_position</primary></indexterm><programlisting><link linkend="GeocluePosition">GeocluePosition</link>*    geoclue_master_client_create_position
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Starts the GeoclueMasterClient position provider and returns 
+a <link linkend="GeocluePosition"><type>GeocluePosition</type></link> that uses the same D-Bus object as the <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> A pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> New <link linkend="GeocluePosition"><type>GeocluePosition</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on error
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="CreatePositionCallback" role="function">
+<title>CreatePositionCallback ()</title>
+<indexterm zone="CreatePositionCallback"><primary>CreatePositionCallback</primary></indexterm><programlisting><link linkend="void">void</link>                (*CreatePositionCallback)           (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="GeocluePosition">GeocluePosition</link> *position,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>position</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara>
+
+
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-create-position-async" role="function">
+<title>geoclue_master_client_create_position_async ()</title>
+<indexterm zone="geoclue-master-client-create-position-async"><primary>geoclue_master_client_create_position_async</primary></indexterm><programlisting><link linkend="void">void</link>                geoclue_master_client_create_position_async
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="CreatePositionCallback">CreatePositionCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+Function returns (essentially) immediately and calls <parameter>callback</parameter> when it has started the position provider
+and a <link linkend="GeocluePosition"><type>GeocluePosition</type></link> is available.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="CreatePositionCallback"><type>CreatePositionCallback</type></link> function that should be called when return values are available
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara> pointer for user specified data
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-get-address-provider" role="function">
+<title>geoclue_master_client_get_address_provider ()</title>
+<indexterm zone="geoclue-master-client-get-address-provider"><primary>geoclue_master_client_get_address_provider</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_master_client_get_address_provider
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="char">char</link> **service,
+                                                         <link linkend="char">char</link> **path,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Gets name and other information for the currently used address provider.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned provider name or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned provider description or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned D-Bus service name or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned D-Bus object path or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-client-get-position-provider" role="function">
+<title>geoclue_master_client_get_position_provider ()</title>
+<indexterm zone="geoclue-master-client-get-position-provider"><primary>geoclue_master_client_get_position_provider</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_master_client_get_position_provider
+                                                        (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="char">char</link> **service,
+                                                         <link linkend="char">char</link> **path,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Gets name and other information for the currently used position provider.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned provider name or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned provider description or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned D-Bus service name or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned D-Bus object path or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+<refsect1 id="GeoclueMasterClient.property-details" role="property_details">
+<title role="property_details.title">Property Details</title>
+<refsect2 id="GeoclueMasterClient--object-path"><title>The <literal>&quot;object-path&quot;</literal> property</title>
+<indexterm zone="GeoclueMasterClient--object-path"><primary>GeoclueMasterClient:object-path</primary></indexterm><programlisting>  &quot;object-path&quot;              <link linkend="gchar">gchar</link>*                : Write / Construct Only</programlisting>
+<para>The DBus path to the object.</para><para>Default value: ""</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1 id="GeoclueMasterClient.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="GeoclueMasterClient-address-provider-changed"><title>The <literal>&quot;address-provider-changed&quot;</literal> signal</title>
+<indexterm zone="GeoclueMasterClient-address-provider-changed"><primary>GeoclueMasterClient::address-provider-changed</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                        <link linkend="gchar">gchar</link>               *name,
+                                                        <link linkend="gchar">gchar</link>               *description,
+                                                        <link linkend="gchar">gchar</link>               *service,
+                                                        <link linkend="gchar">gchar</link>               *path,
+                                                        <link linkend="gpointer">gpointer</link>             user_data)        : Run First / No Recursion</programlisting>
+<para>
+The address-provider-changed signal is emitted each time the used address provider
+changes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> object emitting the signal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> name of the new provider (e.g. "Hostip") or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> a short description of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus service name of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus object path name of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2><refsect2 id="GeoclueMasterClient-position-provider-changed"><title>The <literal>&quot;position-provider-changed&quot;</literal> signal</title>
+<indexterm zone="GeoclueMasterClient-position-provider-changed"><primary>GeoclueMasterClient::position-provider-changed</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="GeoclueMasterClient">GeoclueMasterClient</link> *client,
+                                                        <link linkend="gchar">gchar</link>               *name,
+                                                        <link linkend="gchar">gchar</link>               *description,
+                                                        <link linkend="gchar">gchar</link>               *service,
+                                                        <link linkend="gchar">gchar</link>               *path,
+                                                        <link linkend="gpointer">gpointer</link>             user_data)        : Run First / No Recursion</programlisting>
+<para>
+The position-provider-changed signal is emitted each time the used position provider
+changes.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>client</parameter>&nbsp;:</term>
+<listitem><simpara> the <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> object emitting the signal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> name of the new provider (e.g. "Hostip") or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> a short description of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus service name of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus object path name of the new provider or <link linkend="NULL:CAPS"><literal>NULL</literal></link> if there is no provider
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
+
+
+
+</refentry>

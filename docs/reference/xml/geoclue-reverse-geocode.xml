@@ -1,0 +1,234 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GeoclueReverseGeocode">
+<refmeta>
+<refentrytitle role="top_of_page" id="GeoclueReverseGeocode.top_of_page">GeoclueReverseGeocode</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GeoclueReverseGeocode</refname>
+<refpurpose>Geoclue reverse geocode client API</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GeoclueReverseGeocode.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+#define             <link linkend="GEOCLUE-REVERSE-GEOCODE-INTERFACE-NAME:CAPS">GEOCLUE_REVERSE_GEOCODE_INTERFACE_NAME</link>
+                    <link linkend="GeoclueReverseGeocode-struct">GeoclueReverseGeocode</link>;
+<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link>* <link linkend="geoclue-reverse-geocode-new">geoclue_reverse_geocode_new</link>      (const <link linkend="char">char</link> *service,
+                                                         const <link linkend="char">char</link> *path);
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-reverse-geocode-position-to-address">geoclue_reverse_geocode_position_to_address</link>
+                                                        (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="double">double</link> latitude,
+                                                         <link linkend="double">double</link> longitude,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *position_accuracy,
+                                                         <link linkend="GHashTable">GHashTable</link> **details,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> **address_accuracy,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="void">void</link>                (<link linkend="GeoclueReverseGeocodeCallback">*GeoclueReverseGeocodeCallback</link>)    (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="GHashTable">GHashTable</link> *details,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *accuracy,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+<link linkend="void">void</link>                <link linkend="geoclue-reverse-geocode-position-to-address-async">geoclue_reverse_geocode_position_to_address_async</link>
+                                                        (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="double">double</link> latitude,
+                                                         <link linkend="double">double</link> longitude,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *accuracy,
+                                                         <link linkend="GeoclueReverseGeocodeCallback">GeoclueReverseGeocodeCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GeoclueReverseGeocode.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----<link linkend="GeoclueProvider">GeoclueProvider</link>
+         +----GeoclueReverseGeocode
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+
+
+
+<refsect1 id="GeoclueReverseGeocode.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GeoclueReverseGeocode"><type>GeoclueReverseGeocode</type></link> contains reverse geocoding methods. 
+It is part of the Geoclue public C client API which uses D-Bus 
+to communicate with the actual provider.
+</para>
+<para>
+After a <link linkend="GeoclueReverseGeocode"><type>GeoclueReverseGeocode</type></link> is created with 
+<link linkend="geoclue-reverse-geocode-new"><function>geoclue_reverse_geocode_new()</function></link>, the 
+<link linkend="geoclue-reverse-geocode-position-to-address"><function>geoclue_reverse_geocode_position_to_address()</function></link> and 
+<link linkend="geoclue-reverse-geocode-position-to-address-async"><function>geoclue_reverse_geocode_position_to_address_async()</function></link> method can be used to 
+obtain the address of a known position.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GeoclueReverseGeocode.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GEOCLUE-REVERSE-GEOCODE-INTERFACE-NAME:CAPS" role="macro">
+<title>GEOCLUE_REVERSE_GEOCODE_INTERFACE_NAME</title>
+<indexterm zone="GEOCLUE-REVERSE-GEOCODE-INTERFACE-NAME:CAPS"><primary>GEOCLUE_REVERSE_GEOCODE_INTERFACE_NAME</primary></indexterm><programlisting>#define GEOCLUE_REVERSE_GEOCODE_INTERFACE_NAME "org.freedesktop.Geoclue.ReverseGeocode"
+</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueReverseGeocode-struct" role="struct">
+<title>GeoclueReverseGeocode</title>
+<indexterm zone="GeoclueReverseGeocode-struct"><primary>GeoclueReverseGeocode</primary></indexterm><programlisting>typedef struct _GeoclueReverseGeocode GeoclueReverseGeocode;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="geoclue-reverse-geocode-new" role="function">
+<title>geoclue_reverse_geocode_new ()</title>
+<indexterm zone="geoclue-reverse-geocode-new"><primary>geoclue_reverse_geocode_new</primary></indexterm><programlisting><link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link>* geoclue_reverse_geocode_new      (const <link linkend="char">char</link> *service,
+                                                         const <link linkend="char">char</link> *path);</programlisting>
+<para>
+Creates a <link linkend="GeoclueReverseGeocode"><type>GeoclueReverseGeocode</type></link> with given D-Bus service name and path.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus service name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> D-Bus path name
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> Pointer to a new <link linkend="GeoclueReverseGeocode"><type>GeoclueReverseGeocode</type></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-reverse-geocode-position-to-address" role="function">
+<title>geoclue_reverse_geocode_position_to_address ()</title>
+<indexterm zone="geoclue-reverse-geocode-position-to-address"><primary>geoclue_reverse_geocode_position_to_address</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_reverse_geocode_position_to_address
+                                                        (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="double">double</link> latitude,
+                                                         <link linkend="double">double</link> longitude,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *position_accuracy,
+                                                         <link linkend="GHashTable">GHashTable</link> **details,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> **address_accuracy,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Obtains an address for the position defined by <parameter>latitude</parameter> and <parameter>longitude</parameter>.
+<parameter>details</parameter> is a <link linkend="GHashTable"><type>GHashTable</type></link> with the returned address data, see 
+<ulink url="geoclue-types.html">geoclue-types.h</ulink> for the hashtable keys.
+</para>
+<para>
+If the caller is not interested in some values, the pointers can be 
+left <link linkend="NULL:CAPS"><literal>NULL</literal></link>. If accuracy of the position is not known, an accuracy with
+GeoclueAccuracyLevel GEOCLUE_ACCURACY_DETAILED should be used.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>revgeocode</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>latitude</parameter>&nbsp;:</term>
+<listitem><simpara> latitude in degrees
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>longitude</parameter>&nbsp;:</term>
+<listitem><simpara> longitude in degrees
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>position_accuracy</parameter>&nbsp;:</term>
+<listitem><simpara> Accuracy of the given latitude and longitude
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>details</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="GHashTable"><type>GHashTable</type></link> with address details or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>address_accuracy</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to accuracy of the returned address or <link linkend="NULL:CAPS"><literal>NULL</literal></link> 
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="Gerror"><type>Gerror</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if there is no <parameter>error</parameter>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="GeoclueReverseGeocodeCallback" role="function">
+<title>GeoclueReverseGeocodeCallback ()</title>
+<indexterm zone="GeoclueReverseGeocodeCallback"><primary>GeoclueReverseGeocodeCallback</primary></indexterm><programlisting><link linkend="void">void</link>                (*GeoclueReverseGeocodeCallback)    (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="GHashTable">GHashTable</link> *details,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *accuracy,
+                                                         <link linkend="GError">GError</link> *error,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+Callback function for <link linkend="geoclue-reverse-geocode-position-to-address-async"><function>geoclue_reverse_geocode_position_to_address_async()</function></link>.
+</para>
+<para>
+see <ulink url="geoclue-types.html">geoclue-types.h</ulink> for the 
+hashtable keys used in <parameter>details</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>revgeocode</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueReverseGeocode"><type>GeoclueReverseGeocode</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>details</parameter>&nbsp;:</term>
+<listitem><simpara> Address details as <link linkend="GHashTable"><type>GHashTable</type></link>.
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>accuracy</parameter>&nbsp;:</term>
+<listitem><simpara> Accuracy of measurement as <link linkend="GeoclueAccuracy"><type>GeoclueAccuracy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Error as <link linkend="Gerror"><type>Gerror</type></link> (may be <link linkend="NULL:CAPS"><literal>NULL</literal></link>)
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara> User data pointer set in <link linkend="geoclue-reverse-geocode-position-to-address-async"><function>geoclue_reverse_geocode_position_to_address_async()</function></link>
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-reverse-geocode-position-to-address-async" role="function">
+<title>geoclue_reverse_geocode_position_to_address_async ()</title>
+<indexterm zone="geoclue-reverse-geocode-position-to-address-async"><primary>geoclue_reverse_geocode_position_to_address_async</primary></indexterm><programlisting><link linkend="void">void</link>                geoclue_reverse_geocode_position_to_address_async
+                                                        (<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link> *revgeocode,
+                                                         <link linkend="double">double</link> latitude,
+                                                         <link linkend="double">double</link> longitude,
+                                                         <link linkend="GeoclueAccuracy">GeoclueAccuracy</link> *accuracy,
+                                                         <link linkend="GeoclueReverseGeocodeCallback">GeoclueReverseGeocodeCallback</link> callback,
+                                                         <link linkend="gpointer">gpointer</link> userdata);</programlisting>
+<para>
+Function returns (essentially) immediately and calls <parameter>callback</parameter> when the reverse-geocoded 
+address data is available or when D-Bus timeouts.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>revgeocode</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>latitude</parameter>&nbsp;:</term>
+<listitem><simpara> Latitude in degrees
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>longitude</parameter>&nbsp;:</term>
+<listitem><simpara> Longitude in degrees
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>accuracy</parameter>&nbsp;:</term>
+<listitem><simpara> Accuracy of the given position as <link linkend="GeoclueAccuracy"><type>GeoclueAccuracy</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>callback</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueAddressCallback"><type>GeoclueAddressCallback</type></link> function that should be called when return values are available
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>userdata</parameter>&nbsp;:</term>
+<listitem><simpara> pointer for user specified data
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

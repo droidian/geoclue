@@ -1,0 +1,88 @@
+<!-- ##### SECTION Title ##### -->
+GeoclueAddress
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_INTERFACE_NAME ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT GeoclueAddress ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SIGNAL GeoclueAddress::address-changed ##### -->
+<para>
+
+</para>
+
+@geoclueaddress: the object which received the signal.
+@arg1: 
+@arg2: 
+@arg3: 
+
+<!-- ##### FUNCTION geoclue_address_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_address_get_address ##### -->
+<para>
+
+</para>
+
+@address: 
+@timestamp: 
+@details: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GeoclueAddressCallback ##### -->
+<para>
+
+</para>
+
+@address: 
+@timestamp: 
+@details: 
+@accuracy: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_address_get_address_async ##### -->
+<para>
+
+</para>
+
+@address: 
+@callback: 
+@userdata: 
+
+

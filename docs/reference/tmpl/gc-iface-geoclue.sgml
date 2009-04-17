@@ -1,0 +1,34 @@
+<!-- ##### SECTION Title ##### -->
+GcIfaceGeoclue
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcIfaceGeoclue ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_iface_geoclue_emit_status_changed ##### -->
+<para>
+
+</para>
+
+@gc: 
+@status: 
+
+

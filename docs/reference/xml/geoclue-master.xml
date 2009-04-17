@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GeoclueMaster">
+<refmeta>
+<refentrytitle role="top_of_page" id="GeoclueMaster.top_of_page">GeoclueMaster</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GeoclueMaster</refname>
+<refpurpose>Geoclue Master API</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GeoclueMaster.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+#define             <link linkend="GEOCLUE-MASTER-DBUS-SERVICE:CAPS">GEOCLUE_MASTER_DBUS_SERVICE</link>
+#define             <link linkend="GEOCLUE-MASTER-DBUS-PATH:CAPS">GEOCLUE_MASTER_DBUS_PATH</link>
+#define             <link linkend="GEOCLUE-MASTER-DBUS-INTERFACE:CAPS">GEOCLUE_MASTER_DBUS_INTERFACE</link>
+                    <link linkend="GeoclueMaster-struct">GeoclueMaster</link>;
+<link linkend="GeoclueMaster">GeoclueMaster</link>*      <link linkend="geoclue-master-get-default">geoclue_master_get_default</link>          (void);
+<link linkend="GeoclueMasterClient">GeoclueMasterClient</link>* <link linkend="geoclue-master-create-client">geoclue_master_create_client</link>       (<link linkend="GeoclueMaster">GeoclueMaster</link> *master,
+                                                         <link linkend="char">char</link> **object_path,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GeoclueMaster.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----GeoclueMaster
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+
+
+
+<refsect1 id="GeoclueMaster.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GeoclueMaster"><type>GeoclueMaster</type></link> is part of the Geoclue public C client API. It uses  
+D-Bus to communicate with the actual Master service.
+</para>
+<para>
+<link linkend="GeoclueMaster"><type>GeoclueMaster</type></link> is a singleton service, so it should not be created
+explicitly: instead one should use <link linkend="geoclue-master-get-default"><function>geoclue_master_get_default()</function></link> to
+get a reference to it. It can be used to 
+create a <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> object.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GeoclueMaster.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GEOCLUE-MASTER-DBUS-SERVICE:CAPS" role="macro">
+<title>GEOCLUE_MASTER_DBUS_SERVICE</title>
+<indexterm zone="GEOCLUE-MASTER-DBUS-SERVICE:CAPS"><primary>GEOCLUE_MASTER_DBUS_SERVICE</primary></indexterm><programlisting>#define GEOCLUE_MASTER_DBUS_SERVICE "org.freedesktop.Geoclue.Master"
+</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-MASTER-DBUS-PATH:CAPS" role="macro">
+<title>GEOCLUE_MASTER_DBUS_PATH</title>
+<indexterm zone="GEOCLUE-MASTER-DBUS-PATH:CAPS"><primary>GEOCLUE_MASTER_DBUS_PATH</primary></indexterm><programlisting>#define GEOCLUE_MASTER_DBUS_PATH "/org/freedesktop/Geoclue/Master"
+</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-MASTER-DBUS-INTERFACE:CAPS" role="macro">
+<title>GEOCLUE_MASTER_DBUS_INTERFACE</title>
+<indexterm zone="GEOCLUE-MASTER-DBUS-INTERFACE:CAPS"><primary>GEOCLUE_MASTER_DBUS_INTERFACE</primary></indexterm><programlisting>#define GEOCLUE_MASTER_DBUS_INTERFACE "org.freedesktop.Geoclue.Master"
+</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueMaster-struct" role="struct">
+<title>GeoclueMaster</title>
+<indexterm zone="GeoclueMaster-struct"><primary>GeoclueMaster</primary></indexterm><programlisting>typedef struct _GeoclueMaster GeoclueMaster;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="geoclue-master-get-default" role="function">
+<title>geoclue_master_get_default ()</title>
+<indexterm zone="geoclue-master-get-default"><primary>geoclue_master_get_default</primary></indexterm><programlisting><link linkend="GeoclueMaster">GeoclueMaster</link>*      geoclue_master_get_default          (void);</programlisting>
+<para>
+Returns the default <link linkend="GeoclueMaster"><type>GeoclueMaster</type></link> object. Should be unreferenced once
+the client is finished with it.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> A reference to the default <link linkend="GeoclueMaster"><type>GeoclueMaster</type></link> object
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-master-create-client" role="function">
+<title>geoclue_master_create_client ()</title>
+<indexterm zone="geoclue-master-create-client"><primary>geoclue_master_create_client</primary></indexterm><programlisting><link linkend="GeoclueMasterClient">GeoclueMasterClient</link>* geoclue_master_create_client       (<link linkend="GeoclueMaster">GeoclueMaster</link> *master,
+                                                         <link linkend="char">char</link> **object_path,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Creates a <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> and puts the D-Bus object path in
+<parameter>object_path</parameter>.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>master</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueMaster"><type>GeoclueMaster</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>object_path</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> D-Bus object path or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer to returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> A new <link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link> on error.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+<refsect1 id="GeoclueMaster.see-also">
+<title>See Also</title>
+<link linkend="GeoclueMasterClient"><type>GeoclueMasterClient</type></link>
+</refsect1>
+
+</refentry>

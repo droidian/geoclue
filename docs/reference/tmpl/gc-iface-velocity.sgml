@@ -1,0 +1,38 @@
+<!-- ##### SECTION Title ##### -->
+GcIfaceVelocity
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcIfaceVelocity ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_iface_velocity_emit_velocity_changed ##### -->
+<para>
+
+</para>
+
+@gc: 
+@fields: 
+@timestamp: 
+@speed: 
+@direction: 
+@climb: 
+
+

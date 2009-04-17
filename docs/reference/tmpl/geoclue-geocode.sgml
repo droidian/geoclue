@@ -1,0 +1,83 @@
+<!-- ##### SECTION Title ##### -->
+GeoclueGeocode
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_GEOCODE_INTERFACE_NAME ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT GeoclueGeocode ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION geoclue_geocode_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_geocode_address_to_position ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@details: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GeoclueGeocodeCallback ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@fields: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_geocode_address_to_position_async ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@details: 
+@callback: 
+@userdata: 
+
+

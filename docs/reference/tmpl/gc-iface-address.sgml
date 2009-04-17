@@ -1,0 +1,36 @@
+<!-- ##### SECTION Title ##### -->
+GcIfaceAddress
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcIfaceAddress ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_iface_address_emit_address_changed ##### -->
+<para>
+
+</para>
+
+@gc: 
+@timestamp: 
+@address: 
+@accuracy: 
+
+

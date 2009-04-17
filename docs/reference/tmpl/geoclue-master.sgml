@@ -1,0 +1,65 @@
+<!-- ##### SECTION Title ##### -->
+GeoclueMaster
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_MASTER_DBUS_SERVICE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_MASTER_DBUS_PATH ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_MASTER_DBUS_INTERFACE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT GeoclueMaster ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION geoclue_master_get_default ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_master_create_client ##### -->
+<para>
+
+</para>
+
+@master: 
+@object_path: 
+@error: 
+@Returns: 
+
+

@@ -1,0 +1,258 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GcWebService">
+<refmeta>
+<refentrytitle role="top_of_page" id="GcWebService.top_of_page">GcWebService</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GcWebService</refname>
+<refpurpose>Web service helper object for Geoclue providers.</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GcWebService.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+                    <link linkend="GcWebService-struct">GcWebService</link>;
+<link linkend="void">void</link>                <link linkend="gc-web-service-set-base-url">gc_web_service_set_base_url</link>         (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> *url);
+<link linkend="gboolean">gboolean</link>            <link linkend="gc-web-service-add-namespace">gc_web_service_add_namespace</link>        (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> *namespace,
+                                                         <link linkend="gchar">gchar</link> *uri);
+<link linkend="gboolean">gboolean</link>            <link linkend="gc-web-service-query">gc_web_service_query</link>                (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         ...);
+<link linkend="gboolean">gboolean</link>            <link linkend="gc-web-service-get-string">gc_web_service_get_string</link>           (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> **value,
+                                                         <link linkend="gchar">gchar</link> *xpath);
+<link linkend="gboolean">gboolean</link>            <link linkend="gc-web-service-get-double">gc_web_service_get_double</link>           (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gdouble">gdouble</link> *value,
+                                                         <link linkend="gchar">gchar</link> *xpath);
+<link linkend="gboolean">gboolean</link>            <link linkend="gc-web-service-get-response">gc_web_service_get_response</link>         (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="guchar">guchar</link> **response,
+                                                         <link linkend="gint">gint</link> *response_length);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GcWebService.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----GcWebService
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+
+
+
+<refsect1 id="GcWebService.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GcWebService"><type>GcWebService</type></link> is a web service abstraction for Geoclue provider 
+implementations. It handles basic http stuff and xml parsing 
+(although the raw data is available through 
+<link linkend="gc-web-service-get-response"><function>gc_web_service_get_response()</function></link> as well).
+</para>
+<para>
+At the moment xml parsing functions only exist for double and 
+char-array data types. Adding new functions is trivial, though.
+<informalexample>
+<programlisting>
+. . .
+
+<link linkend="GcWebService">GcWebService</link> *web_service;
+web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
+gc_web_service_set_base_url (web_service, "http://example.org");
+
+/ * Add namespaces if needed * / 
+gc_web_service_add_namespace (web_service,
+                              "ns_name", "http://example.org/ns");
+
+. . .
+
+/ * Fetch document "http://api.example.org?key1=val1&amp;key2=val2" * /
+if (!gc_web_service_query (web_service, 
+                           "key1", "val1"
+                           "key2", val2"
+                           (char *)0)) {
+	/ * error * /
+	return;
+}
+
+/ * Use XPath expressions to parse the xml in fetched document * /
+gchar *str;
+if (gc_web_service_get_string (web_service,
+                               &amp;str, "//path/to/element")) {
+	g_debug("got string: %s", str);
+}
+
+gdouble number;
+if (gc_web_service_get_double (web_service,
+                               &amp;number, "//path/to/another/element")) {
+	g_debug("got double: %f", number);
+}
+
+. . . 
+
+g_object_unref (G_OBJECT (web_service));
+</programlisting>
+</informalexample></para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GcWebService.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GcWebService-struct" role="struct">
+<title>GcWebService</title>
+<indexterm zone="GcWebService-struct"><primary>GcWebService</primary></indexterm><programlisting>typedef struct _GcWebService GcWebService;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="gc-web-service-set-base-url" role="function">
+<title>gc_web_service_set_base_url ()</title>
+<indexterm zone="gc-web-service-set-base-url"><primary>gc_web_service_set_base_url</primary></indexterm><programlisting><link linkend="void">void</link>                gc_web_service_set_base_url         (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> *url);</programlisting>
+<para>
+Sets base url for the web service. Must be called before calls to 
+gc_web_service_get_* -methods.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="GcWebService"><type>GcWebService</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>url</parameter>&nbsp;:</term>
+<listitem><simpara> base url
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="gc-web-service-add-namespace" role="function">
+<title>gc_web_service_add_namespace ()</title>
+<indexterm zone="gc-web-service-add-namespace"><primary>gc_web_service_add_namespace</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            gc_web_service_add_namespace        (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> *namespace,
+                                                         <link linkend="gchar">gchar</link> *uri);</programlisting>
+<para>
+Adds an xml namespace that will be used in all following calls to 
+gc_web_service_get_*-functions.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="GcWebService"><type>GcWebService</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>namespace</parameter>&nbsp;:</term>
+<listitem><simpara> Namespace name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>uri</parameter>&nbsp;:</term>
+<listitem><simpara> Namespace uri 
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="gc-web-service-query" role="function">
+<title>gc_web_service_query ()</title>
+<indexterm zone="gc-web-service-query"><primary>gc_web_service_query</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            gc_web_service_query                (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         ...);</programlisting>
+<para>
+Fetches data from the web. The url is constructed using the 
+optional arguments as GET parameters (see example in the 
+Description-section). Data should be read using 
+gc_web_service_get_* -functions.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GcWebService"><type>GcWebService</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>...</parameter>&nbsp;:</term>
+<listitem><simpara> NULL-terminated list of key-value gchar* pairs
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="gc-web-service-get-string" role="function">
+<title>gc_web_service_get_string ()</title>
+<indexterm zone="gc-web-service-get-string"><primary>gc_web_service_get_string</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            gc_web_service_get_string           (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gchar">gchar</link> **value,
+                                                         <link linkend="gchar">gchar</link> *xpath);</programlisting>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>xpath</parameter>&nbsp;:</term>
+<listitem><simpara>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara>
+
+
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="gc-web-service-get-double" role="function">
+<title>gc_web_service_get_double ()</title>
+<indexterm zone="gc-web-service-get-double"><primary>gc_web_service_get_double</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            gc_web_service_get_double           (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="gdouble">gdouble</link> *value,
+                                                         <link linkend="gchar">gchar</link> *xpath);</programlisting>
+<para>
+Extracts a <parameter>value</parameter> from the data that was fetched in the last call 
+to <link linkend="gc-web-service-query"><function>gc_web_service_query()</function></link> using XPath expression <parameter>xpath</parameter> (returned 
+value is the first match).</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="GcWebService"><type>GcWebService</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>value</parameter>&nbsp;:</term>
+<listitem><simpara> returned gchar array
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>xpath</parameter>&nbsp;:</term>
+<listitem><simpara> XPath expression used to find the value  
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if a value was found.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="gc-web-service-get-response" role="function">
+<title>gc_web_service_get_response ()</title>
+<indexterm zone="gc-web-service-get-response"><primary>gc_web_service_get_response</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            gc_web_service_get_response         (<link linkend="GcWebService">GcWebService</link> *self,
+                                                         <link linkend="guchar">guchar</link> **response,
+                                                         <link linkend="gint">gint</link> *response_length);</programlisting>
+<para>
+Returns the raw data fetched with the last call to 
+<link linkend="gc-web-service-query"><function>gc_web_service_query()</function></link>. Data may be unterminated.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>self</parameter>&nbsp;:</term>
+<listitem><simpara> The <link linkend="GcWebService"><type>GcWebService</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>response</parameter>&nbsp;:</term>
+<listitem><simpara> returned guchar array
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>response_length</parameter>&nbsp;:</term>
+<listitem><simpara> length of the returned array
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success.
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

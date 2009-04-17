@@ -1,0 +1,88 @@
+<!-- ##### SECTION Title ##### -->
+GcWebService
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcWebService ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_web_service_set_base_url ##### -->
+<para>
+
+</para>
+
+@self: 
+@url: 
+
+
+<!-- ##### FUNCTION gc_web_service_add_namespace ##### -->
+<para>
+
+</para>
+
+@self: 
+@namespace: 
+@uri: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_query ##### -->
+<para>
+
+</para>
+
+@self: 
+@Varargs: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_get_string ##### -->
+<para>
+
+</para>
+
+@self: 
+@value: 
+@xpath: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_get_double ##### -->
+<para>
+
+</para>
+
+@self: 
+@value: 
+@xpath: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_get_response ##### -->
+<para>
+
+</para>
+
+@self: 
+@response: 
+@response_length: 
+@Returns: 
+
+

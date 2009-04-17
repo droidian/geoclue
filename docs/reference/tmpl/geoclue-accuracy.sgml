@@ -1,0 +1,82 @@
+<!-- ##### SECTION Title ##### -->
+geoclue-accuracy
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_ACCURACY_TYPE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### TYPEDEF GeoclueAccuracy ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION geoclue_accuracy_new ##### -->
+<para>
+
+</para>
+
+@level: 
+@horizontal_accuracy: 
+@vertical_accuracy: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_accuracy_free ##### -->
+<para>
+
+</para>
+
+@accuracy: 
+
+
+<!-- ##### FUNCTION geoclue_accuracy_get_details ##### -->
+<para>
+
+</para>
+
+@accuracy: 
+@level: 
+@horizontal_accuracy: 
+@vertical_accuracy: 
+
+
+<!-- ##### FUNCTION geoclue_accuracy_set_details ##### -->
+<para>
+
+</para>
+
+@accuracy: 
+@level: 
+@horizontal_accuracy: 
+@vertical_accuracy: 
+
+
+<!-- ##### FUNCTION geoclue_accuracy_copy ##### -->
+<para>
+
+</para>
+
+@accuracy: 
+@Returns: 
+
+

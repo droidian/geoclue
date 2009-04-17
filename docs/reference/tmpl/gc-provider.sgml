@@ -1,0 +1,37 @@
+<!-- ##### SECTION Title ##### -->
+GcProvider
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### STRUCT GcProvider ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### FUNCTION gc_provider_set_details ##### -->
+<para>
+
+</para>
+
+@provider: 
+@service: 
+@path: 
+@name: 
+@description: 
+
+

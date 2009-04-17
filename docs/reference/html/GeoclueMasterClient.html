@@ -1,0 +1,676 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>GeoclueMasterClient</title>
+<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
+<link rel="start" href="index.html" title="Geoclue Reference Manual">
+<link rel="up" href="rn01.html" title="C API">
+<link rel="prev" href="GeoclueMaster.html" title="GeoclueMaster">
+<link rel="next" href="GeoclueProvider.html" title="GeoclueProvider">
+<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
+<link rel="reference" href="rn01.html" title="C API">
+<link rel="reference" href="rn02.html" title="D-Bus API">
+</head>
+<body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
+<tr valign="middle">
+<td><a accesskey="p" href="GeoclueMaster.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
+<td><a accesskey="u" href="rn01.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
+<th width="100%" align="center">Geoclue Reference Manual</th>
+<td><a accesskey="n" href="GeoclueProvider.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
+</tr>
+<tr><td colspan="5" class="shortcuts"><nobr><a href="#GeoclueMasterClient.synopsis" class="shortcut">Top</a>
+                   | 
+                  <a href="#GeoclueMasterClient.description" class="shortcut">Description</a>
+                   | 
+                  <a href="#GeoclueMasterClient.object-hierarchy" class="shortcut">Object Hierarchy</a>
+                   | 
+                  <a href="#GeoclueMasterClient.properties" class="shortcut">Properties</a>
+                   | 
+                  <a href="#GeoclueMasterClient.signals" class="shortcut">Signals</a></nobr></td></tr>
+</table>
+<div class="refentry" lang="en">
+<a name="GeoclueMasterClient"></a><div class="titlepage"></div>
+<div class="refnamediv"><table width="100%"><tr>
+<td valign="top">
+<h2><span class="refentrytitle"><a name="GeoclueMasterClient.top_of_page"></a>GeoclueMasterClient</span></h2>
+<p>GeoclueMasterClient — Geoclue MasterClient API</p>
+</td>
+<td valign="top" align="right"></td>
+</tr></table></div>
+<div class="refsynopsisdiv">
+<a name="GeoclueMasterClient.synopsis"></a><h2>Synopsis</h2>
+<pre class="synopsis">
+#define             <a class="link" href="GeoclueMasterClient.html#GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS" title="GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE">GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE</a>
+                    <a class="link" href="GeoclueMasterClient.html#GeoclueMasterClient-struct" title="GeoclueMasterClient">GeoclueMasterClient</a>;
+gboolean            <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-set-requirements" title="geoclue_master_client_set_requirements ()">geoclue_master_client_set_requirements</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel">GeoclueAccuracyLevel</a> min_accuracy,
+                                                         int min_time,
+                                                         gboolean require_updates,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeoclueResourceFlags" title="enum GeoclueResourceFlags">GeoclueResourceFlags</a> allowed_resources,
+                                                         GError **error);
+<a class="link" href="GeoclueAddress.html" title="GeoclueAddress">GeoclueAddress</a>*     <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-create-address" title="geoclue_master_client_create_address ()">geoclue_master_client_create_address</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         GError **error);
+void                (<a class="link" href="GeoclueMasterClient.html#CreateAddressCallback" title="CreateAddressCallback ()">*CreateAddressCallback</a>)            (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueAddress.html" title="GeoclueAddress">GeoclueAddress</a> *address,
+                                                         GError *error,
+                                                         gpointer userdata);
+void                <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-create-address-async" title="geoclue_master_client_create_address_async ()">geoclue_master_client_create_address_async</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueMasterClient.html#CreateAddressCallback" title="CreateAddressCallback ()">CreateAddressCallback</a> callback,
+                                                         gpointer userdata);
+<a class="link" href="GeocluePosition.html" title="GeocluePosition">GeocluePosition</a>*    <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-create-position" title="geoclue_master_client_create_position ()">geoclue_master_client_create_position</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         GError **error);
+void                (<a class="link" href="GeoclueMasterClient.html#CreatePositionCallback" title="CreatePositionCallback ()">*CreatePositionCallback</a>)           (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeocluePosition.html" title="GeocluePosition">GeocluePosition</a> *position,
+                                                         GError *error,
+                                                         gpointer userdata);
+void                <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-create-position-async" title="geoclue_master_client_create_position_async ()">geoclue_master_client_create_position_async</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueMasterClient.html#CreatePositionCallback" title="CreatePositionCallback ()">CreatePositionCallback</a> callback,
+                                                         gpointer userdata);
+gboolean            <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-get-address-provider" title="geoclue_master_client_get_address_provider ()">geoclue_master_client_get_address_provider</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         char **name,
+                                                         char **description,
+                                                         char **service,
+                                                         char **path,
+                                                         GError **error);
+gboolean            <a class="link" href="GeoclueMasterClient.html#geoclue-master-client-get-position-provider" title="geoclue_master_client_get_position_provider ()">geoclue_master_client_get_position_provider</a>
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         char **name,
+                                                         char **description,
+                                                         char **service,
+                                                         char **path,
+                                                         GError **error);
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.object-hierarchy"></a><h2>Object Hierarchy</h2>
+<pre class="synopsis">
+  GObject
+   +----GeoclueMasterClient
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.properties"></a><h2>Properties</h2>
+<pre class="synopsis">
+  "<a class="link" href="GeoclueMasterClient.html#GeoclueMasterClient--object-path" title='The "object-path" property'>object-path</a>"              gchar*                : Write / Construct Only
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.signals"></a><h2>Signals</h2>
+<pre class="synopsis">
+  "<a class="link" href="GeoclueMasterClient.html#GeoclueMasterClient-address-provider-changed" title='The "address-provider-changed" signal'>address-provider-changed</a>"                       : Run First / No Recursion
+  "<a class="link" href="GeoclueMasterClient.html#GeoclueMasterClient-position-provider-changed" title='The "position-provider-changed" signal'>position-provider-changed</a>"                      : Run First / No Recursion
+</pre>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.description"></a><h2>Description</h2>
+<p>
+<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> is part of the Geoclue public C client API. It uses  
+D-Bus to communicate with the actual Master service.
+</p>
+<p>
+<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> is used to control the client specific behaviour 
+of Geoclue Master. Chapter "Master provider: simple example in C" contains a
+more complete example, but here are the main parts:
+</p>
+<p>
+</p>
+<div class="informalexample"><pre class="programlisting">
+GeoclueMaster *master;
+GeoclueMasterClient *client;
+GeoclueAddress *address;
+
+...
+
+master = geoclue_master_get_default ();
+
+client = geoclue_master_create_client (master, NULL, NULL);
+if (!client) {
+	/ * handle error * /
+}
+
+if (!geoclue_master_client_set_requirements (client,
+                                             GEOCLUE_ACCURACY_LEVEL_NONE,
+                                             0, FALSE,
+                                             GEOCLUE_RESOURCE_NETWORK,
+                                             &amp;error)) {
+	/ * handle error * /
+}
+
+address = geoclue_master_client_create_address (client, error);
+if (!address) {
+	/ * handle error * /
+}
+
+/ * Now we can use address just like we'd use a normal address provider, 
+    but GeoclueMasterClient makes sure that underneath the provider
+    that best matches our requirements is used * /
+</pre></div>
+<p>
+
+</p>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.details"></a><h2>Details</h2>
+<div class="refsect2" lang="en">
+<a name="GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS"></a><h3>GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE</h3>
+<pre class="programlisting">#define GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE "org.freedesktop.Geoclue.MasterClient"
+</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="GeoclueMasterClient-struct"></a><h3>GeoclueMasterClient</h3>
+<pre class="programlisting">typedef struct _GeoclueMasterClient GeoclueMasterClient;</pre>
+<p>
+
+</p>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-set-requirements"></a><h3>geoclue_master_client_set_requirements ()</h3>
+<pre class="programlisting">gboolean            geoclue_master_client_set_requirements
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel">GeoclueAccuracyLevel</a> min_accuracy,
+                                                         int min_time,
+                                                         gboolean require_updates,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeoclueResourceFlags" title="enum GeoclueResourceFlags">GeoclueResourceFlags</a> allowed_resources,
+                                                         GError **error);</pre>
+<p>
+Sets the criteria that should be used when selecting the used provider</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>min_accuracy</code></em> :</span></p></td>
+<td> The required minimum accuracy as a <a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel"><span class="type">GeoclueAccuracyLevel</span></a>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>min_time</code></em> :</span></p></td>
+<td> The minimum time between update signals (currently not implemented)
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>require_updates</code></em> :</span></p></td>
+<td> Whether the updates (signals) are required. Only applies to interfaces with signals
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>allowed_resources</code></em> :</span></p></td>
+<td> The resources that are allowed to be used as a <a class="link" href="geoclue-geoclue-types.html#GeoclueResourceFlags" title="enum GeoclueResourceFlags"><span class="type">GeoclueResourceFlags</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> A pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-create-address"></a><h3>geoclue_master_client_create_address ()</h3>
+<pre class="programlisting"><a class="link" href="GeoclueAddress.html" title="GeoclueAddress">GeoclueAddress</a>*     geoclue_master_client_create_address
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         GError **error);</pre>
+<p>
+Starts the GeoclueMasterClient address provider and returns 
+a <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> that uses the same D-Bus object as the <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> A pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> New <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> or <code class="literal">NULL</code> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="CreateAddressCallback"></a><h3>CreateAddressCallback ()</h3>
+<pre class="programlisting">void                (*CreateAddressCallback)            (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueAddress.html" title="GeoclueAddress">GeoclueAddress</a> *address,
+                                                         GError *error,
+                                                         gpointer userdata);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-create-address-async"></a><h3>geoclue_master_client_create_address_async ()</h3>
+<pre class="programlisting">void                geoclue_master_client_create_address_async
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueMasterClient.html#CreateAddressCallback" title="CreateAddressCallback ()">CreateAddressCallback</a> callback,
+                                                         gpointer userdata);</pre>
+<p>
+Function returns (essentially) immediately and calls <em class="parameter"><code>callback</code></em> when it has started the address provider
+and a <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> is available.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html#CreateAddressCallback" title="CreateAddressCallback ()"><span class="type">CreateAddressCallback</span></a> function that should be called when return values are available
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td> pointer for user specified data
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-create-position"></a><h3>geoclue_master_client_create_position ()</h3>
+<pre class="programlisting"><a class="link" href="GeocluePosition.html" title="GeocluePosition">GeocluePosition</a>*    geoclue_master_client_create_position
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         GError **error);</pre>
+<p>
+Starts the GeoclueMasterClient position provider and returns 
+a <a class="link" href="GeocluePosition.html" title="GeocluePosition"><span class="type">GeocluePosition</span></a> that uses the same D-Bus object as the <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> A pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>.
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> New <a class="link" href="GeocluePosition.html" title="GeocluePosition"><span class="type">GeocluePosition</span></a> or <code class="literal">NULL</code> on error
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="CreatePositionCallback"></a><h3>CreatePositionCallback ()</h3>
+<pre class="programlisting">void                (*CreatePositionCallback)           (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeocluePosition.html" title="GeocluePosition">GeocluePosition</a> *position,
+                                                         GError *error,
+                                                         gpointer userdata);</pre>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>position</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td>
+
+
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-create-position-async"></a><h3>geoclue_master_client_create_position_async ()</h3>
+<pre class="programlisting">void                geoclue_master_client_create_position_async
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         <a class="link" href="GeoclueMasterClient.html#CreatePositionCallback" title="CreatePositionCallback ()">CreatePositionCallback</a> callback,
+                                                         gpointer userdata);</pre>
+<p>
+Function returns (essentially) immediately and calls <em class="parameter"><code>callback</code></em> when it has started the position provider
+and a <a class="link" href="GeocluePosition.html" title="GeocluePosition"><span class="type">GeocluePosition</span></a> is available.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> object
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html#CreatePositionCallback" title="CreatePositionCallback ()"><span class="type">CreatePositionCallback</span></a> function that should be called when return values are available
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td> pointer for user specified data
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-get-address-provider"></a><h3>geoclue_master_client_get_address_provider ()</h3>
+<pre class="programlisting">gboolean            geoclue_master_client_get_address_provider
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         char **name,
+                                                         char **description,
+                                                         char **service,
+                                                         char **path,
+                                                         GError **error);</pre>
+<p>
+Gets name and other information for the currently used address provider.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> Pointer to returned provider name or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>description</code></em> :</span></p></td>
+<td> Pointer to returned provider description or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
+<td> Pointer to returned D-Bus service name or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td> Pointer to returned D-Bus object path or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> Pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="geoclue-master-client-get-position-provider"></a><h3>geoclue_master_client_get_position_provider ()</h3>
+<pre class="programlisting">gboolean            geoclue_master_client_get_position_provider
+                                                        (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                         char **name,
+                                                         char **description,
+                                                         char **service,
+                                                         char **path,
+                                                         GError **error);</pre>
+<p>
+Gets name and other information for the currently used position provider.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> A <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> Pointer to returned provider name or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>description</code></em> :</span></p></td>
+<td> Pointer to returned provider description or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
+<td> Pointer to returned D-Bus service name or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td> Pointer to returned D-Bus object path or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td> Pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td> <code class="literal">TRUE</code> on success
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.property-details"></a><h2>Property Details</h2>
+<div class="refsect2" lang="en">
+<a name="GeoclueMasterClient--object-path"></a><h3>The <code class="literal">"object-path"</code> property</h3>
+<pre class="programlisting">  "object-path"              gchar*                : Write / Construct Only</pre>
+<p>The DBus path to the object.</p>
+<p>Default value: ""</p>
+</div>
+</div>
+<div class="refsect1" lang="en">
+<a name="GeoclueMasterClient.signal-details"></a><h2>Signal Details</h2>
+<div class="refsect2" lang="en">
+<a name="GeoclueMasterClient-address-provider-changed"></a><h3>The <code class="literal">"address-provider-changed"</code> signal</h3>
+<pre class="programlisting">void                user_function                      (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                        gchar               *name,
+                                                        gchar               *description,
+                                                        gchar               *service,
+                                                        gchar               *path,
+                                                        gpointer             user_data)        : Run First / No Recursion</pre>
+<p>
+The address-provider-changed signal is emitted each time the used address provider
+changes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> the <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> object emitting the signal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> name of the new provider (e.g. "Hostip") or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>description</code></em> :</span></p></td>
+<td> a short description of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
+<td> D-Bus service name of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td> D-Bus object path name of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" lang="en">
+<a name="GeoclueMasterClient-position-provider-changed"></a><h3>The <code class="literal">"position-provider-changed"</code> signal</h3>
+<pre class="programlisting">void                user_function                      (<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a> *client,
+                                                        gchar               *name,
+                                                        gchar               *description,
+                                                        gchar               *service,
+                                                        gchar               *path,
+                                                        gpointer             user_data)        : Run First / No Recursion</pre>
+<p>
+The position-provider-changed signal is emitted each time the used position provider
+changes.</p>
+<p>
+
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td> the <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> object emitting the signal
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>name</code></em> :</span></p></td>
+<td> name of the new provider (e.g. "Hostip") or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>description</code></em> :</span></p></td>
+<td> a short description of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
+<td> D-Bus service name of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td> D-Bus object path name of the new provider or <code class="literal">NULL</code> if there is no provider
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>user_data</code></em> :</span></p></td>
+<td>user data set when the signal handler was connected.</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+</div>
+</div>
+<div class="footer">
+<hr>
+          Generated by GTK-Doc V1.10</div>
+</body>
+</html>

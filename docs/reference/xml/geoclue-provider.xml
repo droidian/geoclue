@@ -1,0 +1,230 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GeoclueProvider">
+<refmeta>
+<refentrytitle role="top_of_page" id="GeoclueProvider.top_of_page">GeoclueProvider</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GeoclueProvider</refname>
+<refpurpose>Common client API for Geoclue providers</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GeoclueProvider.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+                    <link linkend="GeoclueProvider-struct">GeoclueProvider</link>;
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-provider-get-status">geoclue_provider_get_status</link>         (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="GeoclueStatus">GeoclueStatus</link> *status,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-provider-get-provider-info">geoclue_provider_get_provider_info</link>  (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="GError">GError</link> **error);
+<link linkend="gboolean">gboolean</link>            <link linkend="geoclue-provider-set-options">geoclue_provider_set_options</link>        (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="GHashTable">GHashTable</link> *options,
+                                                         <link linkend="GError">GError</link> **error);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GeoclueProvider.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----GeoclueProvider
+         +----<link linkend="GeocluePosition">GeocluePosition</link>
+         +----<link linkend="GeoclueVelocity">GeoclueVelocity</link>
+         +----<link linkend="GeoclueAddress">GeoclueAddress</link>
+         +----<link linkend="GeoclueGeocode">GeoclueGeocode</link>
+         +----<link linkend="GeoclueReverseGeocode">GeoclueReverseGeocode</link>
+</synopsis>
+
+</refsect1>
+
+
+
+
+
+<refsect1 id="GeoclueProvider.properties" role="properties">
+<title role="properties.title">Properties</title>
+<synopsis>
+  &quot;<link linkend="GeoclueProvider--interface">interface</link>&quot;                <link linkend="gchar">gchar</link>*                : Write / Construct Only
+  &quot;<link linkend="GeoclueProvider--path">path</link>&quot;                     <link linkend="gchar">gchar</link>*                : Write / Construct Only
+  &quot;<link linkend="GeoclueProvider--service">service</link>&quot;                  <link linkend="gchar">gchar</link>*                : Write / Construct Only
+</synopsis>
+</refsect1>
+
+<refsect1 id="GeoclueProvider.signals" role="signal_proto">
+<title role="signal_proto.title">Signals</title>
+<synopsis>
+  &quot;<link linkend="GeoclueProvider-status-changed">status-changed</link>&quot;                                 : Run First / No Recursion
+</synopsis>
+</refsect1>
+
+
+<refsect1 id="GeoclueProvider.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> contains the methods and signals common to all Geoclue
+providers. It is part of the public C client API which uses D-Bus
+to communicate with the actual provider.
+</para>
+<para>
+A <link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> is not explicitly created. Instead any provider
+object can be cast to <link linkend="GeoclueProvider"><type>GeoclueProvider</type></link>. Using a <link linkend="GeocluePosition"><type>GeocluePosition</type></link> as
+example here:
+<informalexample>
+<programlisting>
+GeocluePosition *pos;
+char *name;
+GError *error;
+
+pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
+                            "/org/freedesktop/Geoclue/Providers/Example");
+if (pos == NULL) {
+	/ * error * / 
+}
+if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
+                                        &amp;name, NULL, &amp;error)) {
+	g_print ("name = %s", name);
+}
+</programlisting>
+</informalexample>
+</para>
+<para>
+<link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> can be used to obtain  generic
+information about the provider and to set provider
+options.</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GeoclueProvider.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GeoclueProvider-struct" role="struct">
+<title>GeoclueProvider</title>
+<indexterm zone="GeoclueProvider-struct"><primary>GeoclueProvider</primary></indexterm><programlisting>typedef struct _GeoclueProvider GeoclueProvider;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="geoclue-provider-get-status" role="function">
+<title>geoclue_provider_get_status ()</title>
+<indexterm zone="geoclue-provider-get-status"><primary>geoclue_provider_get_status</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_provider_get_status         (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="GeoclueStatus">GeoclueStatus</link> *status,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Obtains the current status of the provider.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>provider</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>status</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer for returned status as <link linkend="GeoclueStatus"><type>GeoclueStatus</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara>  Pointer for returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-provider-get-provider-info" role="function">
+<title>geoclue_provider_get_provider_info ()</title>
+<indexterm zone="geoclue-provider-get-provider-info"><primary>geoclue_provider_get_provider_info</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_provider_get_provider_info  (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="char">char</link> **name,
+                                                         <link linkend="char">char</link> **description,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Obtains name and a short description of the provider.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>provider</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer for returned provider name or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer for returned provider description or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara>  Pointer for returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> on success
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+<refsect2 id="geoclue-provider-set-options" role="function">
+<title>geoclue_provider_set_options ()</title>
+<indexterm zone="geoclue-provider-set-options"><primary>geoclue_provider_set_options</primary></indexterm><programlisting><link linkend="gboolean">gboolean</link>            geoclue_provider_set_options        (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                         <link linkend="GHashTable">GHashTable</link> *options,
+                                                         <link linkend="GError">GError</link> **error);</programlisting>
+<para>
+Sets the options on the provider.</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>provider</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GeoclueProvider"><type>GeoclueProvider</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>options</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GHashTable"><type>GHashTable</type></link> containing the options
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>error</parameter>&nbsp;:</term>
+<listitem><simpara> Pointer for returned <link linkend="GError"><type>GError</type></link> or <link linkend="NULL:CAPS"><literal>NULL</literal></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><emphasis>Returns</emphasis>&nbsp;:</term><listitem><simpara> <link linkend="TRUE:CAPS"><literal>TRUE</literal></link> if setting options succeeded
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+<refsect1 id="GeoclueProvider.property-details" role="property_details">
+<title role="property_details.title">Property Details</title>
+<refsect2 id="GeoclueProvider--interface"><title>The <literal>&quot;interface&quot;</literal> property</title>
+<indexterm zone="GeoclueProvider--interface"><primary>GeoclueProvider:interface</primary></indexterm><programlisting>  &quot;interface&quot;                <link linkend="gchar">gchar</link>*                : Write / Construct Only</programlisting>
+<para>The D-Bus interface implemented by the object.</para><para>Default value: ""</para>
+</refsect2>
+<refsect2 id="GeoclueProvider--path"><title>The <literal>&quot;path&quot;</literal> property</title>
+<indexterm zone="GeoclueProvider--path"><primary>GeoclueProvider:path</primary></indexterm><programlisting>  &quot;path&quot;                     <link linkend="gchar">gchar</link>*                : Write / Construct Only</programlisting>
+<para>The D-Bus path to this provider.</para><para>Default value: ""</para>
+</refsect2>
+<refsect2 id="GeoclueProvider--service"><title>The <literal>&quot;service&quot;</literal> property</title>
+<indexterm zone="GeoclueProvider--service"><primary>GeoclueProvider:service</primary></indexterm><programlisting>  &quot;service&quot;                  <link linkend="gchar">gchar</link>*                : Write / Construct Only</programlisting>
+<para>The D-Bus service this object represents.</para><para>Default value: ""</para>
+</refsect2>
+
+</refsect1>
+
+<refsect1 id="GeoclueProvider.signal-details" role="signals">
+<title role="signals.title">Signal Details</title>
+<refsect2 id="GeoclueProvider-status-changed"><title>The <literal>&quot;status-changed&quot;</literal> signal</title>
+<indexterm zone="GeoclueProvider-status-changed"><primary>GeoclueProvider::status-changed</primary></indexterm><programlisting><link linkend="void">void</link>                user_function                      (<link linkend="GeoclueProvider">GeoclueProvider</link> *provider,
+                                                        <link linkend="gint">gint</link>             status,
+                                                        <link linkend="gpointer">gpointer</link>         user_data)      : Run First / No Recursion</programlisting>
+<para>
+The status-changed signal is emitted each time the provider
+status changes</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>provider</parameter>&nbsp;:</term>
+<listitem><simpara> the provider object emitting the signal
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>status</parameter>&nbsp;:</term>
+<listitem><simpara> New provider status as <link linkend="GeoclueStatus"><type>GeoclueStatus</type></link>
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>user_data</parameter>&nbsp;:</term>
+<listitem><simpara>user data set when the signal handler was connected.</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+</refsect1>
+
+
+
+</refentry>

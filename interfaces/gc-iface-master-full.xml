@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	
+	<interface name="org.freedesktop.Geoclue.Master">
+		<method name="Create">
+			<arg type="o" name="path" direction="out" />
+		</method>
+	</interface>
+</node>

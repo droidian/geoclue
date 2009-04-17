@@ -1,0 +1,28 @@
+#include <geoclue/geoclue-master.h>
+#include <geoclue/geoclue-master-client.h>
+#include <geoclue/geoclue-provider.h>
+#include <geoclue/geoclue-position.h>
+#include <geoclue/geoclue-velocity.h>
+#include <geoclue/geoclue-address.h>
+#include <geoclue/geoclue-geocode.h>
+#include <geoclue/geoclue-reverse-geocode.h>
+
+#include <geoclue/geoclue-accuracy.h>
+#include <geoclue/geoclue-address-details.h>
+#include <geoclue/geoclue-error.h>
+#include <geoclue/geoclue-types.h>
+
+#include <geoclue/gc-web-service.h>
+#include <geoclue/gc-provider.h>
+
+geoclue_master_get_type
+geoclue_master_client_get_type
+geoclue_provider_get_type
+geoclue_position_get_type
+geoclue_velocity_get_type
+geoclue_address_get_type
+geoclue_geocode_get_type
+geoclue_reverse_geocode_get_type
+
+gc_web_service_get_type
+gc_provider_get_type

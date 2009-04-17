@@ -1,0 +1,96 @@
+<!-- ##### SECTION Title ##### -->
+GeocluePosition
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_POSITION_INTERFACE_NAME ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### STRUCT GeocluePosition ##### -->
+<para>
+
+</para>
+
+
+<!-- ##### SIGNAL GeocluePosition::position-changed ##### -->
+<para>
+
+</para>
+
+@geoclueposition: the object which received the signal.
+@arg1: 
+@arg2: 
+@arg3: 
+@arg4: 
+@arg5: 
+@arg6: 
+
+<!-- ##### FUNCTION geoclue_position_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_position_get_position ##### -->
+<para>
+
+</para>
+
+@position: 
+@timestamp: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
+<!-- ##### USER_FUNCTION GeocluePositionCallback ##### -->
+<para>
+
+</para>
+
+@position: 
+@fields: 
+@timestamp: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_position_get_position_async ##### -->
+<para>
+
+</para>
+
+@position: 
+@callback: 
+@userdata: 
+
+

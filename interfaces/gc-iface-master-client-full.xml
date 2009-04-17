@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/" xmlns:doc="http://www.freedesktop.org/dbus/1.0/doc.dtd">
+	<interface name="org.freedesktop.Geoclue.MasterClient">
+		<method name="SetRequirements">
+			<arg name="accuracy_level" type="i" direction="in" />
+			<arg name="time" type="i" direction="in" />
+			<arg name="require_updates" type="b" direction="in" />
+			<arg name="allowed_resources" type="i" direction="in" />
+		</method>
+		
+		<method name="AddressStart"/>
+		<method name="PositionStart"/>
+		
+		<method name="GetAddressProvider">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</method>
+		<method name="GetPositionProvider">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</method>
+		
+		<signal name="AddressProviderChanged">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</signal>
+		<signal name="PositionProviderChanged">
+			<arg name="name" type="s" direction="out"/>
+			<arg name="description" type="s" direction="out"/>
+			<arg name="service" type="s" direction="out"/>
+			<arg name="path" type="s" direction="out"/>
+		</signal>
+	</interface>
+</node>

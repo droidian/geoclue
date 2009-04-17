@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<node name="/">
+        <interface name="org.freedesktop.Geoclue.Address">
+		<method name="GetAddress">
+			<arg type="i" name="timestamp" direction="out" />
+			
+			<arg name="address" type="a{ss}" direction="out" />
+
+		        <arg name="accuracy" type="(idd)" direction="out" />
+		</method>
+
+		<signal name="AddressChanged">
+		        <arg type="i" name="timestamp" />
+		        <arg type="a{ss}" name="address" />
+			<arg type="(idd)" name="accuracy" />
+		</signal>
+	</interface>
+</node>

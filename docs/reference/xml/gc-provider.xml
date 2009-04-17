@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="GcProvider">
+<refmeta>
+<refentrytitle role="top_of_page" id="GcProvider.top_of_page">GcProvider</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>GcProvider</refname>
+<refpurpose>Abstract class to derive Geoclue providers from.</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="GcProvider.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+                    <link linkend="GcProvider-struct">GcProvider</link>;
+<link linkend="void">void</link>                <link linkend="gc-provider-set-details">gc_provider_set_details</link>             (<link linkend="GcProvider">GcProvider</link> *provider,
+                                                         const <link linkend="char">char</link> *service,
+                                                         const <link linkend="char">char</link> *path,
+                                                         const <link linkend="char">char</link> *name,
+                                                         const <link linkend="char">char</link> *description);
+</synopsis>
+</refsynopsisdiv>
+
+<refsect1 id="GcProvider.object-hierarchy" role="object_hierarchy">
+<title role="object_hierarchy.title">Object Hierarchy</title>
+<synopsis>
+  <link linkend="GObject">GObject</link>
+   +----GcProvider
+</synopsis>
+
+</refsect1>
+
+
+
+<refsect1 id="GcProvider.implemented-interfaces" role="impl_interfaces">
+<title role="impl_interfaces.title">Implemented Interfaces</title>
+<para>
+GcProvider implements
+ <link linkend="GcIfaceGeoclue">GcIfaceGeoclue</link>.</para>
+
+</refsect1>
+
+
+
+
+
+<refsect1 id="GcProvider.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+<link linkend="GcProvider"><type>GcProvider</type></link> is an abstract class that all Geoclue providers should 
+derive from. It takes care of setting up the provider D-Bus service,
+and also implements <link linkend="GcIfaceGeoclue"><type>GcIfaceGeoclue</type></link> interface (derived classes still 
+need to implement the functionality).
+</para>
+<para>
+Derived classes should define the <link linkend="GcIfaceGeoclue"><type>GcIfaceGeoclue</type></link> methods in their 
+<link linkend="class-init"><function>class_init()</function></link> and call <link linkend="gc-provider-set-details"><function>gc_provider_set_details()</function></link> in <link linkend="init"><function>init()</function></link></para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="GcProvider.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GcProvider-struct" role="struct">
+<title>GcProvider</title>
+<indexterm zone="GcProvider-struct"><primary>GcProvider</primary></indexterm><programlisting>typedef struct _GcProvider GcProvider;</programlisting>
+<para>
+
+</para></refsect2>
+<refsect2 id="gc-provider-set-details" role="function">
+<title>gc_provider_set_details ()</title>
+<indexterm zone="gc-provider-set-details"><primary>gc_provider_set_details</primary></indexterm><programlisting><link linkend="void">void</link>                gc_provider_set_details             (<link linkend="GcProvider">GcProvider</link> *provider,
+                                                         const <link linkend="char">char</link> *service,
+                                                         const <link linkend="char">char</link> *path,
+                                                         const <link linkend="char">char</link> *name,
+                                                         const <link linkend="char">char</link> *description);</programlisting>
+<para>
+Requests ownership of the <parameter>service</parameter> name, and if that succeeds registers
+<parameter>provider</parameter> at <parameter>path</parameter>. <parameter>name</parameter> should be the name of the provider (e.g. 
+"Hostip"), <parameter>description</parameter> should be a short description of the provider 
+(e.g. "Web service based Position &amp; Address provider (http://hostip.info)").</para>
+<para>
+
+</para><variablelist role="params">
+<varlistentry><term><parameter>provider</parameter>&nbsp;:</term>
+<listitem><simpara> A <link linkend="GcProvider"><type>GcProvider</type></link> object
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>service</parameter>&nbsp;:</term>
+<listitem><simpara> The service name to be requested
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>path</parameter>&nbsp;:</term>
+<listitem><simpara> The path the object should be registered at
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>name</parameter>&nbsp;:</term>
+<listitem><simpara> The provider name
+</simpara></listitem></varlistentry>
+<varlistentry><term><parameter>description</parameter>&nbsp;:</term>
+<listitem><simpara> The description of the provider
+</simpara></listitem></varlistentry>
+</variablelist></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

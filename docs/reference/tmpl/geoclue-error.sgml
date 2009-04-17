@@ -1,0 +1,34 @@
+<!-- ##### SECTION Title ##### -->
+geoclue-error
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_ERROR ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION geoclue_error_quark ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+

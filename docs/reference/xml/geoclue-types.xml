@@ -1,0 +1,282 @@
+<?xml version="1.0"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" 
+							 "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id="geoclue-geoclue-types">
+<refmeta>
+<refentrytitle role="top_of_page" id="geoclue-geoclue-types.top_of_page">geoclue-types</refentrytitle>
+<manvolnum>3</manvolnum>
+<refmiscinfo>GEOCLUE Library</refmiscinfo>
+</refmeta>
+
+<refnamediv>
+<refname>geoclue-types</refname>
+<refpurpose>Type definitions and defines useful for Geoclue clients</refpurpose>
+<!--[<xref linkend="desc" endterm="desc.title"/>]-->
+</refnamediv>
+
+<refsynopsisdiv id="geoclue-geoclue-types.synopsis" role="synopsis">
+<title role="synopsis.title">Synopsis</title>
+
+<synopsis>
+enum                <link linkend="GeoclueStatus">GeoclueStatus</link>;
+enum                <link linkend="GeoclueAccuracyLevel">GeoclueAccuracyLevel</link>;
+enum                <link linkend="GeocluePositionFields">GeocluePositionFields</link>;
+enum                <link linkend="GeoclueVelocityFields">GeoclueVelocityFields</link>;
+enum                <link linkend="GeoclueError">GeoclueError</link>;
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-COUNTRYCODE:CAPS">GEOCLUE_ADDRESS_KEY_COUNTRYCODE</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-COUNTRY:CAPS">GEOCLUE_ADDRESS_KEY_COUNTRY</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-REGION:CAPS">GEOCLUE_ADDRESS_KEY_REGION</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-LOCALITY:CAPS">GEOCLUE_ADDRESS_KEY_LOCALITY</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-AREA:CAPS">GEOCLUE_ADDRESS_KEY_AREA</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-POSTALCODE:CAPS">GEOCLUE_ADDRESS_KEY_POSTALCODE</link>
+#define             <link linkend="GEOCLUE-ADDRESS-KEY-STREET:CAPS">GEOCLUE_ADDRESS_KEY_STREET</link>
+enum                <link linkend="GeoclueResourceFlags">GeoclueResourceFlags</link>;
+enum                <link linkend="GeoclueNetworkStatus">GeoclueNetworkStatus</link>;
+<link linkend="void">void</link>                <link linkend="geoclue-types-init">geoclue_types_init</link>                  (void);
+</synopsis>
+</refsynopsisdiv>
+
+
+
+
+
+
+
+
+
+<refsect1 id="geoclue-geoclue-types.description" role="desc">
+<title role="desc.title">Description</title>
+<para>
+</para>
+<para>
+
+</para>
+</refsect1>
+
+<refsect1 id="geoclue-geoclue-types.details" role="details">
+<title role="details.title">Details</title>
+<refsect2 id="GeoclueStatus" role="enum">
+<title>enum GeoclueStatus</title>
+<indexterm zone="GeoclueStatus"><primary>GeoclueStatus</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_STATUS_ERROR,
+	GEOCLUE_STATUS_UNAVAILABLE,
+	GEOCLUE_STATUS_ACQUIRING,
+	GEOCLUE_STATUS_AVAILABLE
+} GeoclueStatus;
+</programlisting>
+<para>
+defines the provider status</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueAccuracyLevel" role="enum">
+<title>enum GeoclueAccuracyLevel</title>
+<indexterm zone="GeoclueAccuracyLevel"><primary>GeoclueAccuracyLevel</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_ACCURACY_LEVEL_NONE = 0,
+	GEOCLUE_ACCURACY_LEVEL_COUNTRY,
+	GEOCLUE_ACCURACY_LEVEL_REGION,
+	GEOCLUE_ACCURACY_LEVEL_LOCALITY,
+	GEOCLUE_ACCURACY_LEVEL_POSTALCODE,
+	GEOCLUE_ACCURACY_LEVEL_STREET,
+	GEOCLUE_ACCURACY_LEVEL_DETAILED,
+} GeoclueAccuracyLevel;
+</programlisting>
+<para>
+Enum values used to define the approximate accuracy of 
+Position or Address information.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeocluePositionFields" role="enum">
+<title>enum GeocluePositionFields</title>
+<indexterm zone="GeocluePositionFields"><primary>GeocluePositionFields</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_POSITION_FIELDS_NONE = 0,
+	GEOCLUE_POSITION_FIELDS_LATITUDE = 1 &lt;&lt; 0,
+	GEOCLUE_POSITION_FIELDS_LONGITUDE = 1 &lt;&lt; 1,
+	GEOCLUE_POSITION_FIELDS_ALTITUDE = 1 &lt;&lt; 2
+} GeocluePositionFields;
+</programlisting>
+<para>
+<link linkend="GeocluePositionFields"><type>GeocluePositionFields</type></link> is a bitfield that defines the validity of 
+Position values.
+</para>
+<para>
+Example:
+<informalexample>
+<programlisting>
+GeocluePositionFields fields;
+fields = geoclue_position_get_position (. . .);
+
+if (fields &amp; GEOCLUE_POSITION_FIELDS_LATITUDE &amp;&amp;
+    fields &amp; GEOCLUE_POSITION_FIELDS_LONGITUDE) {
+	g_print("latitude and longitude are valid");
+}
+</programlisting>
+</informalexample></para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueVelocityFields" role="enum">
+<title>enum GeoclueVelocityFields</title>
+<indexterm zone="GeoclueVelocityFields"><primary>GeoclueVelocityFields</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_VELOCITY_FIELDS_NONE = 0,
+	GEOCLUE_VELOCITY_FIELDS_SPEED = 1 &lt;&lt; 0,
+	GEOCLUE_VELOCITY_FIELDS_DIRECTION = 1 &lt;&lt; 1,
+	GEOCLUE_VELOCITY_FIELDS_CLIMB = 1 &lt;&lt; 2
+} GeoclueVelocityFields;
+</programlisting>
+<para>
+GeoclueVelocityFields is a bitfield that defines the validity of 
+Velocity values.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueError" role="enum">
+<title>enum GeoclueError</title>
+<indexterm zone="GeoclueError"><primary>GeoclueError</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_ERROR_NOT_IMPLEMENTED,
+	GEOCLUE_ERROR_NOT_AVAILABLE,
+	GEOCLUE_ERROR_FAILED,
+} GeoclueError;
+</programlisting>
+<para>
+Error values for providers.</para>
+<para>
+
+</para><variablelist role="enum">
+<varlistentry id="GEOCLUE-ERROR-NOT-IMPLEMENTED:CAPS" role="constant">
+<term><literal>GEOCLUE_ERROR_NOT_IMPLEMENTED</literal></term>
+<listitem><simpara> Method is not implemented
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="GEOCLUE-ERROR-NOT-AVAILABLE:CAPS" role="constant">
+<term><literal>GEOCLUE_ERROR_NOT_AVAILABLE</literal></term>
+<listitem><simpara> Needed information is not currently
+available (e.g. web service did not respond)
+</simpara></listitem>
+</varlistentry>
+<varlistentry id="GEOCLUE-ERROR-FAILED:CAPS" role="constant">
+<term><literal>GEOCLUE_ERROR_FAILED</literal></term>
+<listitem><simpara> Generic fatal error
+</simpara></listitem>
+</varlistentry>
+</variablelist></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-COUNTRYCODE:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_COUNTRYCODE</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-COUNTRYCODE:CAPS"><primary>GEOCLUE_ADDRESS_KEY_COUNTRYCODE</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_COUNTRYCODE "countrycode"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a ISO 3166 two 
+letter country code. 
+</para>
+<para>
+The used hash keys match the elements of XEP-0080 (XMPP protocol 
+extension for user location), see 
+<ulink url="http://www.xmpp.org/extensions/xep-0080.html">
+http://www.xmpp.org/extensions/xep-0080.html</ulink></para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-COUNTRY:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_COUNTRY</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-COUNTRY:CAPS"><primary>GEOCLUE_ADDRESS_KEY_COUNTRY</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_COUNTRY "country"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a name of a country.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-REGION:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_REGION</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-REGION:CAPS"><primary>GEOCLUE_ADDRESS_KEY_REGION</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_REGION "region" 
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a name of an 
+administrative region of a nation, e.g. province or
+US state.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-LOCALITY:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_LOCALITY</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-LOCALITY:CAPS"><primary>GEOCLUE_ADDRESS_KEY_LOCALITY</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_LOCALITY "locality"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a name of a town 
+or city.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-AREA:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_AREA</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-AREA:CAPS"><primary>GEOCLUE_ADDRESS_KEY_AREA</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_AREA "area"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a name of an 
+area, such as neighborhood or campus.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-POSTALCODE:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_POSTALCODE</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-POSTALCODE:CAPS"><primary>GEOCLUE_ADDRESS_KEY_POSTALCODE</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_POSTALCODE "postalcode"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a code used for 
+postal delivery.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GEOCLUE-ADDRESS-KEY-STREET:CAPS" role="macro">
+<title>GEOCLUE_ADDRESS_KEY_STREET</title>
+<indexterm zone="GEOCLUE-ADDRESS-KEY-STREET:CAPS"><primary>GEOCLUE_ADDRESS_KEY_STREET</primary></indexterm><programlisting>#define GEOCLUE_ADDRESS_KEY_STREET "street"
+</programlisting>
+<para>
+A key for address hashtables. The hash value should be a partial or full street 
+address.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueResourceFlags" role="enum">
+<title>enum GeoclueResourceFlags</title>
+<indexterm zone="GeoclueResourceFlags"><primary>GeoclueResourceFlags</primary></indexterm><programlisting>typedef enum _GeoclueResourceFlags {
+	GEOCLUE_RESOURCE_NONE = 0,
+	GEOCLUE_RESOURCE_NETWORK = 1 &lt;&lt; 0,
+	GEOCLUE_RESOURCE_CELL = 1 &lt;&lt; 1,
+	GEOCLUE_RESOURCE_GPS = 1 &lt;&lt; 2,
+	
+	GEOCLUE_RESOURCE_ALL = (1 &lt;&lt; 10) - 1
+} GeoclueResourceFlags;
+</programlisting>
+<para>
+bitfield that represents a set of physical resources.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="GeoclueNetworkStatus" role="enum">
+<title>enum GeoclueNetworkStatus</title>
+<indexterm zone="GeoclueNetworkStatus"><primary>GeoclueNetworkStatus</primary></indexterm><programlisting>typedef enum {
+	GEOCLUE_CONNECTIVITY_UNKNOWN,
+	GEOCLUE_CONNECTIVITY_OFFLINE,
+	GEOCLUE_CONNECTIVITY_ACQUIRING,
+	GEOCLUE_CONNECTIVITY_ONLINE,
+} GeoclueNetworkStatus;
+</programlisting>
+<para>
+Enumeration for current network status.</para>
+<para>
+
+</para></refsect2>
+<refsect2 id="geoclue-types-init" role="function">
+<title>geoclue_types_init ()</title>
+<indexterm zone="geoclue-types-init"><primary>geoclue_types_init</primary></indexterm><programlisting><link linkend="void">void</link>                geoclue_types_init                  (void);</programlisting>
+<para>
+
+</para></refsect2>
+
+</refsect1>
+
+
+
+
+</refentry>

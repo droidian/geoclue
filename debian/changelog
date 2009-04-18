@@ -20,7 +20,7 @@ geoclue (0.11.1-2) unstable; urgency=low
     it was missing.
   * Raise build-dependency on libgammu-dev to >= 1.24.0 as
     we're applying a patch which needs the API change.
-  * Update Vcs information in to point to git.debian.org.
+  * Update Vcs information to point to git.debian.org.
   * Add debian/gbp.conf to make sure we use pristine-tar.
   * Only install *.c and the Makefile as examples, not the
     pre-built .o files and linker scripts.

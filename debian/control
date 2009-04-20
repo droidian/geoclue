@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Craig Andrews <candrews@integralblue.com>
 Uploaders: Bernd Zeimetz <bzed@debian.org>
-Build-Depends: cdbs (>= 0.4.27), autotools-dev, quilt, patchutils (>= 0.2.25), debhelper (>= 5), libgammu-dev (>= 1.24.0), libgps-dev, pkg-config, libglib-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev
+Build-Depends: autotools-dev, quilt, patchutils (>= 0.2.25), debhelper (>= 7), libgammu-dev (>= 1.24.0), libgps-dev, pkg-config, libglib-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.8.1
 Vcs-Git: git://git.debian.org/collab-maint/geoclue.git

@@ -1,3 +1,10 @@
+geoclue (0.11.1-4) unstable; urgency=low
+
+  * [dcb98403] Move geoclue-test-gui into geoclue-examples. (Closes:
+    #534250) - thanks to Laurent Bigonville
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 23 Jun 2009 13:12:44 +0200
+
 geoclue (0.11.1-3) unstable; urgency=low
 
   * [a95b9e89] Fixing typo in the last changelog entry.

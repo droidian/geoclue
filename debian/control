@@ -121,6 +121,7 @@ Description: Map and geocode server for GeoClue (Yahoo)
 Package: geoclue-examples
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Replaces: geoclue (<< 0.11.1-4)
 Description: GeoClue example clients
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 

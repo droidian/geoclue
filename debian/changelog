@@ -1,3 +1,11 @@
+geoclue (0.11.1-5) unstable; urgency=low
+
+  * [ff19d3bf] Fixing section override disparities.
+  * [23ddf112] Use libglib2.0-dev instead of libglib-dev. (Closes:
+    #535940) - thanks to Laurent Bigonville
+
+ -- Bernd Zeimetz <bzed@debian.org>  Mon, 06 Jul 2009 10:39:21 +0200
+
 geoclue (0.11.1-4) unstable; urgency=low
 
   * [dcb98403] Move geoclue-test-gui into geoclue-examples. (Closes:

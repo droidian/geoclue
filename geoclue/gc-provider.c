@@ -227,6 +227,8 @@ remove_reference (GcIfaceGeoclue *geoclue,
 	if (!gc_provider_remove_client (provider, sender)) {
 		g_warning ("Unreffed by client that has not been referenced");
 	}
+
+	g_free (sender);
 	
 	dbus_g_method_return (context);
 }

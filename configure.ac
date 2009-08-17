@@ -125,7 +125,19 @@ fi
 AC_SUBST(GPSD_LIBS)
 AC_SUBST(GPSD_CFLAGS)
 
+PKG_CHECK_MODULES(SKYHOOK, [
+		  libsoup-gnome-2.4
+], HAVE_SKYHOOK=yes, HAVE_SKYHOOK=no)
+if test "x$HAVE_SKYHOOK" = "xyes"; then
+	PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS skyhook"
+else
+	NO_BUILD_PROVIDERS="$NO_BUILD_PROVIDERS skyhook"
+fi
+AC_SUBST(SKYHOOK_LIBS)
+AC_SUBST(SKYHOOK_CFLAGS)
+
 AC_SUBST(PROVIDER_SUBDIRS)
+AC_SUBST(NO_BUILD_PROVIDERS)
 
 AC_CONFIG_FILES([
 geoclue.pc
@@ -148,6 +160,7 @@ providers/plazes/Makefile
 providers/localnet/Makefile
 providers/yahoo/Makefile
 providers/gsmloc/Makefile
+providers/skyhook/Makefile
 src/Makefile
 ])
 

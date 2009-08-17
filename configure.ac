@@ -77,7 +77,7 @@ if test "x$HAVE_CONIC" = "xyes"; then
 fi
 
 PKG_CHECK_MODULES(NETWORK_MANAGER, [
-		  NetworkManager
+		  NetworkManager libnm_glib
 ], HAVE_NETWORK_MANAGER=yes, HAVE_NETWORK_MANAGER=no)
 if test "x$HAVE_NETWORK_MANAGER" = "xyes"; then
 	CONNECTIVITY="Network Manager"

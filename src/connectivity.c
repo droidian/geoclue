@@ -77,6 +77,14 @@ geoclue_connectivity_get_status (GeoclueConnectivity *self)
 	return GEOCLUE_CONNECTIVITY_GET_INTERFACE (self)->get_status (self);
 }
 
+char *
+geoclue_connectivity_get_ap_mac (GeoclueConnectivity *self)
+{
+	if (GEOCLUE_CONNECTIVITY_GET_INTERFACE (self)->get_ap_mac != NULL)
+		return GEOCLUE_CONNECTIVITY_GET_INTERFACE (self)->get_ap_mac (self);
+	return NULL;
+}
+
 void
 geoclue_connectivity_emit_status_changed (GeoclueConnectivity *self,
                                           GeoclueNetworkStatus status)

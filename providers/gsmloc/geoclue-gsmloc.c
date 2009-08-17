@@ -123,7 +123,7 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	}
 	
  	/* Find and read configuration file */
- 	error = GSM_FindGammuRC (&cfg);
+ 	error = GSM_FindGammuRC (&cfg, NULL);
 	if (error != ERR_NONE) {
 		g_printerr ("Gammu error: %s\n", GSM_ErrorString (error));
 		if (GSM_IsConnected (state)) {

@@ -46,6 +46,8 @@ typedef struct {
 
 typedef struct {
 	GObjectClass parent_class;
+
+	void (*options_changed) (GcMaster *master, GHashTable *options);
 } GcMasterClass;
 
 GType gc_master_get_type (void);

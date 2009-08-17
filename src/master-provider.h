@@ -105,6 +105,8 @@ gboolean gc_master_provider_is_good (GcMasterProvider     *provider,
 
 void gc_master_provider_network_status_changed (GcMasterProvider *provider,
                                                 GeoclueNetworkStatus status);
+void gc_master_provider_update_options (GcMasterProvider *provider);
+
 char* gc_master_provider_get_name (GcMasterProvider *provider);
 char* gc_master_provider_get_description (GcMasterProvider *provider);
 char* gc_master_provider_get_service (GcMasterProvider *provider);

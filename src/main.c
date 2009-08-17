@@ -38,8 +38,38 @@
 
 static GMainLoop *mainloop;
 static GHashTable *options;
+static GcMaster *master;
 
+
+#define GEOCLUE_GCONF_TOP "/apps/geoclue/master"
 #define GEOCLUE_MASTER_NAME "org.freedesktop.Geoclue.Master"
+
+static void
+gconf_key_changed (GConfClient *client,
+		   guint cnxn_id,
+		   GConfEntry *entry,
+		   gpointer user_data)
+{
+	const char *key, *value;
+	GConfValue *v;
+
+	key = gconf_entry_get_key (entry);
+	v = gconf_entry_get_value (entry);
+	if (v->type != GCONF_VALUE_STRING)
+		return;
+	value = gconf_value_get_string (v);
+
+	g_message ("gconf key changed %s", key);
+
+	/* Don't add empty strings in the hashtable */
+	if (value != NULL && value[0] == '\0')
+		value = NULL;
+
+	g_hash_table_insert (options, g_path_get_basename (key),
+			     g_strdup (value));
+
+	g_signal_emit_by_name (G_OBJECT (master), "options-changed", options);
+}
 
 static GHashTable *
 load_options (void)
@@ -48,18 +78,21 @@ load_options (void)
         GConfClient *client = gconf_client_get_default ();
         GSList *entries, *e;
         GError *error = NULL;
-        
-        entries = gconf_client_all_entries (client, "/apps/geoclue/master", &error);
+
+        gconf_client_add_dir (client, GEOCLUE_GCONF_TOP,
+        		      GCONF_CLIENT_PRELOAD_RECURSIVE, NULL);
+
+        entries = gconf_client_all_entries (client, GEOCLUE_GCONF_TOP, &error);
         if (error != NULL) {
                 g_warning ("Error loading master options: %s", error->message);
                 g_error_free (error);
                 return NULL;
         }
 
-        /* Not an error, the directory is just empty */
-        if (entries == NULL) {
-                return NULL;
-        }
+        /* Setup keys monitoring */
+	gconf_client_notify_add (client, GEOCLUE_GCONF_TOP,
+				 (GConfClientNotifyFunc) gconf_key_changed,
+				 NULL, NULL, NULL);
 
         ht = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_free);
         g_print ("Master options:\n");
@@ -70,7 +103,12 @@ load_options (void)
 
                 key = gconf_entry_get_key (entry);
                 v = gconf_entry_get_value (entry);
+                if (v->type != GCONF_VALUE_STRING)
+                	continue;
                 value = gconf_value_get_string (v);
+
+                if (value != NULL && value[0] == '\0')
+                	value = NULL;
 
                 g_print ("  %s = %s\n", key, value);
                 g_hash_table_insert (ht, g_path_get_basename (key), 
@@ -92,7 +130,6 @@ int
 main (int    argc,
       char **argv)
 {
-	GcMaster *master;
 	DBusGConnection *conn;
 	DBusGProxy *proxy;
 	GError *error = NULL;

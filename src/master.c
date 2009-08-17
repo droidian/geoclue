@@ -40,6 +40,13 @@
 #endif
 #endif
 
+enum {
+	OPTIONS_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint32 signals[LAST_SIGNAL] = {0, };
+
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
 static GList *providers = NULL;
@@ -76,6 +83,16 @@ gc_master_class_init (GcMasterClass *klass)
 {
 	dbus_g_object_type_install_info (gc_master_get_type (),
 					 &dbus_glib_gc_iface_master_object_info);
+
+	signals[OPTIONS_CHANGED] = g_signal_new ("options-changed",
+						  G_TYPE_FROM_CLASS (klass),
+						  G_SIGNAL_RUN_FIRST |
+						  G_SIGNAL_NO_RECURSE,
+						  G_STRUCT_OFFSET (GcMasterClass, options_changed), 
+						  NULL, NULL,
+						  g_cclosure_marshal_VOID__BOXED,
+						  G_TYPE_NONE, 1,
+						  G_TYPE_HASH_TABLE);
 }
 
 /* Load the provider details out of a keyfile */

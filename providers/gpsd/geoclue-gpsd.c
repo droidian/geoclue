@@ -153,13 +153,9 @@ set_options (GcIfaceGeoclue *gc,
 	}
 	
 	/* new values? */
-	if (host != NULL && gpsd->host != NULL) {
-		changed = (strcmp (host, gpsd->host) != 0);
-	} else if (!(host == NULL && gpsd->host == NULL)) {
+	if (g_strcmp0 (host, gpsd->host) != 0 ||
+	    g_strcmp0 (port, gpsd->port) != 0) {
 		changed = TRUE;
-	}
-	if (!changed) {
-		changed = (strcmp (port, gpsd->port) != 0);
 	}
 	
 	if (!changed) {
@@ -168,10 +164,16 @@ set_options (GcIfaceGeoclue *gc,
 	
 	/* update private values with new ones, restart gpsd */
 	g_free (gpsd->port);
-	if (gpsd->host) {
-		g_free (gpsd->host);
-	}
+	gpsd->port = NULL;
+	g_free (gpsd->host);
+	gpsd->host = NULL;
+
 	geoclue_gpsd_stop_gpsd (gpsd);
+
+	if (host == NULL) {
+		return TRUE;
+	}
+
 	gpsd->port = g_strdup (port);
 	gpsd->host = g_strdup (host);
 	if (!geoclue_gpsd_start_gpsd (gpsd)) {

@@ -1167,6 +1167,22 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 	        ((priv->required_resources & (~allowed_resources)) == 0));
 }
 
+void
+gc_master_provider_update_options (GcMasterProvider *provider)
+{
+	GeoclueProvider *geoclue;
+	GError *error = NULL;
+	
+	geoclue = gc_master_provider_get_provider (provider);
+	
+	if (!geoclue_provider_set_options (geoclue,
+	                                   geoclue_get_main_options (),
+	                                   &error)) {
+		g_warning ("Error setting provider options: %s\n", error->message);
+		g_error_free (error);
+	}
+}
+
 GeoclueStatus 
 gc_master_provider_get_status (GcMasterProvider *provider)
 {

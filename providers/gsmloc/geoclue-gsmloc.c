@@ -179,6 +179,10 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	}
 	
 	strings = g_strsplit (netinfo.NetworkCode, " ", 2);
+	if (!strings[0] || !strings[1]) {
+		g_strfreev (strings);
+		return FALSE;
+	}
 	*mcc = strings[0];
 	*mnc = strings[1];
 	g_free (strings);
@@ -186,7 +190,6 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	*lac = g_strdup_printf ("%d", i_lac);
 	*cid = g_strdup_printf ("%d", i_cid);
 	
-	/* TODO should make sure all return values have data? */
 	return TRUE;
 }
 

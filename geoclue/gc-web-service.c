@@ -163,7 +163,7 @@ gc_web_service_build_xpath_context (GcWebService *self)
 		g_free (tmp);
 		return FALSE;
 	}
-	g_free (tmp);
+	xmlFree (tmp);
 	
 	self->xpath_ctx = xmlXPathNewContext(doc);
 	if (!self->xpath_ctx) {

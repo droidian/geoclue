@@ -1,3 +1,3 @@
 [D-BUS Service]
-Name=org.freedesktop.Geoclue.Providers.Plazes
-Exec=@libexecdir@/geoclue-plazes
+Name=org.freedesktop.Geoclue.Providers.Skyhook
+Exec=@libexecdir@/geoclue-skyhook

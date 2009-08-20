@@ -55,6 +55,7 @@ typedef struct _GeoclueMasterClientClass {
 	                                    char                 *description,
 	                                    char                 *service,
 	                                    char                 *path);
+	void (* invalidated) (GeoclueMasterClient *client);
 } GeoclueMasterClientClass;
 
 GType geoclue_master_client_get_type (void);

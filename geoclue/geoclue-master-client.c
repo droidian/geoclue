@@ -89,6 +89,7 @@ enum {
 enum {
 	ADDRESS_PROVIDER_CHANGED,
 	POSITION_PROVIDER_CHANGED,
+	INVALIDATED,
 	LAST_SIGNAL
 };
 
@@ -116,6 +117,7 @@ finalize (GObject *object)
 static void
 dispose (GObject *object)
 {
+
 	G_OBJECT_CLASS (geoclue_master_client_parent_class)->dispose (object);
 }
 
@@ -171,6 +173,13 @@ position_provider_changed (DBusGProxy          *proxy,
 	               name, description, service, path);
 }
 
+static void
+proxy_destroyed (DBusGProxy *proxy,
+		 gpointer    user_data)
+{
+	g_signal_emit (user_data, signals[INVALIDATED], 0);
+}
+
 static GObject *
 constructor (GType                  type,
 	     guint                  n_props,
@@ -196,11 +205,23 @@ constructor (GType                  type,
 		return object;
 	}
 
-	priv->proxy = dbus_g_proxy_new_for_name (connection,
-						 GEOCLUE_MASTER_DBUS_SERVICE,
-						 priv->object_path,
-						 GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE);
-	
+	priv->proxy = dbus_g_proxy_new_for_name_owner (connection,
+						       GEOCLUE_MASTER_DBUS_SERVICE,
+						       priv->object_path,
+						       GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE,
+						       &error);
+	if (!priv->proxy) {
+		g_warning ("Failed to create proxy to %s: %s",
+			   priv->object_path,
+			   error->message);
+		g_error_free (error);
+
+		return object;
+	}
+
+	g_signal_connect (priv->proxy, "destroy",
+			  G_CALLBACK (proxy_destroyed), object);
+
 	dbus_g_proxy_add_signal (priv->proxy, "AddressProviderChanged",
 	                         G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING,
 	                         G_TYPE_INVALID);
@@ -283,6 +304,24 @@ geoclue_master_client_class_init (GeoclueMasterClientClass *klass)
 		              geoclue_marshal_VOID__STRING_STRING_STRING_STRING,
 		              G_TYPE_NONE, 4,
 		              G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING, G_TYPE_STRING);
+
+	/**
+	* GeoclueMasterClient::invalidated:
+	* @client: the #GeoclueMasterClient object emitting the signal
+	*
+	* The client has been invalidated.  This is emitted when Geoclue Dbus
+	* services disappear unexpectedly (possibly due to a crash).  Upon
+	* receiving this signal, you should unref your client and create a new
+	* one.
+	**/
+	signals[INVALIDATED] =
+		g_signal_new ("invalidated",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_FIRST | G_SIGNAL_NO_RECURSE,
+		              G_STRUCT_OFFSET (GeoclueMasterClientClass, invalidated),
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 static void

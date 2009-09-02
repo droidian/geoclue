@@ -5,6 +5,8 @@ include /usr/share/quilt/quilt.make
 
 build: $(QUILT_STAMPFN) build-stamp
 build-stamp:
+	[ -r /usr/share/misc/config.guess ] && cp -f /usr/share/misc/config.guess config.guess
+	[ -r /usr/share/misc/config.sub ] && cp -f /usr/share/misc/config.sub config.sub
 	dh build
 	touch $@
 

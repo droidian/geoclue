@@ -1,1 +1,3 @@
 providers/gypsy/Makefile
+config.guess
+config.sub

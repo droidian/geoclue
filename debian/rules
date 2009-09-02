@@ -14,7 +14,5 @@ build-stamp:
 clean: clean-patched unpatch
 clean-patched:
 	dh clean
-	rm -f providers/gypsy/Makefile
-	rm -f build-stamp
 
 .PHONY: patch unpatch clean clean-patched build 

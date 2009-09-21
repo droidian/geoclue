@@ -42,13 +42,11 @@
 
 #define HOSTIP_NS_GML_NAME "gml"
 #define HOSTIP_NS_GML_URI "http://www.opengis.net/gml"
-#define HOSTIP_NS_HOSTIP_NAME "hostip"
-#define HOSTIP_NS_HOSTIP_URI "http://www.hostip.info/api"
 
-#define HOSTIP_COUNTRY_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryName"
-#define HOSTIP_COUNTRYCODE_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryAbbrev"
-#define HOSTIP_LOCALITY_XPATH "//gml:featureMember/hostip:Hostip/gml:name"
-#define HOSTIP_LATLON_XPATH "//gml:featureMember/hostip:Hostip//gml:coordinates"
+#define HOSTIP_COUNTRY_XPATH "//gml:featureMember/Hostip/countryName"
+#define HOSTIP_COUNTRYCODE_XPATH "//gml:featureMember/Hostip/countryAbbrev"
+#define HOSTIP_LOCALITY_XPATH "//gml:featureMember/Hostip/gml:name"
+#define HOSTIP_LATLON_XPATH "//gml:featureMember/Hostip//gml:coordinates"
 
 static void geoclue_hostip_init (GeoclueHostip *obj);
 static void geoclue_hostip_position_init (GcIfacePositionClass  *iface);
@@ -100,7 +98,6 @@ geoclue_hostip_get_position (GcIfacePosition        *iface,
 	if (!gc_web_service_query (obj->web_service, error, (char *)0)) {
 		return FALSE;
 	}
-	
 	
 	if (gc_web_service_get_string (obj->web_service, 
 	                                &coord_str, HOSTIP_LATLON_XPATH)) {
@@ -240,8 +237,6 @@ geoclue_hostip_init (GeoclueHostip *obj)
 	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);
 	gc_web_service_add_namespace (obj->web_service,
 	                              HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);
-	gc_web_service_add_namespace (obj->web_service,
-	                              HOSTIP_NS_HOSTIP_NAME, HOSTIP_NS_HOSTIP_URI);
 }
 
 static void

@@ -1,3 +1,19 @@
+geoclue (0.11.1-6) unstable; urgency=low
+
+  * [b5dc4a22] Cleaning up git buildpackage config.
+  * [e2dd0d25] Bump compat to level 7.
+  * [59e22383] Merge branch 'dh'
+  * [80f5bd5a] Adding debian/clean for dh_clean, drop extra rules.
+  * [2fa2135d] Copy config.guess/sub and clean up after build.
+  * [0d7df15a] Adding patch to fix wrong comment syntax in example code.
+    (Closes: #536269) - thanks to Marco Túlio Gontijo e Silva
+  * [aa3f625c] Fix HostIP provider to work with latest web API (Closes:
+    #554178) - thanks to Jonny Lamb
+  * [773831aa] Use dh_quilt_* in debian/rules.
+  * [47ecb429] Bumping Standards-Version to 3.8.3, no changes needed.
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 03 Nov 2009 20:00:20 +0100
+
 geoclue (0.11.1-5) unstable; urgency=low
 
   * [ff19d3bf] Fixing section override disparities.

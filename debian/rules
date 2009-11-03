@@ -1,20 +1,13 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-include /usr/share/quilt/quilt.make
-
-build: $(QUILT_STAMPFN) build-stamp
-build-stamp:
+override_dh_auto_configure:
 	[ -r /usr/share/misc/config.guess ] && cp -f /usr/share/misc/config.guess config.guess
 	[ -r /usr/share/misc/config.sub ] && cp -f /usr/share/misc/config.sub config.sub
-	dh build
-	touch $@
+	dh_auto_configure --with quilt
+
 
 %:
-	dh $@
+	dh --with quilt $@
 
-clean: clean-patched unpatch
-clean-patched:
-	dh clean
-
-.PHONY: patch unpatch clean clean-patched build 
+.PHONY: override_dh_auto_configure

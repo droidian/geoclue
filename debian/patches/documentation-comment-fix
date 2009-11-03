@@ -1,0 +1,310 @@
+--- a/docs/reference/html/GeoclueMasterClient.html
++++ b/docs/reference/html/GeoclueMasterClient.html
+@@ -136,7 +136,7 @@ master = geoclue_master_get_default ();
+ 
+ client = geoclue_master_create_client (master, NULL, NULL);
+ if (!client) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+ if (!geoclue_master_client_set_requirements (client,
+@@ -144,17 +144,17 @@ if (!geoclue_master_client_set_requireme
+                                              0, FALSE,
+                                              GEOCLUE_RESOURCE_NETWORK,
+                                              &amp;error)) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+ address = geoclue_master_client_create_address (client, error);
+ if (!address) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+-/ * Now we can use address just like we'd use a normal address provider, 
++/* Now we can use address just like we'd use a normal address provider, 
+     but GeoclueMasterClient makes sure that underneath the provider
+-    that best matches our requirements is used * /
++    that best matches our requirements is used */
+ </pre></div>
+ <p>
+ 
+--- a/docs/reference/html/GeoclueProvider.html
++++ b/docs/reference/html/GeoclueProvider.html
+@@ -104,7 +104,7 @@ GError *error;
+ pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
+                             "/org/freedesktop/Geoclue/Providers/Example");
+ if (pos == NULL) {
+-	/ * error * / 
++	/* error */ 
+ }
+ if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
+                                         &amp;name, NULL, &amp;error)) {
+--- a/docs/reference/html/simple-example.html
++++ b/docs/reference/html/simple-example.html
+@@ -45,12 +45,12 @@ int main() 
+ 	
+ 	g_type_init ();
+ 	
+-	/ * Create the position object * /
++	/* Create the position object */
+ 	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Hostip",
+ 	                            "/org/freedesktop/Geoclue/Providers/Hostip");
+ 	
+-	/ * call get_position. Note that unneeded output variables (here 
+-	    timestamp, altitude and accuracy) can be left NULL * /
++	/* call get_position. Note that unneeded output variables (here 
++	    timestamp, altitude and accuracy) can be left NULL */
+ 	fields = geoclue_position_get_position (pos, NULL,
+ 	                                        &amp;lat, &amp;lon, NULL,
+ 	                                        NULL, &amp;error);
+@@ -84,7 +84,7 @@ gcc `pkg-config --libs --cflags geoclue`
+ <pre class="programlisting">
+ #include &lt;geoclue/geoclue-position.h&gt;
+ 
+-/ * device name or bluetooth address * /
++/* device name or bluetooth address */
+ #define GPS_DEVICE_NAME "00:02:76:C5:81:BF" 
+ 
+ static void
+@@ -115,11 +115,11 @@ int main() 
+ 	
+ 	g_type_init ();
+ 	
+-	/ * Create the position object * /
++	/* Create the position object */
+ 	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Gypsy",
+ 	                            "/org/freedesktop/Geoclue/Providers/Gypsy");
+ 	
+-	/ * Set GPS device name option for Gypsy * /
++	/* Set GPS device name option for Gypsy */
+ 	options = g_hash_table_new (g_str_hash, g_str_equal);
+ 	g_hash_table_insert (options, "org.freedesktop.Geoclue.GPSDevice", GPS_DEVICE_NAME);
+ 	if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (pos), options, &amp;error)) {
+@@ -131,7 +131,7 @@ int main() 
+ 	}
+ 	g_hash_table_destroy (options);
+ 	
+-	/ * connect to signal * /
++	/* connect to signal */
+ 	g_signal_connect (G_OBJECT (pos), "position-changed",
+ 			  G_CALLBACK (position_changed), NULL);
+ 	
+--- a/docs/reference/html/simple-master-example.html
++++ b/docs/reference/html/simple-master-example.html
+@@ -65,7 +65,7 @@ int main()
+ 	
+ 	g_type_init ();
+ 	
+-	/ * create a MasterClient using Master * /
++	/* create a MasterClient using Master */
+ 	master = geoclue_master_get_default ();
+ 	client = geoclue_master_create_client (master, NULL, &amp;error);
+ 	g_object_unref (master);
+@@ -76,8 +76,8 @@ int main()
+ 		return 1;
+ 	}
+ 	
+-	/ * Set our requirements: We want at least city level accuracy, require signals, 
+-	    and allow the use of network (but not e.g. GPS) * /
++	/* Set our requirements: We want at least city level accuracy, require signals, 
++	    and allow the use of network (but not e.g. GPS) */
+ 	if (!geoclue_master_client_set_requirements (client,
+ 	                                             GEOCLUE_ACCURACY_LEVEL_LOCALITY,
+ 	                                             0, TRUE,
+@@ -90,7 +90,7 @@ int main()
+ 		
+ 	}
+ 	
+-	/ * Get a Position object * /
++	/* Get a Position object */
+ 	pos = geoclue_master_client_create_position (client, NULL);
+ 	if (!pos) {
+ 		g_printerr ("Failed to get a position object");
+@@ -98,8 +98,8 @@ int main()
+ 		return 1;
+ 	}
+ 	
+-	/ * call get_position. We do not know which provider actually provides 
+-	    the answer (although we could find out using MasterClient API) * /
++	/* call get_position. We do not know which provider actually provides 
++	    the answer (although we could find out using MasterClient API) */
+ 	fields = geoclue_position_get_position (pos, NULL,
+ 	                                        &amp;lat, &amp;lon, NULL,
+ 	                                        NULL, &amp;error);
+--- a/docs/reference/implementing-providers.xml
++++ b/docs/reference/implementing-providers.xml
+@@ -341,7 +341,7 @@ emit_position_signal (GeoclueExample *ex
+ {
+ 	static GeoclueAccuracy *accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0, 0);
+ 	
+-	/ * make up some coordinates * /
++	/* make up some coordinates */
+ 	static double lat = 60.0;
+ 	static double lon = 25.0;
+ 	
+--- a/docs/reference/using-geoclue.xml
++++ b/docs/reference/using-geoclue.xml
+@@ -116,12 +116,12 @@ int main() 
+ 	
+ 	g_type_init ();
+ 	
+-	/ * Create the position object * /
++	/* Create the position object */
+ 	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Hostip",
+ 	                            "/org/freedesktop/Geoclue/Providers/Hostip");
+ 	
+-	/ * call get_position. Note that unneeded output variables (here 
+-	    timestamp, altitude and accuracy) can be left NULL * /
++	/* call get_position. Note that unneeded output variables (here 
++	    timestamp, altitude and accuracy) can be left NULL */
+ 	fields = geoclue_position_get_position (pos, NULL,
+ 	                                        &amp;lat, &amp;lon, NULL,
+ 	                                        NULL, &amp;error);
+@@ -155,7 +155,7 @@ gcc `pkg-config --libs --cflags geoclue`
+ 		<programlisting>
+ #include &lt;geoclue/geoclue-position.h&gt;
+ 
+-/ * device name or bluetooth address * /
++/* device name or bluetooth address */
+ #define GPS_DEVICE_NAME "00:02:76:C5:81:BF" 
+ 
+ static void
+@@ -186,11 +186,11 @@ int main() 
+ 	
+ 	g_type_init ();
+ 	
+-	/ * Create the position object * /
++	/* Create the position object */
+ 	pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Gypsy",
+ 	                            "/org/freedesktop/Geoclue/Providers/Gypsy");
+ 	
+-	/ * Set GPS device name option for Gypsy * /
++	/* Set GPS device name option for Gypsy */
+ 	options = g_hash_table_new (g_str_hash, g_str_equal);
+ 	g_hash_table_insert (options, "org.freedesktop.Geoclue.GPSDevice", GPS_DEVICE_NAME);
+ 	if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (pos), options, &amp;error)) {
+@@ -202,7 +202,7 @@ int main() 
+ 	}
+ 	g_hash_table_destroy (options);
+ 	
+-	/ * connect to signal * /
++	/* connect to signal */
+ 	g_signal_connect (G_OBJECT (pos), "position-changed",
+ 			  G_CALLBACK (position_changed), NULL);
+ 	
+@@ -260,7 +260,7 @@ int main()
+ 	
+ 	g_type_init ();
+ 	
+-	/ * create a MasterClient using Master * /
++	/* create a MasterClient using Master */
+ 	master = geoclue_master_get_default ();
+ 	client = geoclue_master_create_client (master, NULL, &amp;error);
+ 	g_object_unref (master);
+@@ -271,8 +271,8 @@ int main()
+ 		return 1;
+ 	}
+ 	
+-	/ * Set our requirements: We want at least city level accuracy, require signals, 
+-	    and allow the use of network (but not e.g. GPS) * /
++	/* Set our requirements: We want at least city level accuracy, require signals, 
++	    and allow the use of network (but not e.g. GPS) */
+ 	if (!geoclue_master_client_set_requirements (client,
+ 	                                             GEOCLUE_ACCURACY_LEVEL_LOCALITY,
+ 	                                             0, TRUE,
+@@ -285,7 +285,7 @@ int main()
+ 		
+ 	}
+ 	
+-	/ * Get a Position object * /
++	/* Get a Position object */
+ 	pos = geoclue_master_client_create_position (client, NULL);
+ 	if (!pos) {
+ 		g_printerr ("Failed to get a position object");
+@@ -293,8 +293,8 @@ int main()
+ 		return 1;
+ 	}
+ 	
+-	/ * call get_position. We do not know which provider actually provides 
+-	    the answer (although we could find out using MasterClient API) * /
++	/* call get_position. We do not know which provider actually provides 
++	    the answer (although we could find out using MasterClient API) */
+ 	fields = geoclue_position_get_position (pos, NULL,
+ 	                                        &amp;lat, &amp;lon, NULL,
+ 	                                        NULL, &amp;error);
+--- a/docs/reference/xml/gc-web-service.xml
++++ b/docs/reference/xml/gc-web-service.xml
+@@ -73,22 +73,22 @@ char-array data types. Adding new functi
+ web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
+ gc_web_service_set_base_url (web_service, "http://example.org");
+ 
+-/ * Add namespaces if needed * / 
++/* Add namespaces if needed */ 
+ gc_web_service_add_namespace (web_service,
+                               "ns_name", "http://example.org/ns");
+ 
+ . . .
+ 
+-/ * Fetch document "http://api.example.org?key1=val1&amp;key2=val2" * /
++/* Fetch document "http://api.example.org?key1=val1&amp;key2=val2" */
+ if (!gc_web_service_query (web_service, 
+                            "key1", "val1"
+                            "key2", val2"
+                            (char *)0)) {
+-	/ * error * /
++	/* error */
+ 	return;
+ }
+ 
+-/ * Use XPath expressions to parse the xml in fetched document * /
++/* Use XPath expressions to parse the xml in fetched document */
+ gchar *str;
+ if (gc_web_service_get_string (web_service,
+                                &amp;str, "//path/to/element")) {
+--- a/docs/reference/xml/geoclue-master-client.xml
++++ b/docs/reference/xml/geoclue-master-client.xml
+@@ -119,7 +119,7 @@ master = geoclue_master_get_default ();
+ 
+ client = geoclue_master_create_client (master, NULL, NULL);
+ if (!client) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+ if (!geoclue_master_client_set_requirements (client,
+@@ -127,17 +127,17 @@ if (!geoclue_master_client_set_requireme
+                                              0, FALSE,
+                                              GEOCLUE_RESOURCE_NETWORK,
+                                              &amp;error)) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+ address = geoclue_master_client_create_address (client, error);
+ if (!address) {
+-	/ * handle error * /
++	/* handle error */
+ }
+ 
+-/ * Now we can use address just like we'd use a normal address provider, 
++/* Now we can use address just like we'd use a normal address provider, 
+     but GeoclueMasterClient makes sure that underneath the provider
+-    that best matches our requirements is used * /
++    that best matches our requirements is used */
+ </programlisting>
+ </informalexample></para>
+ <para>
+--- a/docs/reference/xml/geoclue-provider.xml
++++ b/docs/reference/xml/geoclue-provider.xml
+@@ -87,7 +87,7 @@ GError *error;
+ pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
+                             "/org/freedesktop/Geoclue/Providers/Example");
+ if (pos == NULL) {
+-	/ * error * / 
++	/* error */ 
+ }
+ if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
+                                         &amp;name, NULL, &amp;error)) {

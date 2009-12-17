@@ -6,6 +6,22 @@
  * 
  * Copyright 2007 Jussi Kukkonen (from old geoclue_web_service.c)
  * Copyright 2007, 2008 by Garmin Ltd. or its subsidiaries
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 /**
@@ -70,6 +86,7 @@
 #include <libxml/uri.h>      /* for xmlURIEscapeStr */
 
 #include "gc-web-service.h"
+#include "geoclue-error.h"
 
 G_DEFINE_TYPE (GcWebService, gc_web_service, G_TYPE_OBJECT)
 
@@ -109,6 +126,22 @@ gc_web_service_register_namespaces (GcWebService *self)
 	g_list_foreach (self->namespaces, (GFunc)gc_web_service_register_ns, self);
 }
 
+static void
+gc_web_service_reset (GcWebService *self)
+{
+	g_free (self->response);
+	self->response = NULL;
+	self->response_length = 0;
+	
+	if (self->xpath_ctx) {
+		if (self->xpath_ctx->doc) {
+			xmlFreeDoc (self->xpath_ctx->doc);
+		}
+		xmlXPathFreeContext (self->xpath_ctx);
+		self->xpath_ctx = NULL;
+	}
+}
+
 /* Parse data (self->response), build xpath context and register 
  * namespaces. Nothing will be done if xpath context exists already. */
 static gboolean
@@ -116,8 +149,6 @@ gc_web_service_build_xpath_context (GcWebService *self)
 {
 	xmlDocPtr doc;
 	xmlChar *tmp;
-	
-	g_assert (self->response);
 	
 	/* don't rebuild if there's no need */
 	if (self->xpath_ctx) {
@@ -132,7 +163,7 @@ gc_web_service_build_xpath_context (GcWebService *self)
 		g_free (tmp);
 		return FALSE;
 	}
-	g_free (tmp);
+	xmlFree (tmp);
 	
 	self->xpath_ctx = xmlXPathNewContext(doc);
 	if (!self->xpath_ctx) {
@@ -145,31 +176,37 @@ gc_web_service_build_xpath_context (GcWebService *self)
 
 /* fetch data from url, save into self->response */
 static gboolean
-gc_web_service_fetch (GcWebService *self, gchar *url)
+gc_web_service_fetch (GcWebService *self, gchar *url, GError **error)
 {
 	void* ctxt = NULL;
 	gint len;
 	xmlChar buf[1024];
 	xmlBuffer *output;
 	
-	g_free (self->response);
-	self->response = NULL;
-	xmlXPathFreeContext (self->xpath_ctx);
-	self->xpath_ctx = NULL;
 	g_assert (url);
+	
+	gc_web_service_reset (self);
 	
 	xmlNanoHTTPInit();
 	ctxt = xmlNanoHTTPMethod (url, "GET", NULL, NULL, NULL, 0);
 	if (!ctxt) {
-		g_printerr ("xmlNanoHTTPMethod did not get a response\n");
+		*error = g_error_new (GEOCLUE_ERROR, 
+		                      GEOCLUE_ERROR_NOT_AVAILABLE,
+		                      g_strdup_printf ("xmlNanoHTTPMethod did not get a response from %s\n", url));
 		return FALSE;
 	}
 	
 	output = xmlBufferCreate ();
 	while ((len = xmlNanoHTTPRead (ctxt, buf, sizeof(buf))) > 0) {
 		if (xmlBufferAdd (output, buf, len) != 0) {
-			g_printerr ("xmlBufferAdd failed\n");
-			break;
+			xmlNanoHTTPClose(ctxt);
+			xmlBufferFree (output);
+			
+			*error = g_error_new (GEOCLUE_ERROR, 
+			                      GEOCLUE_ERROR_FAILED,
+			                      g_strdup_printf ("libxml error (xmlBufferAdd failed)"));
+			
+			return FALSE;
 		}
 	}
 	xmlNanoHTTPClose(ctxt);
@@ -178,7 +215,7 @@ gc_web_service_fetch (GcWebService *self, gchar *url)
 	self->response = g_memdup (xmlBufferContent (output), self->response_length);
 	xmlBufferFree (output);
 	
-	return (self->response_length > 0);
+	return TRUE;
 }
 
 static xmlXPathObject*
@@ -186,7 +223,6 @@ gc_web_service_get_xpath_object (GcWebService *self, gchar* xpath)
 {
 	xmlXPathObject *obj = NULL;
 	
-	g_return_val_if_fail (self->response, FALSE);
 	g_return_val_if_fail (xpath, FALSE);
 	
 	/* parse the doc if not parsed yet and register namespaces */
@@ -220,13 +256,12 @@ gc_web_service_finalize (GObject *obj)
 {
 	GcWebService *self = (GcWebService *) obj;
 	
+	gc_web_service_reset (self);
+	
 	g_free (self->base_url);
-	g_free (self->response);
 	
 	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
 	g_list_free (self->namespaces);
-	
-	xmlXPathFreeContext (self->xpath_ctx);
 	
 	((GObjectClass *) gc_web_service_parent_class)->finalize (obj);
 }
@@ -251,18 +286,9 @@ gc_web_service_set_base_url (GcWebService *self, gchar *url)
 {
 	g_assert (url);
 	
+	gc_web_service_reset (self);
+	
 	g_free (self->base_url);
-	g_free (self->response);
-	self->response = NULL;
-	self->response_length = 0;
-	
-	g_list_foreach (self->namespaces, (GFunc)gc_web_service_free_ns, NULL);
-	g_list_free (self->namespaces);
-	self->namespaces = NULL;
-	
-	xmlXPathFreeContext (self->xpath_ctx);
-	self->xpath_ctx = NULL;
-	
 	self->base_url = g_strdup (url);
 }
  
@@ -304,7 +330,7 @@ gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri)
  * Return value: %TRUE on success.
  */
 gboolean
-gc_web_service_query (GcWebService *self, ...)
+gc_web_service_query (GcWebService *self, GError **error, ...)
 {
 	va_list list;
 	gchar *key, *value, *esc_value, *tmp, *url;
@@ -316,12 +342,12 @@ gc_web_service_query (GcWebService *self, ...)
 	
 	/* read the arguments one key-value pair at a time,
 	   add the pairs to url as "?key1=value1&key2=value2&..." */
-	va_start (list, self);
+	va_start (list, error);
 	key = va_arg (list, char*);
 	while (key) {
 		value = va_arg (list, char*);
 		esc_value = (gchar *)xmlURIEscapeStr ((xmlChar *)value, NULL);
-		g_return_val_if_fail (esc_value, FALSE);
+		
 		if (first_pair) {
 			tmp = g_strdup_printf ("%s?%s=%s",  url, key, esc_value);
 			first_pair = FALSE;
@@ -335,11 +361,10 @@ gc_web_service_query (GcWebService *self, ...)
 	}
 	va_end (list);
 	
-	if (!gc_web_service_fetch (self, url)) {
+	if (!gc_web_service_fetch (self, url, error)) {
 		g_free (url);
 		return FALSE;
 	}
-	g_assert (self->response);
 	g_free (url);
 	
 	return TRUE;
@@ -392,7 +417,7 @@ gc_web_service_get_string (GcWebService *self, gchar **value, gchar* xpath)
 	if (!obj) {
 		return FALSE;
 	}
-	*value = g_strdup ((char*)xmlXPathCastNodeSetToString (obj->nodesetval));
+	*value = (char*)xmlXPathCastNodeSetToString (obj->nodesetval);
 	xmlXPathFreeObject (obj);
 	return TRUE;
 }
@@ -411,8 +436,6 @@ gc_web_service_get_string (GcWebService *self, gchar **value, gchar* xpath)
 gboolean
 gc_web_service_get_response (GcWebService *self, guchar **response, gint *response_length)
 {
-	g_return_val_if_fail (self->response, FALSE);
-	
 	*response = g_memdup (self->response, self->response_length);
 	*response_length = self->response_length;
 	return TRUE;

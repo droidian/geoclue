@@ -4,11 +4,26 @@
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
  /** 
-  * This is mostly a proof-of-concept, and gsmloc.org itself is 
-  * not too trustworthy either, rather "barely kept alive".
+  * This is mostly a proof-of-concept provider. 
   * 
   * Gammu must be configured before running the provider (test by
   * running "gammu networkinfo"). Currently the first configuration 
@@ -16,6 +31,10 @@
   * 
   * Gammu initialization takes a really long time if the configured
   * phone is not available.
+  * 
+  * Gsmloc uses the webservice http://www.opencellid.org/ (a similar service
+  * used to live at gsmloc.org, hence the name)
+  * 
   **/
   
 #include <config.h>
@@ -38,7 +57,7 @@
 
 #define GEOCLUE_DBUS_SERVICE_GSMLOC "org.freedesktop.Geoclue.Providers.Gsmloc"
 #define GEOCLUE_DBUS_PATH_GSMLOC "/org/freedesktop/Geoclue/Providers/Gsmloc"
-#define GSMLOC_URL "http://gsmloc.org/api"
+#define GSMLOC_URL "http://www.opencellid.org/cell/get"
 
 #define GEOCLUE_TYPE_GSMLOC (geoclue_gsmloc_get_type ())
 #define GEOCLUE_GSMLOC(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_GSMLOC, GeoclueGsmloc))
@@ -104,7 +123,7 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	}
 	
  	/* Find and read configuration file */
- 	error = GSM_FindGammuRC (&cfg);
+ 	error = GSM_FindGammuRC (&cfg, NULL);
 	if (error != ERR_NONE) {
 		g_printerr ("Gammu error: %s\n", GSM_ErrorString (error));
 		if (GSM_IsConnected (state)) {
@@ -160,6 +179,10 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	}
 	
 	strings = g_strsplit (netinfo.NetworkCode, " ", 2);
+	if (!strings[0] || !strings[1]) {
+		g_strfreev (strings);
+		return FALSE;
+	}
 	*mcc = strings[0];
 	*mnc = strings[1];
 	g_free (strings);
@@ -167,7 +190,6 @@ static gboolean geoclue_gsmloc_get_cell (GeoclueGsmloc *gsmloc,
 	*lac = g_strdup_printf ("%d", i_lac);
 	*cid = g_strdup_printf ("%d", i_cid);
 	
-	/* TODO should make sure all return values have data? */
 	return TRUE;
 }
 
@@ -187,9 +209,11 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	char *mcc, *mnc, *lac, *cid;
 	
 	gsmloc = (GEOCLUE_GSMLOC (iface));
+	mcc = mnc = lac = cid = NULL;
 	
 	if (!geoclue_gsmloc_get_cell (gsmloc, &mcc, &mnc, &lac, &cid)) {
-		/* Error */
+		*error = g_error_new (GEOCLUE_ERROR, GEOCLUE_ERROR_NOT_AVAILABLE,
+		                      "Failed to get cell data from Gammu");
 		return FALSE;
 	}
 	
@@ -197,19 +221,12 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	if (timestamp) {
 		*timestamp = time (NULL);
 	}
-	
-	if (!gc_web_service_query (gsmloc->web_service, 
-	                           "action", "get",
-	                           "format", "xml",
-	                           "nid1", mcc,
-	                           "nid2", mnc,
+	if (!gc_web_service_query (gsmloc->web_service, error,
+	                           "mcc", mcc,
+	                           "mnc", mnc,
 	                           "lac", lac,
-	                           "cid", cid,
+	                           "cellid", cid,
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, 
-		             "Web service query failed");
-		
 		g_free (mcc);
 		g_free (mnc);
 		g_free (lac);
@@ -222,11 +239,11 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	g_free (cid);
 	
 	if (latitude && gc_web_service_get_double (gsmloc->web_service, 
-	                                           latitude, "//Point/lat")) {
+	                                           latitude, "/rsp/cell/attribute::lat")) {
 		*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
 	}
 	if (longitude && gc_web_service_get_double (gsmloc->web_service, 
-	                                            longitude, "//Point/lon")) {
+	                                            longitude, "/rsp/cell/attribute::lat")) {
 		*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
 	}
 	
@@ -275,7 +292,7 @@ geoclue_gsmloc_init (GeoclueGsmloc *gsmloc)
 	gc_provider_set_details (GC_PROVIDER (gsmloc), 
 	                         GEOCLUE_DBUS_SERVICE_GSMLOC,
 	                         GEOCLUE_DBUS_PATH_GSMLOC,
-	                         "Gsmloc", "Gsmloc.org and Gammu -based provider");
+	                         "Gsmloc", "opencellid.org and Gammu -based provider");
 	
 	gsmloc->web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (gsmloc->web_service, GSMLOC_URL);

@@ -1,9 +1,25 @@
 /*
  * Geoclue
- * geoclue-gypsy.c - Geoclue backend for Gypsy
+ * geoclue-gypsy.c - Geoclue backend for Gypsy which provides the Position.
  *
  * Authors: Iain Holmes <iain@openedhand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 #include <config.h>
@@ -362,17 +378,25 @@ set_options (GcIfaceGeoclue *gc,
              GError        **error)
 {
         GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
-        gpointer device_name;
+        const char *device_name;
         char *path;
 
         device_name = g_hash_table_lookup (options, 
                                            "org.freedesktop.Geoclue.GPSDevice");
-        if (device_name == NULL) {
-                return TRUE;
-        }
+
+        if (g_strcmp0 (gypsy->device_name, device_name) == 0) {
+        	return TRUE;
+	}
+
+	g_free (gypsy->device_name);
+	gypsy->device_name = NULL;
+
+	if (device_name == NULL || *device_name == '\0') {
+		return TRUE;
+	}
 
         gypsy->device_name = g_strdup (device_name);
-        g_print ("Gypsy provider using %s\n", gypsy->device_name);
+        g_print ("Gypsy provider using '%s'\n", gypsy->device_name);
 	path = gypsy_control_create (gypsy->control, gypsy->device_name,
 				     error);
 	if (*error != NULL) {

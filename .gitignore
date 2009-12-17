@@ -4,20 +4,14 @@
 *.la
 
 
-Makefile.in
 Makefile
 stamp-*
 config.*
-configure
 INSTALL
 aclocal.m4
 autom4te.cache
 compile
-depcomp
 install-sh
-libtool
-ltmain.sh
-missing
 .deps
 .libs
 

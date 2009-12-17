@@ -62,10 +62,14 @@ libgeoclue.so.0 libgeoclue0 #MINVER#
  geoclue_master_client_create_position@Base 0.11.1
  geoclue_master_client_create_position_async@Base 0.11.1
  geoclue_master_client_get_address_provider@Base 0.11.1
+ geoclue_master_client_get_address_provider_async@Base 0.11.1+git20091217
  geoclue_master_client_get_position_provider@Base 0.11.1
+ geoclue_master_client_get_position_provider_async@Base 0.11.1+git20091217
  geoclue_master_client_get_type@Base 0.11.1
  geoclue_master_client_set_requirements@Base 0.11.1
+ geoclue_master_client_set_requirements_async@Base 0.11.1+git20091217
  geoclue_master_create_client@Base 0.11.1
+ geoclue_master_create_client_async@Base 0.11.1+git20091217
  geoclue_master_get_default@Base 0.11.1
  geoclue_master_get_type@Base 0.11.1
  geoclue_position_get_position@Base 0.11.1
@@ -73,9 +77,12 @@ libgeoclue.so.0 libgeoclue0 #MINVER#
  geoclue_position_get_type@Base 0.11.1
  geoclue_position_new@Base 0.11.1
  geoclue_provider_get_provider_info@Base 0.11.1
+ geoclue_provider_get_provider_info_async@Base 0.11.1+git20091217
  geoclue_provider_get_status@Base 0.11.1
+ geoclue_provider_get_status_async@Base 0.11.1+git20091217
  geoclue_provider_get_type@Base 0.11.1
  geoclue_provider_set_options@Base 0.11.1
+ geoclue_provider_set_options_async@Base 0.11.1+git20091217
  geoclue_reverse_geocode_get_type@Base 0.11.1
  geoclue_reverse_geocode_new@Base 0.11.1
  geoclue_reverse_geocode_position_to_address@Base 0.11.1

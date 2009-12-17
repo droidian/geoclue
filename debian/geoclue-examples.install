@@ -1,4 +1,4 @@
-debian/tmp/usr/bin/geoclue-test-gui
+test/.libs/geoclue-test-gui /usr/bin
 debian/tmp/usr/lib/geoclue/geoclue-example
 debian/tmp/usr/share/geoclue-providers/geoclue-example.provider
 debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Example.service

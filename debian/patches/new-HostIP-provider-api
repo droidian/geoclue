@@ -1,6 +1,6 @@
 --- a/providers/hostip/geoclue-hostip.c
 +++ b/providers/hostip/geoclue-hostip.c
-@@ -26,13 +26,11 @@
+@@ -42,13 +42,11 @@
  
  #define HOSTIP_NS_GML_NAME "gml"
  #define HOSTIP_NS_GML_URI "http://www.opengis.net/gml"
@@ -18,7 +18,7 @@
  
  static void geoclue_hostip_init (GeoclueHostip *obj);
  static void geoclue_hostip_position_init (GcIfacePositionClass  *iface);
-@@ -87,7 +85,6 @@ geoclue_hostip_get_position (GcIfacePosi
+@@ -101,7 +99,6 @@ geoclue_hostip_get_position (GcIfacePosi
  		return FALSE;
  	}
  	
@@ -26,7 +26,7 @@
  	if (gc_web_service_get_string (obj->web_service, 
  	                                &coord_str, HOSTIP_LATLON_XPATH)) {
  		if (sscanf (coord_str, "%lf,%lf", longitude , latitude) == 2) {
-@@ -228,8 +225,6 @@ geoclue_hostip_init (GeoclueHostip *obj)
+@@ -240,8 +237,6 @@ geoclue_hostip_init (GeoclueHostip *obj)
  	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);
  	gc_web_service_add_namespace (obj->web_service,
  	                              HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);

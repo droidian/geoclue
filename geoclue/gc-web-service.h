@@ -3,6 +3,22 @@
  * gc-web-service.h
  *
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 #ifndef GC_WEB_SERVICE_H
 #define GC_WEB_SERVICE_H
@@ -41,7 +57,7 @@ GType gc_web_service_get_type (void);
 void gc_web_service_set_base_url (GcWebService *self, gchar *url);
 gboolean gc_web_service_add_namespace (GcWebService *self, gchar *namespace, gchar *uri);
 
-gboolean gc_web_service_query (GcWebService *self, ...);
+gboolean gc_web_service_query (GcWebService *self, GError **error, ...);
 gboolean gc_web_service_get_string (GcWebService *self, gchar **value, gchar *xpath);
 gboolean gc_web_service_get_double (GcWebService *self, gdouble *value, gchar *xpath);
 

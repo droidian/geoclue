@@ -5,6 +5,22 @@
  * Authors: Iain Holmes <iain@openedhand.com>
  *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 #include <config.h>
@@ -23,6 +39,13 @@
 #include "connectivity-conic.h"
 #endif
 #endif
+
+enum {
+	OPTIONS_CHANGED,
+	LAST_SIGNAL
+};
+
+static guint32 signals[LAST_SIGNAL] = {0, };
 
 G_DEFINE_TYPE (GcMaster, gc_master, G_TYPE_OBJECT);
 
@@ -60,6 +83,16 @@ gc_master_class_init (GcMasterClass *klass)
 {
 	dbus_g_object_type_install_info (gc_master_get_type (),
 					 &dbus_glib_gc_iface_master_object_info);
+
+	signals[OPTIONS_CHANGED] = g_signal_new ("options-changed",
+						  G_TYPE_FROM_CLASS (klass),
+						  G_SIGNAL_RUN_FIRST |
+						  G_SIGNAL_NO_RECURSE,
+						  G_STRUCT_OFFSET (GcMasterClass, options_changed), 
+						  NULL, NULL,
+						  g_cclosure_marshal_VOID__BOXED,
+						  G_TYPE_NONE, 1,
+						  G_TYPE_HASH_TABLE);
 }
 
 /* Load the provider details out of a keyfile */

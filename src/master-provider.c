@@ -6,6 +6,22 @@
  * 
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
  *                2008 OpenedHand Ltd
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 /**
@@ -122,7 +138,7 @@ gc_master_provider_get_provider (GcMasterProvider *master_provider)
 		return GEOCLUE_PROVIDER (priv->address);
 	}
 	if (priv->position) {
-		return GEOCLUE_PROVIDER (priv->address);
+		return GEOCLUE_PROVIDER (priv->position);
 	}
 	return NULL;
 }
@@ -1149,6 +1165,22 @@ gc_master_provider_is_good (GcMasterProvider     *provider,
 	        ((priv->provides & required_flags) == required_flags) &&
 	        (priv->expected_accuracy >= min_accuracy) &&
 	        ((priv->required_resources & (~allowed_resources)) == 0));
+}
+
+void
+gc_master_provider_update_options (GcMasterProvider *provider)
+{
+	GeoclueProvider *geoclue;
+	GError *error = NULL;
+	
+	geoclue = gc_master_provider_get_provider (provider);
+	
+	if (!geoclue_provider_set_options (geoclue,
+	                                   geoclue_get_main_options (),
+	                                   &error)) {
+		g_warning ("Error setting provider options: %s\n", error->message);
+		g_error_free (error);
+	}
 }
 
 GeoclueStatus 

@@ -1,10 +1,27 @@
 /*
  * Geoclue
- * geoclue-yahoo.c - A "local.yahooapis.com"-based Geocode-provider
+ * geoclue-yahoo.c - A "local.yahooapis.com"-based Geocode-provider which
+ * converts from street address to position.
  * 
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  * 
  * Author: Jussi Kukkonen <jku@o-hand.com>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 #include <config.h>
@@ -101,15 +118,13 @@ geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
 	locality = get_address_value (address, GEOCLUE_ADDRESS_KEY_LOCALITY);
 	region = get_address_value (address, GEOCLUE_ADDRESS_KEY_REGION);
 	
-	if (!gc_web_service_query (yahoo->web_service,
+	if (!gc_web_service_query (yahoo->web_service, error,
 	                           "appid", YAHOO_GEOCLUE_APP_ID,
 	                           "street", street,
 	                           "zip", postalcode,
 	                           "city", locality,
 	                           "state", region,
 	                           (char *)0)) {
-		g_set_error (error, GEOCLUE_ERROR, 
-		             GEOCLUE_ERROR_NOT_AVAILABLE, "Web service query failed");
 		return FALSE;
 	}
 	

@@ -6,6 +6,22 @@
  *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
  *           2008 OpenedHand Ltd
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 /**
@@ -27,9 +43,7 @@
  * 
  * pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
  *                             "/org/freedesktop/Geoclue/Providers/Example");
- * if (pos == NULL) {
- * 	/ * error * / 
- * }
+ *
  * if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
  *                                         &name, NULL, &error)) {
  * 	g_print ("name = %s", name);
@@ -44,6 +58,12 @@
 
 #include <geoclue/geoclue-provider.h>
 #include "gc-iface-geoclue-bindings.h"
+
+typedef struct _GeoclueProviderAsyncData {
+	GeoclueProvider *provider;
+	GCallback callback;
+	gpointer userdata;
+} GeoclueProviderAsyncData;
 
 typedef struct _GeoclueProviderPrivate {
 	DBusGProxy *geoclue_proxy;
@@ -81,6 +101,24 @@ status_changed (DBusGProxy      *proxy,
 }
 
 static void
+add_reference_callback (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+	if (error) {
+		g_printerr ("Could not reference provider: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
+remove_reference_callback (DBusGProxy *proxy, GError *error, gpointer userdata)
+{
+	if (error) {
+		g_printerr ("Could not unreference provider: %s", error->message);
+		g_error_free (error);
+	}
+}
+
+static void
 finalize (GObject *object)
 {
 	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
@@ -97,12 +135,10 @@ dispose (GObject *object)
 {
 	GeoclueProvider *provider = GEOCLUE_PROVIDER (object);
 	GeoclueProviderPrivate *priv = GET_PRIVATE (object);
-	GError *error = NULL;
 	
-	if (!org_freedesktop_Geoclue_remove_reference (priv->geoclue_proxy, &error)){
-		g_printerr ("Could not unreference provider: %s", error->message);
-		g_error_free (error);
-	}
+	org_freedesktop_Geoclue_remove_reference_async (priv->geoclue_proxy,
+	                                                remove_reference_callback,
+	                                                NULL);
 	if (priv->geoclue_proxy) {
 		g_object_unref (priv->geoclue_proxy);
 		priv->geoclue_proxy = NULL;
@@ -152,10 +188,9 @@ constructor (GType                  type,
 	priv->geoclue_proxy = dbus_g_proxy_new_for_name (connection, 
 	                                                 priv->service, priv->path, 
 	                                                 GEOCLUE_INTERFACE_NAME);
-	if (!org_freedesktop_Geoclue_add_reference (priv->geoclue_proxy, &error)){
-		g_printerr ("Could not reference provider: %s", error->message);
-		g_error_free (error);
-	}
+	org_freedesktop_Geoclue_add_reference_async (priv->geoclue_proxy,
+	                                             add_reference_callback,
+	                                             NULL);
 	dbus_g_proxy_add_signal (priv->geoclue_proxy, "StatusChanged",
 	                         G_TYPE_INT, G_TYPE_INVALID);
 	dbus_g_proxy_connect_signal (priv->geoclue_proxy, "StatusChanged",
@@ -303,6 +338,60 @@ geoclue_provider_get_status (GeoclueProvider  *provider,
 	return TRUE;
 }
 
+static void
+get_status_async_callback (DBusGProxy               *proxy, 
+                           GeoclueStatus             status, 
+                           GError                   *error, 
+                           GeoclueProviderAsyncData *data)
+{
+	(*(GeoclueProviderStatusCallback)data->callback) (data->provider,
+	                                                  status,
+	                                                  error,
+	                                                  data->userdata);
+	g_free (data);
+	
+}
+
+/**
+ * GeoclueProviderStatusCallback:
+ * @provider: A #GeoclueProvider object
+ * @status: A #GeoclueStatus
+ * @error: Error as #GError or %NULL
+ * @userdata: User data pointer set in geoclue_provider_get_status_async()
+ * 
+ * Callback function for geoclue_provider_get_status_async().
+ */
+
+/**
+ * geoclue_provider_get_status_async:
+ * @provider: A #GeoclueProvider object
+ * @callback: A #GeoclueProviderStatusCallback function that will be called when return values are available
+ * @userdata: pointer for user specified data
+ * 
+ * Asynchronous version of geoclue_provider_get_status(). Function returns 
+ * (essentially) immediately and calls @callback when status is available or 
+ * when there is an error.
+ */
+void 
+geoclue_provider_get_status_async (GeoclueProvider               *provider,
+                                   GeoclueProviderStatusCallback  callback,
+                                   gpointer                       userdata)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	GeoclueProviderAsyncData *data;
+	
+	data = g_new (GeoclueProviderAsyncData, 1);
+	data->provider = provider;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_get_status_async
+			(priv->geoclue_proxy,
+			 (org_freedesktop_Geoclue_get_status_reply)get_status_async_callback,
+			 data);
+}
+
+
 /**
  * geoclue_provider_set_options:
  * @provider: A #GeoclueProvider object
@@ -328,6 +417,58 @@ geoclue_provider_set_options (GeoclueProvider  *provider,
 	                                            options, error);
 }
 
+static void
+set_options_async_callback (DBusGProxy               *proxy, 
+                            GError                   *error, 
+                            GeoclueProviderAsyncData *data)
+{
+	(*(GeoclueProviderOptionsCallback)data->callback) (data->provider,
+	                                                  error,
+	                                                  data->userdata);
+	g_free (data);
+}
+
+/**
+ * GeoclueProviderOptionsCallback:
+ * @provider: A #GeoclueProvider object
+ * @error: Error as #GError or %NULL
+ * @userdata: User data pointer set in geoclue_provider_set_options_async()
+ * 
+ * Callback function for geoclue_provider_set_options_async().
+ */
+
+/**
+ * geoclue_provider_set_options_async:
+ * @provider: A #GeoclueProvider object
+ * @options: A #GHashTable of options
+ * @callback: A #GeoclueProviderOptionsCallback function that will be called when options are set
+ * @userdata: pointer for user specified data
+ * 
+ * Asynchronous version of geoclue_provider_set_options(). Function returns 
+ * (essentially) immediately and calls @callback when options have been set or 
+ * when there is an error.
+ */
+void 
+geoclue_provider_set_options_async (GeoclueProvider                *provider,
+                                    GHashTable                     *options,
+                                    GeoclueProviderOptionsCallback  callback,
+                                    gpointer                        userdata)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	GeoclueProviderAsyncData *data;
+	
+	data = g_new (GeoclueProviderAsyncData, 1);
+	data->provider = provider;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_set_options_async
+			(priv->geoclue_proxy,
+			 options,
+			 (org_freedesktop_Geoclue_set_options_reply)set_options_async_callback,
+			 data);
+}
+
 /**
  * geoclue_provider_get_provider_info:
  * @provider: A #GeoclueProvider object
@@ -350,4 +491,59 @@ geoclue_provider_get_provider_info (GeoclueProvider  *provider,
 	return org_freedesktop_Geoclue_get_provider_info (priv->geoclue_proxy,
 	                                                  name, description,
 	                                                  error);
+}
+
+static void
+get_provider_info_async_callback (DBusGProxy               *proxy, 
+                                  char                     *name,
+                                  char                     *description,
+                                  GError                   *error, 
+                                  GeoclueProviderAsyncData *data)
+{
+	(*(GeoclueProviderInfoCallback)data->callback) (data->provider,
+	                                                name,
+	                                                description,
+	                                                error,
+	                                                data->userdata);
+	g_free (data);
+}
+
+/**
+ * GeoclueProviderInfoCallback:
+ * @provider: A #GeoclueProvider object
+ * @name: Name of the provider
+ * @description: one-line description of the provider
+ * @error: Error as #GError or %NULL
+ * @userdata: User data pointer set in geoclue_provider_get_provider_info_async()
+ * 
+ * Callback function for geoclue_provider_get_provider_info_async().
+ */
+
+/**
+ * geoclue_provider_get_provider_info_async:
+ * @provider: A #GeoclueProvider object
+ * @callback: A #GeoclueProviderInfoCallback function that will be called when info is available
+ * @userdata: pointer for user specified data
+ * 
+ * Asynchronous version of geoclue_provider_get_provider_info(). Function returns 
+ * (essentially) immediately and calls @callback when info is available or 
+ * when there is an error.
+ */
+void 
+geoclue_provider_get_provider_info_async (GeoclueProvider             *provider,
+                                          GeoclueProviderInfoCallback  callback,
+                                          gpointer                     userdata)
+{
+	GeoclueProviderPrivate *priv = GET_PRIVATE (provider);
+	GeoclueProviderAsyncData *data;
+	
+	data = g_new (GeoclueProviderAsyncData, 1);
+	data->provider = provider;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+	
+	org_freedesktop_Geoclue_get_provider_info_async
+			(priv->geoclue_proxy,
+			 (org_freedesktop_Geoclue_get_provider_info_reply)get_provider_info_async_callback,
+			 data);
 }

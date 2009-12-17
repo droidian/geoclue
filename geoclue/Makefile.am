@@ -43,6 +43,9 @@ libgeoclue_la_SOURCES = 	\
 	gc-iface-reverse-geocode.c	\
 	gc-iface-velocity.c
 
+libgeoclue_la_LIBADD =	\
+	$(GEOCLUE_LIBS)
+
 libgeoclue_la_CFLAGS =		\
 	-I$(top_srcdir)		\
 	-I$(top_builddir)	\

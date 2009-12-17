@@ -37,6 +37,22 @@
  * This would make the provider save the specified address with current 
  * router mac address. It will provide the address to clients whenever 
  * the computer is connected to the same router again.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */ 
 
 #include <config.h>
@@ -201,7 +217,7 @@ geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet,
 {
 	char **groups;
 	char **g;
-	GError *error;
+	GError *error = NULL;
 	
 	groups = g_key_file_get_groups (keyfile, NULL);
 	g = groups;
@@ -218,7 +234,7 @@ geoclue_localnet_load_gateways_from_keyfile (GeoclueLocalnet  *localnet,
 		keys = g_key_file_get_keys (keyfile, *g,
 		                            NULL, &error);
 		if (error) {
-			g_warning ("Could not load keys for group %s from %s: %s", 
+			g_warning ("Could not load keys for group [%s] from %s: %s", 
 			           *g, localnet->keyfile_name, error->message);
 			g_error_free (error);
 			error = NULL;
@@ -282,12 +298,13 @@ geoclue_localnet_init (GeoclueLocalnet *localnet)
 	
 	/* load known addresses from keyfile */
 	dir = g_get_user_config_dir ();
+	g_mkdir_with_parents (dir, 0755);
 	localnet->keyfile_name = g_build_filename (dir, KEYFILE_NAME, NULL);
 	
 	keyfile = g_key_file_new ();
 	if (!g_key_file_load_from_file (keyfile, localnet->keyfile_name, 
 	                                G_KEY_FILE_NONE, &error)) {
-		g_warning ("Error loading keyfile %s: %s", 
+		g_warning ("Could not load keyfile %s: %s", 
 		           localnet->keyfile_name, error->message);
 		g_error_free (error);
 	}
@@ -379,13 +396,15 @@ geoclue_localnet_set_address (GeoclueLocalnet *localnet,
 	geoclue_localnet_load_gateways_from_keyfile (localnet, keyfile);
 	g_key_file_free (keyfile);
 	
-	g_debug ("emitting");
-	
 	gw = geoclue_localnet_find_gateway (localnet, mac);
 	g_free (mac);
 	
-	gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (localnet),
-	                                       time (NULL), gw->address, gw->accuracy);
+	if (gw) {
+		gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (localnet),
+		                                       time (NULL), gw->address, gw->accuracy);
+	} else {
+		/* empty address -- should emit anyway? */
+	}
 	return TRUE;
 }
 

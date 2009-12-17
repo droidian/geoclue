@@ -6,6 +6,22 @@
  *          Jussi Kukkonen <jku@o-hand.com>
  * Copyright 2007-2008 by Garmin Ltd. or its subsidiaries
  *                2008 OpenedHand Ltd
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Library General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Library General Public License for more details.
+ *
+ * You should have received a copy of the GNU Library General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ *
  */
 
 /** TODO
@@ -52,10 +68,12 @@ typedef struct _GcMasterClientPrivate {
 	gboolean require_updates;
 	GeoclueResourceFlags allowed_resources;
 	
+	gboolean position_started;
 	GcMasterProvider *position_provider;
 	GList *position_providers;
 	gboolean position_provider_choice_in_progress;
 	
+	gboolean address_started;
 	GcMasterProvider *address_provider;
 	GList *address_providers;
 	gboolean address_provider_choice_in_progress;
@@ -530,24 +548,6 @@ gc_master_client_choose_address_provider (GcMasterClient *client,
 	return TRUE;
 }
 
-static gboolean
-gc_iface_master_client_set_requirements (GcMasterClient        *client,
-					 GeoclueAccuracyLevel   min_accuracy,
-					 int                    min_time,
-					 gboolean               require_updates,
-					 GeoclueResourceFlags   allowed_resources,
-					 GError               **error)
-{
-	GcMasterClientPrivate *priv = GET_PRIVATE (client);
-	
-	priv->min_accuracy = min_accuracy;
-	priv->min_time = min_time;
-	priv->require_updates = require_updates;
-	priv->allowed_resources = allowed_resources;
-	
-	return TRUE;
-}
-
 static void
 gc_master_provider_set_position_providers (GcMasterClient *client, 
                                            GList *providers)
@@ -588,22 +588,17 @@ gc_master_provider_set_address_providers (GcMasterClient *client,
 	g_free (accuracy_data);
 }
 
-
-static gboolean 
-gc_iface_master_client_position_start (GcMasterClient *client, 
-                                       GError         **error)
+static void
+gc_master_client_init_position_providers (GcMasterClient *client)
 {
-	GList *providers;
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	GList *providers;
 	
-	if (priv->position_providers) {
-		if (error) {
-			*error = g_error_new (GEOCLUE_ERROR,
-			                      GEOCLUE_ERROR_FAILED,
-			                      "Position interface already started");
-		}
-		return FALSE;
+	if (!priv->position_started) {
+		return;
 	}
+	 
+	/* TODO: free priv->position_providers */
 	
 	providers = gc_master_get_providers (GC_IFACE_POSITION,
 	                                     priv->min_accuracy,
@@ -615,25 +610,18 @@ gc_iface_master_client_position_start (GcMasterClient *client,
 	
 	gc_master_provider_set_position_providers (client, providers);
 	gc_master_client_choose_position_provider (client, priv->position_providers);
-	
-	return TRUE;
 }
-
-static gboolean 
-gc_iface_master_client_address_start (GcMasterClient *client,
-                                      GError         **error)
+static void
+gc_master_client_init_address_providers (GcMasterClient *client)
 {
 	GList *providers;
 	GcMasterClientPrivate *priv = GET_PRIVATE (client);
 	
-	if (priv->address_providers) {
-		if (error) {
-			*error = g_error_new (GEOCLUE_ERROR,
-					      GEOCLUE_ERROR_FAILED,
-					      "Address interface already started");
-		}
-		return FALSE;
+	if (!priv->address_started) {
+		return;
 	}
+	 
+	/* TODO: free priv->address_providers */
 	
 	providers = gc_master_get_providers (GC_IFACE_ADDRESS,
 	                                     priv->min_accuracy,
@@ -645,6 +633,69 @@ gc_iface_master_client_address_start (GcMasterClient *client,
 	
 	gc_master_provider_set_address_providers (client, providers);
 	gc_master_client_choose_address_provider (client, priv->address_providers);
+}
+
+static gboolean
+gc_iface_master_client_set_requirements (GcMasterClient        *client,
+					 GeoclueAccuracyLevel   min_accuracy,
+					 int                    min_time,
+					 gboolean               require_updates,
+					 GeoclueResourceFlags   allowed_resources,
+					 GError               **error)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	priv->min_accuracy = min_accuracy;
+	priv->min_time = min_time;
+	priv->require_updates = require_updates;
+	priv->allowed_resources = allowed_resources;
+	
+	gc_master_client_init_position_providers (client);
+	gc_master_client_init_address_providers (client);
+	
+	return TRUE;
+}
+
+
+static gboolean 
+gc_iface_master_client_position_start (GcMasterClient *client, 
+                                       GError         **error)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	if (priv->position_providers) {
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+			                      GEOCLUE_ERROR_FAILED,
+			                      "Position interface already started");
+		}
+		return FALSE;
+	}
+	
+	priv->position_started = TRUE;
+	
+	gc_master_client_init_position_providers (client); 
+	
+	return TRUE;
+}
+
+static gboolean 
+gc_iface_master_client_address_start (GcMasterClient *client,
+                                      GError         **error)
+{
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	
+	if (priv->address_providers) {
+		if (error) {
+			*error = g_error_new (GEOCLUE_ERROR,
+					      GEOCLUE_ERROR_FAILED,
+					      "Address interface already started");
+		}
+		return FALSE;
+	}
+	
+	priv->address_started = TRUE;
+	gc_master_client_init_address_providers (client);
 	return TRUE;
 }
 
@@ -777,9 +828,11 @@ gc_master_client_init (GcMasterClient *client)
 	priv->position_provider_choice_in_progress = FALSE;
 	priv->address_provider_choice_in_progress = FALSE;
 	
+	priv->position_started = FALSE;
 	priv->position_provider = NULL;
 	priv->position_providers = NULL;
 	
+	priv->address_started = FALSE;
 	priv->address_provider = NULL;
 	priv->address_providers = NULL;
 }

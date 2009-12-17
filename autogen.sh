@@ -34,7 +34,7 @@ GTKDOCIZE=gtkdocize
     exit 1
 }
 
-gtkdocize || exit 1
+gtkdocize --copy || exit 1
 
 "${ACLOCAL}" \
 && "${LIBTOOLIZE}" \

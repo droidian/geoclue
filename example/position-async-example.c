@@ -10,6 +10,7 @@
 /* NOTE: provider options are not used in this example  */
 
 #include <glib.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-position.h>
 
 static void

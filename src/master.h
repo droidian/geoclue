@@ -13,6 +13,7 @@
 #include <dbus/dbus-glib.h>
 
 #include <geoclue/geoclue-types.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-accuracy.h>
 #include "connectivity.h"
 #include "master-provider.h"

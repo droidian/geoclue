@@ -7,6 +7,7 @@
  */
 
 #include <glib.h>
+#include <geoclue/geoclue-common.h>
 #include <geoclue/geoclue-reverse-geocode.h>
 
 /* GHFunc, use with g_hash_table_foreach */

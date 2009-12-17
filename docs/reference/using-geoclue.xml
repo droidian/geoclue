@@ -286,7 +286,7 @@ int main()
 	}
 	
 	/ * Get a Position object * /
-	pos = geoclue_master_client_create_position (client, NULL);
+	pos = geoclue_master_client_position_create (client, NULL);
 	if (!pos) {
 		g_printerr ("Failed to get a position object");
 		g_object_unref (client);

@@ -1,3 +1,13 @@
+geoclue (0.11.1+git20091217-1) unstable; urgency=low
+
+  * Building from the upstream git directly as there was no release
+    for months now.
+  * Fixing a build issue with the new libgps, requires libgps >= 2.91
+    now as we rely on the non-blocking features of gps_poll.
+    Closes: #560519
+
+ -- Bernd Zeimetz <bzed@debian.org>  Thu, 17 Dec 2009 11:30:59 +0100
+
 geoclue (0.11.1-6) unstable; urgency=low
 
   * [b5dc4a22] Cleaning up git buildpackage config.

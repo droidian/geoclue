@@ -1,3 +1,10 @@
+geoclue (0.11.1+git20091217-3) unstable; urgency=low
+
+  * [73b81920] Require libgps >= 2.90.1~svn6819 to build. This fixes the
+    ftbfs on mipsel.
+
+ -- Bernd Zeimetz <bzed@debian.org>  Sat, 19 Dec 2009 15:28:25 +0100
+
 geoclue (0.11.1+git20091217-2) unstable; urgency=low
 
   * [6b0622fc] Don't require network-manager-dev on kfreebsd.

@@ -144,7 +144,7 @@ AC_SUBST(CONNECTIVITY_LIBS)
 AC_SUBST(CONNECTIVITY_CFLAGS)
 
 
-PROVIDER_SUBDIRS="example hostip geonames manual plazes localnet yahoo"
+PROVIDER_SUBDIRS="example hostip geonames nominatim manual plazes localnet yahoo"
 
 # -----------------------------------------------------------
 # gsmloc / gypsy / gpsd / skyhook
@@ -272,6 +272,7 @@ providers/gpsd/Makefile
 providers/hostip/Makefile
 providers/geonames/Makefile
 providers/manual/Makefile
+providers/nominatim/Makefile
 providers/plazes/Makefile
 providers/localnet/Makefile
 providers/yahoo/Makefile

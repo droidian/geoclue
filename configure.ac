@@ -143,39 +143,11 @@ fi
 AC_SUBST(CONNECTIVITY_LIBS)
 AC_SUBST(CONNECTIVITY_CFLAGS)
 
-
-PROVIDER_SUBDIRS="example hostip geonames nominatim manual plazes localnet yahoo"
+PROVIDER_SUBDIRS="example hostip geonames nominatim manual plazes localnet yahoo gsmloc"
 
 # -----------------------------------------------------------
-# gsmloc / gypsy / gpsd / skyhook
+# gypsy / gpsd / skyhook
 # -----------------------------------------------------------
-
-AC_ARG_ENABLE(gsmloc,
-              AS_HELP_STRING([--enable-gsmloc=@<:@no/yes/auto@:>@],
-                             [build with gsmloc support]), ,
-                             enable_gsmloc=auto)
-
-if test "x$enable_gsmloc" != "xno"; then
-   PKG_CHECK_MODULES(GSMLOC,
-   [
-      gammu >= 1.12
-   ], have_gsmloc="yes", have_gsmloc="no")
-
-   if test "x$have_gsmloc" = "xyes"; then
-      PROVIDER_SUBDIRS="$PROVIDER_SUBDIRS gsmloc"
-   else
-      NO_BUILD_PROVIDERS="$NO_BUILD_PROVIDERS gsmloc"
-   fi
- else
-   have_gsmloc=no
-fi
-
-if test "x$enable_gsmloc" = "xyes" -a "x$have_gsmloc" != "xyes"; then
-   AC_MSG_ERROR([Couldn't find gsmloc dependencies.])
-fi
-AC_SUBST(GSMLOC_LIBS)
-AC_SUBST(GSMLOC_CFLAGS)
-
 
 AC_ARG_ENABLE(gypsy,
               AS_HELP_STRING([--enable-gypsy=@<:@no/yes/auto@:>@],

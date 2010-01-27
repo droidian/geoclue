@@ -25,9 +25,25 @@
 #ifndef _GEOCLUE_ERROR_H
 #define _GEOCLUE_ERROR_H
 
-#include <glib.h>
-#include <geoclue/geoclue-types.h>
+#include <glib-object.h>
+#include <geoclue/geoclue-enum-types.h>
 
+/**
+ * GeoclueError:
+ * @GEOCLUE_ERROR_NOT_IMPLEMENTED: Method is not implemented
+ * @GEOCLUE_ERROR_NOT_AVAILABLE: Needed information is not currently
+ * available (e.g. web service did not respond)
+ * @GEOCLUE_ERROR_FAILED: Generic fatal error
+ *
+ * Error values for providers.
+ **/
+typedef enum {
+	GEOCLUE_ERROR_NOT_IMPLEMENTED,
+	GEOCLUE_ERROR_NOT_AVAILABLE,
+	GEOCLUE_ERROR_FAILED,
+} GeoclueError;
+
+#define GEOCLUE_ERROR_DBUS_INTERFACE "org.freedesktop.Geoclue.Error"
 #define GEOCLUE_ERROR (geoclue_error_quark ())
 
 GQuark geoclue_error_quark (void);

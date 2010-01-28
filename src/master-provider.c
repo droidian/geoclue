@@ -126,6 +126,19 @@ copy_error (GError **target, GError *source)
 	}
 	if (source) {
 		*target = g_error_copy (source);
+
+		/* If the error type is a D-Bus remote exception,
+		 * don't lose the "magic" sauce after the message string.
+		 * See the code in gerror_to_dbus_error_message() in dbus-glib */
+		if (source->domain == DBUS_GERROR &&
+		    source->code == DBUS_GERROR_REMOTE_EXCEPTION) {
+			int len;
+			g_free ((*target)->message);
+			len = strlen (source->message);
+			len += strlen (source->message + len + 1);
+			len += 2;
+			(*target)->message = g_memdup (source->message, len);
+		}
 	}
 }
 

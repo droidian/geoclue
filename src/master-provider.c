@@ -977,6 +977,14 @@ gc_master_provider_new (const char *filename,
 	} else {
 		priv->provides = GEOCLUE_PROVIDE_NONE;
 	}
+
+    if (!connectivity && 
+         (priv->required_resources & GEOCLUE_RESOURCE_NETWORK)) {
+	    priv->provides &= ~GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION;
+		priv->net_status = GEOCLUE_CONNECTIVITY_ONLINE;
+		priv->status = GEOCLUE_STATUS_AVAILABLE;
+        gc_master_provider_handle_status_change (provider);
+    }
 	
 	if (connectivity && 
 	    (priv->provides & GEOCLUE_PROVIDE_CACHEABLE_ON_CONNECTION)) {

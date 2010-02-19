@@ -13,7 +13,9 @@ BUILT_SOURCES = \
 	$(nodist_geoclue_gsmloc_SOURCES)
 
 geoclue_gsmloc_SOURCES = \
-	geoclue-gsmloc.c
+	geoclue-gsmloc.c \
+	geoclue-gsmloc-ofono.c \
+	geoclue-gsmloc-ofono.h
 
 
 geoclue_gsmloc_CFLAGS = \

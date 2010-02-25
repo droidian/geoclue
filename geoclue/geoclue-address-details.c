@@ -284,13 +284,6 @@ char *countries[][2] = {
 #include <geoclue/geoclue-types.h>
 #include "geoclue-address-details.h"
 
-static void 
-copy_address_key_and_value (char *key, char *value, GHashTable *target)
-{
-	g_hash_table_insert (target, g_strdup (key), g_strdup (value));
-}
-
-
 /**
  * geoclue_address_details_new:
  * 
@@ -306,6 +299,30 @@ geoclue_address_details_new ()
 	return g_hash_table_new_full (g_str_hash, g_str_equal,
 	                              g_free, g_free);
 }
+
+
+/**
+ * geoclue_address_details_insert:
+ * @address: #GHashTable to insert value in
+ * @key: the key to use, one of GEOCLUE_ADDRESS_KEY_*
+ * @value: value to insert into address
+ * 
+ * Adds a address field into @address. Will take copies
+ * of the strings.
+ */
+void
+geoclue_address_details_insert (GHashTable *address,
+                                const char *key, const char *value)
+{
+	g_hash_table_insert (address, g_strdup (key), g_strdup (value));
+}
+
+static void
+copy_address_key_and_value (char *key, char *value, GHashTable *target)
+{
+	geoclue_address_details_insert (target, key, value);
+}
+
 
 /**
  * geoclue_address_details_copy:
@@ -358,12 +375,14 @@ geoclue_address_details_set_country_from_code (GHashTable *address)
 
 	code = g_hash_table_lookup (address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE);
 	if (code) {
-		country = g_hash_table_lookup (country_table, code);
+		char *upper = g_ascii_strup (code, -1);
+		country = g_hash_table_lookup (country_table, upper);
+		g_free (upper);
 	}
 
 	if (country) {
-		g_hash_table_insert (address,
-		                     GEOCLUE_ADDRESS_KEY_COUNTRY, g_strdup(country));
+		geoclue_address_details_insert (
+		    address, GEOCLUE_ADDRESS_KEY_COUNTRY, country);
 	} else {
 		g_hash_table_remove (address, GEOCLUE_ADDRESS_KEY_COUNTRY);
 	}

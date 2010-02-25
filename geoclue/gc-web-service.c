@@ -397,9 +397,9 @@ gc_web_service_get_double (GcWebService *self, gdouble *value, gchar *xpath)
 }
 
 /**
- * gc_web_service_get_double:
+ * gc_web_service_get_string:
  * @self: The #GcWebService object
- * @value: returned gchar array
+ * @value: pointer to newly allocated string
  * @xpath: XPath expression used to find the value  
  * 
  * Extracts a @value from the data that was fetched in the last call 

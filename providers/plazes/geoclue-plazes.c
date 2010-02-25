@@ -305,37 +305,42 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 		
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/country")) {
-			g_hash_table_insert (*address, 
-			                     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRY),
-			                     str);
+			geoclue_address_details_insert (*address,
+			                                GEOCLUE_ADDRESS_KEY_COUNTRY,
+			                                str);
+			g_free (str);
 			level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
 		}
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/country_code")) {
-			g_hash_table_insert (*address, 
-			                     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
-			                     str);
+			geoclue_address_details_insert (*address,
+			                                GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+			                                str);
+			g_free (str);
 			level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
 		}
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/city")) {
-			g_hash_table_insert (*address, 
-			                     g_strdup (GEOCLUE_ADDRESS_KEY_LOCALITY),
-			                     str);
+			geoclue_address_details_insert (*address,
+			                                GEOCLUE_ADDRESS_KEY_LOCALITY,
+			                                str);
+			g_free (str);
 			level = GEOCLUE_ACCURACY_LEVEL_LOCALITY;
 		}
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/zip_code")) {
-			g_hash_table_insert (*address, 
-			                     g_strdup (GEOCLUE_ADDRESS_KEY_POSTALCODE),
-			                     str);
+			geoclue_address_details_insert (*address,
+			                                GEOCLUE_ADDRESS_KEY_POSTALCODE,
+			                                str);
+			g_free (str);
 			level = GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
 		}
 		if (gc_web_service_get_string (plazes->web_service, 
 		                               &str, "//plaze/address")) {
-			g_hash_table_insert (*address, 
-			                     g_strdup (GEOCLUE_ADDRESS_KEY_STREET),
-			                     str);
+			geoclue_address_details_insert (*address,
+			                                GEOCLUE_ADDRESS_KEY_STREET,
+			                                str);
+			g_free (str);
 			level = GEOCLUE_ACCURACY_LEVEL_STREET;
 		}
 	}

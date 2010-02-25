@@ -30,6 +30,8 @@ GHashTable *geoclue_address_details_new ();
 
 GHashTable *geoclue_address_details_copy (GHashTable *source);
 
+void geoclue_address_details_insert (GHashTable *address, const char *key, const char *value);
+
 void geoclue_address_details_set_country_from_code (GHashTable *address);
 
 GeoclueAccuracyLevel geoclue_address_details_get_accuracy_level (GHashTable *address);

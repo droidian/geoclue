@@ -149,9 +149,9 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_free (locality);
 				locality = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_LOCALITY),
-						     locality);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_LOCALITY,
+				                                locality);
 			}
 		}
 		
@@ -161,13 +161,13 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_free (country_code);
 				country_code = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
-						     country_code);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+				                                country_code);
 				geoclue_address_details_set_country_from_code (*address);
 			}
 		}
-		
+
 		if (!g_hash_table_lookup (*address, GEOCLUE_ADDRESS_KEY_COUNTRY) &&
 		    gc_web_service_get_string (obj->web_service, 
 		                               &country, HOSTIP_COUNTRY_XPATH)) {
@@ -175,17 +175,17 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_free (country);
 				country = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRY), 
-						     country);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_COUNTRY,
+				                                country);
 			}
 		}
 	}
-	
+
 	if (timestamp) {
 		*timestamp = time (NULL);
 	}
-	
+
 	if (accuracy) {
 		if (locality && country) {
 			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
@@ -198,7 +198,10 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 							  0, 0);
 		}
 	}
-	
+	g_free (locality);
+	g_free (country);
+	g_free (country_code);
+
 	return TRUE;
 }
 

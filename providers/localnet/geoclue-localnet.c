@@ -478,6 +478,9 @@ geoclue_localnet_set_address_fields (GeoclueLocalnet *localnet,
 		g_hash_table_insert (address,
 		                     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE), 
 		                     g_strdup (country_code));
+		if (!country) {
+			geoclue_address_details_set_country_from_code (address);
+		}
 	}
 	if (country && (strlen (country) > 0)) {
 		g_hash_table_insert (address,

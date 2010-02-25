@@ -49,9 +49,13 @@
 #include <geoclue/gc-provider.h>
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-position.h>
+#include <geoclue/gc-iface-address.h>
 
 /* ofono implementation */
 #include "geoclue-gsmloc-ofono.h"
+
+/* country code list */
+#include "mcc.h"
 
 #define GEOCLUE_DBUS_SERVICE_GSMLOC "org.freedesktop.Geoclue.Providers.Gsmloc"
 #define GEOCLUE_DBUS_PATH_GSMLOC "/org/freedesktop/Geoclue/Providers/Gsmloc"
@@ -82,6 +86,8 @@ struct _GeoclueGsmloc {
 	GeoclueAccuracyLevel last_accuracy_level;
 	double last_lat;
 	double last_lon;
+
+	GHashTable *address;
 };
 
 typedef struct _GeoclueGsmlocClass {
@@ -91,10 +97,13 @@ typedef struct _GeoclueGsmlocClass {
 
 static void geoclue_gsmloc_init (GeoclueGsmloc *gsmloc);
 static void geoclue_gsmloc_position_init (GcIfacePositionClass  *iface);
+static void geoclue_gsmloc_address_init (GcIfaceAddressClass  *iface);
 
 G_DEFINE_TYPE_WITH_CODE (GeoclueGsmloc, geoclue_gsmloc, GC_TYPE_PROVIDER,
                          G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_POSITION,
-                                                geoclue_gsmloc_position_init))
+                                                geoclue_gsmloc_position_init)
+                         G_IMPLEMENT_INTERFACE (GC_TYPE_IFACE_ADDRESS,
+                                                geoclue_gsmloc_address_init))
 
 
 /* Geoclue interface implementation */
@@ -196,8 +205,49 @@ geoclue_gsmloc_query_opencellid (GeoclueGsmloc *gsmloc)
 	return FALSE;
 }
 
+static void
+geoclue_gsmloc_update_address (GeoclueGsmloc *gsmloc)
+{
+	char *countrycode = NULL;
+	const char *old_countrycode;
+	gboolean changed = FALSE;
+	GeoclueAccuracy *acc;
 
-static gboolean
+	if (gsmloc->mcc) {
+		gint64 i;
+		i = g_ascii_strtoll (gsmloc->mcc, NULL, 10);
+		if (i > 0 && i < 800 && mcc_country_codes[i]) {
+			countrycode = mcc_country_codes[i];
+		}
+	}
+
+	old_countrycode = g_hash_table_lookup (gsmloc->address,
+	                                       GEOCLUE_ADDRESS_KEY_COUNTRYCODE);
+	if (g_strcmp0 (old_countrycode, countrycode) != 0) {
+		changed = TRUE;
+	}
+
+	if (countrycode) {
+		g_hash_table_insert (gsmloc->address,
+		                     GEOCLUE_ADDRESS_KEY_COUNTRYCODE, g_strdup (countrycode));
+		acc = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_COUNTRY, 0.0, 0.0);
+	} else {
+		g_hash_table_remove (gsmloc->address, GEOCLUE_ADDRESS_KEY_COUNTRYCODE);
+		g_hash_table_remove (gsmloc->address, GEOCLUE_ADDRESS_KEY_COUNTRY);
+		acc = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+	}
+	geoclue_address_details_set_country_from_code (gsmloc->address);
+
+	if (changed) {
+		gc_iface_address_emit_address_changed (GC_IFACE_ADDRESS (gsmloc),
+		                                       time (NULL),
+		                                       gsmloc->address,
+		                                       acc);
+		
+	}
+	geoclue_accuracy_free (acc);
+}
+static void
 geoclue_gsmloc_set_cell (GeoclueGsmloc *gsmloc,
                          const char *mcc, const char *mnc, 
                          const char *lac, const char *cid)
@@ -212,7 +262,8 @@ geoclue_gsmloc_set_cell (GeoclueGsmloc *gsmloc,
 	gsmloc->lac = g_strdup (lac);
 	gsmloc->cid = g_strdup (cid);
 
-	return geoclue_gsmloc_query_opencellid (gsmloc);
+	geoclue_gsmloc_update_address (gsmloc);
+	geoclue_gsmloc_query_opencellid (gsmloc);
 }
 
 static void
@@ -272,6 +323,34 @@ geoclue_gsmloc_get_position (GcIfacePosition        *iface,
 	return TRUE;
 }
 
+/* Address interface implementation */
+static gboolean
+geoclue_gsmloc_get_address (GcIfaceAddress   *iface,
+                            int              *timestamp,
+                            GHashTable      **address,
+                            GeoclueAccuracy **accuracy,
+                            GError          **error)
+{
+	GeoclueGsmloc *obj = GEOCLUE_GSMLOC (iface);
+
+	if (address) {
+		*address = geoclue_address_details_copy (obj->address);
+	}
+	if (accuracy) {
+		GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+		if (g_hash_table_lookup (obj->address, GEOCLUE_ADDRESS_KEY_COUNTRY)) {
+			level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+		}
+		*accuracy = geoclue_accuracy_new (level, 0.0, 0.0);
+	}
+	if (timestamp) {
+		*timestamp = time (NULL);
+	}
+
+	return TRUE;
+}
+
+
 static void
 geoclue_gsmloc_dispose (GObject *obj)
 {
@@ -283,6 +362,11 @@ geoclue_gsmloc_dispose (GObject *obj)
 		                                      gsmloc);
 		g_object_unref (gsmloc->ofono);
 		gsmloc->ofono = NULL;
+	}
+
+	if (gsmloc->address) {
+		g_hash_table_destroy (gsmloc->address);
+		gsmloc->address = NULL;
 	}
 
 	((GObjectClass *) geoclue_gsmloc_parent_class)->dispose (obj);
@@ -318,6 +402,8 @@ geoclue_gsmloc_init (GeoclueGsmloc *gsmloc)
 
 	geoclue_gsmloc_set_cell (gsmloc, NULL, NULL, NULL, NULL);
 
+	gsmloc->address = geoclue_address_details_new ();
+
 	/* init ofono*/
 	gsmloc->ofono = geoclue_gsmloc_ofono_new ();
 	g_signal_connect (gsmloc->ofono, "network-data-changed",
@@ -328,6 +414,12 @@ static void
 geoclue_gsmloc_position_init (GcIfacePositionClass  *iface)
 {
 	iface->get_position = geoclue_gsmloc_get_position;
+}
+
+static void
+geoclue_gsmloc_address_init (GcIfaceAddressClass  *iface)
+{
+	iface->get_address = geoclue_gsmloc_get_address;
 }
 
 int 

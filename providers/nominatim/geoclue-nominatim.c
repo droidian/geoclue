@@ -239,7 +239,7 @@ geoclue_nominatim_position_to_address (GcIfaceReverseGeocode  *iface,
 		geoclue_accuracy_get_details (position_accuracy, &in_acc, NULL, NULL);
 	}
 	
-	*address = g_hash_table_new (g_str_hash, g_str_equal);
+	*address = geoclue_address_details_new ();
 	
 	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_COUNTRY && 
 	    gc_web_service_get_string (obj->rev_geocoder,
@@ -247,8 +247,10 @@ geoclue_nominatim_position_to_address (GcIfaceReverseGeocode  *iface,
 		g_hash_table_insert (*address, 
 		                     GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
 		                     countrycode);
+		geoclue_address_details_set_country_from_code (*address);
 	}
-	if (in_acc >= GEOCLUE_ACCURACY_LEVEL_COUNTRY && 
+	if (!g_hash_table_lookup (*address, GEOCLUE_ADDRESS_KEY_COUNTRY) &&
+	    in_acc >= GEOCLUE_ACCURACY_LEVEL_COUNTRY && 
 	    gc_web_service_get_string (obj->rev_geocoder,
 	                               &country, NOMINATIM_COUNTRY)) {
 		g_hash_table_insert (*address, 

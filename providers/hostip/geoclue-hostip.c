@@ -164,11 +164,13 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_hash_table_insert (*address, 
 						     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
 						     country_code);
+				geoclue_address_details_set_country_from_code (*address);
 			}
 		}
 		
-		if (gc_web_service_get_string (obj->web_service, 
-					       &country, HOSTIP_COUNTRY_XPATH)) {
+		if (!g_hash_table_lookup (*address, GEOCLUE_ADDRESS_KEY_COUNTRY) &&
+		    gc_web_service_get_string (obj->web_service, 
+		                               &country, HOSTIP_COUNTRY_XPATH)) {
 			if (g_ascii_strcasecmp (country, "(Unknown Country?)") == 0) {
 				g_free (country);
 				country = NULL;

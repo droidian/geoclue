@@ -52,6 +52,7 @@ typedef struct _GeocluePlazes {
 	GcProvider parent;
 	GMainLoop *loop;
 	GcWebService *web_service;
+	GeoclueStatus last_status;
 } GeocluePlazes;
 
 typedef struct _GeocluePlazesClass {
@@ -76,9 +77,9 @@ geoclue_plazes_get_status (GcIfaceGeoclue *iface,
 			   GeoclueStatus  *status,
 			   GError        **error)
 {
-	/* Assume available so long as all the requirements are satisfied
-	   ie: Network is available */
-	*status = GEOCLUE_STATUS_AVAILABLE;
+	GeocluePlazes *plazes = GEOCLUE_PLAZES (iface);
+
+	*status = plazes->last_status;
 	return TRUE;
 }
 
@@ -89,6 +90,15 @@ shutdown (GcProvider *provider)
 	g_main_loop_quit (plazes->loop);
 }
 
+static void
+geoclue_plazes_set_status (GeocluePlazes *self, GeoclueStatus status)
+{
+	if (status != self->last_status) {
+		self->last_status = status;
+		gc_iface_geoclue_emit_status_changed (GC_IFACE_GEOCLUE (self), status);
+    }
+}
+		
 /* Parse /proc/net/route to get default gateway address and then parse
  * /proc/net/arp to find matching mac address. 
  *
@@ -216,14 +226,21 @@ geoclue_plazes_get_position (GcIfacePosition        *iface,
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, 
 		             "Router mac address query failed");
-		/* TODO: set status == error ? */
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ERROR);
 		return FALSE;
 	}
 	
+    geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ACQUIRING);
+
 	if (!gc_web_service_query (plazes->web_service, error,
 	                           PLAZES_KEY_MAC, mac, 
 	                           (char *)0)) {
 		g_free (mac);
+        // did not get a reply; we can try again later
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_AVAILABLE);
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, 
+		             "Did not get reply from server");
 		return FALSE;
 	}
 	
@@ -237,18 +254,26 @@ geoclue_plazes_get_position (GcIfacePosition        *iface,
 	}
 	
 	if (accuracy) {
-		if (*fields == GEOCLUE_POSITION_FIELDS_NONE) {
-			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE,
-							  0, 0);
-		} else {
-			/* Educated guess. Plazes are typically hand pointed on 
-			 * a map, or geocoded from address, so should be fairly 
-			 * accurate */
-			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_STREET,
-							  0, 0);
-		}
+        /* Educated guess. Plazes are typically hand pointed on 
+         * a map, or geocoded from address, so should be fairly 
+         * accurate */
+        *accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_STREET, 0, 0);
 	}
 	
+    if (!(*fields & GEOCLUE_POSITION_FIELDS_LATITUDE &&
+         *fields & GEOCLUE_POSITION_FIELDS_LONGITUDE)) {
+
+        // we got a reply, but could not exploit it. It would probably be the
+        // same next time.
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ERROR);
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, 
+		             "Could not understand reply from server");
+		return FALSE;
+    }
+	
+	geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_AVAILABLE);
+
 	return TRUE;
 }
 
@@ -287,14 +312,20 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 		g_set_error (error, GEOCLUE_ERROR, 
 		             GEOCLUE_ERROR_NOT_AVAILABLE, 
 		             "Router mac address query failed");
-		/* TODO: set status == error ? */
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ERROR);
 		return FALSE;
 	}
 	
+    geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ACQUIRING);
+
 	if (!gc_web_service_query (plazes->web_service, error,
 	                           PLAZES_KEY_MAC, mac, 
 	                           (char *)0)) {
 		g_free (mac);
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_AVAILABLE);
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, 
+		             "Did not get reply from server");
 		return FALSE;
 	}
 	
@@ -344,7 +375,17 @@ geoclue_plazes_get_address (GcIfaceAddress   *iface,
 			level = GEOCLUE_ACCURACY_LEVEL_STREET;
 		}
 	}
-	
+
+    if (level == GEOCLUE_ACCURACY_LEVEL_NONE) {
+        // we got a reply, but could not exploit it. It would probably be the
+        // same next time.
+		geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_ERROR);
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, 
+		             "Could not understand reply from server");
+		return FALSE;
+    }
+
 	if (accuracy) {
 		*accuracy = geoclue_accuracy_new (level, 0, 0);
 	}
@@ -387,6 +428,7 @@ geoclue_plazes_init (GeocluePlazes *plazes)
 	
 	plazes->web_service = g_object_new (GC_TYPE_WEB_SERVICE, NULL);
 	gc_web_service_set_base_url (plazes->web_service, PLAZES_URL);
+    geoclue_plazes_set_status (plazes, GEOCLUE_STATUS_AVAILABLE);
 }
 
 static void

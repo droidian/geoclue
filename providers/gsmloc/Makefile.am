@@ -13,6 +13,7 @@ BUILT_SOURCES = \
 	$(nodist_geoclue_gsmloc_SOURCES)
 
 geoclue_gsmloc_SOURCES = \
+	mcc.h \
 	geoclue-gsmloc.c \
 	geoclue-gsmloc-ofono.c \
 	geoclue-gsmloc-ofono.h
@@ -45,6 +46,9 @@ EXTRA_DIST = 			\
 	ofono-network-registration.xml \
 	$(service_in_files)	\
 	$(providers_DATA)
+
+CLEANFILES = \
+	$(BUILT_SOURCES)
 
 DISTCLEANFILES = \
 	$(service_DATA)

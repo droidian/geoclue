@@ -42,7 +42,6 @@ position_callback (GeocluePosition      *pos,
 	if (error) {
 		g_printerr ("Error getting position: %s\n", error->message);
 		g_error_free (error);
-		g_object_unref (pos);
 	} else {
 		if (fields & GEOCLUE_POSITION_FIELDS_LATITUDE &&
 		    fields & GEOCLUE_POSITION_FIELDS_LONGITUDE) {

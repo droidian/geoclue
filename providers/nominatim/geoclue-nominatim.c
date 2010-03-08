@@ -194,6 +194,45 @@ geoclue_nominatim_address_to_position (GcIfaceGeocode        *iface,
 	return TRUE;
 }
 
+static gboolean
+geoclue_nominatim_freeform_address_to_position (GcIfaceGeocode        *iface,
+                                                const char            *address,
+                                                GeocluePositionFields *fields,
+                                                double                *latitude,
+                                                double                *longitude,
+                                                double                *altitude,
+                                                GeoclueAccuracy      **accuracy,
+                                                GError               **error)
+{
+	GeoclueNominatim *obj = GEOCLUE_NOMINATIM (iface);
+
+	if (!gc_web_service_query (obj->geocoder, error,
+	                           "q", address,
+	                           "format", "xml",
+	                           "polygon", "0",
+	                           "addressdetails", "1",
+	                           (char *)0)) {
+		return FALSE;
+	}
+
+	*fields = GEOCLUE_POSITION_FIELDS_NONE;
+	if (latitude && gc_web_service_get_double (obj->geocoder,
+	                                           latitude, NOMINATIM_LAT)) {
+		*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+	}
+
+	if (longitude &&  gc_web_service_get_double (obj->geocoder,
+	                                             longitude, NOMINATIM_LON)) {
+		*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
+	}
+
+	if (accuracy) {
+		*accuracy = get_geocode_accuracy (obj->geocoder);
+	}
+
+	return TRUE;
+}
+
 /* ReverseGeocode interface implementation */
 
 static gboolean
@@ -376,6 +415,7 @@ static void
 geoclue_nominatim_geocode_init (GcIfaceGeocodeClass *iface)
 {
 	iface->address_to_position = geoclue_nominatim_address_to_position;
+	iface->freeform_address_to_position = geoclue_nominatim_freeform_address_to_position;
 }
 
 static void

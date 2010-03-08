@@ -2,15 +2,24 @@
 
 <node name="/">
 	<interface name="org.freedesktop.Geoclue.Geocode"> 
+
 		<method name="AddressToPosition">
-		        <arg type="a{ss}" name="address" direction="in" />
-
-		        <arg name="fields" type="i" direction="out" /> 
-		        <arg name="latitude" type="d" direction="out" /> 
-		        <arg name="longitude" type="d" direction="out" />
-		        <arg name="altitude" type="d" direction="out" />
-
-                        <arg name="accuracy" type="(idd)" direction="out" />
+			<arg name="address" type="a{ss}" direction="in" />
+			<arg name="fields" type="i" direction="out" />
+			<arg name="latitude" type="d" direction="out" />
+			<arg name="longitude" type="d" direction="out" />
+			<arg name="altitude" type="d" direction="out" />
+			<arg name="accuracy" type="(idd)" direction="out" />
 		</method>
+
+		<method name="FreeformAddressToPosition">
+			<arg name="address" type="s" direction="in" />
+			<arg name="fields" type="i" direction="out" />
+			<arg name="latitude" type="d" direction="out" />
+			<arg name="longitude" type="d" direction="out" />
+			<arg name="altitude" type="d" direction="out" />
+			<arg name="accuracy" type="(idd)" direction="out" />
+		</method>
+
 	</interface>
 </node>

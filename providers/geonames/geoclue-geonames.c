@@ -64,6 +64,7 @@
 #define GEONAME_COUNTRY "//geonames/geoname/countryName"
 #define GEONAME_ADMIN1 "//geonames/geoname/adminName1"
 #define GEONAME_COUNTRYCODE "//geonames/geoname/countryCode"
+#define GEONAME_FEATURE_CLASS "//geonames/geoname/fcl"
 
 #define ADDRESS_STREETNO "//geonames/address/streetNumber"
 #define ADDRESS_STREET "//geonames/address/street"
@@ -172,6 +173,62 @@ geoclue_geonames_address_to_position (GcIfaceGeocode        *iface,
 	return TRUE;
 }
 
+static gboolean
+geoclue_geonames_freeform_address_to_position (GcIfaceGeocode        *iface,
+                                               const char            *address,
+                                               GeocluePositionFields *fields,
+                                               double                *latitude,
+                                               double                *longitude,
+                                               double                *altitude,
+                                               GeoclueAccuracy      **accuracy,
+                                               GError               **error)
+{
+	GeoclueGeonames *obj = GEOCLUE_GEONAMES (iface);
+
+	if (fields) {
+		*fields = GEOCLUE_POSITION_FIELDS_NONE;
+	}
+
+	if (address) {
+		if (!gc_web_service_query (obj->place_geocoder, error,
+		                           "q", address,
+		                           "maxRows", "1",
+		                           "style", "FULL",
+		                           (char *)0)) {
+			return FALSE;
+		}
+		if (gc_web_service_get_double (obj->place_geocoder,
+		                               latitude, GEONAME_LAT) &&
+			gc_web_service_get_double (obj->place_geocoder,
+			                           longitude, GEONAME_LON)) {
+			if (fields) {
+				*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+				*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
+			}
+			if (accuracy) {
+				char *fclass = NULL;
+				GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+
+				/* this is crude but should cover most results from geonames */
+				if (gc_web_service_get_string (obj->place_geocoder,
+				                               &fclass, GEONAME_FEATURE_CLASS)) {
+					if (g_strcmp0 (fclass, "A") == 0) {
+						level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+					}else if (g_strcmp0 (fclass, "P") == 0) {
+						level = GEOCLUE_ACCURACY_LEVEL_LOCALITY;
+					}
+					g_free (fclass);
+				}
+				*accuracy = geoclue_accuracy_new (level, 0.0, 0.0);
+			}
+		}
+	}
+
+	if (accuracy && *accuracy == NULL) {
+		*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_NONE, 0.0, 0.0);
+	}
+	return TRUE;
+}
 
 /* ReverseGeocode interface implementation */
 
@@ -341,6 +398,8 @@ static void
 geoclue_geonames_geocode_init (GcIfaceGeocodeClass *iface)
 {
 	iface->address_to_position = geoclue_geonames_address_to_position;
+	iface->freeform_address_to_position =
+			geoclue_geonames_freeform_address_to_position;
 }
 
 static void

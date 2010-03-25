@@ -59,7 +59,6 @@ typedef struct {
 	char *host;
 	char *port;
 	
-	pthread_t *gps_thread;
 	gps_data *gpsdata;
 	
 	gps_fix *last_fix;
@@ -70,6 +69,7 @@ typedef struct {
 	GeoclueVelocityFields last_velo_fields;
 	
 	GMainLoop *loop;
+
 } GeoclueGpsd;
 
 typedef struct {
@@ -362,7 +362,7 @@ geoclue_gpsd_update_status (GeoclueGpsd *gpsd, NmeaTag nmea_tag)
 }
 
 static void 
-gpsd_callback (struct gps_data_t *gpsdata, char *message, size_t len, int level)
+gpsd_raw_hook (struct gps_data_t *gpsdata, char *message, size_t len)
 {
 	char *tag_str = gpsd->gpsdata->tag;
 	NmeaTag nmea_tag = NMEA_NONE;
@@ -387,7 +387,6 @@ geoclue_gpsd_stop_gpsd (GeoclueGpsd *self)
 {
 	if (self->gpsdata) {
 		gps_close (self->gpsdata);
-		g_free (self->gps_thread);
 		self->gpsdata = NULL;
 	}
 }
@@ -397,8 +396,8 @@ geoclue_gpsd_start_gpsd (GeoclueGpsd *self)
 {
 	self->gpsdata = gps_open (self->host, self->port);
 	if (self->gpsdata) {
-		/* This can block for some time if device is not available */
-		gps_set_callback (self->gpsdata, gpsd_callback, self->gps_thread);
+		gps_stream(self->gpsdata, WATCH_ENABLE | WATCH_NMEA | POLL_NONBLOCK, NULL);
+		gps_set_raw_hook (self->gpsdata, gpsd_raw_hook);
 		return TRUE;
 	} else {
 		g_warning ("gps_open() failed, is gpsd running (host=%s,port=%s)?", self->host, self->port);
@@ -406,11 +405,24 @@ geoclue_gpsd_start_gpsd (GeoclueGpsd *self)
 	}
 }
 
+gboolean
+gpsd_poll(gpointer data)
+{
+	GeoclueGpsd *self = (GeoclueGpsd*)data;
+	if (self->gpsdata) {
+		if (gps_poll(self->gpsdata) < 0) {
+			geoclue_gpsd_set_status (self, GEOCLUE_STATUS_ERROR);
+			geoclue_gpsd_stop_gpsd(self);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
 static void
 geoclue_gpsd_init (GeoclueGpsd *self)
 {
 	self->gpsdata = NULL;
-	self->gps_thread = g_new0 (pthread_t, 1);
 	self->last_fix = g_new0 (gps_fix, 1);
 	
 	self->last_pos_fields = GEOCLUE_POSITION_FIELDS_NONE;
@@ -493,6 +505,8 @@ main (int    argc,
 	gpsd = g_object_new (GEOCLUE_TYPE_GPSD, NULL);
 	
 	gpsd->loop = g_main_loop_new (NULL, TRUE);
+	g_timeout_add(500, gpsd_poll, (gpointer)gpsd);
+
 	g_main_loop_run (gpsd->loop);
 	
 	g_main_loop_unref (gpsd->loop);

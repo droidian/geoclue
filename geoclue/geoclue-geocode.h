@@ -2,8 +2,10 @@
  * Geoclue
  * geoclue-geocode.h - 
  *
- * Author: Iain Holmes <iain@openedhand.com>
+ * Authors: Iain Holmes <iain@openedhand.com>
+ *          Jussi Kukkonen <jku@linux.intel.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *           2010 Intel Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -74,6 +76,20 @@ void geoclue_geocode_address_to_position_async (GeoclueGeocode         *geocode,
 						GeoclueGeocodeCallback  callback,
 						gpointer                userdata);
 
+GeocluePositionFields
+geoclue_geocode_freeform_address_to_position (GeoclueGeocode   *geocode,
+                                              const char       *address,
+                                              double           *latitude,
+                                              double           *longitude,
+                                              double           *altitude,
+                                              GeoclueAccuracy **accuracy,
+                                              GError          **error);
+
+void
+geoclue_geocode_freeform_address_to_position_async (GeoclueGeocode         *geocode,
+                                                    const char             *address,
+                                                    GeoclueGeocodeCallback  callback,
+                                                    gpointer                userdata);
 
 G_END_DECLS
 

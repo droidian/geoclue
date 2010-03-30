@@ -42,13 +42,11 @@
 
 #define HOSTIP_NS_GML_NAME "gml"
 #define HOSTIP_NS_GML_URI "http://www.opengis.net/gml"
-#define HOSTIP_NS_HOSTIP_NAME "hostip"
-#define HOSTIP_NS_HOSTIP_URI "http://www.hostip.info/api"
 
-#define HOSTIP_COUNTRY_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryName"
-#define HOSTIP_COUNTRYCODE_XPATH "//gml:featureMember/hostip:Hostip/hostip:countryAbbrev"
-#define HOSTIP_LOCALITY_XPATH "//gml:featureMember/hostip:Hostip/gml:name"
-#define HOSTIP_LATLON_XPATH "//gml:featureMember/hostip:Hostip//gml:coordinates"
+#define HOSTIP_COUNTRY_XPATH "//gml:featureMember/Hostip/countryName"
+#define HOSTIP_COUNTRYCODE_XPATH "//gml:featureMember/Hostip/countryAbbrev"
+#define HOSTIP_LOCALITY_XPATH "//gml:featureMember/Hostip/gml:name"
+#define HOSTIP_LATLON_XPATH "//gml:featureMember/Hostip//gml:coordinates"
 
 static void geoclue_hostip_init (GeoclueHostip *obj);
 static void geoclue_hostip_position_init (GcIfacePositionClass  *iface);
@@ -101,7 +99,6 @@ geoclue_hostip_get_position (GcIfacePosition        *iface,
 		return FALSE;
 	}
 	
-	
 	if (gc_web_service_get_string (obj->web_service, 
 	                                &coord_str, HOSTIP_LATLON_XPATH)) {
 		if (sscanf (coord_str, "%lf,%lf", longitude , latitude) == 2) {
@@ -152,9 +149,9 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_free (locality);
 				locality = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_LOCALITY),
-						     locality);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_LOCALITY,
+				                                locality);
 			}
 		}
 		
@@ -164,29 +161,31 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 				g_free (country_code);
 				country_code = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRYCODE),
-						     country_code);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_COUNTRYCODE,
+				                                country_code);
+				geoclue_address_details_set_country_from_code (*address);
 			}
 		}
-		
-		if (gc_web_service_get_string (obj->web_service, 
-					       &country, HOSTIP_COUNTRY_XPATH)) {
+
+		if (!g_hash_table_lookup (*address, GEOCLUE_ADDRESS_KEY_COUNTRY) &&
+		    gc_web_service_get_string (obj->web_service, 
+		                               &country, HOSTIP_COUNTRY_XPATH)) {
 			if (g_ascii_strcasecmp (country, "(Unknown Country?)") == 0) {
 				g_free (country);
 				country = NULL;
 			} else {
-				g_hash_table_insert (*address, 
-						     g_strdup (GEOCLUE_ADDRESS_KEY_COUNTRY), 
-						     country);
+				geoclue_address_details_insert (*address,
+				                                GEOCLUE_ADDRESS_KEY_COUNTRY,
+				                                country);
 			}
 		}
 	}
-	
+
 	if (timestamp) {
 		*timestamp = time (NULL);
 	}
-	
+
 	if (accuracy) {
 		if (locality && country) {
 			*accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_LOCALITY,
@@ -199,7 +198,10 @@ geoclue_hostip_get_address (GcIfaceAddress   *iface,
 							  0, 0);
 		}
 	}
-	
+	g_free (locality);
+	g_free (country);
+	g_free (country_code);
+
 	return TRUE;
 }
 
@@ -240,8 +242,6 @@ geoclue_hostip_init (GeoclueHostip *obj)
 	gc_web_service_set_base_url (obj->web_service, HOSTIP_URL);
 	gc_web_service_add_namespace (obj->web_service,
 	                              HOSTIP_NS_GML_NAME, HOSTIP_NS_GML_URI);
-	gc_web_service_add_namespace (obj->web_service,
-	                              HOSTIP_NS_HOSTIP_NAME, HOSTIP_NS_HOSTIP_URI);
 }
 
 static void

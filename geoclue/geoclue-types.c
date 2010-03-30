@@ -25,6 +25,7 @@
 #include <geoclue/geoclue-marshal.h>
 #include <geoclue/geoclue-types.h>
 #include <geoclue/geoclue-accuracy.h>
+#include <geoclue/geoclue-error.h>
 
 void
 geoclue_types_init (void)
@@ -61,4 +62,8 @@ geoclue_types_init (void)
 	                                   G_TYPE_STRING,
 	                                   G_TYPE_STRING,
 	                                   G_TYPE_INVALID);
+
+	dbus_g_error_domain_register (GEOCLUE_ERROR,
+				      GEOCLUE_ERROR_DBUS_INTERFACE,
+				      GEOCLUE_TYPE_ERROR);
 }

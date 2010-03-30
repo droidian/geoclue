@@ -35,3 +35,4 @@ geoclue_error_quark (void)
 
 	return quark;
 }
+

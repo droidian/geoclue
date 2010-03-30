@@ -2,8 +2,10 @@
  * Geoclue
  * geoclue-geocode.c - Client API for accessing GcIfaceGeocode
  *
- * Author: Iain Holmes <iain@openedhand.com>
+ * Authors: Iain Holmes <iain@openedhand.com>
+ *          Jussi Kukkonen <jku@linux.intel.com>
  * Copyright 2007 by Garmin Ltd. or its subsidiaries
+ *           2010 Intel Corporation
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -31,8 +33,10 @@
  * to communicate with the actual provider.
  * 
  * After a #GeoclueGeocode is created with geoclue_geocode_new(), the 
- * geoclue_geocode_address_to_position() and geoclue_geocode_address_to_position_async() 
- * methods can be used to obtain the position (coordinates) of a given address. 
+ * geoclue_geocode_address_to_position(),
+ * geoclue_geocode_freeform_address_to_position() methods and their
+ * asynchronous counterparts can be used to obtain the position (coordinates)
+ * of the given address.
  * 
  * Address #GHashTable keys are defined in 
  * <ulink url="geoclue-types.html">geoclue-types.h</ulink>. See also 
@@ -162,7 +166,6 @@ geoclue_geocode_address_to_position (GeoclueGeocode   *geocode,
 	return fields;
 }
 
-
 typedef struct _GeoclueGeocodeAsyncData {
 	GeoclueGeocode *geocode;
 	GCallback callback;
@@ -199,9 +202,9 @@ address_to_position_callback (DBusGProxy              *proxy,
  * @altitude: Altitude in meters
  * @accuracy: Accuracy of measurement as #GeoclueAccuracy
  * @error: Error as #Gerror or %NULL
- * @userdata: User data pointer set in geoclue_geocode_address_to_position_async()
+ * @userdata: User data pointer
  * 
- * Callback function for geoclue_geocode_address_to_position_async().
+ * Callback function for the asynchronous methods.
  */
 
 /**
@@ -238,3 +241,95 @@ geoclue_geocode_address_to_position_async (GeoclueGeocode         *geocode,
 			 (org_freedesktop_Geoclue_Geocode_address_to_position_reply)address_to_position_callback,
 			 data);
 }
+
+/**
+ * geoclue_geocode_freeform_address_to_position:
+ * @geocode: A #GeoclueGeocode object
+ * @address: freeform address
+ * @latitude: Pointer to returned latitude in degrees or %NULL
+ * @longitude: Pointer to returned longitude in degrees or %NULL
+ * @altitude: Pointer to returned altitude in meters or %NULL
+ * @accuracy: Pointer to returned #GeoclueAccuracy or %NULL
+ * @error: Pointer to returned #Gerror or %NULL
+ *
+ * Geocodes given address to coordinates (@latitude, @longitude, @altitude).
+ * @accuracy is a rough estimate of the accuracy of the returned position.
+ *
+ * If the caller is not interested in some values, the pointers can be
+ * left %NULL.
+ *
+ * Return value: A #GeocluePositionFields bitfield representing the
+ * validity of the returned coordinates.
+ */
+GeocluePositionFields
+geoclue_geocode_freeform_address_to_position (GeoclueGeocode   *geocode,
+                                              const char       *address,
+                                              double           *latitude,
+                                              double           *longitude,
+                                              double           *altitude,
+                                              GeoclueAccuracy **accuracy,
+                                              GError          **error)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (geocode);
+	int fields;
+	double la, lo, al;
+	GeoclueAccuracy *acc;
+
+	if (!org_freedesktop_Geoclue_Geocode_freeform_address_to_position
+			(provider->proxy,
+			 address, &fields,
+			 &la, &lo, &al,
+			 &acc, error)) {
+		return GEOCLUE_POSITION_FIELDS_NONE;
+	}
+
+	if (latitude != NULL && (fields & GEOCLUE_POSITION_FIELDS_LATITUDE)) {
+		*latitude = la;
+	}
+
+	if (longitude != NULL && (fields & GEOCLUE_POSITION_FIELDS_LONGITUDE)) {
+		*longitude = lo;
+	}
+
+	if (altitude != NULL && (fields & GEOCLUE_POSITION_FIELDS_ALTITUDE)) {
+		*altitude = al;
+	}
+
+	if (accuracy != NULL) {
+		*accuracy = acc;
+	}
+
+	return fields;
+}
+
+/**
+ * geoclue_geocode_freeform_address_to_position_async:
+ * @geocode: A #Geocluegeocode object
+ * @address: freeform address
+ * @callback: A #GeoclueAddressCallback function that should be called when return values are available
+ * @userdata: pointer for user specified data
+ *
+ * Function returns (essentially) immediately and calls @callback when the geocoded 
+ * position data is available or when D-Bus timeouts.
+ */
+void
+geoclue_geocode_freeform_address_to_position_async (GeoclueGeocode         *geocode,
+                                                    const char             *address,
+                                                    GeoclueGeocodeCallback  callback,
+                                                    gpointer                userdata)
+{
+	GeoclueProvider *provider = GEOCLUE_PROVIDER (geocode);
+	GeoclueGeocodeAsyncData *data;
+
+	data = g_new (GeoclueGeocodeAsyncData, 1);
+	data->geocode = geocode;
+	data->callback = G_CALLBACK (callback);
+	data->userdata = userdata;
+
+	org_freedesktop_Geoclue_Geocode_freeform_address_to_position_async
+			(provider->proxy,
+			 address,
+			 (org_freedesktop_Geoclue_Geocode_address_to_position_reply)address_to_position_callback,
+			 data);
+}
+

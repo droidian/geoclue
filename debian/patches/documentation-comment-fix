@@ -1,50 +1,6 @@
---- a/docs/reference/html/GeoclueMasterClient.html
-+++ b/docs/reference/html/GeoclueMasterClient.html
-@@ -136,7 +136,7 @@ master = geoclue_master_get_default ();
- 
- client = geoclue_master_create_client (master, NULL, NULL);
- if (!client) {
--	/ * handle error * /
-+	/* handle error */
- }
- 
- if (!geoclue_master_client_set_requirements (client,
-@@ -144,17 +144,17 @@ if (!geoclue_master_client_set_requireme
-                                              0, FALSE,
-                                              GEOCLUE_RESOURCE_NETWORK,
-                                              &amp;error)) {
--	/ * handle error * /
-+	/* handle error */
- }
- 
- address = geoclue_master_client_create_address (client, error);
- if (!address) {
--	/ * handle error * /
-+	/* handle error */
- }
- 
--/ * Now we can use address just like we'd use a normal address provider, 
-+/* Now we can use address just like we'd use a normal address provider, 
-     but GeoclueMasterClient makes sure that underneath the provider
--    that best matches our requirements is used * /
-+    that best matches our requirements is used */
- </pre></div>
- <p>
- 
---- a/docs/reference/html/GeoclueProvider.html
-+++ b/docs/reference/html/GeoclueProvider.html
-@@ -104,7 +104,7 @@ GError *error;
- pos = geoclue_position_new ("org.freedesktop.Geoclue.Providers.Example", 
-                             "/org/freedesktop/Geoclue/Providers/Example");
- if (pos == NULL) {
--	/ * error * / 
-+	/* error */ 
- }
- if (geoclue_provider_get_provider_info (GEOCLUE_PROVIDER (pos),
-                                         &amp;name, NULL, &amp;error)) {
 --- a/docs/reference/html/simple-example.html
 +++ b/docs/reference/html/simple-example.html
-@@ -45,12 +45,12 @@ int main() 
+@@ -45,12 +45,12 @@ int main()
  	
  	g_type_init ();
  	
@@ -69,7 +25,7 @@
  #define GPS_DEVICE_NAME "00:02:76:C5:81:BF" 
  
  static void
-@@ -115,11 +115,11 @@ int main() 
+@@ -115,11 +115,11 @@ int main()
  	
  	g_type_init ();
  	
@@ -83,7 +39,7 @@
  	options = g_hash_table_new (g_str_hash, g_str_equal);
  	g_hash_table_insert (options, "org.freedesktop.Geoclue.GPSDevice", GPS_DEVICE_NAME);
  	if (!geoclue_provider_set_options (GEOCLUE_PROVIDER (pos), options, &amp;error)) {
-@@ -131,7 +131,7 @@ int main() 
+@@ -131,7 +131,7 @@ int main()
  	}
  	g_hash_table_destroy (options);
  	

@@ -35,8 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-libexec_PROGRAMS = geoclue-manual$(EXEEXT)
-subdir = providers/manual
+libexec_PROGRAMS = geoclue-nominatim$(EXEEXT)
+subdir = providers/nominatim
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
@@ -49,16 +49,17 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(libexecdir)" \
 	"$(DESTDIR)$(providersdir)" "$(DESTDIR)$(servicedir)"
 PROGRAMS = $(libexec_PROGRAMS)
-am_geoclue_manual_OBJECTS = geoclue_manual-geoclue-manual.$(OBJEXT)
-nodist_geoclue_manual_OBJECTS =
-geoclue_manual_OBJECTS = $(am_geoclue_manual_OBJECTS) \
-	$(nodist_geoclue_manual_OBJECTS)
+am__objects_1 =
+am_geoclue_nominatim_OBJECTS = $(am__objects_1) \
+	geoclue_nominatim-geoclue-nominatim.$(OBJEXT)
+geoclue_nominatim_OBJECTS = $(am_geoclue_nominatim_OBJECTS)
 am__DEPENDENCIES_1 =
-geoclue_manual_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+geoclue_nominatim_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(top_builddir)/geoclue/libgeoclue.la
-geoclue_manual_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(geoclue_manual_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+geoclue_nominatim_LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(geoclue_nominatim_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -72,8 +73,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(geoclue_manual_SOURCES) $(nodist_geoclue_manual_SOURCES)
-DIST_SOURCES = $(geoclue_manual_SOURCES)
+SOURCES = $(geoclue_nominatim_SOURCES)
+DIST_SOURCES = $(geoclue_nominatim_SOURCES)
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
@@ -95,7 +96,7 @@ am__nobase_list = $(am__nobase_strip_setup); \
 am__base_list = \
   sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
   sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
-DATA = $(noinst_DATA) $(providers_DATA) $(service_DATA)
+DATA = $(providers_DATA) $(service_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -239,46 +240,35 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-noinst_DATA = \
-	geoclue-manual.xml
+NOINST_H_FILES = \
+	geoclue-nominatim.h
 
-nodist_geoclue_manual_SOURCES = \
-	geoclue-manual-glue.h
+geoclue_nominatim_SOURCES = \
+	$(NOINST_H_FILES)	\
+	geoclue-nominatim.c
 
-BUILT_SOURCES = \
-	$(nodist_geoclue_manual_SOURCES)
-
-geoclue_manual_SOURCES = \
-	geoclue-manual.c     
-
-geoclue_manual_CFLAGS = \
-	-I$(top_srcdir)     \
-	-I$(top_builddir)   \
+geoclue_nominatim_CFLAGS = \
+	-I$(top_srcdir) \
+	-I$(top_builddir) \
 	$(GEOCLUE_CFLAGS)
 
-geoclue_manual_LDADD = \
-	$(GEOCLUE_LIBS)    \
-	$(top_builddir)/geoclue/libgeoclue.la
+geoclue_nominatim_LDADD = \
+	$(GEOCLUE_LIBS) \
+	$(top_builddir)/geoclue/libgeoclue.la 
 
 providersdir = $(datadir)/geoclue-providers
-providers_DATA = geoclue-manual.provider
+providers_DATA = geoclue-nominatim.provider
 servicedir = $(DBUS_SERVICES_DIR)
-service_in_files = org.freedesktop.Geoclue.Providers.Manual.service.in
+service_in_files = org.freedesktop.Geoclue.Providers.Nominatim.service.in
 service_DATA = $(service_in_files:.service.in=.service)
-CLEANFILES = \
-	stamp-geoclue-manual-glue.h
-
 EXTRA_DIST = \
 	$(service_in_files)	\
-	$(providers_DATA)	\
-	$(noinst_DATA)
+	$(providers_DATA)
 
 DISTCLEANFILES = \
-	$(service_DATA)	\
-	$(nodist_geoclue_manual_SOURCES)
+	$(service_DATA)
 
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -291,9 +281,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign providers/manual/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign providers/nominatim/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign providers/manual/Makefile
+	  $(AUTOMAKE) --foreign providers/nominatim/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -355,9 +345,9 @@ clean-libexecPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-geoclue-manual$(EXEEXT): $(geoclue_manual_OBJECTS) $(geoclue_manual_DEPENDENCIES) 
-	@rm -f geoclue-manual$(EXEEXT)
-	$(geoclue_manual_LINK) $(geoclue_manual_OBJECTS) $(geoclue_manual_LDADD) $(LIBS)
+geoclue-nominatim$(EXEEXT): $(geoclue_nominatim_OBJECTS) $(geoclue_nominatim_DEPENDENCIES) 
+	@rm -f geoclue-nominatim$(EXEEXT)
+	$(geoclue_nominatim_LINK) $(geoclue_nominatim_OBJECTS) $(geoclue_nominatim_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -365,7 +355,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue_manual-geoclue-manual.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -388,19 +378,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(LTCOMPILE) -c -o $@ $<
 
-geoclue_manual-geoclue-manual.o: geoclue-manual.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_manual_CFLAGS) $(CFLAGS) -MT geoclue_manual-geoclue-manual.o -MD -MP -MF $(DEPDIR)/geoclue_manual-geoclue-manual.Tpo -c -o geoclue_manual-geoclue-manual.o `test -f 'geoclue-manual.c' || echo '$(srcdir)/'`geoclue-manual.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/geoclue_manual-geoclue-manual.Tpo $(DEPDIR)/geoclue_manual-geoclue-manual.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='geoclue-manual.c' object='geoclue_manual-geoclue-manual.o' libtool=no @AMDEPBACKSLASH@
+geoclue_nominatim-geoclue-nominatim.o: geoclue-nominatim.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_nominatim_CFLAGS) $(CFLAGS) -MT geoclue_nominatim-geoclue-nominatim.o -MD -MP -MF $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Tpo -c -o geoclue_nominatim-geoclue-nominatim.o `test -f 'geoclue-nominatim.c' || echo '$(srcdir)/'`geoclue-nominatim.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Tpo $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='geoclue-nominatim.c' object='geoclue_nominatim-geoclue-nominatim.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_manual_CFLAGS) $(CFLAGS) -c -o geoclue_manual-geoclue-manual.o `test -f 'geoclue-manual.c' || echo '$(srcdir)/'`geoclue-manual.c
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_nominatim_CFLAGS) $(CFLAGS) -c -o geoclue_nominatim-geoclue-nominatim.o `test -f 'geoclue-nominatim.c' || echo '$(srcdir)/'`geoclue-nominatim.c
 
-geoclue_manual-geoclue-manual.obj: geoclue-manual.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_manual_CFLAGS) $(CFLAGS) -MT geoclue_manual-geoclue-manual.obj -MD -MP -MF $(DEPDIR)/geoclue_manual-geoclue-manual.Tpo -c -o geoclue_manual-geoclue-manual.obj `if test -f 'geoclue-manual.c'; then $(CYGPATH_W) 'geoclue-manual.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-manual.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/geoclue_manual-geoclue-manual.Tpo $(DEPDIR)/geoclue_manual-geoclue-manual.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='geoclue-manual.c' object='geoclue_manual-geoclue-manual.obj' libtool=no @AMDEPBACKSLASH@
+geoclue_nominatim-geoclue-nominatim.obj: geoclue-nominatim.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_nominatim_CFLAGS) $(CFLAGS) -MT geoclue_nominatim-geoclue-nominatim.obj -MD -MP -MF $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Tpo -c -o geoclue_nominatim-geoclue-nominatim.obj `if test -f 'geoclue-nominatim.c'; then $(CYGPATH_W) 'geoclue-nominatim.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-nominatim.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Tpo $(DEPDIR)/geoclue_nominatim-geoclue-nominatim.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='geoclue-nominatim.c' object='geoclue_nominatim-geoclue-nominatim.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_manual_CFLAGS) $(CFLAGS) -c -o geoclue_manual-geoclue-manual.obj `if test -f 'geoclue-manual.c'; then $(CYGPATH_W) 'geoclue-manual.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-manual.c'; fi`
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_nominatim_CFLAGS) $(CFLAGS) -c -o geoclue_nominatim-geoclue-nominatim.obj `if test -f 'geoclue-nominatim.c'; then $(CYGPATH_W) 'geoclue-nominatim.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-nominatim.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -531,15 +521,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
+check: check-am
 all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(providersdir)" "$(DESTDIR)$(servicedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -556,7 +544,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
@@ -566,7 +553,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-generic clean-libexecPROGRAMS clean-libtool \
@@ -639,7 +625,7 @@ ps-am:
 uninstall-am: uninstall-libexecPROGRAMS uninstall-providersDATA \
 	uninstall-serviceDATA
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-generic \
 	clean-libexecPROGRAMS clean-libtool ctags distclean \
@@ -660,15 +646,6 @@ uninstall-am: uninstall-libexecPROGRAMS uninstall-providersDATA \
 
 $(service_DATA): $(service_in_files) Makefile
 	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
-
-%-glue.h: stamp-%-glue.h
-	@true
-
-stamp-geoclue-manual-glue.h: geoclue-manual.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_manual --mode=glib-server $< > xgen-$(@F) \
-	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
-	&& rm -f xgen-$(@F) \
-	&& echo timestamp > $(@F)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

@@ -39,9 +39,13 @@
     <function name="GeoclueMaster" link="GeoclueMaster.html#GeoclueMaster-struct"/>
     <function name="geoclue_master_get_default ()" link="GeoclueMaster.html#geoclue-master-get-default"/>
     <function name="geoclue_master_create_client ()" link="GeoclueMaster.html#geoclue-master-create-client"/>
+    <function name="GeoclueCreateClientCallback ()" link="GeoclueMaster.html#GeoclueCreateClientCallback"/>
+    <function name="geoclue_master_create_client_async ()" link="GeoclueMaster.html#geoclue-master-create-client-async"/>
     <function name="GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE" link="GeoclueMasterClient.html#GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS"/>
     <function name="GeoclueMasterClient" link="GeoclueMasterClient.html#GeoclueMasterClient-struct"/>
     <function name="geoclue_master_client_set_requirements ()" link="GeoclueMasterClient.html#geoclue-master-client-set-requirements"/>
+    <function name="GeoclueSetRequirementsCallback ()" link="GeoclueMasterClient.html#GeoclueSetRequirementsCallback"/>
+    <function name="geoclue_master_client_set_requirements_async ()" link="GeoclueMasterClient.html#geoclue-master-client-set-requirements-async"/>
     <function name="geoclue_master_client_create_address ()" link="GeoclueMasterClient.html#geoclue-master-client-create-address"/>
     <function name="CreateAddressCallback ()" link="GeoclueMasterClient.html#CreateAddressCallback"/>
     <function name="geoclue_master_client_create_address_async ()" link="GeoclueMasterClient.html#geoclue-master-client-create-address-async"/>
@@ -49,14 +53,24 @@
     <function name="CreatePositionCallback ()" link="GeoclueMasterClient.html#CreatePositionCallback"/>
     <function name="geoclue_master_client_create_position_async ()" link="GeoclueMasterClient.html#geoclue-master-client-create-position-async"/>
     <function name="geoclue_master_client_get_address_provider ()" link="GeoclueMasterClient.html#geoclue-master-client-get-address-provider"/>
+    <function name="GeoclueGetProviderCallback ()" link="GeoclueMasterClient.html#GeoclueGetProviderCallback"/>
+    <function name="geoclue_master_client_get_address_provider_async ()" link="GeoclueMasterClient.html#geoclue-master-client-get-address-provider-async"/>
     <function name="geoclue_master_client_get_position_provider ()" link="GeoclueMasterClient.html#geoclue-master-client-get-position-provider"/>
+    <function name="geoclue_master_client_get_position_provider_async ()" link="GeoclueMasterClient.html#geoclue-master-client-get-position-provider-async"/>
     <function name="The &quot;object-path&quot; property" link="GeoclueMasterClient.html#GeoclueMasterClient--object-path"/>
     <function name="The &quot;address-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-address-provider-changed"/>
+    <function name="The &quot;invalidated&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-invalidated"/>
     <function name="The &quot;position-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-position-provider-changed"/>
     <function name="GeoclueProvider" link="GeoclueProvider.html#GeoclueProvider-struct"/>
     <function name="geoclue_provider_get_status ()" link="GeoclueProvider.html#geoclue-provider-get-status"/>
+    <function name="GeoclueProviderStatusCallback ()" link="GeoclueProvider.html#GeoclueProviderStatusCallback"/>
+    <function name="geoclue_provider_get_status_async ()" link="GeoclueProvider.html#geoclue-provider-get-status-async"/>
     <function name="geoclue_provider_get_provider_info ()" link="GeoclueProvider.html#geoclue-provider-get-provider-info"/>
+    <function name="GeoclueProviderInfoCallback ()" link="GeoclueProvider.html#GeoclueProviderInfoCallback"/>
+    <function name="geoclue_provider_get_provider_info_async ()" link="GeoclueProvider.html#geoclue-provider-get-provider-info-async"/>
     <function name="geoclue_provider_set_options ()" link="GeoclueProvider.html#geoclue-provider-set-options"/>
+    <function name="GeoclueProviderOptionsCallback ()" link="GeoclueProvider.html#GeoclueProviderOptionsCallback"/>
+    <function name="geoclue_provider_set_options_async ()" link="GeoclueProvider.html#geoclue-provider-set-options-async"/>
     <function name="The &quot;interface&quot; property" link="GeoclueProvider.html#GeoclueProvider--interface"/>
     <function name="The &quot;path&quot; property" link="GeoclueProvider.html#GeoclueProvider--path"/>
     <function name="The &quot;service&quot; property" link="GeoclueProvider.html#GeoclueProvider--service"/>
@@ -142,6 +156,7 @@
     <function name="GetVelocity ()" link="Velocity.html#Velocity.GetVelocity"/>
     <function name="The VelocityChanged signal" link="Velocity.html#Velocity::VelocityChanged"/>
     <function name="AddressToPosition ()" link="Geocode.html#Geocode.AddressToPosition"/>
+    <function name="FreeformAddressToPosition ()" link="Geocode.html#Geocode.FreeformAddressToPosition"/>
     <function name="PositionToAddress ()" link="ReverseGeocode.html#ReverseGeocode.PositionToAddress"/>
   </functions>
 </book>

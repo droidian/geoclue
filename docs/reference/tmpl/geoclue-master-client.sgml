@@ -41,6 +41,13 @@ GeoclueMasterClient
 @arg3: 
 @arg4: 
 
+<!-- ##### SIGNAL GeoclueMasterClient::invalidated ##### -->
+<para>
+
+</para>
+
+@geocluemasterclient: the object which received the signal.
+
 <!-- ##### SIGNAL GeoclueMasterClient::position-provider-changed ##### -->
 <para>
 
@@ -69,6 +76,30 @@ GeoclueMasterClient
 @allowed_resources: 
 @error: 
 @Returns: 
+
+
+<!-- ##### USER_FUNCTION GeoclueSetRequirementsCallback ##### -->
+<para>
+
+</para>
+
+@client: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_master_client_set_requirements_async ##### -->
+<para>
+
+</para>
+
+@client: 
+@min_accuracy: 
+@min_time: 
+@require_updates: 
+@allowed_resources: 
+@callback: 
+@userdata: 
 
 
 <!-- ##### FUNCTION geoclue_master_client_create_address ##### -->
@@ -147,6 +178,30 @@ GeoclueMasterClient
 @Returns: 
 
 
+<!-- ##### USER_FUNCTION GeoclueGetProviderCallback ##### -->
+<para>
+
+</para>
+
+@client: 
+@name: 
+@description: 
+@service: 
+@path: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_master_client_get_address_provider_async ##### -->
+<para>
+
+</para>
+
+@client: 
+@callback: 
+@userdata: 
+
+
 <!-- ##### FUNCTION geoclue_master_client_get_position_provider ##### -->
 <para>
 
@@ -159,5 +214,15 @@ GeoclueMasterClient
 @path: 
 @error: 
 @Returns: 
+
+
+<!-- ##### FUNCTION geoclue_master_client_get_position_provider_async ##### -->
+<para>
+
+</para>
+
+@client: 
+@callback: 
+@userdata: 
 
 

@@ -130,8 +130,14 @@ GC_IFACE_VELOCITY_GET_CLASS
 <TITLE>GeoclueProvider</TITLE>
 GeoclueProvider
 geoclue_provider_get_status
+GeoclueProviderStatusCallback
+geoclue_provider_get_status_async
 geoclue_provider_get_provider_info
+GeoclueProviderInfoCallback
+geoclue_provider_get_provider_info_async
 geoclue_provider_set_options
+GeoclueProviderOptionsCallback
+geoclue_provider_set_options_async
 <SUBSECTION Standard>
 GEOCLUE_PROVIDER
 GEOCLUE_IS_PROVIDER
@@ -163,6 +169,8 @@ GEOCLUE_MASTER_DBUS_INTERFACE
 GeoclueMaster
 geoclue_master_get_default
 geoclue_master_create_client
+GeoclueCreateClientCallback
+geoclue_master_create_client_async
 <SUBSECTION Standard>
 GEOCLUE_MASTER
 GEOCLUE_IS_MASTER
@@ -221,6 +229,8 @@ GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE
 <TITLE>GeoclueMasterClient</TITLE>
 GeoclueMasterClient
 geoclue_master_client_set_requirements
+GeoclueSetRequirementsCallback
+geoclue_master_client_set_requirements_async
 geoclue_master_client_create_address
 CreateAddressCallback
 geoclue_master_client_create_address_async
@@ -228,7 +238,10 @@ geoclue_master_client_create_position
 CreatePositionCallback
 geoclue_master_client_create_position_async
 geoclue_master_client_get_address_provider
+GeoclueGetProviderCallback
+geoclue_master_client_get_address_provider_async
 geoclue_master_client_get_position_provider
+geoclue_master_client_get_position_provider_async
 <SUBSECTION Standard>
 GEOCLUE_MASTER_CLIENT
 GEOCLUE_IS_MASTER_CLIENT

@@ -9,12 +9,18 @@
   </refnamediv>
   <refsynopsisdiv role="synopsis">
     <title role="synopsis.title">Methods</title>
-    <synopsis><link linkend="Geocode.AddressToPosition">AddressToPosition</link> (in  'a{ss}'address,
-                   out 'i'fields,
-                   out 'd'latitude,
-                   out 'd'longitude,
-                   out 'd'altitude,
-                   out '(idd)'accuracy)
+    <synopsis><link linkend="Geocode.AddressToPosition">AddressToPosition</link>         (in  'a{ss}'address,
+                           out 'i'fields,
+                           out 'd'latitude,
+                           out 'd'longitude,
+                           out 'd'altitude,
+                           out '(idd)'accuracy)
+<link linkend="Geocode.FreeformAddressToPosition">FreeformAddressToPosition</link> (in  's'address,
+                           out 'i'fields,
+                           out 'd'latitude,
+                           out 'd'longitude,
+                           out 'd'altitude,
+                           out '(idd)'accuracy)
 </synopsis>
   </refsynopsisdiv>
   <refsect1 role="signal_proto">
@@ -50,6 +56,57 @@
                    out 'd'     longitude,
                    out 'd'     altitude,
                    out '(idd)' accuracy)</programlisting>
+      <variablelist role="params">
+        <varlistentry>
+          <term><parameter>address</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><parameter>fields</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><parameter>latitude</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><parameter>longitude</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><parameter>altitude</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+        <varlistentry>
+          <term><parameter>accuracy</parameter>:</term>
+          <listitem>
+            <para/>
+          </listitem>
+        </varlistentry>
+      </variablelist>
+    </refsect2>
+    <refsect2>
+      <title><anchor role="function" id="Geocode.FreeformAddressToPosition"/>FreeformAddressToPosition ()</title>
+      <indexterm>
+        <primary>FreeformAddressToPosition</primary>
+        <secondary>Geocode</secondary>
+      </indexterm>
+      <programlisting>FreeformAddressToPosition (in  's'     address,
+                           out 'i'     fields,
+                           out 'd'     latitude,
+                           out 'd'     longitude,
+                           out 'd'     altitude,
+                           out '(idd)' accuracy)</programlisting>
       <variablelist role="params">
         <varlistentry>
           <term><parameter>address</parameter>:</term>

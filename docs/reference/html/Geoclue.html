@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>org.freedesktop.Geoclue</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
-<link rel="start" href="index.html" title="Geoclue Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn02.html" title="D-Bus API">
 <link rel="prev" href="MasterClient.html" title="org.freedesktop.Geoclue.MasterClient">
 <link rel="next" href="Position.html" title="org.freedesktop.Geoclue.Position">
-<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 <link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
 <link rel="reference" href="rn01.html" title="C API">
@@ -23,7 +23,8 @@
 <th width="100%" align="center">Geoclue Reference Manual</th>
 <td><a accesskey="n" href="Position.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#Geoclue.synopsis" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts">
+<a href="#Geoclue.synopsis" class="shortcut">Top</a>
                    | 
                   <a href="#Geoclue.description" class="shortcut">Description</a>
                    | 
@@ -31,9 +32,10 @@
                    | 
                   <a href="#Geoclue.properties" class="shortcut">Properties</a>
                    | 
-                  <a href="#Geoclue.signals" class="shortcut">Signals</a></nobr></td></tr>
+                  <a href="#Geoclue.signals" class="shortcut">Signals</a>
+</td></tr>
 </table>
-<div class="refentry" lang="en">
+<div class="refentry" title="org.freedesktop.Geoclue">
 <a name="Geoclue"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -42,47 +44,35 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv">
+<div class="refsynopsisdiv" title="Methods">
 <h2>Methods</h2>
-<pre class="synopsis"><a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue.GetProviderInfo"
->GetProviderInfo</a> (out 's'Name,
+<pre class="synopsis"><a href="Geoclue.html#Geoclue.GetProviderInfo">GetProviderInfo</a> (out 's'Name,
                  out 's'Description)
-<a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue.GetStatus"
->GetStatus</a>       (out 'i'status)
-<a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue.SetOptions"
->SetOptions</a>      (in  'a{ss}'options)
-<a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue.AddReference"
->AddReference</a>    ()
-<a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue.RemoveReference"
->RemoveReference</a> ()
+<a href="Geoclue.html#Geoclue.GetStatus">GetStatus</a>       (out 'i'status)
+<a href="Geoclue.html#Geoclue.SetOptions">SetOptions</a>      (in  'a{ss}'options)
+<a href="Geoclue.html#Geoclue.AddReference">AddReference</a>    ()
+<a href="Geoclue.html#Geoclue.RemoveReference">RemoveReference</a> ()
 </pre>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2607448"></a><h2>Signals</h2>
-<pre class="synopsis"><a
-href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
->StatusChanged</a> ('i'status)
+<div class="refsect1" title="Signals">
+<a name="id2755605"></a><h2>Signals</h2>
+<pre class="synopsis"><a href="Geoclue.html#Geoclue::StatusChanged">StatusChanged</a> ('i'status)
 
 </pre>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2591104"></a><h2>Implemented Interfaces</h2>
+<div class="refsect1" title="Implemented Interfaces">
+<a name="id2792344"></a><h2>Implemented Interfaces</h2>
 <p>org.freedesktop.Geoclue implements
     org.freedesktop.DBus.Introspectable,
     org.freedesktop.DBus.Properties
     </p>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2613014"></a><h2>Properties</h2>
+<div class="refsect1" title="Properties">
+<a name="id2750470"></a><h2>Properties</h2>
 <pre class="synopsis"></pre>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2614106"></a><h2>Description</h2>
+<div class="refsect1" title="Description">
+<a name="id2760484"></a><h2>Description</h2>
 <p>
 			</p>
 <p>Geoclue interface contains methods 
@@ -91,10 +81,10 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 <p>
 		</p>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2591442"></a><h2>Details</h2>
-<div class="refsect2" lang="en">
-<a name="id2591857"></a><h3>
+<div class="refsect1" title="Details">
+<a name="id2772755"></a><h2>Details</h2>
+<div class="refsect2" title="GetProviderInfo ()">
+<a name="id2741729"></a><h3>
 <a name="Geoclue.GetProviderInfo"></a>GetProviderInfo ()</h3>
 <pre class="programlisting">GetProviderInfo (out 's' Name,
                  out 's' Description)</pre>
@@ -113,8 +103,8 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
-<a name="id2600042"></a><h3>
+<div class="refsect2" title="GetStatus ()">
+<a name="id2762515"></a><h3>
 <a name="Geoclue.GetStatus"></a>GetStatus ()</h3>
 <pre class="programlisting">GetStatus (out 'i' status)</pre>
 <div class="variablelist"><table border="0">
@@ -126,8 +116,8 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
-<a name="id2608566"></a><h3>
+<div class="refsect2" title="SetOptions ()">
+<a name="id2757506"></a><h3>
 <a name="Geoclue.SetOptions"></a>SetOptions ()</h3>
 <pre class="programlisting">SetOptions (in  'a{ss}' options)</pre>
 <div class="variablelist"><table border="0">
@@ -139,8 +129,8 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
-<a name="id2587956"></a><h3>
+<div class="refsect2" title="AddReference ()">
+<a name="id2756566"></a><h3>
 <a name="Geoclue.AddReference"></a>AddReference ()</h3>
 <pre class="programlisting">AddReference ()</pre>Increase the reference count on the provider. 
 				Provider may shutdown if reference count reaches zero, so 
@@ -152,8 +142,8 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
-<a name="id2602233"></a><h3>
+<div class="refsect2" title="RemoveReference ()">
+<a name="id2776854"></a><h3>
 <a name="Geoclue.RemoveReference"></a>RemoveReference ()</h3>
 <pre class="programlisting">RemoveReference ()</pre>Decrease the reference count on the provider<div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -161,10 +151,10 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2619354"></a><h2>Signal Details</h2>
-<div class="refsect2" lang="en">
-<a name="id2608252"></a><h3>
+<div class="refsect1" title="Signal Details">
+<a name="id2772569"></a><h2>Signal Details</h2>
+<div class="refsect2" title="The StatusChanged signal">
+<a name="id2739821"></a><h3>
 <a name="Geoclue::StatusChanged"></a>The StatusChanged signal</h3>
 <pre class="programlisting">StatusChanged ('i' status)</pre>
 <div class="variablelist"><table border="0">
@@ -176,12 +166,12 @@ href="/usr/share/gtk-doc/html/geoclue/Geoclue.html#Geoclue::StatusChanged"
 </table></div>
 </div>
 </div>
-<div class="refsect1" lang="en">
-<a name="id2604454"></a><h2>Property Details</h2>
+<div class="refsect1" title="Property Details">
+<a name="id2758952"></a><h2>Property Details</h2>
 </div>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.10</div>
+          Generated by GTK-Doc V1.13</div>
 </body>
 </html>

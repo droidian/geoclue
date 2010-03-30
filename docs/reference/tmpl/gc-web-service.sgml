@@ -49,6 +49,7 @@ GcWebService
 </para>
 
 @self: 
+@error: 
 @Varargs: 
 @Returns: 
 

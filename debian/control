@@ -96,7 +96,7 @@ Description: Position server for GeoClue (GSM)
  .
  This package provides a positioning backend for GeoClue. The 
  location information comes from a GSM (cellular) device
- through gammu and opencellid.org.
+ through the ofono stack and opencellid.org.
 
 Package: geoclue-localnet
 Architecture: any

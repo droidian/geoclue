@@ -23,6 +23,7 @@
  */
 
 #include <glib.h>
+#include <stdlib.h>
 #include <geoclue/geoclue-reverse-geocode.h>
 
 /* GHFunc, use with g_hash_table_foreach */
@@ -40,7 +41,7 @@ parse_options (int    argc,
         int i;
 
         options = g_hash_table_new (g_str_hash, g_str_equal);
-        for (i = 2; i < argc; i += 2) {
+        for (i = 4; i < argc; i += 2) {
                 g_hash_table_insert (options, argv[i], argv[i + 1]);
         }
 
@@ -58,8 +59,8 @@ int main (int argc, char** argv)
 	
 	g_type_init();
 	
-	if (argc != 2) {
-		g_printerr ("Usage:\n  revgeocode-example <provider_name>\n");
+	if (argc < 4) {
+		g_printerr ("Usage:\n  revgeocode-example <provider_name> <lat> <lon>\n");
 		return 1;
 	}
 	g_print ("Using provider '%s'\n", argv[1]);
@@ -74,9 +75,10 @@ int main (int argc, char** argv)
 		g_printerr ("Error while creating GeoclueGeocode object.\n");
 		return 1;
 	}
-	
+
+
         /* Set options */
-        if (argc > 2) {
+        if (argc > 4) {
                 GHashTable *options;
                 
                 options = parse_options (argc, argv);
@@ -93,9 +95,9 @@ int main (int argc, char** argv)
 	                                 (GDestroyNotify)g_free, 
 	                                 (GDestroyNotify)g_free);
 	
-	lat = 60.2;
-	lon = 24.9;
-	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_POSTALCODE, 0.0, 0.0);
+	lat = atof (argv[2]);
+	lon = atof (argv[3]);
+	accuracy = geoclue_accuracy_new (GEOCLUE_ACCURACY_LEVEL_STREET, 0.0, 0.0);
 	if (!geoclue_reverse_geocode_position_to_address (revgeocoder,  
 	                                                  lat, lon, accuracy,
 	                                                  &address, &out_accuracy, &error)) {
@@ -108,7 +110,7 @@ int main (int argc, char** argv)
 	/* Print out the address */
 	GeoclueAccuracyLevel level;
 	geoclue_accuracy_get_details (out_accuracy, &level, NULL, NULL);
-	g_print ("Reverse Geocoded  [%.2f, %.2f] to address (accuracy %d):\n", lat, lon, level);
+	g_print ("Reverse Geocoded  [%f, %f] to address (accuracy %d):\n", lat, lon, level);
 	g_hash_table_foreach (address, (GHFunc)print_address_key_and_value, NULL);
 	
 	g_hash_table_destroy (address);

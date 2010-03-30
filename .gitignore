@@ -31,3 +31,5 @@ example/geoclue-map-example-moving
 example/geoclue-map-layout-example
 example/geoclue-position-example
 geoclue/geoclue-master
+geoclue/geoclue-enum-types.h
+geoclue/geoclue-enum-types.c

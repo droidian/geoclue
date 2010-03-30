@@ -25,6 +25,8 @@
 #ifndef _GEOCLUE_TYPES_H
 #define _GEOCLUE_TYPES_H
 
+#include <geoclue/geoclue-error.h>
+
 /**
  * SECTION:geoclue-types
  * @short_description: Type definitions and defines useful for Geoclue clients 
@@ -97,21 +99,6 @@ typedef enum {
 	GEOCLUE_VELOCITY_FIELDS_DIRECTION = 1 << 1,
 	GEOCLUE_VELOCITY_FIELDS_CLIMB = 1 << 2
 } GeoclueVelocityFields;
-
-/**
- * GeoclueError:
- * @GEOCLUE_ERROR_NOT_IMPLEMENTED: Method is not implemented
- * @GEOCLUE_ERROR_NOT_AVAILABLE: Needed information is not currently
- * available (e.g. web service did not respond)
- * @GEOCLUE_ERROR_FAILED: Generic fatal error
- * 
- * Error values for providers.
- **/
-typedef enum {
-	GEOCLUE_ERROR_NOT_IMPLEMENTED,
-	GEOCLUE_ERROR_NOT_AVAILABLE,
-	GEOCLUE_ERROR_FAILED,
-} GeoclueError;
 
 /**
  * GEOCLUE_ADDRESS_KEY_COUNTRYCODE:

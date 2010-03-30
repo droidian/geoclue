@@ -23,6 +23,7 @@ geoclue_velocity_get_type
 geoclue_address_get_type
 geoclue_geocode_get_type
 geoclue_reverse_geocode_get_type
+geoclue_error_get_type
 
 gc_web_service_get_type
 gc_provider_get_type

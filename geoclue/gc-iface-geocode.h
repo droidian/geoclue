@@ -52,6 +52,15 @@ struct _GcIfaceGeocodeClass {
 					 double                *altitude,
 					 GeoclueAccuracy      **accuracy,
 					 GError               **error);
+
+	gboolean (*freeform_address_to_position) (GcIfaceGeocode        *gc,
+	                                          const char            *address,
+	                                          GeocluePositionFields *fields,
+	                                          double                *latitude,
+	                                          double                *longitude,
+	                                          double                *altitude,
+	                                          GeoclueAccuracy      **accuracy,
+	                                          GError               **error);
 };
 
 GType gc_iface_geocode_get_type (void);

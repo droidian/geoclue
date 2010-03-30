@@ -92,9 +92,36 @@ get_address_value (GHashTable *address, char *key)
 	}
 	return value;
 }
+
+static GeoclueAccuracyLevel
+get_query_accuracy_level (GeoclueYahoo *yahoo)
+{
+	char *precision = NULL;
+	GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
+
+	gc_web_service_get_string (yahoo->web_service,
+							   &precision, "//yahoo:Result/attribute::precision");
+	if (precision) {
+		if ((strcmp (precision, "street") == 0) ||
+			(strcmp (precision, "address") == 0)) {
+			level = GEOCLUE_ACCURACY_LEVEL_STREET;
+		} else if ((strcmp (precision, "zip") == 0) ||
+				   (strcmp (precision, "city") == 0)) {
+			level = GEOCLUE_ACCURACY_LEVEL_LOCALITY;
+		} else if ((strcmp (precision, "zip+2") == 0) ||
+				   (strcmp (precision, "zip+4") == 0)) {
+			level = GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
+		} else if (strcmp (precision, "state") == 0) {
+			level = GEOCLUE_ACCURACY_LEVEL_REGION;
+		} else if (strcmp (precision, "country") == 0) {
+			level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
+		}
+		g_free (precision);
+	}
+	return level;
+}
+
 /* Geocode interface implementation */
-
-
 static gboolean
 geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
                                    GHashTable            *address,
@@ -142,28 +169,8 @@ geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
 	}
 	
 	if (accuracy) {
-		char *precision = NULL;
-		GeoclueAccuracyLevel level = GEOCLUE_ACCURACY_LEVEL_NONE;
-		gc_web_service_get_string (yahoo->web_service,
-		                           &precision, "//yahoo:Result/attribute::precision");
-		if (precision) {
-			if ((strcmp (precision, "street") == 0) ||
-			    (strcmp (precision, "address") == 0)) {
-				level = GEOCLUE_ACCURACY_LEVEL_STREET;
-			} else if ((strcmp (precision, "zip") == 0) ||
-			           (strcmp (precision, "city") == 0)) {
-				level = GEOCLUE_ACCURACY_LEVEL_LOCALITY;
-			} else if ((strcmp (precision, "zip+2") == 0) ||
-			           (strcmp (precision, "zip+4") == 0)) {
-				level = GEOCLUE_ACCURACY_LEVEL_POSTALCODE;
-			} else if (strcmp (precision, "state") == 0) {
-				level = GEOCLUE_ACCURACY_LEVEL_REGION;
-			} else if (strcmp (precision, "country") == 0) {
-				level = GEOCLUE_ACCURACY_LEVEL_COUNTRY;
-			}
-			g_free (precision);
-		}
-		*accuracy = geoclue_accuracy_new (level, 0, 0);
+		*accuracy = geoclue_accuracy_new (get_query_accuracy_level (yahoo),
+		                                  0, 0);
 	}
 	
 	g_free (street);
@@ -174,6 +181,49 @@ geoclue_yahoo_address_to_position (GcIfaceGeocode        *iface,
 	return TRUE;
 }
 
+static gboolean
+geoclue_yahoo_freeform_address_to_position (GcIfaceGeocode        *iface,
+                                            const char            *address,
+                                            GeocluePositionFields *fields,
+                                            double                *latitude,
+                                            double                *longitude,
+                                            double                *altitude,
+                                            GeoclueAccuracy      **accuracy,
+                                            GError               **error)
+{
+	GeoclueYahoo *yahoo;
+
+	yahoo = GEOCLUE_YAHOO (iface);
+
+	*fields = GEOCLUE_POSITION_FIELDS_NONE;
+
+	if (!gc_web_service_query (yahoo->web_service, error,
+	                           "appid", YAHOO_GEOCLUE_APP_ID,
+	                           "location", address,
+	                           (char *)0)) {
+		return FALSE;
+	}
+
+	if (latitude) {
+		if (gc_web_service_get_double (yahoo->web_service,
+		                               latitude, "//yahoo:Latitude")) {
+			*fields |= GEOCLUE_POSITION_FIELDS_LATITUDE;
+		}
+	}
+	if (longitude) {
+		if (gc_web_service_get_double (yahoo->web_service,
+		                               longitude, "//yahoo:Longitude")) {
+			*fields |= GEOCLUE_POSITION_FIELDS_LONGITUDE;
+		}
+	}
+
+	if (accuracy) {
+		*accuracy = geoclue_accuracy_new (get_query_accuracy_level (yahoo),
+		                                  0, 0);
+	}
+
+	return TRUE;
+}
 
 static void
 geoclue_yahoo_dispose (GObject *obj)
@@ -220,6 +270,8 @@ static void
 geoclue_yahoo_geocode_init (GcIfaceGeocodeClass *iface)
 {
 	iface->address_to_position = geoclue_yahoo_address_to_position;
+	iface->freeform_address_to_position =
+			geoclue_yahoo_freeform_address_to_position;
 }
 
 int 

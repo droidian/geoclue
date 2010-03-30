@@ -1,3 +1,16 @@
+geoclue (0.12.0-1) unstable; urgency=low
+
+  * [e52a1858] Add ofono-dev as build-dependency.
+  * [f3a4f817] Replace gammu by ofono in the description.
+  * [7fc55dc5] Drop libgammu-dev build-dep.
+  * [1346e6d5] Imported Upstream version 0.12.0 (Closes: #575816)
+  * [224b42d3] Updating patches.
+  * [bee64eb7] Updating symbols file.
+  * [8cb5a919] Reorder dh optionts as specified by the manpage.
+  * [2c8aa421] Switching Maintainer/Uploaders.
+
+ -- Bernd Zeimetz <bzed@debian.org>  Tue, 30 Mar 2010 22:51:42 +0200
+
 geoclue (0.11.1+git20091217-3) unstable; urgency=low
 
   * [73b81920] Require libgps >= 2.90.1~svn6819 to build. This fixes the

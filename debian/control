@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Craig Andrews <candrews@integralblue.com>
 Uploaders: Bernd Zeimetz <bzed@debian.org>
-Build-Depends: autotools-dev, quilt (>= 0.46-7), patchutils (>= 0.2.25), debhelper (>= 7.0.50), libgammu-dev (>= 1.24.0), libgps-dev (>= 2.90.1~svn6819), pkg-config, libglib2.0-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev, network-manager-dev [!kfreebsd-i386 !kfreebsd-amd64], ofono-dev
+Build-Depends: autotools-dev, quilt (>= 0.46-7), patchutils (>= 0.2.25), debhelper (>= 7.0.50), libgps-dev (>= 2.90.1~svn6819), pkg-config, libglib2.0-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev, network-manager-dev [!kfreebsd-i386 !kfreebsd-amd64], ofono-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.8.3
 Vcs-Git: git://git.debian.org/collab-maint/geoclue.git

@@ -8,6 +8,6 @@ override_dh_auto_configure:
 
 
 %:
-	dh --with quilt $@
+	dh $@ --with quilt
 
 .PHONY: override_dh_auto_configure

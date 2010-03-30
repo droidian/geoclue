@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE book PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "">
-<book xmlns="http://www.devhelp.net/book" title="Geoclue Reference Manual" link="index.html" author="" name="geoclue" version="2">
+<book xmlns="http://www.devhelp.net/book" title="Geoclue Reference Manual" link="index.html" author="" name="geoclue" version="2" language="c">
   <chapters>
     <sub name="Using Geoclue in applications" link="ch01.html">
       <sub name="Overview" link="ch01.html#overview"/>
@@ -39,9 +39,13 @@
     <keyword type="struct" name="GeoclueMaster" link="GeoclueMaster.html#GeoclueMaster-struct"/>
     <keyword type="function" name="geoclue_master_get_default ()" link="GeoclueMaster.html#geoclue-master-get-default"/>
     <keyword type="function" name="geoclue_master_create_client ()" link="GeoclueMaster.html#geoclue-master-create-client"/>
+    <keyword type="function" name="GeoclueCreateClientCallback ()" link="GeoclueMaster.html#GeoclueCreateClientCallback"/>
+    <keyword type="function" name="geoclue_master_create_client_async ()" link="GeoclueMaster.html#geoclue-master-create-client-async"/>
     <keyword type="macro" name="GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE" link="GeoclueMasterClient.html#GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS"/>
     <keyword type="struct" name="GeoclueMasterClient" link="GeoclueMasterClient.html#GeoclueMasterClient-struct"/>
     <keyword type="function" name="geoclue_master_client_set_requirements ()" link="GeoclueMasterClient.html#geoclue-master-client-set-requirements"/>
+    <keyword type="function" name="GeoclueSetRequirementsCallback ()" link="GeoclueMasterClient.html#GeoclueSetRequirementsCallback"/>
+    <keyword type="function" name="geoclue_master_client_set_requirements_async ()" link="GeoclueMasterClient.html#geoclue-master-client-set-requirements-async"/>
     <keyword type="function" name="geoclue_master_client_create_address ()" link="GeoclueMasterClient.html#geoclue-master-client-create-address"/>
     <keyword type="function" name="CreateAddressCallback ()" link="GeoclueMasterClient.html#CreateAddressCallback"/>
     <keyword type="function" name="geoclue_master_client_create_address_async ()" link="GeoclueMasterClient.html#geoclue-master-client-create-address-async"/>
@@ -49,39 +53,49 @@
     <keyword type="function" name="CreatePositionCallback ()" link="GeoclueMasterClient.html#CreatePositionCallback"/>
     <keyword type="function" name="geoclue_master_client_create_position_async ()" link="GeoclueMasterClient.html#geoclue-master-client-create-position-async"/>
     <keyword type="function" name="geoclue_master_client_get_address_provider ()" link="GeoclueMasterClient.html#geoclue-master-client-get-address-provider"/>
+    <keyword type="function" name="GeoclueGetProviderCallback ()" link="GeoclueMasterClient.html#GeoclueGetProviderCallback"/>
+    <keyword type="function" name="geoclue_master_client_get_address_provider_async ()" link="GeoclueMasterClient.html#geoclue-master-client-get-address-provider-async"/>
     <keyword type="function" name="geoclue_master_client_get_position_provider ()" link="GeoclueMasterClient.html#geoclue-master-client-get-position-provider"/>
-    <keyword type="" name="The &quot;object-path&quot; property" link="GeoclueMasterClient.html#GeoclueMasterClient--object-path"/>
-    <keyword type="" name="The &quot;address-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-address-provider-changed"/>
-    <keyword type="" name="The &quot;position-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-position-provider-changed"/>
+    <keyword type="function" name="geoclue_master_client_get_position_provider_async ()" link="GeoclueMasterClient.html#geoclue-master-client-get-position-provider-async"/>
+    <keyword type="property" name="The &quot;object-path&quot; property" link="GeoclueMasterClient.html#GeoclueMasterClient--object-path"/>
+    <keyword type="signal" name="The &quot;address-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-address-provider-changed"/>
+    <keyword type="signal" name="The &quot;invalidated&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-invalidated"/>
+    <keyword type="signal" name="The &quot;position-provider-changed&quot; signal" link="GeoclueMasterClient.html#GeoclueMasterClient-position-provider-changed"/>
     <keyword type="struct" name="GeoclueProvider" link="GeoclueProvider.html#GeoclueProvider-struct"/>
     <keyword type="function" name="geoclue_provider_get_status ()" link="GeoclueProvider.html#geoclue-provider-get-status"/>
+    <keyword type="function" name="GeoclueProviderStatusCallback ()" link="GeoclueProvider.html#GeoclueProviderStatusCallback"/>
+    <keyword type="function" name="geoclue_provider_get_status_async ()" link="GeoclueProvider.html#geoclue-provider-get-status-async"/>
     <keyword type="function" name="geoclue_provider_get_provider_info ()" link="GeoclueProvider.html#geoclue-provider-get-provider-info"/>
+    <keyword type="function" name="GeoclueProviderInfoCallback ()" link="GeoclueProvider.html#GeoclueProviderInfoCallback"/>
+    <keyword type="function" name="geoclue_provider_get_provider_info_async ()" link="GeoclueProvider.html#geoclue-provider-get-provider-info-async"/>
     <keyword type="function" name="geoclue_provider_set_options ()" link="GeoclueProvider.html#geoclue-provider-set-options"/>
-    <keyword type="" name="The &quot;interface&quot; property" link="GeoclueProvider.html#GeoclueProvider--interface"/>
-    <keyword type="" name="The &quot;path&quot; property" link="GeoclueProvider.html#GeoclueProvider--path"/>
-    <keyword type="" name="The &quot;service&quot; property" link="GeoclueProvider.html#GeoclueProvider--service"/>
-    <keyword type="" name="The &quot;status-changed&quot; signal" link="GeoclueProvider.html#GeoclueProvider-status-changed"/>
+    <keyword type="function" name="GeoclueProviderOptionsCallback ()" link="GeoclueProvider.html#GeoclueProviderOptionsCallback"/>
+    <keyword type="function" name="geoclue_provider_set_options_async ()" link="GeoclueProvider.html#geoclue-provider-set-options-async"/>
+    <keyword type="property" name="The &quot;interface&quot; property" link="GeoclueProvider.html#GeoclueProvider--interface"/>
+    <keyword type="property" name="The &quot;path&quot; property" link="GeoclueProvider.html#GeoclueProvider--path"/>
+    <keyword type="property" name="The &quot;service&quot; property" link="GeoclueProvider.html#GeoclueProvider--service"/>
+    <keyword type="signal" name="The &quot;status-changed&quot; signal" link="GeoclueProvider.html#GeoclueProvider-status-changed"/>
     <keyword type="macro" name="GEOCLUE_POSITION_INTERFACE_NAME" link="GeocluePosition.html#GEOCLUE-POSITION-INTERFACE-NAME:CAPS"/>
     <keyword type="struct" name="GeocluePosition" link="GeocluePosition.html#GeocluePosition-struct"/>
     <keyword type="function" name="geoclue_position_new ()" link="GeocluePosition.html#geoclue-position-new"/>
     <keyword type="function" name="geoclue_position_get_position ()" link="GeocluePosition.html#geoclue-position-get-position"/>
     <keyword type="function" name="GeocluePositionCallback ()" link="GeocluePosition.html#GeocluePositionCallback"/>
     <keyword type="function" name="geoclue_position_get_position_async ()" link="GeocluePosition.html#geoclue-position-get-position-async"/>
-    <keyword type="" name="The &quot;position-changed&quot; signal" link="GeocluePosition.html#GeocluePosition-position-changed"/>
+    <keyword type="signal" name="The &quot;position-changed&quot; signal" link="GeocluePosition.html#GeocluePosition-position-changed"/>
     <keyword type="macro" name="GEOCLUE_ADDRESS_INTERFACE_NAME" link="GeoclueAddress.html#GEOCLUE-ADDRESS-INTERFACE-NAME:CAPS"/>
     <keyword type="struct" name="GeoclueAddress" link="GeoclueAddress.html#GeoclueAddress-struct"/>
     <keyword type="function" name="geoclue_address_new ()" link="GeoclueAddress.html#geoclue-address-new"/>
     <keyword type="function" name="geoclue_address_get_address ()" link="GeoclueAddress.html#geoclue-address-get-address"/>
     <keyword type="function" name="GeoclueAddressCallback ()" link="GeoclueAddress.html#GeoclueAddressCallback"/>
     <keyword type="function" name="geoclue_address_get_address_async ()" link="GeoclueAddress.html#geoclue-address-get-address-async"/>
-    <keyword type="" name="The &quot;address-changed&quot; signal" link="GeoclueAddress.html#GeoclueAddress-address-changed"/>
+    <keyword type="signal" name="The &quot;address-changed&quot; signal" link="GeoclueAddress.html#GeoclueAddress-address-changed"/>
     <keyword type="macro" name="GEOCLUE_VELOCITY_INTERFACE_NAME" link="GeoclueVelocity.html#GEOCLUE-VELOCITY-INTERFACE-NAME:CAPS"/>
     <keyword type="struct" name="GeoclueVelocity" link="GeoclueVelocity.html#GeoclueVelocity-struct"/>
     <keyword type="function" name="geoclue_velocity_new ()" link="GeoclueVelocity.html#geoclue-velocity-new"/>
     <keyword type="function" name="geoclue_velocity_get_velocity ()" link="GeoclueVelocity.html#geoclue-velocity-get-velocity"/>
     <keyword type="function" name="GeoclueVelocityCallback ()" link="GeoclueVelocity.html#GeoclueVelocityCallback"/>
     <keyword type="function" name="geoclue_velocity_get_velocity_async ()" link="GeoclueVelocity.html#geoclue-velocity-get-velocity-async"/>
-    <keyword type="" name="The &quot;velocity-changed&quot; signal" link="GeoclueVelocity.html#GeoclueVelocity-velocity-changed"/>
+    <keyword type="signal" name="The &quot;velocity-changed&quot; signal" link="GeoclueVelocity.html#GeoclueVelocity-velocity-changed"/>
     <keyword type="macro" name="GEOCLUE_GEOCODE_INTERFACE_NAME" link="GeoclueGeocode.html#GEOCLUE-GEOCODE-INTERFACE-NAME:CAPS"/>
     <keyword type="struct" name="GeoclueGeocode" link="GeoclueGeocode.html#GeoclueGeocode-struct"/>
     <keyword type="function" name="geoclue_geocode_new ()" link="GeoclueGeocode.html#geoclue-geocode-new"/>
@@ -142,6 +156,10 @@
     <keyword type="" name="GetVelocity ()" link="Velocity.html#Velocity.GetVelocity"/>
     <keyword type="" name="The VelocityChanged signal" link="Velocity.html#Velocity::VelocityChanged"/>
     <keyword type="" name="AddressToPosition ()" link="Geocode.html#Geocode.AddressToPosition"/>
+    <keyword type="" name="FreeformAddressToPosition ()" link="Geocode.html#Geocode.FreeformAddressToPosition"/>
     <keyword type="" name="PositionToAddress ()" link="ReverseGeocode.html#ReverseGeocode.PositionToAddress"/>
+    <keyword type="constant" name="GEOCLUE_ERROR_NOT_IMPLEMENTED" link="geoclue-geoclue-types.html#GEOCLUE-ERROR-NOT-IMPLEMENTED:CAPS"/>
+    <keyword type="constant" name="GEOCLUE_ERROR_NOT_AVAILABLE" link="geoclue-geoclue-types.html#GEOCLUE-ERROR-NOT-AVAILABLE:CAPS"/>
+    <keyword type="constant" name="GEOCLUE_ERROR_FAILED" link="geoclue-geoclue-types.html#GEOCLUE-ERROR-FAILED:CAPS"/>
   </functions>
 </book>

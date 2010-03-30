@@ -9,6 +9,8 @@
 <ANCHOR id="GeoclueMaster-struct" href="geoclue/GeoclueMaster.html#GeoclueMaster-struct">
 <ANCHOR id="geoclue-master-get-default" href="geoclue/GeoclueMaster.html#geoclue-master-get-default">
 <ANCHOR id="geoclue-master-create-client" href="geoclue/GeoclueMaster.html#geoclue-master-create-client">
+<ANCHOR id="GeoclueCreateClientCallback" href="geoclue/GeoclueMaster.html#GeoclueCreateClientCallback">
+<ANCHOR id="geoclue-master-create-client-async" href="geoclue/GeoclueMaster.html#geoclue-master-create-client-async">
 <ANCHOR id="GeoclueMaster.see-also" href="geoclue/GeoclueMaster.html#GeoclueMaster.see-also">
 <ANCHOR id="GeoclueMasterClient" href="geoclue/GeoclueMasterClient.html">
 <ANCHOR id="GeoclueMasterClient.synopsis" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient.synopsis">
@@ -20,6 +22,8 @@
 <ANCHOR id="GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS" href="geoclue/GeoclueMasterClient.html#GEOCLUE-MASTER-CLIENT-DBUS-INTERFACE:CAPS">
 <ANCHOR id="GeoclueMasterClient-struct" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient-struct">
 <ANCHOR id="geoclue-master-client-set-requirements" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-set-requirements">
+<ANCHOR id="GeoclueSetRequirementsCallback" href="geoclue/GeoclueMasterClient.html#GeoclueSetRequirementsCallback">
+<ANCHOR id="geoclue-master-client-set-requirements-async" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-set-requirements-async">
 <ANCHOR id="geoclue-master-client-create-address" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-create-address">
 <ANCHOR id="CreateAddressCallback" href="geoclue/GeoclueMasterClient.html#CreateAddressCallback">
 <ANCHOR id="geoclue-master-client-create-address-async" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-create-address-async">
@@ -27,11 +31,15 @@
 <ANCHOR id="CreatePositionCallback" href="geoclue/GeoclueMasterClient.html#CreatePositionCallback">
 <ANCHOR id="geoclue-master-client-create-position-async" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-create-position-async">
 <ANCHOR id="geoclue-master-client-get-address-provider" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-get-address-provider">
+<ANCHOR id="GeoclueGetProviderCallback" href="geoclue/GeoclueMasterClient.html#GeoclueGetProviderCallback">
+<ANCHOR id="geoclue-master-client-get-address-provider-async" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-get-address-provider-async">
 <ANCHOR id="geoclue-master-client-get-position-provider" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-get-position-provider">
+<ANCHOR id="geoclue-master-client-get-position-provider-async" href="geoclue/GeoclueMasterClient.html#geoclue-master-client-get-position-provider-async">
 <ANCHOR id="GeoclueMasterClient.property-details" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient.property-details">
 <ANCHOR id="GeoclueMasterClient--object-path" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient--object-path">
 <ANCHOR id="GeoclueMasterClient.signal-details" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient.signal-details">
 <ANCHOR id="GeoclueMasterClient-address-provider-changed" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient-address-provider-changed">
+<ANCHOR id="GeoclueMasterClient-invalidated" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient-invalidated">
 <ANCHOR id="GeoclueMasterClient-position-provider-changed" href="geoclue/GeoclueMasterClient.html#GeoclueMasterClient-position-provider-changed">
 <ANCHOR id="GeoclueProvider" href="geoclue/GeoclueProvider.html">
 <ANCHOR id="GeoclueProvider.synopsis" href="geoclue/GeoclueProvider.html#GeoclueProvider.synopsis">
@@ -42,8 +50,14 @@
 <ANCHOR id="GeoclueProvider.details" href="geoclue/GeoclueProvider.html#GeoclueProvider.details">
 <ANCHOR id="GeoclueProvider-struct" href="geoclue/GeoclueProvider.html#GeoclueProvider-struct">
 <ANCHOR id="geoclue-provider-get-status" href="geoclue/GeoclueProvider.html#geoclue-provider-get-status">
+<ANCHOR id="GeoclueProviderStatusCallback" href="geoclue/GeoclueProvider.html#GeoclueProviderStatusCallback">
+<ANCHOR id="geoclue-provider-get-status-async" href="geoclue/GeoclueProvider.html#geoclue-provider-get-status-async">
 <ANCHOR id="geoclue-provider-get-provider-info" href="geoclue/GeoclueProvider.html#geoclue-provider-get-provider-info">
+<ANCHOR id="GeoclueProviderInfoCallback" href="geoclue/GeoclueProvider.html#GeoclueProviderInfoCallback">
+<ANCHOR id="geoclue-provider-get-provider-info-async" href="geoclue/GeoclueProvider.html#geoclue-provider-get-provider-info-async">
 <ANCHOR id="geoclue-provider-set-options" href="geoclue/GeoclueProvider.html#geoclue-provider-set-options">
+<ANCHOR id="GeoclueProviderOptionsCallback" href="geoclue/GeoclueProvider.html#GeoclueProviderOptionsCallback">
+<ANCHOR id="geoclue-provider-set-options-async" href="geoclue/GeoclueProvider.html#geoclue-provider-set-options-async">
 <ANCHOR id="GeoclueProvider.property-details" href="geoclue/GeoclueProvider.html#GeoclueProvider.property-details">
 <ANCHOR id="GeoclueProvider--interface" href="geoclue/GeoclueProvider.html#GeoclueProvider--interface">
 <ANCHOR id="GeoclueProvider--path" href="geoclue/GeoclueProvider.html#GeoclueProvider--path">
@@ -123,6 +137,9 @@
 <ANCHOR id="GeocluePositionFields" href="geoclue/geoclue-geoclue-types.html#GeocluePositionFields">
 <ANCHOR id="GeoclueVelocityFields" href="geoclue/geoclue-geoclue-types.html#GeoclueVelocityFields">
 <ANCHOR id="GeoclueError" href="geoclue/geoclue-geoclue-types.html#GeoclueError">
+<ANCHOR id="GEOCLUE-ERROR-NOT-IMPLEMENTED:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ERROR-NOT-IMPLEMENTED:CAPS">
+<ANCHOR id="GEOCLUE-ERROR-NOT-AVAILABLE:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ERROR-NOT-AVAILABLE:CAPS">
+<ANCHOR id="GEOCLUE-ERROR-FAILED:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ERROR-FAILED:CAPS">
 <ANCHOR id="GEOCLUE-ADDRESS-KEY-COUNTRYCODE:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ADDRESS-KEY-COUNTRYCODE:CAPS">
 <ANCHOR id="GEOCLUE-ADDRESS-KEY-COUNTRY:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ADDRESS-KEY-COUNTRY:CAPS">
 <ANCHOR id="GEOCLUE-ADDRESS-KEY-REGION:CAPS" href="geoclue/geoclue-geoclue-types.html#GEOCLUE-ADDRESS-KEY-REGION:CAPS">
@@ -185,5 +202,6 @@
 <ANCHOR id="Velocity::VelocityChanged" href="geoclue/Velocity.html#Velocity::VelocityChanged">
 <ANCHOR id="Geocode" href="geoclue/Geocode.html">
 <ANCHOR id="Geocode.AddressToPosition" href="geoclue/Geocode.html#Geocode.AddressToPosition">
+<ANCHOR id="Geocode.FreeformAddressToPosition" href="geoclue/Geocode.html#Geocode.FreeformAddressToPosition">
 <ANCHOR id="ReverseGeocode" href="geoclue/ReverseGeocode.html">
 <ANCHOR id="ReverseGeocode.PositionToAddress" href="geoclue/ReverseGeocode.html#ReverseGeocode.PositionToAddress">

@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>GeoclueGeocode</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
-<link rel="start" href="index.html" title="Geoclue Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn01.html" title="C API">
 <link rel="prev" href="GeoclueVelocity.html" title="GeoclueVelocity">
 <link rel="next" href="GeoclueReverseGeocode.html" title="GeoclueReverseGeocode">
-<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 <link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
 <link rel="reference" href="rn01.html" title="C API">
@@ -23,108 +23,103 @@
 <th width="100%" align="center">Geoclue Reference Manual</th>
 <td><a accesskey="n" href="GeoclueReverseGeocode.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#GeoclueGeocode.synopsis" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts">
+<a href="#GeoclueGeocode.synopsis" class="shortcut">Top</a>
                    | 
                   <a href="#GeoclueGeocode.description" class="shortcut">Description</a>
                    | 
-                  <a href="#GeoclueGeocode.object-hierarchy" class="shortcut">Object Hierarchy</a></nobr></td></tr>
+                  <a href="#GeoclueGeocode.object-hierarchy" class="shortcut">Object Hierarchy</a>
+</td></tr>
 </table>
-<div class="refentry" lang="en">
+<div class="refentry" title="GeoclueGeocode">
 <a name="GeoclueGeocode"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
 <h2><span class="refentrytitle"><a name="GeoclueGeocode.top_of_page"></a>GeoclueGeocode</span></h2>
-<p>GeoclueGeocode — Geoclue Geocoding client API</p>
+<p>GeoclueGeocode — Geoclue geocode client API</p>
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv">
+<div class="refsynopsisdiv" title="Synopsis">
 <a name="GeoclueGeocode.synopsis"></a><h2>Synopsis</h2>
-<pre class="synopsis">
-#define             <a class="link" href="GeoclueGeocode.html#GEOCLUE-GEOCODE-INTERFACE-NAME:CAPS" title="GEOCLUE_GEOCODE_INTERFACE_NAME">GEOCLUE_GEOCODE_INTERFACE_NAME</a>
+<pre class="synopsis">#define             <a class="link" href="GeoclueGeocode.html#GEOCLUE-GEOCODE-INTERFACE-NAME:CAPS" title="GEOCLUE_GEOCODE_INTERFACE_NAME">GEOCLUE_GEOCODE_INTERFACE_NAME</a>
                     <a class="link" href="GeoclueGeocode.html#GeoclueGeocode-struct" title="GeoclueGeocode">GeoclueGeocode</a>;
-<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a>*     <a class="link" href="GeoclueGeocode.html#geoclue-geocode-new" title="geoclue_geocode_new ()">geoclue_geocode_new</a>                 (const char *service,
-                                                         const char *path);
-<a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields">GeocluePositionFields</a> <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position" title="geoclue_geocode_address_to_position ()">geoclue_geocode_address_to_position</a>
-                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         GHashTable *details,
-                                                         double *latitude,
-                                                         double *longitude,
-                                                         double *altitude,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy">GeoclueAccuracy</a> **accuracy,
-                                                         GError **error);
-void                (<a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()">*GeoclueGeocodeCallback</a>)           (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         <a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields">GeocluePositionFields</a> fields,
-                                                         double latitude,
-                                                         double longitude,
-                                                         double altitude,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy">GeoclueAccuracy</a> *accuracy,
-                                                         GError *error,
-                                                         gpointer userdata);
-void                <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position-async" title="geoclue_geocode_address_to_position_async ()">geoclue_geocode_address_to_position_async</a>
-                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         GHashTable *details,
-                                                         <a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()">GeoclueGeocodeCallback</a> callback,
-                                                         gpointer userdata);
+<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *    <a class="link" href="GeoclueGeocode.html#geoclue-geocode-new" title="geoclue_geocode_new ()">geoclue_geocode_new</a>                 (const <span class="returnvalue">char</span> *service,
+                                                         const <span class="returnvalue">char</span> *path);
+<a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields"><span class="returnvalue">GeocluePositionFields</span></a>  <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position" title="geoclue_geocode_address_to_position ()">geoclue_geocode_address_to_position</a>
+                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
+                                                         <span class="returnvalue">double</span> *latitude,
+                                                         <span class="returnvalue">double</span> *longitude,
+                                                         <span class="returnvalue">double</span> *altitude,
+                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> **accuracy,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);
+<span class="returnvalue">void</span>                (<a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()">*GeoclueGeocodeCallback</a>)           (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields"><span class="returnvalue">GeocluePositionFields</span></a> fields,
+                                                         <span class="returnvalue">double</span> latitude,
+                                                         <span class="returnvalue">double</span> longitude,
+                                                         <span class="returnvalue">double</span> altitude,
+                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> *accuracy,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
+<span class="returnvalue">void</span>                <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position-async" title="geoclue_geocode_address_to_position_async ()">geoclue_geocode_address_to_position_async</a>
+                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
+                                                         <a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()"><span class="returnvalue">GeoclueGeocodeCallback</span></a> callback,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
 </pre>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Object Hierarchy">
 <a name="GeoclueGeocode.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
-  GObject
+  <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
    +----<a class="link" href="GeoclueProvider.html" title="GeoclueProvider">GeoclueProvider</a>
          +----GeoclueGeocode
 </pre>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Description">
 <a name="GeoclueGeocode.description"></a><h2>Description</h2>
 <p>
-<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="type">GeoclueGeocode</span></a> contains Geocoding-related methods. 
+<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="type">GeoclueGeocode</span></a> contains geocoding methods. 
 It is part of the Geoclue public C client API which uses D-Bus 
 to communicate with the actual provider.
 </p>
 <p>
 After a <a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="type">GeoclueGeocode</span></a> is created with <a class="link" href="GeoclueGeocode.html#geoclue-geocode-new" title="geoclue_geocode_new ()"><code class="function">geoclue_geocode_new()</code></a>, the 
-<a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position" title="geoclue_geocode_address_to_position ()"><code class="function">geoclue_geocode_address_to_position()</code></a> and <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position-async" title="geoclue_geocode_address_to_position_async ()"><code class="function">geoclue_geocode_address_to_position_async()</code></a> 
-methods can be used to obtain the position (coordinates) of a given address. 
+<a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position" title="geoclue_geocode_address_to_position ()"><code class="function">geoclue_geocode_address_to_position()</code></a>, 
+<code class="function">geoclue_geocode_freeform_address_to_position()</code> methods and their 
+asynchronous counterparts can be used to obtain the position (coordinates) 
+of the given address. 
 </p>
 <p>
-Address <span class="type">GHashTable</span> keys are defined in 
+Address <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> keys are defined in 
 <a class="ulink" href="geoclue-types.html" target="_top">geoclue-types.h</a>. See also 
 convenience functions in 
 <a class="ulink" href="geoclue-address-details.html" target="_top">geoclue-address-details.h</a>.</p>
-<p>
-
-</p>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Details">
 <a name="GeoclueGeocode.details"></a><h2>Details</h2>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GEOCLUE_GEOCODE_INTERFACE_NAME">
 <a name="GEOCLUE-GEOCODE-INTERFACE-NAME:CAPS"></a><h3>GEOCLUE_GEOCODE_INTERFACE_NAME</h3>
 <pre class="programlisting">#define GEOCLUE_GEOCODE_INTERFACE_NAME "org.freedesktop.Geoclue.Geocode"
 </pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GeoclueGeocode">
 <a name="GeoclueGeocode-struct"></a><h3>GeoclueGeocode</h3>
 <pre class="programlisting">typedef struct _GeoclueGeocode GeoclueGeocode;</pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="geoclue_geocode_new ()">
 <a name="geoclue-geocode-new"></a><h3>geoclue_geocode_new ()</h3>
-<pre class="programlisting"><a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a>*     geoclue_geocode_new                 (const char *service,
-                                                         const char *path);</pre>
+<pre class="programlisting"><a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *    geoclue_geocode_new                 (const <span class="returnvalue">char</span> *service,
+                                                         const <span class="returnvalue">char</span> *path);</pre>
 <p>
 Creates a <a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="type">GeoclueGeocode</span></a> with given D-Bus service name and path.</p>
-<p>
-
-</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -147,16 +142,16 @@ Creates a <a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><spa
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="geoclue_geocode_address_to_position ()">
 <a name="geoclue-geocode-address-to-position"></a><h3>geoclue_geocode_address_to_position ()</h3>
-<pre class="programlisting"><a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields">GeocluePositionFields</a> geoclue_geocode_address_to_position
-                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         GHashTable *details,
-                                                         double *latitude,
-                                                         double *longitude,
-                                                         double *altitude,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy">GeoclueAccuracy</a> **accuracy,
-                                                         GError **error);</pre>
+<pre class="programlisting"><a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields"><span class="returnvalue">GeocluePositionFields</span></a>  geoclue_geocode_address_to_position
+                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
+                                                         <span class="returnvalue">double</span> *latitude,
+                                                         <span class="returnvalue">double</span> *longitude,
+                                                         <span class="returnvalue">double</span> *altitude,
+                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> **accuracy,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);</pre>
 <p>
 Geocodes given address to coordinates (<em class="parameter"><code>latitude</code></em>, <em class="parameter"><code>longitude</code></em>, <em class="parameter"><code>altitude</code></em>). 
 see <a class="ulink" href="geoclue-types.html" target="_top">geoclue-types.h</a> for the 
@@ -165,10 +160,7 @@ the accuracy of the returned position.
 </p>
 <p>
 If the caller is not interested in some values, the pointers can be 
-left <code class="literal">NULL</code>.</p>
-<p>
-
-</p>
+left <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -184,27 +176,27 @@ left <code class="literal">NULL</code>.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>latitude</code></em> :</span></p></td>
-<td> Pointer to returned latitude in degrees or <code class="literal">NULL</code>
+<td> Pointer to returned latitude in degrees or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>longitude</code></em> :</span></p></td>
-<td> Pointer to returned longitude in degrees or <code class="literal">NULL</code>
+<td> Pointer to returned longitude in degrees or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>altitude</code></em> :</span></p></td>
-<td> Pointer to returned altitude in meters or <code class="literal">NULL</code>
+<td> Pointer to returned altitude in meters or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>accuracy</code></em> :</span></p></td>
-<td> Pointer to returned <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> or <code class="literal">NULL</code>
+<td> Pointer to returned <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> Pointer to returned <span class="type">Gerror</span> or <code class="literal">NULL</code>
+<td> Pointer to returned <span class="type">Gerror</span> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
@@ -217,21 +209,18 @@ validity of the returned coordinates.
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GeoclueGeocodeCallback ()">
 <a name="GeoclueGeocodeCallback"></a><h3>GeoclueGeocodeCallback ()</h3>
-<pre class="programlisting">void                (*GeoclueGeocodeCallback)           (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         <a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields">GeocluePositionFields</a> fields,
-                                                         double latitude,
-                                                         double longitude,
-                                                         double altitude,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy">GeoclueAccuracy</a> *accuracy,
-                                                         GError *error,
-                                                         gpointer userdata);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*GeoclueGeocodeCallback)           (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a class="link" href="geoclue-geoclue-types.html#GeocluePositionFields" title="enum GeocluePositionFields"><span class="returnvalue">GeocluePositionFields</span></a> fields,
+                                                         <span class="returnvalue">double</span> latitude,
+                                                         <span class="returnvalue">double</span> longitude,
+                                                         <span class="returnvalue">double</span> altitude,
+                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> *accuracy,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
 <p>
-Callback function for <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position-async" title="geoclue_geocode_address_to_position_async ()"><code class="function">geoclue_geocode_address_to_position_async()</code></a>.</p>
-<p>
-
-</p>
+Callback function for the asynchronous methods.</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -267,25 +256,25 @@ Callback function for <a class="link" href="GeoclueGeocode.html#geoclue-geocode-
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> Error as <span class="type">Gerror</span> or <code class="literal">NULL</code>
+<td> Error as <span class="type">Gerror</span> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
-<td> User data pointer set in <a class="link" href="GeoclueGeocode.html#geoclue-geocode-address-to-position-async" title="geoclue_geocode_address_to_position_async ()"><code class="function">geoclue_geocode_address_to_position_async()</code></a>
+<td> User data pointer
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="geoclue_geocode_address_to_position_async ()">
 <a name="geoclue-geocode-address-to-position-async"></a><h3>geoclue_geocode_address_to_position_async ()</h3>
-<pre class="programlisting">void                geoclue_geocode_address_to_position_async
-                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode">GeoclueGeocode</a> *geocode,
-                                                         GHashTable *details,
-                                                         <a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()">GeoclueGeocodeCallback</a> callback,
-                                                         gpointer userdata);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_geocode_address_to_position_async
+                                                        (<a class="link" href="GeoclueGeocode.html" title="GeoclueGeocode"><span class="returnvalue">GeoclueGeocode</span></a> *geocode,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
+                                                         <a class="link" href="GeoclueGeocode.html#GeoclueGeocodeCallback" title="GeoclueGeocodeCallback ()"><span class="returnvalue">GeoclueGeocodeCallback</span></a> callback,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
 <p>
 Function returns (essentially) immediately and calls <em class="parameter"><code>callback</code></em> when the geocoded 
 position data is available or when D-Bus timeouts.
@@ -293,9 +282,6 @@ position data is available or when D-Bus timeouts.
 <p>
 see <a class="ulink" href="geoclue-types.html" target="_top">geoclue-types.h</a> for the 
 hashtable keys usable in <em class="parameter"><code>details</code></em>.</p>
-<p>
-
-</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -306,7 +292,7 @@ hashtable keys usable in <em class="parameter"><code>details</code></em>.</p>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
-<td> A <span class="type">GHashTable</span> with address data
+<td> A <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address data
 </td>
 </tr>
 <tr>
@@ -326,6 +312,6 @@ hashtable keys usable in <em class="parameter"><code>details</code></em>.</p>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.10</div>
+          Generated by GTK-Doc V1.13</div>
 </body>
 </html>

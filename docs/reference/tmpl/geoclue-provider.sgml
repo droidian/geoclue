@@ -57,6 +57,27 @@ GeoclueProvider
 @Returns: 
 
 
+<!-- ##### USER_FUNCTION GeoclueProviderStatusCallback ##### -->
+<para>
+
+</para>
+
+@provider: 
+@status: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_provider_get_status_async ##### -->
+<para>
+
+</para>
+
+@provider: 
+@callback: 
+@userdata: 
+
+
 <!-- ##### FUNCTION geoclue_provider_get_provider_info ##### -->
 <para>
 
@@ -69,6 +90,28 @@ GeoclueProvider
 @Returns: 
 
 
+<!-- ##### USER_FUNCTION GeoclueProviderInfoCallback ##### -->
+<para>
+
+</para>
+
+@provider: 
+@name: 
+@description: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_provider_get_provider_info_async ##### -->
+<para>
+
+</para>
+
+@provider: 
+@callback: 
+@userdata: 
+
+
 <!-- ##### FUNCTION geoclue_provider_set_options ##### -->
 <para>
 
@@ -78,5 +121,26 @@ GeoclueProvider
 @options: 
 @error: 
 @Returns: 
+
+
+<!-- ##### USER_FUNCTION GeoclueProviderOptionsCallback ##### -->
+<para>
+
+</para>
+
+@provider: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_provider_set_options_async ##### -->
+<para>
+
+</para>
+
+@provider: 
+@options: 
+@callback: 
+@userdata: 
 
 

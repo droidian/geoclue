@@ -63,3 +63,25 @@ GeoclueMaster
 @Returns: 
 
 
+<!-- ##### USER_FUNCTION GeoclueCreateClientCallback ##### -->
+<para>
+
+</para>
+
+@master: 
+@client: 
+@object_path: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_master_create_client_async ##### -->
+<para>
+
+</para>
+
+@master: 
+@callback: 
+@userdata: 
+
+

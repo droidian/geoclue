@@ -3,12 +3,12 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>GeoclueMaster</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.73.2">
-<link rel="start" href="index.html" title="Geoclue Reference Manual">
+<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn01.html" title="C API">
 <link rel="prev" href="rn01.html" title="C API">
 <link rel="next" href="GeoclueMasterClient.html" title="GeoclueMasterClient">
-<meta name="generator" content="GTK-Doc V1.10 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 <link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
 <link rel="reference" href="rn01.html" title="C API">
@@ -23,13 +23,15 @@
 <th width="100%" align="center">Geoclue Reference Manual</th>
 <td><a accesskey="n" href="GeoclueMasterClient.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
 </tr>
-<tr><td colspan="5" class="shortcuts"><nobr><a href="#GeoclueMaster.synopsis" class="shortcut">Top</a>
+<tr><td colspan="5" class="shortcuts">
+<a href="#GeoclueMaster.synopsis" class="shortcut">Top</a>
                    | 
                   <a href="#GeoclueMaster.description" class="shortcut">Description</a>
                    | 
-                  <a href="#GeoclueMaster.object-hierarchy" class="shortcut">Object Hierarchy</a></nobr></td></tr>
+                  <a href="#GeoclueMaster.object-hierarchy" class="shortcut">Object Hierarchy</a>
+</td></tr>
 </table>
-<div class="refentry" lang="en">
+<div class="refentry" title="GeoclueMaster">
 <a name="GeoclueMaster"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -38,27 +40,34 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv">
+<div class="refsynopsisdiv" title="Synopsis">
 <a name="GeoclueMaster.synopsis"></a><h2>Synopsis</h2>
-<pre class="synopsis">
-#define             <a class="link" href="GeoclueMaster.html#GEOCLUE-MASTER-DBUS-SERVICE:CAPS" title="GEOCLUE_MASTER_DBUS_SERVICE">GEOCLUE_MASTER_DBUS_SERVICE</a>
+<pre class="synopsis">#define             <a class="link" href="GeoclueMaster.html#GEOCLUE-MASTER-DBUS-SERVICE:CAPS" title="GEOCLUE_MASTER_DBUS_SERVICE">GEOCLUE_MASTER_DBUS_SERVICE</a>
 #define             <a class="link" href="GeoclueMaster.html#GEOCLUE-MASTER-DBUS-PATH:CAPS" title="GEOCLUE_MASTER_DBUS_PATH">GEOCLUE_MASTER_DBUS_PATH</a>
 #define             <a class="link" href="GeoclueMaster.html#GEOCLUE-MASTER-DBUS-INTERFACE:CAPS" title="GEOCLUE_MASTER_DBUS_INTERFACE">GEOCLUE_MASTER_DBUS_INTERFACE</a>
                     <a class="link" href="GeoclueMaster.html#GeoclueMaster-struct" title="GeoclueMaster">GeoclueMaster</a>;
-<a class="link" href="GeoclueMaster.html" title="GeoclueMaster">GeoclueMaster</a>*      <a class="link" href="GeoclueMaster.html#geoclue-master-get-default" title="geoclue_master_get_default ()">geoclue_master_get_default</a>          (void);
-<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a>* <a class="link" href="GeoclueMaster.html#geoclue-master-create-client" title="geoclue_master_create_client ()">geoclue_master_create_client</a>       (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster">GeoclueMaster</a> *master,
-                                                         char **object_path,
-                                                         GError **error);
+<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *     <a class="link" href="GeoclueMaster.html#geoclue-master-get-default" title="geoclue_master_get_default ()">geoclue_master_get_default</a>          (void);
+<a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="returnvalue">GeoclueMasterClient</span></a> * <a class="link" href="GeoclueMaster.html#geoclue-master-create-client" title="geoclue_master_create_client ()">geoclue_master_create_client</a>      (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <span class="returnvalue">char</span> **object_path,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);
+<span class="returnvalue">void</span>                (<a class="link" href="GeoclueMaster.html#GeoclueCreateClientCallback" title="GeoclueCreateClientCallback ()">*GeoclueCreateClientCallback</a>)      (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="returnvalue">GeoclueMasterClient</span></a> *client,
+                                                         <span class="returnvalue">char</span> *object_path,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
+<span class="returnvalue">void</span>                <a class="link" href="GeoclueMaster.html#geoclue-master-create-client-async" title="geoclue_master_create_client_async ()">geoclue_master_create_client_async</a>  (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <a class="link" href="GeoclueMaster.html#GeoclueCreateClientCallback" title="GeoclueCreateClientCallback ()"><span class="returnvalue">GeoclueCreateClientCallback</span></a> callback,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
 </pre>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Object Hierarchy">
 <a name="GeoclueMaster.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
-  GObject
+  <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
    +----GeoclueMaster
 </pre>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Description">
 <a name="GeoclueMaster.description"></a><h2>Description</h2>
 <p>
 <a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="type">GeoclueMaster</span></a> is part of the Geoclue public C client API. It uses  
@@ -69,56 +78,46 @@ D-Bus to communicate with the actual Master service.
 explicitly: instead one should use <a class="link" href="GeoclueMaster.html#geoclue-master-get-default" title="geoclue_master_get_default ()"><code class="function">geoclue_master_get_default()</code></a> to
 get a reference to it. It can be used to 
 create a <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> object.</p>
-<p>
-
-</p>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="Details">
 <a name="GeoclueMaster.details"></a><h2>Details</h2>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GEOCLUE_MASTER_DBUS_SERVICE">
 <a name="GEOCLUE-MASTER-DBUS-SERVICE:CAPS"></a><h3>GEOCLUE_MASTER_DBUS_SERVICE</h3>
 <pre class="programlisting">#define GEOCLUE_MASTER_DBUS_SERVICE "org.freedesktop.Geoclue.Master"
 </pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GEOCLUE_MASTER_DBUS_PATH">
 <a name="GEOCLUE-MASTER-DBUS-PATH:CAPS"></a><h3>GEOCLUE_MASTER_DBUS_PATH</h3>
 <pre class="programlisting">#define GEOCLUE_MASTER_DBUS_PATH "/org/freedesktop/Geoclue/Master"
 </pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GEOCLUE_MASTER_DBUS_INTERFACE">
 <a name="GEOCLUE-MASTER-DBUS-INTERFACE:CAPS"></a><h3>GEOCLUE_MASTER_DBUS_INTERFACE</h3>
 <pre class="programlisting">#define GEOCLUE_MASTER_DBUS_INTERFACE "org.freedesktop.Geoclue.Master"
 </pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="GeoclueMaster">
 <a name="GeoclueMaster-struct"></a><h3>GeoclueMaster</h3>
 <pre class="programlisting">typedef struct _GeoclueMaster GeoclueMaster;</pre>
 <p>
-
 </p>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="geoclue_master_get_default ()">
 <a name="geoclue-master-get-default"></a><h3>geoclue_master_get_default ()</h3>
-<pre class="programlisting"><a class="link" href="GeoclueMaster.html" title="GeoclueMaster">GeoclueMaster</a>*      geoclue_master_get_default          (void);</pre>
+<pre class="programlisting"><a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *     geoclue_master_get_default          (void);</pre>
 <p>
 Returns the default <a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="type">GeoclueMaster</span></a> object. Should be unreferenced once
 the client is finished with it.</p>
-<p>
-
-</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody><tr>
@@ -129,17 +128,14 @@ the client is finished with it.</p>
 </table></div>
 </div>
 <hr>
-<div class="refsect2" lang="en">
+<div class="refsect2" title="geoclue_master_create_client ()">
 <a name="geoclue-master-create-client"></a><h3>geoclue_master_create_client ()</h3>
-<pre class="programlisting"><a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient">GeoclueMasterClient</a>* geoclue_master_create_client       (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster">GeoclueMaster</a> *master,
-                                                         char **object_path,
-                                                         GError **error);</pre>
+<pre class="programlisting"><a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="returnvalue">GeoclueMasterClient</span></a> * geoclue_master_create_client      (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <span class="returnvalue">char</span> **object_path,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);</pre>
 <p>
 Creates a <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> and puts the D-Bus object path in
 <em class="parameter"><code>object_path</code></em>.</p>
-<p>
-
-</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
@@ -150,30 +146,100 @@ Creates a <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterCl
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>object_path</code></em> :</span></p></td>
-<td> Pointer to returned <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> D-Bus object path or <code class="literal">NULL</code>
+<td> Pointer to returned <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> D-Bus object path or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> Pointer to returned <span class="type">GError</span> or <code class="literal">NULL</code>
+<td> Pointer to returned <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> A new <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> or <code class="literal">NULL</code> on error.
+<td> A new <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> on error.
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="GeoclueCreateClientCallback ()">
+<a name="GeoclueCreateClientCallback"></a><h3>GeoclueCreateClientCallback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*GeoclueCreateClientCallback)      (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="returnvalue">GeoclueMasterClient</span></a> *client,
+                                                         <span class="returnvalue">char</span> *object_path,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>master</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>client</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>object_path</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2" title="geoclue_master_create_client_async ()">
+<a name="geoclue-master-create-client-async"></a><h3>geoclue_master_create_client_async ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_master_create_client_async  (<a class="link" href="GeoclueMaster.html" title="GeoclueMaster"><span class="returnvalue">GeoclueMaster</span></a> *master,
+                                                         <a class="link" href="GeoclueMaster.html#GeoclueCreateClientCallback" title="GeoclueCreateClientCallback ()"><span class="returnvalue">GeoclueCreateClientCallback</span></a> callback,
+                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
+<p>
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>master</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
+<td>
+</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td>
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 </div>
-<div class="refsect1" lang="en">
+<div class="refsect1" title="See Also">
 <a name="GeoclueMaster.see-also"></a><h2>See Also</h2>
 <a class="link" href="GeoclueMasterClient.html" title="GeoclueMasterClient"><span class="type">GeoclueMasterClient</span></a>
 </div>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.10</div>
+          Generated by GTK-Doc V1.13</div>
 </body>
 </html>

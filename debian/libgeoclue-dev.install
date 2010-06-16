@@ -1,5 +1,5 @@
 debian/tmp/usr/include/*
 debian/tmp/usr/lib/pkgconfig/*
-debian/tmp/usr/lib/libgeoclue.*a
+debian/tmp/usr/lib/libgeoclue.a
 debian/tmp/usr/lib/libgeoclue.so
 debian/tmp/usr/share/gtk-doc/*

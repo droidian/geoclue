@@ -64,7 +64,7 @@ Description: Position server for GeoClue (Plazes)
  sources using a D-Bus API or a C library. 
  .
  This package provides a positioning backend for GeoClue.
- It uses the plazezs.com router/access point location database 
+ It uses the plazes.com router/access point location database
  (http://plazes.com).
 
 Package: geoclue-gpsd

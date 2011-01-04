@@ -13,8 +13,17 @@ geoclue (0.12.0-2) UNRELEASED; urgency=low
   * [f26f5c75] Add skyhook geocoding backend
   * [d5e3fb94] Bump Standards-Version to 3.9.1
   * [8f0bdbda] geoclue-manual shouldn't be in doc section
+  * [fc1af9da] Switch to dpkg-source 3.0 (quilt) format
+  * [2e38ec8c] Use dh_autotools-dev instead of updating
+    config.{sub,guess} manually
+  * [70fa94bd] Build-dep against libnm-glib-dev on linux-any arch
+  * [106e7914] debian/patches/libnm-glib-pc.patch: Fix libnm-glib.pc
+    name
+  * [732f3e4d] debian/patches/autoreconf.patch: Update configure file
+  * [aacbbc7d] debian/rules: Be sure we FTBFS if we miss something
+  * [c2553245] Drop debian/clean, not needed anymore
 
- -- Laurent Bigonville <bigon@debian.org>  Tue, 04 Jan 2011 21:58:12 +0100
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 04 Jan 2011 23:52:40 +0100
 
 geoclue (0.12.0-1) unstable; urgency=low
 

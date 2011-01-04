@@ -15,6 +15,7 @@ Build-Depends: autotools-dev,
                libgconf2-dev,
                xsltproc,
                libgtk2.0-dev,
+               libnm-glib-dev [linux-any],
                network-manager-dev [linux-any],
                ofono-dev,
                libsoup-gnome2.4-dev

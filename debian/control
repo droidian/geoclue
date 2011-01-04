@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Bernd Zeimetz <bzed@debian.org>
 Uploaders: Craig Andrews <candrews@integralblue.com>
 Build-Depends: autotools-dev,
-               quilt (>= 0.46-7),
+               quilt (>= 0.46-7~),
                patchutils (>= 0.2.25),
                debhelper (>= 7.0.50),
                libgps-dev (>= 2.90.1~svn6819),

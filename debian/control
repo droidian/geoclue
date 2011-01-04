@@ -16,7 +16,8 @@ Build-Depends: autotools-dev,
                xsltproc,
                libgtk2.0-dev,
                network-manager-dev [linux-any],
-               ofono-dev
+               ofono-dev,
+               libsoup-gnome2.4-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.8.3
 Vcs-Git: git://git.debian.org/collab-maint/geoclue.git
@@ -129,6 +130,16 @@ Description: Position server for GeoClue (local network)
  This package provides a positioning backend for GeoClue. The 
  location information comes from a configuration file containing
  information about the current network.
+
+Package: geoclue-skyhook
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Description: Map and geocode server for GeoClue (Skyhook)
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
+ .
+ This package provides a map and geocoding backend for GeoClue.
+ It uses Skyhook provider.
 
 Package: geoclue-yahoo
 Architecture: any

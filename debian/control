@@ -12,6 +12,7 @@ Vcs-Browser: http://git.debian.org/?p=collab-maint/geoclue.git
 Package: geoclue
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Recommends: geoclue-hostip, geoclue-localnet, geoclue-yahoo, geoclue-manual
 Description: Geographic information framework
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 

@@ -7,8 +7,14 @@ geoclue (0.12.0-2) UNRELEASED; urgency=low
   [ Laurent Bigonville ]
   * [73b9d0c0] Do not install .la file anymore (Closes: #586089).
   * [18402b0a] Fix typo in plazes.com URL (Closes: #584460)
+  * [38d50a05] Make geoclue master package Recommends some backends
+    (Closes: #602833)
+  * [e2562e3e] Wrap {build-}dependencies
+  * [f26f5c75] Add skyhook geocoding backend
+  * [d5e3fb94] Bump Standards-Version to 3.9.1
+  * [8f0bdbda] geoclue-manual shouldn't be in doc section
 
- -- Laurent Bigonville <bigon@debian.org>  Wed, 29 Dec 2010 16:08:32 +0100
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 04 Jan 2011 21:58:12 +0100
 
 geoclue (0.12.0-1) unstable; urgency=low
 

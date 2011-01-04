@@ -60,7 +60,6 @@ Description: C API for GeoClue (development files)
 Package: geoclue-manual
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
-Section: doc
 Description: Position server for GeoClue (manual)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 

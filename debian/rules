@@ -1,5 +1,16 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+CONFIG_FLAGS = --enable-gtk \
+	       --enable-gpsd \
+	       --enable-skyhook
+
+ifeq ($(DEB_BUILD_ARCH_OS),linux)
+	CONFIG_FLAGS += --enable-networkmanager
+endif
+
+override_dh_auto_configure:
+	dh_auto_configure -- ${CONFIG_FLAGS}
+
 %:
 	dh $@ --with quilt --with autotools-dev

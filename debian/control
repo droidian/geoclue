@@ -3,7 +3,20 @@ Section: utils
 Priority: optional
 Maintainer: Bernd Zeimetz <bzed@debian.org>
 Uploaders: Craig Andrews <candrews@integralblue.com>
-Build-Depends: autotools-dev, quilt (>= 0.46-7), patchutils (>= 0.2.25), debhelper (>= 7.0.50), libgps-dev (>= 2.90.1~svn6819), pkg-config, libglib2.0-dev, libdbus-glib-1-dev, libxml2-dev, libgconf2-dev, xsltproc, libgtk2.0-dev, network-manager-dev [linux-any], ofono-dev
+Build-Depends: autotools-dev,
+               quilt (>= 0.46-7),
+               patchutils (>= 0.2.25),
+               debhelper (>= 7.0.50),
+               libgps-dev (>= 2.90.1~svn6819),
+               pkg-config,
+               libglib2.0-dev,
+               libdbus-glib-1-dev,
+               libxml2-dev,
+               libgconf2-dev,
+               xsltproc,
+               libgtk2.0-dev,
+               network-manager-dev [linux-any],
+               ofono-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.8.3
 Vcs-Git: git://git.debian.org/collab-maint/geoclue.git
@@ -12,7 +25,10 @@ Vcs-Browser: http://git.debian.org/?p=collab-maint/geoclue.git
 Package: geoclue
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: geoclue-hostip, geoclue-localnet, geoclue-yahoo, geoclue-manual
+Recommends: geoclue-hostip,
+            geoclue-localnet,
+            geoclue-yahoo,
+            geoclue-manual
 Description: Geographic information framework
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -31,7 +47,11 @@ Description: C API for GeoClue
 Package: libgeoclue-dev
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libgeoclue0 (= ${binary:Version}), pkg-config, libdbus-glib-1-dev, libxml2-dev
+Depends: ${shlibs:Depends}, ${misc:Depends},
+         libgeoclue0 (= ${binary:Version}),
+         pkg-config,
+         libdbus-glib-1-dev,
+         libxml2-dev
 Description: C API for GeoClue (development files)
  libgeoclue is a convenience wrapper for the GeoClue service, and 
  the recommended way to use GeoClue in the C language.

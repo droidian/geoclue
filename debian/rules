@@ -3,7 +3,8 @@
 
 CONFIG_FLAGS = --enable-gtk \
 	       --enable-gpsd \
-	       --enable-skyhook
+	       --enable-skyhook \
+	       --enable-connman=no
 
 ifeq ($(DEB_BUILD_ARCH_OS),linux)
 	CONFIG_FLAGS += --enable-networkmanager

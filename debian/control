@@ -2,7 +2,7 @@ Source: geoclue
 Section: utils
 Priority: optional
 Maintainer: Bernd Zeimetz <bzed@debian.org>
-Uploaders: Craig Andrews <candrews@integralblue.com>
+Uploaders: Craig Andrews <candrews@integralblue.com>, Laurent Bigonville <bigon@debian.org>
 Build-Depends: autotools-dev,
                quilt (>= 0.46-7~),
                patchutils (>= 0.2.25),

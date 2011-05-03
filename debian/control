@@ -61,6 +61,7 @@ Description: C API for GeoClue (development files)
 Package: geoclue-manual
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (manual)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -71,6 +72,7 @@ Description: Position server for GeoClue (manual)
 Package: geoclue-hostip
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (hostip)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -81,6 +83,7 @@ Description: Position server for GeoClue (hostip)
 Package: geoclue-plazes
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (Plazes)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -92,6 +95,7 @@ Description: Position server for GeoClue (Plazes)
 Package: geoclue-gpsd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (GPS)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -102,6 +106,7 @@ Description: Position server for GeoClue (GPS)
 Package: geoclue-geonames
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Geocoder provider for GeoClue (geonames)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -112,6 +117,7 @@ Description: Geocoder provider for GeoClue (geonames)
 Package: geoclue-gsmloc
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (GSM)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -123,6 +129,7 @@ Description: Position server for GeoClue (GSM)
 Package: geoclue-localnet
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Position server for GeoClue (local network)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 
@@ -134,6 +141,7 @@ Description: Position server for GeoClue (local network)
 Package: geoclue-skyhook
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Map and geocode server for GeoClue (Skyhook)
  GeoClue provides applications access to various geographical information
  sources using a D-Bus API or a C library.
@@ -144,6 +152,7 @@ Description: Map and geocode server for GeoClue (Skyhook)
 Package: geoclue-yahoo
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
 Description: Map and geocode server for GeoClue (Yahoo)
  GeoClue provides applications access to various geographical information 
  sources using a D-Bus API or a C library. 

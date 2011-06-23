@@ -1,3 +1,4 @@
 documentation-comment-fix
 libnm-glib-pc.patch
 autoreconf.patch
+gcc-4.6-werror.patch

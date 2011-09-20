@@ -160,6 +160,17 @@ Description: Map and geocode server for GeoClue (Yahoo)
  This package provides a map and geocoding backend for GeoClue.
  It uses the Yahoo map API.
 
+Package: geoclue-nominatim
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Provides: geoclue-provider
+Description: Geocoding and reverse-geocoding server for GeoClue (Nominatim)
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
+ .
+ This package provides a geocoding and reverse-geocoding backend for GeoClue.
+ It uses the Nominatim (OpenStreetMap) API.
+
 Package: geoclue-examples
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})

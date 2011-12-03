@@ -1,3 +1,15 @@
+geoclue (0.12.0-4) unstable; urgency=low
+
+  [ Laurent Bigonville ]
+  * [a5d605f9] Bump Standards-Version to 3.9.2 (no further changes)
+  * [e17fbb8f] Add geoclue-nominatim provider
+
+  [ Bernd Zeimetz ]
+  * [6d14937a] Remove gpsd support.
+    geoclue seems to be dead upstream and the gpsd provider needs a rewrite.
+
+ -- Bernd Zeimetz <bzed@debian.org>  Sat, 03 Dec 2011 12:57:49 +0100
+
 geoclue (0.12.0-3) unstable; urgency=low
 
   [ Evgeni Golov ]

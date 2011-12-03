@@ -2,7 +2,6 @@
 # -*- makefile -*-
 
 CONFIG_FLAGS = --enable-gtk \
-	       --enable-gpsd \
 	       --enable-skyhook \
 	       --enable-connman=no
 

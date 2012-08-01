@@ -16,7 +16,7 @@ Build-Depends: debhelper (>= 9),
                ofono-dev,
                libsoup-gnome2.4-dev
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
-Standards-Version: 3.9.2
+Standards-Version: 3.9.3
 Vcs-Git: git://git.debian.org/collab-maint/geoclue.git
 Vcs-Browser: http://git.debian.org/?p=collab-maint/geoclue.git
 

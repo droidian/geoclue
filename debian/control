@@ -6,7 +6,7 @@ Uploaders: Craig Andrews <candrews@integralblue.com>, Laurent Bigonville <bigon@
 Build-Depends: autotools-dev,
                quilt (>= 0.46-7~),
                patchutils (>= 0.2.25),
-               debhelper (>= 7.0.50),
+               debhelper (>= 9),
                pkg-config,
                libglib2.0-dev (>= 2.25.7),
                libdbus-glib-1-dev (>= 0.86),
@@ -41,6 +41,7 @@ Section: libs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: geoclue
+Pre-Depends: ${misc:Pre-Depends}
 Description: C API for GeoClue
  libgeoclue is a convenience wrapper for the GeoClue service, and 
  the recommended way to use GeoClue in the C language.

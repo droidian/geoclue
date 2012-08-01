@@ -1,4 +1,7 @@
-SUBDIRS = interfaces geoclue providers src example test docs
+ALWAYS_DIRS = interfaces geoclue src providers example docs
+
+SUBDIRS = $(ALWAYS_DIRS) @BUILD_TESTS@
+DIST_SUBDIRS = $(ALWAYS_DIRS) test
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = geoclue.pc

@@ -9,17 +9,25 @@ GcIfaceGeocode
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### STRUCT GcIfaceGeocode ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT GcIfaceGeocodeClass ##### -->
 <para>
 
 </para>
 
+@base_iface: 
+@address_to_position: 
+@freeform_address_to_position: 
 

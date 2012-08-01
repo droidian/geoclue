@@ -3,16 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>GeoclueAddress</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn01.html" title="C API">
 <link rel="prev" href="GeocluePosition.html" title="GeocluePosition">
 <link rel="next" href="GeoclueVelocity.html" title="GeoclueVelocity">
-<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
-<link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
-<link rel="reference" href="rn01.html" title="C API">
-<link rel="reference" href="rn02.html" title="D-Bus API">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
@@ -33,7 +30,7 @@
                   <a href="#GeoclueAddress.signals" class="shortcut">Signals</a>
 </td></tr>
 </table>
-<div class="refentry" title="GeoclueAddress">
+<div class="refentry">
 <a name="GeoclueAddress"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -42,29 +39,30 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv" title="Synopsis">
+<div class="refsynopsisdiv">
 <a name="GeoclueAddress.synopsis"></a><h2>Synopsis</h2>
 <pre class="synopsis">#define             <a class="link" href="GeoclueAddress.html#GEOCLUE-ADDRESS-INTERFACE-NAME:CAPS" title="GEOCLUE_ADDRESS_INTERFACE_NAME">GEOCLUE_ADDRESS_INTERFACE_NAME</a>
                     <a class="link" href="GeoclueAddress.html#GeoclueAddress-struct" title="GeoclueAddress">GeoclueAddress</a>;
-<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *    <a class="link" href="GeoclueAddress.html#geoclue-address-new" title="geoclue_address_new ()">geoclue_address_new</a>                 (const <span class="returnvalue">char</span> *service,
-                                                         const <span class="returnvalue">char</span> *path);
-<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="GeoclueAddress.html#geoclue-address-get-address" title="geoclue_address_get_address ()">geoclue_address_get_address</a>         (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <span class="returnvalue">int</span> *timestamp,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> **details,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> **accuracy,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);
-<span class="returnvalue">void</span>                (<a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()">*GeoclueAddressCallback</a>)           (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <span class="returnvalue">int</span> timestamp,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> *accuracy,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
-<span class="returnvalue">void</span>                <a class="link" href="GeoclueAddress.html#geoclue-address-get-address-async" title="geoclue_address_get_address_async ()">geoclue_address_get_address_async</a>   (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="returnvalue">GeoclueAddressCallback</span></a> callback,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);
+<span class="returnvalue">void</span>                (<a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()">*GeoclueAddressCallback</a>)           (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *details</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> *accuracy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> userdata</code></em>);
+                    <a class="link" href="GeoclueAddress.html#GeoclueAddressClass" title="GeoclueAddressClass">GeoclueAddressClass</a>;
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            <a class="link" href="GeoclueAddress.html#geoclue-address-get-address" title="geoclue_address_get_address ()">geoclue_address_get_address</a>         (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> *timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> **details</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> **accuracy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="GeoclueAddress.html#geoclue-address-get-address-async" title="geoclue_address_get_address_async ()">geoclue_address_get_address_async</a>   (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="type">GeoclueAddressCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> userdata</code></em>);
+<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *    <a class="link" href="GeoclueAddress.html#geoclue-address-new" title="geoclue_address_new ()">geoclue_address_new</a>                 (<em class="parameter"><code>const <span class="type">char</span> *service</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *path</code></em>);
 </pre>
 </div>
-<div class="refsect1" title="Object Hierarchy">
+<div class="refsect1">
 <a name="GeoclueAddress.object-hierarchy"></a><h2>Object Hierarchy</h2>
 <pre class="synopsis">
   <a href="http://library.gnome.org/devel/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
@@ -72,13 +70,13 @@
          +----GeoclueAddress
 </pre>
 </div>
-<div class="refsect1" title="Signals">
+<div class="refsect1">
 <a name="GeoclueAddress.signals"></a><h2>Signals</h2>
 <pre class="synopsis">
-  "<a class="link" href="GeoclueAddress.html#GeoclueAddress-address-changed" title='The "address-changed" signal'>address-changed</a>"                                : Run First / No Recursion
+  "<a class="link" href="GeoclueAddress.html#GeoclueAddress-address-changed" title='The "address-changed" signal'>address-changed</a>"                                : <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-SIGNAL-NO-RECURSE:CAPS"><code class="literal">No Recursion</code></a>
 </pre>
 </div>
-<div class="refsect1" title="Description">
+<div class="refsect1">
 <a name="GeoclueAddress.description"></a><h2>Description</h2>
 <p>
 <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> contains Address-related methods and signals. 
@@ -95,11 +93,12 @@ and the address-changed signal can be used to obtain the current address.
 Address <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> keys are defined in 
 <a class="ulink" href="geoclue-types.html" target="_top">geoclue-types.h</a>. See also 
 convenience functions in 
-<a class="ulink" href="geoclue-address-details.html" target="_top">geoclue-address-details.h</a>.</p>
+<a class="ulink" href="geoclue-address-details.html" target="_top">geoclue-address-details.h</a>.
+</p>
 </div>
-<div class="refsect1" title="Details">
+<div class="refsect1">
 <a name="GeoclueAddress.details"></a><h2>Details</h2>
-<div class="refsect2" title="GEOCLUE_ADDRESS_INTERFACE_NAME">
+<div class="refsect2">
 <a name="GEOCLUE-ADDRESS-INTERFACE-NAME:CAPS"></a><h3>GEOCLUE_ADDRESS_INTERFACE_NAME</h3>
 <pre class="programlisting">#define GEOCLUE_ADDRESS_INTERFACE_NAME "org.freedesktop.Geoclue.Address"
 </pre>
@@ -107,48 +106,79 @@ convenience functions in
 </p>
 </div>
 <hr>
-<div class="refsect2" title="GeoclueAddress">
+<div class="refsect2">
 <a name="GeoclueAddress-struct"></a><h3>GeoclueAddress</h3>
 <pre class="programlisting">typedef struct _GeoclueAddress GeoclueAddress;</pre>
 <p>
 </p>
 </div>
 <hr>
-<div class="refsect2" title="geoclue_address_new ()">
-<a name="geoclue-address-new"></a><h3>geoclue_address_new ()</h3>
-<pre class="programlisting"><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *    geoclue_address_new                 (const <span class="returnvalue">char</span> *service,
-                                                         const <span class="returnvalue">char</span> *path);</pre>
+<div class="refsect2">
+<a name="GeoclueAddressCallback"></a><h3>GeoclueAddressCallback ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                (*GeoclueAddressCallback)           (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *details</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> *accuracy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> *error</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> userdata</code></em>);</pre>
 <p>
-Creates a <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> with given D-Bus service name and path.</p>
+Callback function for <a class="link" href="GeoclueAddress.html#geoclue-address-get-address-async" title="geoclue_address_get_address_async ()"><code class="function">geoclue_address_get_address_async()</code></a>.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
-<td> D-Bus service name
+<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
+<td>the <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object emitting the signal</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>timestamp</code></em> :</span></p></td>
+<td>Time of address measurement (Unix timestamp)</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
+<td>Address details as <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>accuracy</code></em> :</span></p></td>
+<td>Accuracy of measurement as <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a>
 </td>
 </tr>
 <tr>
-<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
-<td> D-Bus path name
-</td>
+<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
+<td>Error as <span class="type">Gerror</span> (may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>)</td>
 </tr>
 <tr>
-<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> Pointer to a new <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a>
+<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
+<td>User data pointer set in <a class="link" href="GeocluePosition.html#geoclue-position-get-position-async" title="geoclue_position_get_position_async ()"><code class="function">geoclue_position_get_position_async()</code></a>
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="geoclue_address_get_address ()">
+<div class="refsect2">
+<a name="GeoclueAddressClass"></a><h3>GeoclueAddressClass</h3>
+<pre class="programlisting">typedef struct {
+	GeoclueProviderClass provider_class;
+
+	void (* address_changed) (GeoclueAddress  *address,
+				  int              timestamp,
+				  GHashTable      *details,
+				  GeoclueAccuracy *accuracy);
+} GeoclueAddressClass;
+</pre>
+<p>
+</p>
+</div>
+<hr>
+<div class="refsect2">
 <a name="geoclue-address-get-address"></a><h3>geoclue_address_get_address ()</h3>
-<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            geoclue_address_get_address         (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <span class="returnvalue">int</span> *timestamp,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> **details,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> **accuracy,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> **error);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gboolean"><span class="returnvalue">gboolean</span></a>            geoclue_address_get_address         (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><span class="type">int</span> *timestamp</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> **details</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> **accuracy</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>
 Obtains the current address. <em class="parameter"><code>timestamp</code></em> will contain the time of 
 the actual address measurement. <em class="parameter"><code>accuracy</code></em> is the estimated of the
@@ -159,158 +189,134 @@ hashtable keys.
 </p>
 <p>
 If the caller is not interested in some values, the pointers can be 
-left <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p>
+left <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
-<td> A <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object
-</td>
+<td>A <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>timestamp</code></em> :</span></p></td>
-<td> Pointer to returned time of address measurement (Unix timestamp) or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td>Pointer to returned time of address measurement (Unix timestamp) or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
-<td> Pointer to returned <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address details or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td>Pointer to returned <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address details or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>accuracy</code></em> :</span></p></td>
-<td> Pointer to returned <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> or NULL
-</td>
+<td>Pointer to returned <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> or NULL</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> Pointer to returned <span class="type">Gerror</span> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
+<td>Pointer to returned <span class="type">Gerror</span> or <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>
 </td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if there is no <em class="parameter"><code>error</code></em>
+<td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#TRUE:CAPS"><code class="literal">TRUE</code></a> if there is no <em class="parameter"><code>error</code></em>
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="GeoclueAddressCallback ()">
-<a name="GeoclueAddressCallback"></a><h3>GeoclueAddressCallback ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                (*GeoclueAddressCallback)           (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <span class="returnvalue">int</span> timestamp,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *details,
-                                                         <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="returnvalue">GeoclueAccuracy</span></a> *accuracy,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Error-Reporting.html#GError"><span class="returnvalue">GError</span></a> *error,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
-<p>
-Callback function for <a class="link" href="GeoclueAddress.html#geoclue-address-get-address-async" title="geoclue_address_get_address_async ()"><code class="function">geoclue_address_get_address_async()</code></a>.</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
-<td> the <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object emitting the signal
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>timestamp</code></em> :</span></p></td>
-<td> Time of address measurement (Unix timestamp)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
-<td> Address details as <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>accuracy</code></em> :</span></p></td>
-<td> Accuracy of measurement as <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a>
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>error</code></em> :</span></p></td>
-<td> Error as <span class="type">Gerror</span> (may be <a href="http://library.gnome.org/devel/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>)
-</td>
-</tr>
-<tr>
-<td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
-<td> User data pointer set in <a class="link" href="GeocluePosition.html#geoclue-position-get-position-async" title="geoclue_position_get_position_async ()"><code class="function">geoclue_position_get_position_async()</code></a>
-</td>
-</tr>
-</tbody>
-</table></div>
-</div>
-<hr>
-<div class="refsect2" title="geoclue_address_get_address_async ()">
+<div class="refsect2">
 <a name="geoclue-address-get-address-async"></a><h3>geoclue_address_get_address_async ()</h3>
-<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_address_get_address_async   (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *address,
-                                                         <a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="returnvalue">GeoclueAddressCallback</span></a> callback,
-                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="returnvalue">gpointer</span></a> userdata);</pre>
+<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_address_get_address_async   (<em class="parameter"><code><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address</code></em>,
+                                                         <em class="parameter"><code><a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="type">GeoclueAddressCallback</span></a> callback</code></em>,
+                                                         <em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> userdata</code></em>);</pre>
 <p>
 Function returns (essentially) immediately and calls <em class="parameter"><code>callback</code></em> when current address
-is available or when D-Bus timeouts.</p>
+is available or when D-Bus timeouts.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
-<td> A <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object
-</td>
+<td>A <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>callback</code></em> :</span></p></td>
-<td> A <a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="type">GeoclueAddressCallback</span></a> function that should be called when return values are available
-</td>
+<td>A <a class="link" href="GeoclueAddress.html#GeoclueAddressCallback" title="GeoclueAddressCallback ()"><span class="type">GeoclueAddressCallback</span></a> function that should be called when return values are available</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>userdata</code></em> :</span></p></td>
-<td> pointer for user specified data
+<td>pointer for user specified data</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="geoclue-address-new"></a><h3>geoclue_address_new ()</h3>
+<pre class="programlisting"><a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="returnvalue">GeoclueAddress</span></a> *    geoclue_address_new                 (<em class="parameter"><code>const <span class="type">char</span> *service</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *path</code></em>);</pre>
+<p>
+Creates a <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> with given D-Bus service name and path.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>service</code></em> :</span></p></td>
+<td>D-Bus service name</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>path</code></em> :</span></p></td>
+<td>D-Bus path name</td>
+</tr>
+<tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>Pointer to a new <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a>
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 </div>
-<div class="refsect1" title="Signal Details">
+<div class="refsect1">
 <a name="GeoclueAddress.signal-details"></a><h2>Signal Details</h2>
-<div class="refsect2" title='The "address-changed" signal'>
+<div class="refsect2">
 <a name="GeoclueAddress-address-changed"></a><h3>The <code class="literal">"address-changed"</code> signal</h3>
 <pre class="programlisting"><span class="returnvalue">void</span>                user_function                      (<a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> *address,
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gint"><span class="type">gint</span></a>            timestamp,
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>        details,
                                                         <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>        accuracy,
-                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>        user_data)      : Run First / No Recursion</pre>
+                                                        <a href="http://library.gnome.org/devel/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a>        user_data)      : <a href="http://library.gnome.org/devel/gobject/unstable/gobject-Signals.html#G-SIGNAL-NO-RECURSE:CAPS"><code class="literal">No Recursion</code></a></pre>
 <p>
 The address-changed signal is emitted each time the address changes.
 See <a class="ulink" href="geoclue-types.html" target="_top">geoclue-types.h</a> for the possible 
 GEOCLUE_ADDRESS_KEY_* keys used in <em class="parameter"><code>details</code></em>.
 </p>
 <p>
-Note that not all providers support signals.</p>
+Note that not all providers support signals.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
-<td> the <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object emitting the signal
-</td>
+<td>the <a class="link" href="GeoclueAddress.html" title="GeoclueAddress"><span class="type">GeoclueAddress</span></a> object emitting the signal</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>timestamp</code></em> :</span></p></td>
-<td> Time of address measurement (Unix timestamp)
-</td>
+<td>Time of address measurement (Unix timestamp)</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>details</code></em> :</span></p></td>
-<td> Address details as <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.
-</td>
+<td>Address details as <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.</td>
 </tr>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>accuracy</code></em> :</span></p></td>
-<td> Accuracy of measurement as <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a>
+<td>Accuracy of measurement as <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a>
 </td>
 </tr>
 <tr>
@@ -324,6 +330,6 @@ Note that not all providers support signals.</p>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.13</div>
+          Generated by GTK-Doc V1.18.1</div>
 </body>
 </html>

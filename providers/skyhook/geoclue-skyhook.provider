@@ -1,5 +1,5 @@
 [Geoclue Provider]
-Name=Plazes
+Name=Skyhook
 Service=org.freedesktop.Geoclue.Providers.Skyhook
 Path=/org/freedesktop/Geoclue/Providers/Skyhook
 Accuracy=Street

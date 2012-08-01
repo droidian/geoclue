@@ -98,46 +98,45 @@ DISTCLEANFILES = \
 	geoclue-enum-types.c
 
 geoclue-marshal.h: geoclue-marshal.list $(GLIB_GENMARSHAL)
-	$(GLIB_GENMARSHAL) $< --header --prefix=geoclue_marshal > $@
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) $< --header --prefix=geoclue_marshal > $@
 geoclue-marshal.c: geoclue-marshal.list geoclue-marshal.h $(GLIB_GENMARSHAL)
-	echo "#include \"geoclue-marshal.h\"" > $@ \
-	&& $(GLIB_GENMARSHAL) --prefix=geoclue_marshal $(srcdir)/geoclue-marshal.list --body >> $@
+	$(AM_V_GEN) $(GLIB_GENMARSHAL) --prefix=geoclue_marshal $(srcdir)/geoclue-marshal.list --header --body > $@
 
 %-glue.h: stamp-%-glue.h
 	@true
 
 stamp-gc-iface-address-glue.h: ../interfaces/gc-iface-address.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_address --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_address --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
 
 stamp-gc-iface-geoclue-glue.h: ../interfaces/gc-iface-geoclue.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_geoclue --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_geoclue --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
 
 stamp-gc-iface-geocode-glue.h: ../interfaces/gc-iface-geocode.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_geocode --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_geocode --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
 
 stamp-gc-iface-position-glue.h: ../interfaces/gc-iface-position.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_position --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_position --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
 
 stamp-gc-iface-reverse-geocode-glue.h: ../interfaces/gc-iface-reverse-geocode.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_reverse_geocode --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_reverse_geocode --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
 
 stamp-gc-iface-velocity-glue.h: ../interfaces/gc-iface-velocity.xml
-	$(DBUS_BINDING_TOOL) --prefix=gc_iface_velocity --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_velocity --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)
@@ -145,7 +144,7 @@ stamp-gc-iface-velocity-glue.h: ../interfaces/gc-iface-velocity.xml
 %-bindings.h: stamp-%-bindings.h
 	@true
 stamp-%-bindings.h: ../interfaces/%.xml
-	$(DBUS_BINDING_TOOL) --mode=glib-client --prefix=geoclue $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --mode=glib-client --prefix=geoclue $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)

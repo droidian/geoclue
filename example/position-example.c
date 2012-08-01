@@ -51,6 +51,13 @@ position_changed_cb (GeocluePosition      *position,
 	}
 }
 
+static void
+unset_and_free_gvalue (gpointer val)
+{
+        g_value_unset (val);
+        g_free (val);
+}
+
 static GHashTable *
 parse_options (int    argc,
                char **argv)
@@ -58,9 +65,14 @@ parse_options (int    argc,
         GHashTable *options;
         int i;
 
-        options = g_hash_table_new (g_str_hash, g_str_equal);
+        options = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                         NULL, unset_and_free_gvalue);
+
         for (i = 2; i < argc; i += 2) {
-                g_hash_table_insert (options, argv[i], argv[i + 1]);
+                GValue *val = g_new0(GValue, 1);
+                g_value_init (val, G_TYPE_STRING);
+                g_value_set_string(val, argv[i + 1]);
+                g_hash_table_insert (options, argv[i], val);
         }
 
         return options;
@@ -80,7 +92,7 @@ int main (int argc, char** argv)
 	g_type_init();
 	
 	if (argc < 2 || argc % 2 != 0) {
-		g_printerr ("Usage:\n  position-example <provider_name> [option,value]\n");
+		g_printerr ("Usage:\n  position-example <provider_name> [option value]\n");
 		return 1;
 	}
 

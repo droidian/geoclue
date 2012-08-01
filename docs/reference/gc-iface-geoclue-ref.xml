@@ -12,7 +12,7 @@
     <synopsis><link linkend="Geoclue.GetProviderInfo">GetProviderInfo</link> (out 's'Name,
                  out 's'Description)
 <link linkend="Geoclue.GetStatus">GetStatus</link>       (out 'i'status)
-<link linkend="Geoclue.SetOptions">SetOptions</link>      (in  'a{ss}'options)
+<link linkend="Geoclue.SetOptions">SetOptions</link>      (in  'a{sv}'options)
 <link linkend="Geoclue.AddReference">AddReference</link>    ()
 <link linkend="Geoclue.RemoveReference">RemoveReference</link> ()
 </synopsis>
@@ -89,7 +89,7 @@
         <primary>SetOptions</primary>
         <secondary>Geoclue</secondary>
       </indexterm>
-      <programlisting>SetOptions (in  'a{ss}' options)</programlisting>
+      <programlisting>SetOptions (in  'a{sv}' options)</programlisting>
       <variablelist role="params">
         <varlistentry>
           <term><parameter>options</parameter>:</term>

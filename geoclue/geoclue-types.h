@@ -49,7 +49,11 @@ typedef enum {
  * GeoclueAccuracyLevel:
  *
  * Enum values used to define the approximate accuracy of 
- * Position or Address information.
+ * Position or Address information. These are ordered in
+ * from lowest accuracy possible to highest accuracy possible.
+ * geoclue_accuracy_get_details() can be used to get get the
+ * current accuracy. It is up to the provider to set the
+ * accuracy based on analysis of its queries.
  **/
 typedef enum {
 	GEOCLUE_ACCURACY_LEVEL_NONE = 0,

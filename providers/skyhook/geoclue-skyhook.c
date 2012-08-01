@@ -22,6 +22,8 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-position.h>
 
+#include "connectivity.h"
+
 #define GEOCLUE_DBUS_SERVICE_SKYHOOK "org.freedesktop.Geoclue.Providers.Skyhook"
 #define GEOCLUE_DBUS_PATH_SKYHOOK "/org/freedesktop/Geoclue/Providers/Skyhook"
 #define SKYHOOK_URL "https://api.skyhookwireless.com/wps2/location"
@@ -32,12 +34,15 @@
 #define GEOCLUE_TYPE_SKYHOOK (geoclue_skyhook_get_type ())
 #define GEOCLUE_SKYHOOK(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), GEOCLUE_TYPE_SKYHOOK, GeoclueSkyhook))
 
-#define QUERY "<?xml version=\'1.0\'?><LocationRQ xmlns=\'http://skyhookwireless.com/wps/2005\' version=\'2.6\' street-address-lookup=\'full\'><authentication version=\'2.0\'><simple><username>beta</username><realm>js.loki.com</realm></simple></authentication><access-point><mac>%s</mac><signal-strength>-50</signal-strength></access-point></LocationRQ>"
+#define QUERY_START "<?xml version=\'1.0\'?><LocationRQ xmlns=\'http://skyhookwireless.com/wps/2005\' version=\'2.6\' street-address-lookup=\'full\'><authentication version=\'2.0\'><simple><username>beta</username><realm>js.loki.com</realm></simple></authentication>"
+#define QUERY_AP "<access-point><mac>%s</mac><signal-strength>%d</signal-strength></access-point>"
+#define QUERY_END "</LocationRQ>"
 
 typedef struct _GeoclueSkyhook {
 	GcProvider parent;
 	GMainLoop *loop;
 	SoupSession *session;
+	GeoclueConnectivity *conn;
 } GeoclueSkyhook;
 
 typedef struct _GeoclueSkyhookClass {
@@ -72,66 +77,38 @@ _shutdown (GcProvider *provider)
 	g_main_loop_quit (skyhook->loop);
 }
 
-#define MAC_LEN 18
-
-static char *
-get_mac_address (void)
-	{
-	/* this is an ugly hack, but it seems there is no easy 
-	 * ioctl-based way to get the mac address of the router. This 
-	 * implementation expects the system to have netstat, grep and awk 
-	 * */
-	
-	FILE *in;
-	char mac[MAC_LEN];
-	int i;
-	
-	/*for some reason netstat or /proc/net/arp isn't always ready 
-	 * when a connection is already up... Try a couple of times */
-	for (i=0; i<10; i++) {
-		if (!(in = popen ("ROUTER_IP=`netstat -rn | grep '^0.0.0.0 ' | awk '{ print $2 }'` && grep \"^$ROUTER_IP \" /proc/net/arp | awk '{print $4}'", "r"))) {
-			g_warning ("popen failed");
-			return NULL;
-		}
-		
-		if (!(fgets (mac, MAC_LEN, in))) {
-			if (errno != ENOENT && errno != EAGAIN) {
-				g_debug ("error %d", errno);
-				return NULL;
-			}
-			/* try again */
-			pclose (in);
-			g_debug ("trying again...");
-			g_usleep (200);
-			continue;
-		}
-		pclose (in);
-		return g_strdup (mac);
-	}
-	return NULL;
-}
-
-static char *
-create_post_query (void)
+static void
+add_ap (gpointer key,
+	gpointer value,
+	gpointer data)
 {
-	char *mac, *query;
+	char *mac;
 	char **split;
 
-	mac = get_mac_address ();
-	if (mac == NULL)
-		return NULL;
 	/* Remove the ":" */
-	split = g_strsplit (mac, ":", -1);
-	g_free (mac);
-	if (split == NULL)
-		return NULL;
+	split = g_strsplit (key, ":", -1);
 	mac = g_strjoinv ("", split);
 	g_strfreev (split);
 
-	query = g_strdup_printf (QUERY, mac);
+	g_string_append_printf (data, QUERY_AP, mac, GPOINTER_TO_INT (value));
 	g_free (mac);
+}
 
-	return query;
+static char *
+create_post_query (GeoclueConnectivity *conn)
+{
+	GHashTable *ht;
+	GString *str;
+
+	ht = geoclue_connectivity_get_aps (conn);
+	if (ht == NULL)
+		return NULL;
+	str = g_string_new (QUERY_START);
+	g_hash_table_foreach (ht, add_ap, str);
+	g_string_append (str, QUERY_END);
+	g_hash_table_destroy (ht);
+
+	return g_string_free (str, FALSE);
 }
 
 static gboolean
@@ -200,7 +177,7 @@ geoclue_skyhook_get_position (GcIfacePosition        *iface,
 	if (timestamp)
 		*timestamp = time (NULL);
 	
-	query = create_post_query ();
+	query = create_post_query (skyhook->conn);
 	if (query == NULL) {
 		g_set_error (error, GEOCLUE_ERROR, 
 			     GEOCLUE_ERROR_NOT_AVAILABLE,
@@ -266,7 +243,11 @@ static void
 geoclue_skyhook_finalize (GObject *obj)
 {
 	GeoclueSkyhook *skyhook = GEOCLUE_SKYHOOK (obj);
-	
+
+	if (skyhook->conn != NULL) {
+		g_object_unref (skyhook->conn);
+		skyhook->conn = NULL;
+	}
 	g_object_unref (skyhook->session);
 	
 	((GObjectClass *) geoclue_skyhook_parent_class)->finalize (obj);
@@ -295,6 +276,7 @@ geoclue_skyhook_init (GeoclueSkyhook *skyhook)
 	                         GEOCLUE_DBUS_PATH_SKYHOOK,
 	                         "Skyhook", "Skyhook.com based provider, uses gateway mac address to locate");
 	skyhook->session = soup_session_sync_new ();
+	skyhook->conn = geoclue_connectivity_new ();
 }
 
 static void
@@ -307,7 +289,9 @@ int
 main()
 {
 	g_type_init();
+#if !GLIB_CHECK_VERSION(2,31,0)
 	g_thread_init (NULL);
+#endif
 
 	GeoclueSkyhook *o = g_object_new (GEOCLUE_TYPE_SKYHOOK, NULL);
 	o->loop = g_main_loop_new (NULL, TRUE);

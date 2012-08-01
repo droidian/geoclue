@@ -9,20 +9,17 @@ geoclue-address-details
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### FUNCTION geoclue_address_details_new ##### -->
-<para>
-
-</para>
-
-@Returns: 
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### FUNCTION geoclue_address_details_copy ##### -->
@@ -41,5 +38,31 @@ geoclue-address-details
 
 @address: 
 @Returns: 
+
+
+<!-- ##### FUNCTION geoclue_address_details_insert ##### -->
+<para>
+
+</para>
+
+@address: 
+@key: 
+@value: 
+
+
+<!-- ##### FUNCTION geoclue_address_details_new ##### -->
+<para>
+
+</para>
+
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_address_details_set_country_from_code ##### -->
+<para>
+
+</para>
+
+@address: 
 
 

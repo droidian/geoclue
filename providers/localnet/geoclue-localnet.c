@@ -69,6 +69,8 @@
 #include <geoclue/geoclue-error.h>
 #include <geoclue/gc-iface-address.h>
 
+#include "connectivity.h"
+
 #define KEYFILE_NAME "geoclue-localnet-gateways"
 
 typedef struct {
@@ -82,7 +84,8 @@ typedef struct {
 	GcProvider parent;
 	
 	GMainLoop *loop;
-	
+	GeoclueConnectivity *conn;
+
 	char *keyfile_name;
 	GSList *gateways;
 } GeoclueLocalnet;
@@ -149,7 +152,11 @@ finalize (GObject *object)
 	GeoclueLocalnet *localnet;
 	
 	localnet = GEOCLUE_LOCALNET (object);
-	
+
+	if (localnet->conn != NULL) {
+		g_object_unref (localnet->conn);
+		localnet->conn = NULL;
+	}
 	g_free (localnet->keyfile_name);
 	free_gateway_list (localnet->gateways);
 	
@@ -170,94 +177,6 @@ geoclue_localnet_class_init (GeoclueLocalnetClass *klass)
 	dbus_g_object_type_install_info (geoclue_localnet_get_type (),
 	                                 &dbus_glib_geoclue_localnet_object_info);
 
-}
-
-/* Parse /proc/net/route to get default gateway address and then parse
- * /proc/net/arp to find matching mac address. 
- *
- * There are some problems with this. First, it's IPv4 only.
- * Second, there must be a way to do this with ioctl, but that seemed really
- * complicated... even /usr/sbin/arp parses /proc/net/arp 
- * 
- * returns:
- *   1 : on success
- *   0 : no success, no errors
- *  <0 : error
- */
-int
-get_mac_address (char **mac)
-{
-	char *content;
-	char **lines, **entry;
-	GError *error = NULL;
-	char *route_gateway = NULL;
-
-	g_assert (*mac == NULL);
-
-	if (!g_file_get_contents ("/proc/net/route", &content, NULL, &error)) {
-		g_warning ("Failed to read /proc/net/route: %s", error->message);
-		g_error_free (error);
-		return -1;
-	}
-
-	lines = g_strsplit (content, "\n", 0);
-	g_free (content);
-	entry = lines + 1;
-
-	while (*entry && strlen (*entry) > 0) {
-		char dest[9];
-		char gateway[9];
-		if (sscanf (*entry, 
-			        "%*s %8[0-9A-Fa-f] %8[0-9A-Fa-f] %*s", 
-			        dest, gateway) != 2) {
-			g_warning ("Failed to parse /proc/net/route entry '%s'", *entry);
-		} else if (strcmp (dest, "00000000") == 0) {
-			route_gateway = g_strdup (gateway);
-			break;
-		}
-		entry++;
-	}
-	g_strfreev (lines);	
-
-	if (!route_gateway) {
-		g_warning ("Failed to find default route in /proc/net/route");
-		return -1;
-	}
-
-	if (!g_file_get_contents ("/proc/net/arp", &content, NULL, &error)) {
-		g_warning ("Failed to read /proc/net/arp: %s", error->message);
-		g_error_free (error);
-		return -1;
-	}
-	
-	lines = g_strsplit (content, "\n", 0);
-	g_free (content);
-	entry = lines+1;
-	while (*entry && strlen (*entry) > 0) {
-		char hwa[100];
-		char *arp_gateway;
-		int ip[4];
-		
-		if (sscanf(*entry, 
-		           "%d.%d.%d.%d 0x%*x 0x%*x %100s %*s %*s\n", 
-		           &ip[0], &ip[1], &ip[2], &ip[3], hwa) != 5) {
-			g_warning ("Failed to parse /proc/net/arp entry '%s'", *entry);
-		} else {
-			arp_gateway = g_strdup_printf ("%02X%02X%02X%02X", ip[3], ip[2], ip[1], ip[0]);
-			if (strcmp (arp_gateway, route_gateway) == 0) {
-				g_free (arp_gateway);
-				*mac = g_strdup (hwa);
-				break;
-			}
-			g_free (arp_gateway);
-			
-		}
-		entry++;
-	}
-	g_free (route_gateway);
-	g_strfreev (lines);
-
-	return *mac ? 1 : 0;
 }
 
 static void
@@ -320,7 +239,7 @@ geoclue_localnet_find_gateway (GeoclueLocalnet *localnet, char *mac)
 	while (l) {
 		Gateway *gw = l->data;
 		
-		if (strcmp (gw->mac, mac) == 0) {
+		if (g_ascii_strcasecmp (gw->mac, mac) == 0) {
 			return gw;
 		}
 		
@@ -359,8 +278,8 @@ geoclue_localnet_init (GeoclueLocalnet *localnet)
 	}
 	geoclue_localnet_load_gateways_from_keyfile (localnet, keyfile);
 	g_key_file_free (keyfile);
-	
-	
+
+	localnet->conn = geoclue_connectivity_new ();
 }
 
 typedef struct {
@@ -381,7 +300,7 @@ geoclue_localnet_set_address (GeoclueLocalnet *localnet,
                               GHashTable *details,
                               GError **error)
 {
-	char *str, *mac = NULL;
+	char *str, *mac;
 	GKeyFile *keyfile;
 	GError *int_err = NULL;
 	localnet_keyfile_group *keyfile_group;
@@ -391,10 +310,8 @@ geoclue_localnet_set_address (GeoclueLocalnet *localnet,
 		/* TODO set error */
 		return FALSE;
 	}
-	
-	if (get_mac_address (&mac) < 0) 
-		return FALSE;
-	
+
+	mac = geoclue_connectivity_get_router_mac (localnet->conn);
 	if (!mac) {
 		g_warning ("Couldn't get current gateway mac address");
 		/* TODO set error */
@@ -528,23 +445,15 @@ get_address (GcIfaceAddress   *gc,
              GError          **error)
 {
 	GeoclueLocalnet *localnet;
-	int i, ret_val;
-	char *mac = NULL;
+	char *mac;
 	Gateway *gw;
 	
 	localnet = GEOCLUE_LOCALNET (gc);
 
 	/* we may be trying to read /proc/net/arp right after network connection. 
 	 * It's sometimes not up yet, try a couple of times */
-	for (i = 0; i < 5; i++) {
-		ret_val = get_mac_address (&mac);
-		if (ret_val < 0)
-			return FALSE;
-		else if (ret_val == 1)
-			break;
-		usleep (200);
-	}
-	
+	mac = geoclue_connectivity_get_router_mac (localnet->conn);
+
 	if (!mac) {
 		g_warning ("Couldn't get current gateway mac address");
 		if (error) {

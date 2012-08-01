@@ -9,12 +9,17 @@ GeoclueAddress
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### MACRO GEOCLUE_ADDRESS_INTERFACE_NAME ##### -->
@@ -40,15 +45,26 @@ GeoclueAddress
 @arg2: 
 @arg3: 
 
-<!-- ##### FUNCTION geoclue_address_new ##### -->
+<!-- ##### USER_FUNCTION GeoclueAddressCallback ##### -->
 <para>
 
 </para>
 
-@service: 
-@path: 
-@Returns: 
+@address: 
+@timestamp: 
+@details: 
+@accuracy: 
+@error: 
+@userdata: 
 
+
+<!-- ##### STRUCT GeoclueAddressClass ##### -->
+<para>
+
+</para>
+
+@provider_class: 
+@address_changed: 
 
 <!-- ##### FUNCTION geoclue_address_get_address ##### -->
 <para>
@@ -63,19 +79,6 @@ GeoclueAddress
 @Returns: 
 
 
-<!-- ##### USER_FUNCTION GeoclueAddressCallback ##### -->
-<para>
-
-</para>
-
-@address: 
-@timestamp: 
-@details: 
-@accuracy: 
-@error: 
-@userdata: 
-
-
 <!-- ##### FUNCTION geoclue_address_get_address_async ##### -->
 <para>
 
@@ -84,5 +87,15 @@ GeoclueAddress
 @address: 
 @callback: 
 @userdata: 
+
+
+<!-- ##### FUNCTION geoclue_address_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
 
 

@@ -9,19 +9,27 @@ GcIfaceAddress
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### STRUCT GcIfaceAddress ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT GcIfaceAddressClass ##### -->
 <para>
 
 </para>
 
+@base_iface: 
+@address_changed: 
+@get_address: 
 
 <!-- ##### FUNCTION gc_iface_address_emit_address_changed ##### -->
 <para>

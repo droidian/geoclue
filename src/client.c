@@ -67,17 +67,19 @@ typedef struct _GcMasterClientPrivate {
 	int min_time;
 	gboolean require_updates;
 	GeoclueResourceFlags allowed_resources;
-	
+
 	gboolean position_started;
 	GcMasterProvider *position_provider;
 	GList *position_providers;
 	gboolean position_provider_choice_in_progress;
-	
+	time_t last_position_changed;
+
 	gboolean address_started;
 	GcMasterProvider *address_provider;
 	GList *address_providers;
 	gboolean address_provider_choice_in_progress;
-	
+	time_t last_address_changed;
+
 } GcMasterClientPrivate;
 
 #define GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), GC_TYPE_MASTER_CLIENT, GcMasterClientPrivate))
@@ -224,6 +226,17 @@ position_changed (GcMasterProvider     *provider,
                   GeoclueAccuracy      *accuracy,
                   GcMasterClient       *client)
 {
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	time_t now;
+
+	now = time (NULL);
+	if (priv->min_time > (now - priv->last_position_changed)) {
+		/* NOTE: currently no-one makes sure there is an emit
+		 * after min_time */
+		return;
+	}
+	priv->last_position_changed = now;
+
 	gc_iface_position_emit_position_changed
 		(GC_IFACE_POSITION (client),
 		 fields,
@@ -239,6 +252,17 @@ address_changed (GcMasterProvider     *provider,
                  GeoclueAccuracy      *accuracy,
                  GcMasterClient       *client)
 {
+	GcMasterClientPrivate *priv = GET_PRIVATE (client);
+	time_t now;
+
+	now = time (NULL);
+	if (priv->min_time > (now - priv->last_address_changed)) {
+		/* NOTE: currently no-one makes sure there is an emit
+		 * after min_time */
+		return;
+	}
+	priv->last_address_changed = now;
+
 	gc_iface_address_emit_address_changed
 		(GC_IFACE_ADDRESS (client),
 		 timestamp,

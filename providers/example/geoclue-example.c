@@ -62,7 +62,10 @@ print_option (gpointer key,
               gpointer value,
               gpointer data)
 {
-        g_print ("   %s - %s\n", key, value);
+	if (G_VALUE_TYPE (value) == G_TYPE_STRING)
+		g_print ("   %s - %s\n", key, g_value_get_string (value));
+	else
+		g_print ("   %s - %d\n", key, g_value_get_int (value));
 }
 
 static gboolean

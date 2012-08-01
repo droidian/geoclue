@@ -38,7 +38,8 @@ typedef struct {
 	GcProvider parent;
 
         char *device_name;
-	
+        guint baud_rate;
+
 	GypsyControl *control;
 	GypsyDevice *device;
 	GypsyPosition *position;
@@ -378,14 +379,26 @@ set_options (GcIfaceGeoclue *gc,
              GError        **error)
 {
         GeoclueGypsy *gypsy = GEOCLUE_GYPSY (gc);
+        GValue *device_value, *baud_rate_value;
         const char *device_name;
         char *path;
+        int baud_rate;
 
-        device_name = g_hash_table_lookup (options, 
-                                           "org.freedesktop.Geoclue.GPSDevice");
+	device_value = g_hash_table_lookup (options,
+					    "org.freedesktop.Geoclue.GPSDevice");
+	device_name = device_value ? g_value_get_string (device_value) : NULL;
+	baud_rate_value = g_hash_table_lookup (options,
+					   "org.freedesktop.Geoclue.GPSBaudRate");
+	baud_rate = baud_rate_value ? g_value_get_int (baud_rate_value) : 0;
 
-        if (g_strcmp0 (gypsy->device_name, device_name) == 0) {
-        	return TRUE;
+        if (g_strcmp0 (gypsy->device_name, device_name) == 0 &&
+            gypsy->baud_rate == baud_rate)
+		return TRUE;
+
+	/* Disconnect from the old device, if any */
+	if (gypsy->device != NULL) {
+		g_object_unref (gypsy->device);
+		gypsy->device = NULL;
 	}
 
 	g_free (gypsy->device_name);
@@ -396,7 +409,8 @@ set_options (GcIfaceGeoclue *gc,
 	}
 
         gypsy->device_name = g_strdup (device_name);
-        g_print ("Gypsy provider using '%s'\n", gypsy->device_name);
+        gypsy->baud_rate = baud_rate;
+        g_print ("Gypsy provider using '%s' at %d bps\n", gypsy->device_name, gypsy->baud_rate);
 	path = gypsy_control_create (gypsy->control, gypsy->device_name,
 				     error);
 	if (*error != NULL) {
@@ -425,6 +439,24 @@ set_options (GcIfaceGeoclue *gc,
 			  G_CALLBACK (accuracy_changed), gypsy);
 	
 	g_debug ("starting device");
+	if (gypsy->baud_rate != 0) {
+		GHashTable *goptions;
+		GValue speed_val = { 0, };
+		GError *err = NULL;
+
+		g_value_init (&speed_val, G_TYPE_UINT);
+		g_value_set_uint (&speed_val, gypsy->baud_rate);
+		goptions = g_hash_table_new (g_str_hash,
+					     g_str_equal);
+		g_hash_table_insert (goptions, "BaudRate", &speed_val);
+		if (!gypsy_device_set_start_options (gypsy->device,
+						    goptions,
+						    &err)) {
+			g_warning ("Error: %s", err->message);
+			g_error_free (err);
+		}
+		g_hash_table_destroy (goptions);
+	}
 	gypsy_device_start (gypsy->device, error);
 	if (*error != NULL) {
 		g_print ("Error - %s?\n", (*error)->message);

@@ -3,16 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>geoclue-address-details</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn01.html" title="C API">
 <link rel="prev" href="geoclue-geoclue-accuracy.html" title="geoclue-accuracy">
 <link rel="next" href="geoclue-geoclue-error.html" title="geoclue-error">
-<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
-<link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
-<link rel="reference" href="rn01.html" title="C API">
-<link rel="reference" href="rn02.html" title="D-Bus API">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
@@ -29,7 +26,7 @@
                   <a href="#geoclue-geoclue-address-details.description" class="shortcut">Description</a>
 </td></tr>
 </table>
-<div class="refentry" title="geoclue-address-details">
+<div class="refentry">
 <a name="geoclue-geoclue-address-details"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -39,84 +36,141 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv" title="Synopsis">
+<div class="refsynopsisdiv">
 <a name="geoclue-geoclue-address-details.synopsis"></a><h2>Synopsis</h2>
-<pre class="synopsis"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-new" title="geoclue_address_details_new ()">geoclue_address_details_new</a>         ();
-<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-copy" title="geoclue_address_details_copy ()">geoclue_address_details_copy</a>        (<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *source);
-<a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel"><span class="returnvalue">GeoclueAccuracyLevel</span></a>  <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-get-accuracy-level" title="geoclue_address_details_get_accuracy_level ()">geoclue_address_details_get_accuracy_level</a>
-                                                        (<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *address);
+<pre class="synopsis"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-copy" title="geoclue_address_details_copy ()">geoclue_address_details_copy</a>        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *source</code></em>);
+<a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel"><span class="returnvalue">GeoclueAccuracyLevel</span></a> <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-get-accuracy-level" title="geoclue_address_details_get_accuracy_level ()">geoclue_address_details_get_accuracy_level</a>
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>);
+<span class="returnvalue">void</span>                <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-insert" title="geoclue_address_details_insert ()">geoclue_address_details_insert</a>      (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *key</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *value</code></em>);
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-new" title="geoclue_address_details_new ()">geoclue_address_details_new</a>         ();
+<span class="returnvalue">void</span>                <a class="link" href="geoclue-geoclue-address-details.html#geoclue-address-details-set-country-from-code" title="geoclue_address_details_set_country_from_code ()">geoclue_address_details_set_country_from_code</a>
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>);
 </pre>
 </div>
-<div class="refsect1" title="Description">
+<div class="refsect1">
 <a name="geoclue-geoclue-address-details.description"></a><h2>Description</h2>
 </div>
-<div class="refsect1" title="Details">
+<div class="refsect1">
 <a name="geoclue-geoclue-address-details.details"></a><h2>Details</h2>
-<div class="refsect2" title="geoclue_address_details_new ()">
-<a name="geoclue-address-details-new"></a><h3>geoclue_address_details_new ()</h3>
-<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        geoclue_address_details_new         ();</pre>
-<p>
-Creates a new <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> suitable for Geoclue Address details.
-Both keys and values inserted to this <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> will be freed
-on <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-destroy"><code class="function">g_hash_table_destroy()</code></a>.</p>
-<div class="variablelist"><table border="0">
-<col align="left" valign="top">
-<tbody><tr>
-<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> New <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
-</td>
-</tr></tbody>
-</table></div>
-</div>
-<hr>
-<div class="refsect2" title="geoclue_address_details_copy ()">
+<div class="refsect2">
 <a name="geoclue-address-details-copy"></a><h3>geoclue_address_details_copy ()</h3>
-<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        geoclue_address_details_copy        (<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *source);</pre>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        geoclue_address_details_copy        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *source</code></em>);</pre>
 <p>
-Deep-copies a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.</p>
+Deep-copies a <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>.
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>source</code></em> :</span></p></td>
-<td> <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> to copy
-</td>
+<td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> to copy</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> New, deep copied <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+<td>New, deep copied <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
 </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="geoclue_address_details_get_accuracy_level ()">
+<div class="refsect2">
 <a name="geoclue-address-details-get-accuracy-level"></a><h3>geoclue_address_details_get_accuracy_level ()</h3>
-<pre class="programlisting"><a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel"><span class="returnvalue">GeoclueAccuracyLevel</span></a>  geoclue_address_details_get_accuracy_level
-                                                        (<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *address);</pre>
+<pre class="programlisting"><a class="link" href="geoclue-geoclue-types.html#GeoclueAccuracyLevel" title="enum GeoclueAccuracyLevel"><span class="returnvalue">GeoclueAccuracyLevel</span></a> geoclue_address_details_get_accuracy_level
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>);</pre>
 <p>
-Returns a <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> that best describes the accuracy of <em class="parameter"><code>address</code></em></p>
+Returns a <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a> that best describes the accuracy of <em class="parameter"><code>address</code></em>
+</p>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody>
 <tr>
 <td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
-<td> A <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address hash values
-</td>
+<td>A <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address hash values</td>
 </tr>
 <tr>
 <td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
-<td> <a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a>
-</td>
+<td><a class="link" href="geoclue-geoclue-accuracy.html#GeoclueAccuracy" title="GeoclueAccuracy"><span class="type">GeoclueAccuracy</span></a></td>
 </tr>
 </tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="geoclue-address-details-insert"></a><h3>geoclue_address_details_insert ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_address_details_insert      (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *key</code></em>,
+                                                         <em class="parameter"><code>const <span class="type">char</span> *value</code></em>);</pre>
+<p>
+Adds a address field into <em class="parameter"><code>address</code></em>. Will take copies
+of the strings.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
+<td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> to insert value in</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>key</code></em> :</span></p></td>
+<td>the key to use, one of GEOCLUE_ADDRESS_KEY_*</td>
+</tr>
+<tr>
+<td><p><span class="term"><em class="parameter"><code>value</code></em> :</span></p></td>
+<td>value to insert into address</td>
+</tr>
+</tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="geoclue-address-details-new"></a><h3>geoclue_address_details_new ()</h3>
+<pre class="programlisting"><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="returnvalue">GHashTable</span></a> *        geoclue_address_details_new         ();</pre>
+<p>
+Creates a new <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> suitable for Geoclue Address details.
+Both keys and values inserted to this <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> will be freed
+on <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#g-hash-table-destroy"><code class="function">g_hash_table_destroy()</code></a>.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><span class="emphasis"><em>Returns</em></span> :</span></p></td>
+<td>New <a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a>
+</td>
+</tr></tbody>
+</table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="geoclue-address-details-set-country-from-code"></a><h3>geoclue_address_details_set_country_from_code ()</h3>
+<pre class="programlisting"><span class="returnvalue">void</span>                geoclue_address_details_set_country_from_code
+                                                        (<em class="parameter"><code><a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> *address</code></em>);</pre>
+<p>
+Uses the "ISO 3166-1 alpha-2" list to figure out the country name matching 
+the country code in <em class="parameter"><code>details</code></em>, and adds the country name to details.
+</p>
+<p>
+Using this function in providers is useful even when the data source includes
+country name: this way names are standardized.
+</p>
+<div class="variablelist"><table border="0">
+<col align="left" valign="top">
+<tbody><tr>
+<td><p><span class="term"><em class="parameter"><code>address</code></em> :</span></p></td>
+<td>
+<a href="http://library.gnome.org/devel/glib/unstable/glib-Hash-Tables.html#GHashTable"><span class="type">GHashTable</span></a> with address data</td>
+</tr></tbody>
 </table></div>
 </div>
 </div>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.13</div>
+          Generated by GTK-Doc V1.18.1</div>
 </body>
 </html>

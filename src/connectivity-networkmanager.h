@@ -40,7 +40,6 @@ typedef struct {
 	
 	/* private */
 	GeoclueNetworkStatus status;
-	DBusGConnection *connection;
 	NMClient *client;
 	char *cache_ap_mac;
 	int ap_strength;

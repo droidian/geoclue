@@ -846,10 +846,6 @@ gc_master_provider_initialize_interfaces (GcMasterProvider *provider)
 static gboolean
 gc_master_provider_initialize (GcMasterProvider *provider)
 {
-	GcMasterProviderPrivate *priv;
-	 
-	priv = GET_PRIVATE (provider);
-	
 	if (!gc_master_provider_initialize_interfaces (provider)) {
 		return FALSE;
 	}

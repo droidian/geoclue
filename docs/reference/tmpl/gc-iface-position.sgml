@@ -9,19 +9,27 @@ GcIfacePosition
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### STRUCT GcIfacePosition ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT GcIfacePositionClass ##### -->
 <para>
 
 </para>
 
+@base_iface: 
+@position_changed: 
+@get_position: 
 
 <!-- ##### FUNCTION gc_iface_position_emit_position_changed ##### -->
 <para>

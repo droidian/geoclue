@@ -5,6 +5,7 @@
  * Author: Jussi Kukkonen <jku@linux.intel.com>
  * Copyright 2008 by Garmin Ltd. or its subsidiaries
  *           2010 Intel Corporation
+ *           2010 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -31,8 +32,8 @@
   * "mobile country code -> ISO country code" lookup table: as a result address
   * will only ever have country code and country fields.
   * 
-  * Gsmloc requires the telephony stack oFono to work -- more IMSI data
-  * sources could be added fairly easily. 
+  * Gsmloc requires the oFono or ModemManager telephony stacks to work -- more
+  * IMSI data sources could be added fairly easily.
   **/
   
 #include <config.h>
@@ -53,6 +54,9 @@
 
 /* ofono implementation */
 #include "geoclue-gsmloc-ofono.h"
+
+/* ModemManager implementation */
+#include "geoclue-gsmloc-mm.h"
 
 /* country code list */
 #include "mcc.h"
@@ -76,6 +80,7 @@ struct _GeoclueGsmloc {
 	GcWebService *web_service;
 
 	GeoclueGsmlocOfono *ofono;
+	GeoclueGsmlocMm *mm;
 
 	/* current data */
 	char *mcc;
@@ -114,10 +119,12 @@ geoclue_gsmloc_get_status (GcIfaceGeoclue *iface,
 {
 	GeoclueGsmloc *gsmloc = GEOCLUE_GSMLOC (iface);
 	gboolean ofono_available;
+	gboolean mm_available;
 
 	g_object_get (gsmloc->ofono, "available", &ofono_available, NULL);
+	g_object_get (gsmloc->mm, "available", &mm_available, NULL);
 
-	if (!ofono_available) {
+	if (!ofono_available && !mm_available) {
 		*status = GEOCLUE_STATUS_ERROR;
 	} else if (!gsmloc->mcc || !gsmloc->mnc ||
 	           !gsmloc->lac || !gsmloc->cid) {
@@ -364,6 +371,14 @@ geoclue_gsmloc_dispose (GObject *obj)
 		gsmloc->ofono = NULL;
 	}
 
+	if (gsmloc->mm) {
+		g_signal_handlers_disconnect_by_func (gsmloc->mm,
+		                                      network_data_changed_cb,
+		                                      gsmloc);
+		g_object_unref (gsmloc->mm);
+		gsmloc->mm = NULL;
+	}
+
 	if (gsmloc->address) {
 		g_hash_table_destroy (gsmloc->address);
 		gsmloc->address = NULL;
@@ -407,6 +422,11 @@ geoclue_gsmloc_init (GeoclueGsmloc *gsmloc)
 	/* init ofono*/
 	gsmloc->ofono = geoclue_gsmloc_ofono_new ();
 	g_signal_connect (gsmloc->ofono, "network-data-changed",
+	                  G_CALLBACK (network_data_changed_cb), gsmloc);
+
+	/* init mm */
+	gsmloc->mm = geoclue_gsmloc_mm_new ();
+	g_signal_connect (gsmloc->mm, "network-data-changed",
 	                  G_CALLBACK (network_data_changed_cb), gsmloc);
 }
 

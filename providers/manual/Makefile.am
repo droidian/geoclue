@@ -30,7 +30,7 @@ service_in_files = org.freedesktop.Geoclue.Providers.Manual.service.in
 service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+	$(AM_V_GEN) sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 CLEANFILES = \
 	stamp-geoclue-manual-glue.h
@@ -48,7 +48,7 @@ DISTCLEANFILES = 	\
 	@true
 
 stamp-geoclue-manual-glue.h: geoclue-manual.xml
-	$(DBUS_BINDING_TOOL) --prefix=geoclue_manual --mode=glib-server $< > xgen-$(@F) \
+	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=geoclue_manual --mode=glib-server $< > xgen-$(@F) \
 	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
 	&& rm -f xgen-$(@F) \
 	&& echo timestamp > $(@F)

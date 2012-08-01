@@ -9,12 +9,17 @@ GeoclueProvider
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### STRUCT GeoclueProvider ##### -->
@@ -46,15 +51,34 @@ GeoclueProvider
 
 </para>
 
-<!-- ##### FUNCTION geoclue_provider_get_status ##### -->
+<!-- ##### STRUCT GeoclueProviderClass ##### -->
+<para>
+
+</para>
+
+@object_class: 
+@status_changed: 
+
+<!-- ##### USER_FUNCTION GeoclueProviderInfoCallback ##### -->
 <para>
 
 </para>
 
 @provider: 
-@status: 
+@name: 
+@description: 
 @error: 
-@Returns: 
+@userdata: 
+
+
+<!-- ##### USER_FUNCTION GeoclueProviderOptionsCallback ##### -->
+<para>
+
+</para>
+
+@provider: 
+@error: 
+@userdata: 
 
 
 <!-- ##### USER_FUNCTION GeoclueProviderStatusCallback ##### -->
@@ -65,16 +89,6 @@ GeoclueProvider
 @provider: 
 @status: 
 @error: 
-@userdata: 
-
-
-<!-- ##### FUNCTION geoclue_provider_get_status_async ##### -->
-<para>
-
-</para>
-
-@provider: 
-@callback: 
 @userdata: 
 
 
@@ -90,19 +104,28 @@ GeoclueProvider
 @Returns: 
 
 
-<!-- ##### USER_FUNCTION GeoclueProviderInfoCallback ##### -->
+<!-- ##### FUNCTION geoclue_provider_get_provider_info_async ##### -->
 <para>
 
 </para>
 
 @provider: 
-@name: 
-@description: 
-@error: 
+@callback: 
 @userdata: 
 
 
-<!-- ##### FUNCTION geoclue_provider_get_provider_info_async ##### -->
+<!-- ##### FUNCTION geoclue_provider_get_status ##### -->
+<para>
+
+</para>
+
+@provider: 
+@status: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_provider_get_status_async ##### -->
 <para>
 
 </para>
@@ -121,16 +144,6 @@ GeoclueProvider
 @options: 
 @error: 
 @Returns: 
-
-
-<!-- ##### USER_FUNCTION GeoclueProviderOptionsCallback ##### -->
-<para>
-
-</para>
-
-@provider: 
-@error: 
-@userdata: 
 
 
 <!-- ##### FUNCTION geoclue_provider_set_options_async ##### -->

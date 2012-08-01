@@ -1,5 +1,5 @@
 %.xml: %-full.xml
-	$(XSLT) -o $@ $(top_srcdir)/docs/tools/spec-strip-docs.xsl $<
+	$(AM_V_GEN) $(XSLT) -o $@ $(top_srcdir)/docs/tools/spec-strip-docs.xsl $<
 
 noinst_DATA = \
 	gc-iface-geoclue.xml \

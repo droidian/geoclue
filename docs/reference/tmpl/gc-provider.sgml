@@ -9,12 +9,17 @@ GcProvider
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### STRUCT GcProvider ##### -->
@@ -22,6 +27,16 @@ GcProvider
 
 </para>
 
+
+<!-- ##### STRUCT GcProviderClass ##### -->
+<para>
+
+</para>
+
+@parent_class: 
+@shutdown: 
+@get_status: 
+@set_options: 
 
 <!-- ##### FUNCTION gc_provider_set_details ##### -->
 <para>

@@ -55,6 +55,7 @@
  * information about the provider and to set provider
  * options.
  */
+#include <config.h>
 
 #include <geoclue/geoclue-provider.h>
 #include "gc-iface-geoclue-bindings.h"
@@ -168,7 +169,7 @@ constructor (GType                  type,
 	provider = GEOCLUE_PROVIDER (object);
 	priv = GET_PRIVATE (provider);
 	
-	connection = dbus_g_bus_get (DBUS_BUS_SESSION, &error);
+	connection = dbus_g_bus_get (GEOCLUE_DBUS_BUS, &error);
 	if (connection == NULL) {
 		g_printerr ("Failed to open connection to bus: %s\n",
 		            error->message);

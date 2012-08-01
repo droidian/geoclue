@@ -9,17 +9,24 @@ GcIfaceReverseGeocode
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### STRUCT GcIfaceReverseGeocode ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT GcIfaceReverseGeocodeClass ##### -->
 <para>
 
 </para>
 
+@base_iface: 
+@position_to_address: 
 

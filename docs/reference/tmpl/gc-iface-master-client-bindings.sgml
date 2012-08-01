@@ -9,49 +9,24 @@ gc-iface-master-client-bindings
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO DBUS_GLIB_CLIENT_WRAPPERS_org_freedesktop_Geoclue_MasterClient ##### -->
 <para>
 
 </para>
 
-@proxy: 
-@IN_accuracy_level: 
-@IN_time: 
-@IN_require_updates: 
-@IN_allowed_resources: 
-@Returns: 
-
-
-<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements_reply ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@error: 
-@userdata: 
-
-
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements_async ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@IN_accuracy_level: 
-@IN_time: 
-@IN_require_updates: 
-@IN_allowed_resources: 
-@callback: 
-@Returns: 
 
 
 <!-- ##### FUNCTION dbus_g_proxy_begin_call ##### -->
@@ -72,16 +47,6 @@ gc-iface-master-client-bindings
 @Returns: 
 
 
-<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_address_start_reply ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@error: 
-@userdata: 
-
-
 <!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_address_start_async ##### -->
 <para>
 
@@ -92,16 +57,17 @@ gc-iface-master-client-bindings
 @Returns: 
 
 
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_position_start ##### -->
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_address_start_async_callback ##### -->
 <para>
 
 </para>
 
 @proxy: 
-@Returns: 
+@call: 
+@user_data: 
 
 
-<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_position_start_reply ##### -->
+<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_address_start_reply ##### -->
 <para>
 
 </para>
@@ -109,16 +75,6 @@ gc-iface-master-client-bindings
 @proxy: 
 @error: 
 @userdata: 
-
-
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_position_start_async ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@callback: 
-@Returns: 
 
 
 <!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_address_provider ##### -->
@@ -132,6 +88,26 @@ gc-iface-master-client-bindings
 @OUT_service: 
 @OUT_path: 
 @Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_address_provider_async ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@callback: 
+@Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_address_provider_async_callback ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@call: 
+@user_data: 
 
 
 <!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_get_address_provider_reply ##### -->
@@ -148,16 +124,6 @@ gc-iface-master-client-bindings
 @userdata: 
 
 
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_address_provider_async ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@callback: 
-@Returns: 
-
-
 <!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_position_provider ##### -->
 <para>
 
@@ -169,6 +135,26 @@ gc-iface-master-client-bindings
 @OUT_service: 
 @OUT_path: 
 @Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_position_provider_async ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@callback: 
+@Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_position_provider_async_callback ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@call: 
+@user_data: 
 
 
 <!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_get_position_provider_reply ##### -->
@@ -185,7 +171,16 @@ gc-iface-master-client-bindings
 @userdata: 
 
 
-<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_get_position_provider_async ##### -->
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_position_start ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_position_start_async ##### -->
 <para>
 
 </para>
@@ -193,5 +188,72 @@ gc-iface-master-client-bindings
 @proxy: 
 @callback: 
 @Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_position_start_async_callback ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@call: 
+@user_data: 
+
+
+<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_position_start_reply ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@error: 
+@userdata: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@IN_accuracy_level: 
+@IN_time: 
+@IN_require_updates: 
+@IN_allowed_resources: 
+@Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements_async ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@IN_accuracy_level: 
+@IN_time: 
+@IN_require_updates: 
+@IN_allowed_resources: 
+@callback: 
+@Returns: 
+
+
+<!-- ##### FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements_async_callback ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@call: 
+@user_data: 
+
+
+<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_MasterClient_set_requirements_reply ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@error: 
+@userdata: 
 
 

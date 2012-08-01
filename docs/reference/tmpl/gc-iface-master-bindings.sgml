@@ -9,12 +9,33 @@ gc-iface-master-bindings
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO DBUS_GLIB_CLIENT_WRAPPERS_org_freedesktop_Geoclue_Master ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### FUNCTION dbus_g_proxy_begin_call ##### -->
+<para>
+
+</para>
+
+@Param1: 
+@Returns: 
 
 
 <!-- ##### FUNCTION org_freedesktop_Geoclue_Master_create ##### -->
@@ -27,17 +48,6 @@ gc-iface-master-bindings
 @Returns: 
 
 
-<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_Master_create_reply ##### -->
-<para>
-
-</para>
-
-@proxy: 
-@OUT_path: 
-@error: 
-@userdata: 
-
-
 <!-- ##### FUNCTION org_freedesktop_Geoclue_Master_create_async ##### -->
 <para>
 
@@ -48,12 +58,24 @@ gc-iface-master-bindings
 @Returns: 
 
 
-<!-- ##### FUNCTION dbus_g_proxy_begin_call ##### -->
+<!-- ##### FUNCTION org_freedesktop_Geoclue_Master_create_async_callback ##### -->
 <para>
 
 </para>
 
-@Param1: 
-@Returns: 
+@proxy: 
+@call: 
+@user_data: 
+
+
+<!-- ##### USER_FUNCTION org_freedesktop_Geoclue_Master_create_reply ##### -->
+<para>
+
+</para>
+
+@proxy: 
+@OUT_path: 
+@error: 
+@userdata: 
 
 

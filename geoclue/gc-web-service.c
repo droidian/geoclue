@@ -190,9 +190,9 @@ gc_web_service_fetch (GcWebService *self, gchar *url, GError **error)
 	xmlNanoHTTPInit();
 	ctxt = xmlNanoHTTPMethod (url, "GET", NULL, NULL, NULL, 0);
 	if (!ctxt) {
-		*error = g_error_new (GEOCLUE_ERROR, 
-		                      GEOCLUE_ERROR_NOT_AVAILABLE,
-		                      g_strdup_printf ("xmlNanoHTTPMethod did not get a response from %s\n", url));
+		g_set_error (error, GEOCLUE_ERROR,
+		             GEOCLUE_ERROR_NOT_AVAILABLE,
+		             "xmlNanoHTTPMethod did not get a response from %s\n", url);
 		return FALSE;
 	}
 	
@@ -202,9 +202,9 @@ gc_web_service_fetch (GcWebService *self, gchar *url, GError **error)
 			xmlNanoHTTPClose(ctxt);
 			xmlBufferFree (output);
 			
-			*error = g_error_new (GEOCLUE_ERROR, 
-			                      GEOCLUE_ERROR_FAILED,
-			                      g_strdup_printf ("libxml error (xmlBufferAdd failed)"));
+			g_set_error_literal (error, GEOCLUE_ERROR,
+			                     GEOCLUE_ERROR_FAILED,
+			                     "libxml error (xmlBufferAdd failed)");
 			
 			return FALSE;
 		}
@@ -346,7 +346,7 @@ gc_web_service_query (GcWebService *self, GError **error, ...)
 	key = va_arg (list, char*);
 	while (key) {
 		value = va_arg (list, char*);
-		esc_value = (gchar *)xmlURIEscapeStr ((xmlChar *)value, NULL);
+		esc_value = (gchar *)xmlURIEscapeStr ((xmlChar *)value, (xmlChar *)":");
 		
 		if (first_pair) {
 			tmp = g_strdup_printf ("%s?%s=%s",  url, key, esc_value);

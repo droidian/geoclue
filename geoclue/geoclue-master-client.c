@@ -333,7 +333,7 @@ geoclue_master_client_init (GeoclueMasterClient *client)
  * geoclue_master_client_set_requirements:
  * @client: A #GeoclueMasterClient
  * @min_accuracy: The required minimum accuracy as a #GeoclueAccuracyLevel.
- * @min_time: The minimum time between update signals (currently not implemented)
+ * @min_time: The minimum time between update signals in seconds
  * @require_updates: Whether the updates (signals) are required. Only applies to interfaces with signals
  * @allowed_resources: The resources that are allowed to be used as a #GeoclueResourceFlags
  * @error: A pointer to returned #GError or %NULL.

@@ -216,21 +216,50 @@ position_changed (GeocluePosition      *position,
 	update_position (gui, position, latitude, longitude, altitude);
 }
 
+typedef struct {
+	GeoclueTestGui *gui;
+	char *name;
+} cb_data;
+
+static void 
+position_callback (GeocluePosition *position,
+                   GeocluePositionFields fields,
+                   int timestamp,
+                   double lat, double lon, double alt,
+                   GeoclueAccuracy *accuracy,
+                   GError *error,
+                   cb_data *data)
+{
+	if (error) {
+		g_warning ("Error getting position from %s: %s\n", data->name, error->message);
+		g_error_free (error);
+		lat = lon = alt = 0.0/0.0;
+	}
+
+	update_position (data->gui, position, lat, lon, alt);
+
+	g_free (data->name);
+	g_free (data);
+}
+
 static void
 address_callback (GeoclueAddress *address,
                   int timestamp,
                   GHashTable *details,
                   GeoclueAccuracy *accuracy,
                   GError *error,
-                  gpointer userdata)
+                  cb_data *data)
 {
 	if (error) {
-		g_warning ("Error getting address: %s\n", error->message);
+		g_warning ("Error getting address for %s: %s\n", data->name, error->message);
 		g_error_free (error);
 		details = geoclue_address_details_new ();
 	}
-	
-	update_address (GEOCLUE_TEST_GUI (userdata), address, details);
+
+	update_address (data->gui, address, details);
+
+	g_free (data->name);
+	g_free (data);
 }
 
 static void 
@@ -242,6 +271,7 @@ info_callback (GeoclueProvider *provider,
 {
 	GtkTreeIter iter;
 	GeoclueTestGui *gui = GEOCLUE_TEST_GUI (userdata);
+	cb_data *data;
 	
 	if (error) {
 		g_warning ("Error getting provider info: %s\n", error->message);
@@ -258,6 +288,13 @@ info_callback (GeoclueProvider *provider,
 					    COL_ADDRESS_PROVIDER_NAME, name,
 					    -1);
 		}
+
+		data = g_new0 (cb_data, 1);
+		data->gui = gui;
+		data->name = g_strdup (name);
+		geoclue_address_get_address_async (GEOCLUE_ADDRESS (provider),
+	                                     (GeoclueAddressCallback)address_callback,
+	                                     data);
 	}
 	
 	if (get_matching_tree_iter (GTK_TREE_MODEL (gui->position_store),
@@ -269,6 +306,13 @@ info_callback (GeoclueProvider *provider,
 			                    COL_POSITION_PROVIDER_NAME, name,
 			                    -1);
 		}
+
+		data = g_new0 (cb_data, 1);
+		data->gui = gui;
+		data->name = g_strdup (name);
+		geoclue_position_get_position_async (GEOCLUE_POSITION (provider),
+	                                       (GeocluePositionCallback)position_callback,
+	                                       data);
 	}
 }
 
@@ -294,11 +338,10 @@ add_to_address_store (GeoclueTestGui *gui, GeoclueAddress *address, gboolean is_
 	g_signal_connect (G_OBJECT (address), "address-changed",
 				G_CALLBACK (address_changed), gui);
 	
+	/* callback will call get_address */
 	geoclue_provider_get_provider_info_async (GEOCLUE_PROVIDER (address), 
 	                                          info_callback,
 	                                          gui);
-	geoclue_address_get_address_async (address, address_callback, gui);
-	
 }
 
 static gboolean
@@ -342,23 +385,6 @@ get_next_provider (GDir *dir, char **name, char **service, char **path, char **i
 }
 
 static void 
-position_callback (GeocluePosition *position,
-                   GeocluePositionFields fields,
-                   int timestamp,
-                   double lat, double lon, double alt,
-                   GeoclueAccuracy *accuracy,
-                   GError *error,
-                   gpointer userdata)
-{
-	if (error) {
-		g_warning ("Error getting position: %s\n", error->message);
-		g_error_free (error);
-		lat = lon = alt = 0.0/0.0;
-	}
-	update_position (GEOCLUE_TEST_GUI (userdata), position, lat, lon, alt);
-}
-
-static void 
 add_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, gboolean is_master)
 {
 	GtkTreeIter iter;
@@ -380,10 +406,10 @@ add_to_position_store (GeoclueTestGui *gui, GeocluePosition *position, gboolean 
 	g_signal_connect (G_OBJECT (position), "position-changed",
 				G_CALLBACK (position_changed), gui);
 	
+	/* callback will call get_position */
 	geoclue_provider_get_provider_info_async (GEOCLUE_PROVIDER (position), 
 	                                          info_callback,
 	                                          gui);
-	geoclue_position_get_position_async (position, position_callback, gui);
 }
 
 

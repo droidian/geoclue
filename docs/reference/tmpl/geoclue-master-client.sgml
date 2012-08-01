@@ -9,12 +9,39 @@ GeoclueMasterClient
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### USER_FUNCTION CreateAddressCallback ##### -->
+<para>
+
+</para>
+
+@client: 
+@address: 
+@error: 
+@userdata: 
+
+
+<!-- ##### USER_FUNCTION CreatePositionCallback ##### -->
+<para>
+
+</para>
+
+@client: 
+@position: 
+@error: 
+@userdata: 
 
 
 <!-- ##### MACRO GEOCLUE_MASTER_CLIENT_DBUS_INTERFACE ##### -->
@@ -22,6 +49,20 @@ GeoclueMasterClient
 
 </para>
 
+
+
+<!-- ##### USER_FUNCTION GeoclueGetProviderCallback ##### -->
+<para>
+
+</para>
+
+@client: 
+@name: 
+@description: 
+@service: 
+@path: 
+@error: 
+@userdata: 
 
 
 <!-- ##### STRUCT GeoclueMasterClient ##### -->
@@ -64,19 +105,15 @@ GeoclueMasterClient
 
 </para>
 
-<!-- ##### FUNCTION geoclue_master_client_set_requirements ##### -->
+<!-- ##### STRUCT GeoclueMasterClientClass ##### -->
 <para>
 
 </para>
 
-@client: 
-@min_accuracy: 
-@min_time: 
-@require_updates: 
-@allowed_resources: 
-@error: 
-@Returns: 
-
+@parent_class: 
+@address_provider_changed: 
+@position_provider_changed: 
+@invalidated: 
 
 <!-- ##### USER_FUNCTION GeoclueSetRequirementsCallback ##### -->
 <para>
@@ -88,20 +125,6 @@ GeoclueMasterClient
 @userdata: 
 
 
-<!-- ##### FUNCTION geoclue_master_client_set_requirements_async ##### -->
-<para>
-
-</para>
-
-@client: 
-@min_accuracy: 
-@min_time: 
-@require_updates: 
-@allowed_resources: 
-@callback: 
-@userdata: 
-
-
 <!-- ##### FUNCTION geoclue_master_client_create_address ##### -->
 <para>
 
@@ -110,17 +133,6 @@ GeoclueMasterClient
 @client: 
 @error: 
 @Returns: 
-
-
-<!-- ##### USER_FUNCTION CreateAddressCallback ##### -->
-<para>
-
-</para>
-
-@client: 
-@address: 
-@error: 
-@userdata: 
 
 
 <!-- ##### FUNCTION geoclue_master_client_create_address_async ##### -->
@@ -141,17 +153,6 @@ GeoclueMasterClient
 @client: 
 @error: 
 @Returns: 
-
-
-<!-- ##### USER_FUNCTION CreatePositionCallback ##### -->
-<para>
-
-</para>
-
-@client: 
-@position: 
-@error: 
-@userdata: 
 
 
 <!-- ##### FUNCTION geoclue_master_client_create_position_async ##### -->
@@ -176,20 +177,6 @@ GeoclueMasterClient
 @path: 
 @error: 
 @Returns: 
-
-
-<!-- ##### USER_FUNCTION GeoclueGetProviderCallback ##### -->
-<para>
-
-</para>
-
-@client: 
-@name: 
-@description: 
-@service: 
-@path: 
-@error: 
-@userdata: 
 
 
 <!-- ##### FUNCTION geoclue_master_client_get_address_provider_async ##### -->
@@ -222,6 +209,34 @@ GeoclueMasterClient
 </para>
 
 @client: 
+@callback: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_master_client_set_requirements ##### -->
+<para>
+
+</para>
+
+@client: 
+@min_accuracy: 
+@min_time: 
+@require_updates: 
+@allowed_resources: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_master_client_set_requirements_async ##### -->
+<para>
+
+</para>
+
+@client: 
+@min_accuracy: 
+@min_time: 
+@require_updates: 
+@allowed_resources: 
 @callback: 
 @userdata: 
 

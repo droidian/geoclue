@@ -9,23 +9,67 @@ geoclue-types
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### ENUM GeoclueStatus ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_AREA ##### -->
 <para>
 
 </para>
 
-@GEOCLUE_STATUS_ERROR: 
-@GEOCLUE_STATUS_UNAVAILABLE: 
-@GEOCLUE_STATUS_ACQUIRING: 
-@GEOCLUE_STATUS_AVAILABLE: 
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_COUNTRY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_COUNTRYCODE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_LOCALITY ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_POSTALCODE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_REGION ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_STREET ##### -->
+<para>
+
+</para>
+
+
 
 <!-- ##### ENUM GeoclueAccuracyLevel ##### -->
 <para>
@@ -40,6 +84,16 @@ geoclue-types
 @GEOCLUE_ACCURACY_LEVEL_STREET: 
 @GEOCLUE_ACCURACY_LEVEL_DETAILED: 
 
+<!-- ##### ENUM GeoclueNetworkStatus ##### -->
+<para>
+
+</para>
+
+@GEOCLUE_CONNECTIVITY_UNKNOWN: 
+@GEOCLUE_CONNECTIVITY_OFFLINE: 
+@GEOCLUE_CONNECTIVITY_ACQUIRING: 
+@GEOCLUE_CONNECTIVITY_ONLINE: 
+
 <!-- ##### ENUM GeocluePositionFields ##### -->
 <para>
 
@@ -49,74 +103,6 @@ geoclue-types
 @GEOCLUE_POSITION_FIELDS_LATITUDE: 
 @GEOCLUE_POSITION_FIELDS_LONGITUDE: 
 @GEOCLUE_POSITION_FIELDS_ALTITUDE: 
-
-<!-- ##### ENUM GeoclueVelocityFields ##### -->
-<para>
-
-</para>
-
-@GEOCLUE_VELOCITY_FIELDS_NONE: 
-@GEOCLUE_VELOCITY_FIELDS_SPEED: 
-@GEOCLUE_VELOCITY_FIELDS_DIRECTION: 
-@GEOCLUE_VELOCITY_FIELDS_CLIMB: 
-
-<!-- ##### ENUM GeoclueError ##### -->
-<para>
-
-</para>
-
-@GEOCLUE_ERROR_NOT_IMPLEMENTED: 
-@GEOCLUE_ERROR_NOT_AVAILABLE: 
-@GEOCLUE_ERROR_FAILED: 
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_COUNTRYCODE ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_COUNTRY ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_REGION ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_LOCALITY ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_AREA ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_POSTALCODE ##### -->
-<para>
-
-</para>
-
-
-
-<!-- ##### MACRO GEOCLUE_ADDRESS_KEY_STREET ##### -->
-<para>
-
-</para>
-
-
 
 <!-- ##### ENUM GeoclueResourceFlags ##### -->
 <para>
@@ -129,20 +115,31 @@ geoclue-types
 @GEOCLUE_RESOURCE_GPS: 
 @GEOCLUE_RESOURCE_ALL: 
 
-<!-- ##### ENUM GeoclueNetworkStatus ##### -->
+<!-- ##### ENUM GeoclueStatus ##### -->
 <para>
 
 </para>
 
-@GEOCLUE_CONNECTIVITY_UNKNOWN: 
-@GEOCLUE_CONNECTIVITY_OFFLINE: 
-@GEOCLUE_CONNECTIVITY_ACQUIRING: 
-@GEOCLUE_CONNECTIVITY_ONLINE: 
+@GEOCLUE_STATUS_ERROR: 
+@GEOCLUE_STATUS_UNAVAILABLE: 
+@GEOCLUE_STATUS_ACQUIRING: 
+@GEOCLUE_STATUS_AVAILABLE: 
+
+<!-- ##### ENUM GeoclueVelocityFields ##### -->
+<para>
+
+</para>
+
+@GEOCLUE_VELOCITY_FIELDS_NONE: 
+@GEOCLUE_VELOCITY_FIELDS_SPEED: 
+@GEOCLUE_VELOCITY_FIELDS_DIRECTION: 
+@GEOCLUE_VELOCITY_FIELDS_CLIMB: 
 
 <!-- ##### FUNCTION geoclue_types_init ##### -->
 <para>
 
 </para>
 
+@void: 
 
 

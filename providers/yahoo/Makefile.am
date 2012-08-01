@@ -21,7 +21,7 @@ service_in_files = org.freedesktop.Geoclue.Providers.Yahoo.service.in
 service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+	$(AM_V_GEN) sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 EXTRA_DIST = 			\
 	$(service_in_files)	\

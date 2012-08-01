@@ -3,16 +3,13 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>org.freedesktop.Geoclue</title>
-<meta name="generator" content="DocBook XSL Stylesheets V1.75.2">
+<meta name="generator" content="DocBook XSL Stylesheets V1.76.1">
 <link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="rn02.html" title="D-Bus API">
 <link rel="prev" href="MasterClient.html" title="org.freedesktop.Geoclue.MasterClient">
 <link rel="next" href="Position.html" title="org.freedesktop.Geoclue.Position">
-<meta name="generator" content="GTK-Doc V1.13 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.18.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
-<link rel="chapter" href="ch01.html" title="Using Geoclue in applications">
-<link rel="reference" href="rn01.html" title="C API">
-<link rel="reference" href="rn02.html" title="D-Bus API">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
@@ -35,7 +32,7 @@
                   <a href="#Geoclue.signals" class="shortcut">Signals</a>
 </td></tr>
 </table>
-<div class="refentry" title="org.freedesktop.Geoclue">
+<div class="refentry">
 <a name="Geoclue"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
 <td valign="top">
@@ -44,35 +41,35 @@
 </td>
 <td valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv" title="Methods">
+<div class="refsynopsisdiv">
 <h2>Methods</h2>
 <pre class="synopsis"><a href="Geoclue.html#Geoclue.GetProviderInfo">GetProviderInfo</a> (out 's'Name,
                  out 's'Description)
 <a href="Geoclue.html#Geoclue.GetStatus">GetStatus</a>       (out 'i'status)
-<a href="Geoclue.html#Geoclue.SetOptions">SetOptions</a>      (in  'a{ss}'options)
+<a href="Geoclue.html#Geoclue.SetOptions">SetOptions</a>      (in  'a{sv}'options)
 <a href="Geoclue.html#Geoclue.AddReference">AddReference</a>    ()
 <a href="Geoclue.html#Geoclue.RemoveReference">RemoveReference</a> ()
 </pre>
 </div>
-<div class="refsect1" title="Signals">
-<a name="id2755605"></a><h2>Signals</h2>
+<div class="refsect1">
+<a name="id429374"></a><h2>Signals</h2>
 <pre class="synopsis"><a href="Geoclue.html#Geoclue::StatusChanged">StatusChanged</a> ('i'status)
 
 </pre>
 </div>
-<div class="refsect1" title="Implemented Interfaces">
-<a name="id2792344"></a><h2>Implemented Interfaces</h2>
+<div class="refsect1">
+<a name="id423379"></a><h2>Implemented Interfaces</h2>
 <p>org.freedesktop.Geoclue implements
     org.freedesktop.DBus.Introspectable,
     org.freedesktop.DBus.Properties
     </p>
 </div>
-<div class="refsect1" title="Properties">
-<a name="id2750470"></a><h2>Properties</h2>
+<div class="refsect1">
+<a name="id429498"></a><h2>Properties</h2>
 <pre class="synopsis"></pre>
 </div>
-<div class="refsect1" title="Description">
-<a name="id2760484"></a><h2>Description</h2>
+<div class="refsect1">
+<a name="id422868"></a><h2>Description</h2>
 <p>
 			</p>
 <p>Geoclue interface contains methods 
@@ -81,10 +78,10 @@
 <p>
 		</p>
 </div>
-<div class="refsect1" title="Details">
-<a name="id2772755"></a><h2>Details</h2>
-<div class="refsect2" title="GetProviderInfo ()">
-<a name="id2741729"></a><h3>
+<div class="refsect1">
+<a name="id431471"></a><h2>Details</h2>
+<div class="refsect2">
+<a name="id431478"></a><h3>
 <a name="Geoclue.GetProviderInfo"></a>GetProviderInfo ()</h3>
 <pre class="programlisting">GetProviderInfo (out 's' Name,
                  out 's' Description)</pre>
@@ -103,8 +100,8 @@
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="GetStatus ()">
-<a name="id2762515"></a><h3>
+<div class="refsect2">
+<a name="id429073"></a><h3>
 <a name="Geoclue.GetStatus"></a>GetStatus ()</h3>
 <pre class="programlisting">GetStatus (out 'i' status)</pre>
 <div class="variablelist"><table border="0">
@@ -116,10 +113,10 @@
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="SetOptions ()">
-<a name="id2757506"></a><h3>
+<div class="refsect2">
+<a name="id397281"></a><h3>
 <a name="Geoclue.SetOptions"></a>SetOptions ()</h3>
-<pre class="programlisting">SetOptions (in  'a{ss}' options)</pre>
+<pre class="programlisting">SetOptions (in  'a{sv}' options)</pre>
 <div class="variablelist"><table border="0">
 <col align="left" valign="top">
 <tbody><tr>
@@ -129,8 +126,8 @@
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="AddReference ()">
-<a name="id2756566"></a><h3>
+<div class="refsect2">
+<a name="id405714"></a><h3>
 <a name="Geoclue.AddReference"></a>AddReference ()</h3>
 <pre class="programlisting">AddReference ()</pre>Increase the reference count on the provider. 
 				Provider may shutdown if reference count reaches zero, so 
@@ -142,8 +139,8 @@
 </table></div>
 </div>
 <hr>
-<div class="refsect2" title="RemoveReference ()">
-<a name="id2776854"></a><h3>
+<div class="refsect2">
+<a name="id425425"></a><h3>
 <a name="Geoclue.RemoveReference"></a>RemoveReference ()</h3>
 <pre class="programlisting">RemoveReference ()</pre>Decrease the reference count on the provider<div class="variablelist"><table border="0">
 <col align="left" valign="top">
@@ -151,10 +148,10 @@
 </table></div>
 </div>
 </div>
-<div class="refsect1" title="Signal Details">
-<a name="id2772569"></a><h2>Signal Details</h2>
-<div class="refsect2" title="The StatusChanged signal">
-<a name="id2739821"></a><h3>
+<div class="refsect1">
+<a name="id406517"></a><h2>Signal Details</h2>
+<div class="refsect2">
+<a name="id416651"></a><h3>
 <a name="Geoclue::StatusChanged"></a>The StatusChanged signal</h3>
 <pre class="programlisting">StatusChanged ('i' status)</pre>
 <div class="variablelist"><table border="0">
@@ -166,12 +163,12 @@
 </table></div>
 </div>
 </div>
-<div class="refsect1" title="Property Details">
-<a name="id2758952"></a><h2>Property Details</h2>
+<div class="refsect1">
+<a name="id402530"></a><h2>Property Details</h2>
 </div>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.13</div>
+          Generated by GTK-Doc V1.18.1</div>
 </body>
 </html>

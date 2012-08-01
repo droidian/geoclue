@@ -9,12 +9,17 @@ GcWebService
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### STRUCT GcWebService ##### -->
@@ -23,14 +28,12 @@ GcWebService
 </para>
 
 
-<!-- ##### FUNCTION gc_web_service_set_base_url ##### -->
+<!-- ##### STRUCT GcWebServiceClass ##### -->
 <para>
 
 </para>
 
-@self: 
-@url: 
-
+@parent_class: 
 
 <!-- ##### FUNCTION gc_web_service_add_namespace ##### -->
 <para>
@@ -40,28 +43,6 @@ GcWebService
 @self: 
 @namespace: 
 @uri: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gc_web_service_query ##### -->
-<para>
-
-</para>
-
-@self: 
-@error: 
-@Varargs: 
-@Returns: 
-
-
-<!-- ##### FUNCTION gc_web_service_get_string ##### -->
-<para>
-
-</para>
-
-@self: 
-@value: 
-@xpath: 
 @Returns: 
 
 
@@ -85,5 +66,36 @@ GcWebService
 @response: 
 @response_length: 
 @Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_get_string ##### -->
+<para>
+
+</para>
+
+@self: 
+@value: 
+@xpath: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_query ##### -->
+<para>
+
+</para>
+
+@self: 
+@error: 
+@...: 
+@Returns: 
+
+
+<!-- ##### FUNCTION gc_web_service_set_base_url ##### -->
+<para>
+
+</para>
+
+@self: 
+@url: 
 
 

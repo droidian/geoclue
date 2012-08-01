@@ -17,7 +17,7 @@ revgeocode_example_SOURCES = revgeocode-example.c
 master_example_SOURCES = master-example.c
 master_pos_example_SOURCES = master-pos-example.c
 
-AM_CFLAGS = $(GEOCLUE_CFLAGS)
+AM_CFLAGS = $(GEOCLUE_CFLAGS) -I$(top_builddir) -I$(top_srcdir)
 LDADD = \
 	$(GEOCLUE_LIBS) \
     $(top_builddir)/geoclue/libgeoclue.la

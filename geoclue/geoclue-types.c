@@ -27,9 +27,14 @@
 #include <geoclue/geoclue-accuracy.h>
 #include <geoclue/geoclue-error.h>
 
+static gboolean initted = FALSE;
+
 void
 geoclue_types_init (void)
 {
+	if (initted != FALSE)
+		return;
+
 	dbus_g_object_register_marshaller (geoclue_marshal_VOID__INT_INT_DOUBLE_DOUBLE_DOUBLE,
 					   G_TYPE_NONE,
 					   G_TYPE_INT,
@@ -66,4 +71,6 @@ geoclue_types_init (void)
 	dbus_g_error_domain_register (GEOCLUE_ERROR,
 				      GEOCLUE_ERROR_DBUS_INTERFACE,
 				      GEOCLUE_TYPE_ERROR);
+
+	initted = TRUE;
 }

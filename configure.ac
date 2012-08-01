@@ -1,10 +1,13 @@
 AC_PREREQ(2.59)
-AC_INIT(geoclue, 0.12.0, http://geoclue.freedesktop.org)
+AC_INIT(geoclue, 0.12.99, http://geoclue.freedesktop.org)
 
 AC_CONFIG_SRCDIR(geoclue/gc-iface-geoclue.c)
 AM_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE([1.9 foreign])
 GEOCLUE_VERSION=0.12.0
+
+# Enable silent build when available (Automake 1.11)
+m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
 AC_PROG_CC
 AC_ISC_POSIX
@@ -14,6 +17,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_GCC_TRADITIONAL
 AM_PROG_LIBTOOL
+GLIB_GSETTINGS
 
 GTK_DOC_CHECK(1.0)
 AC_CHECK_PROGS(XSLT, xsltproc)
@@ -31,17 +35,24 @@ else
 	AC_DEFINE(GEOCLUE_DBUS_BUS, DBUS_BUS_SESSION, Use the session bus)
 fi
 
+AC_ARG_ENABLE(tests,[  --disable-tests           disable test libraries ], enable_tests=$enableval,enable_tests=yes)
+if test "x$enable_tests" = "xyes"; then
+   BUILD_TESTS=test
+fi
+AC_SUBST(BUILD_TESTS)
+
 PKG_CHECK_MODULES(GEOCLUE, [
 		  glib-2.0
 		  gobject-2.0
-		  dbus-glib-1 >= 0.60
+		  dbus-glib-1 >= 0.86
 		  libxml-2.0
 ])
 AC_SUBST(GEOCLUE_LIBS)
 AC_SUBST(GEOCLUE_CFLAGS)
 
 PKG_CHECK_MODULES(MASTER, [
-		  gconf-2.0
+		  gio-2.0 >= 2.25.7
+		  glib-2.0
 ])
 AC_SUBST(MASTER_LIBS)
 AC_SUBST(MASTER_CFLAGS)
@@ -53,7 +64,7 @@ DBUS_SERVICES_DIR="${datadir}/dbus-1/services"
 AC_SUBST(DBUS_SERVICES_DIR)
 AC_DEFINE_UNQUOTED(DBUS_SERVICES_DIR, "$DBUS_SERVICES_DIR", [Where services dir for D-Bus is])
 
-CFLAGS="$CFLAGS -g -Wall -Werror -Wno-format"
+CFLAGS="$CFLAGS -g -Wall -Wno-format"
 
 # -----------------------------------------------------------
 # gtk+
@@ -115,6 +126,18 @@ if test "x$enable_conic" = "xyes" -a "x$have_conic" != "xyes"; then
    AC_MSG_ERROR([Couldn't find conic dependencies.])
 fi
 
+AC_ARG_ENABLE(connman,
+              AS_HELP_STRING([--enable-connman=@<:@no/yes/auto@:>@],
+                             [build with connman support]), ,
+                             enable_connman=auto)
+
+if test "x$enable_connman" != "xno"; then
+    CONNECTIVITY="ConnMan"
+    AC_DEFINE(HAVE_CONNMAN, 1, [define if libconmann is installed])
+else
+   have_connman=no
+fi
+
 AC_ARG_ENABLE(networkmanager,
               AS_HELP_STRING([--enable-networkmanager=@<:@no/yes/auto@:>@],
                              [build with NetworkManager support]), ,
@@ -123,7 +146,7 @@ AC_ARG_ENABLE(networkmanager,
 if test "x$enable_networkmanager" != "xno"; then
    PKG_CHECK_MODULES(NETWORK_MANAGER,
    [
-      NetworkManager libnm_glib
+      NetworkManager libnm-glib libnm-util
    ], have_networkmanager="yes", have_networkmanager="no")
 
    if test "x$have_networkmanager" = "xyes"; then
@@ -149,6 +172,7 @@ PROVIDER_SUBDIRS="example hostip geonames nominatim manual plazes localnet yahoo
 # gypsy / gpsd / skyhook
 # -----------------------------------------------------------
 
+GYPSY_REQUIRED=0.7.1
 AC_ARG_ENABLE(gypsy,
               AS_HELP_STRING([--enable-gypsy=@<:@no/yes/auto@:>@],
                              [build with gypsy support]), ,
@@ -157,7 +181,7 @@ AC_ARG_ENABLE(gypsy,
 if test "x$enable_gypsy" != "xno"; then
    PKG_CHECK_MODULES(GYPSY,
    [
-      gypsy
+      gypsy >= $GYPSY_REQUIRED
    ], have_gypsy="yes", have_gypsy="no")
 
    if test "x$have_gypsy" = "xyes"; then

@@ -7,13 +7,15 @@ geoclue_skyhook_SOURCES = \
 geoclue_skyhook_CFLAGS = \
 	-I$(top_srcdir) \
 	-I$(top_builddir) \
+	-I$(top_srcdir)/src \
 	$(GEOCLUE_CFLAGS) \
 	$(SKYHOOK_CFLAGS)
 
 geoclue_skyhook_LDADD = \
 	$(GEOCLUE_LIBS) \
 	$(SKYHOOK_LIBS) \
-	$(top_builddir)/geoclue/libgeoclue.la 
+	$(top_builddir)/src/libconnectivity.la \
+	$(top_builddir)/geoclue/libgeoclue.la
 
 providersdir = $(datadir)/geoclue-providers
 providers_DATA = geoclue-skyhook.provider
@@ -23,7 +25,7 @@ service_in_files = org.freedesktop.Geoclue.Providers.Skyhook.service.in
 service_DATA = $(service_in_files:.service.in=.service)
 
 $(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
+	$(AM_V_GEN) sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
 
 EXTRA_DIST = 			\
 	$(service_in_files)	\

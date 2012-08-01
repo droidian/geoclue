@@ -9,12 +9,17 @@ geoclue-error
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### MACRO GEOCLUE_ERROR ##### -->
@@ -24,11 +29,28 @@ geoclue-error
 
 
 
+<!-- ##### MACRO GEOCLUE_ERROR_DBUS_INTERFACE ##### -->
+<para>
+
+</para>
+
+
+
+<!-- ##### ENUM GeoclueError ##### -->
+<para>
+
+</para>
+
+@GEOCLUE_ERROR_NOT_IMPLEMENTED: 
+@GEOCLUE_ERROR_NOT_AVAILABLE: 
+@GEOCLUE_ERROR_FAILED: 
+
 <!-- ##### FUNCTION geoclue_error_quark ##### -->
 <para>
 
 </para>
 
+@void: 
 @Returns: 
 
 

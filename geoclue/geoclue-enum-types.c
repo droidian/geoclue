@@ -1,5 +1,5 @@
 
-/* Generated data (by glib-mkenums) */
+
 
 #include <geoclue-error.h>
 #include "geoclue-enum-types.h"
@@ -22,5 +22,5 @@ geoclue_error_get_type (void)
   return etype;
 }
 
-/* Generated data ends here */
+
 

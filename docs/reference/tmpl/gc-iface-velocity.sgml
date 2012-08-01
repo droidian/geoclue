@@ -9,19 +9,27 @@ GcIfaceVelocity
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
 
 
-<!-- ##### STRUCT GcIfaceVelocity ##### -->
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### STRUCT GcIfaceVelocityClass ##### -->
 <para>
 
 </para>
 
+@base_iface: 
+@velocity_changed: 
+@get_velocity: 
 
 <!-- ##### FUNCTION gc_iface_velocity_emit_velocity_changed ##### -->
 <para>

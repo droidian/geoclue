@@ -140,14 +140,17 @@ set_options (GcIfaceGeoclue *gc,
              GError        **error)
 {
 	GeoclueGpsd *gpsd = GEOCLUE_GPSD (gc);
-	char *port, *host;
+	GValue *port_value, *host_value;
+	const char *port, *host;
 	gboolean changed = FALSE;
-	
-	host = g_hash_table_lookup (options, 
-	                                  "org.freedesktop.Geoclue.GPSHost");
-	port = g_hash_table_lookup (options, 
-	                                  "org.freedesktop.Geoclue.GPSPort");
-	
+
+	host_value = g_hash_table_lookup (options,
+					  "org.freedesktop.Geoclue.GPSHost");
+	host = host_value ? g_value_get_string (host_value) : NULL;
+	port_value = g_hash_table_lookup (options,
+					  "org.freedesktop.Geoclue.GPSPort");
+	port = port_value ? g_value_get_string (port_value) : NULL;
+
 	if (port == NULL) {
 		port = DEFAULT_GPSD_PORT;
 	}

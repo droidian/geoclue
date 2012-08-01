@@ -130,7 +130,15 @@ get_status (GcIfaceGeoclue *gc,
 	    GeoclueStatus  *status,
 	    GError        **error)
 {
-	*status = GEOCLUE_STATUS_AVAILABLE;
+	GeoclueAccuracyLevel level;
+  
+	geoclue_accuracy_get_details (GEOCLUE_MANUAL (gc)->accuracy,
+	                              &level, NULL, NULL);
+	if (level == GEOCLUE_ACCURACY_LEVEL_NONE) {
+		*status = GEOCLUE_STATUS_UNAVAILABLE;
+	} else {
+		*status = GEOCLUE_STATUS_AVAILABLE;
+	}
 	return TRUE;
 }
 
@@ -308,8 +316,16 @@ get_address (GcIfaceAddress   *gc,
              GError          **error)
 {
 	GeoclueManual *manual = GEOCLUE_MANUAL (gc);
-	
-	
+	GeoclueAccuracyLevel level;
+  
+	geoclue_accuracy_get_details (manual->accuracy, &level, NULL, NULL);
+	if (level == GEOCLUE_ACCURACY_LEVEL_NONE) {
+		g_set_error (error, GEOCLUE_ERROR, 
+		             GEOCLUE_ERROR_NOT_AVAILABLE, 
+		             "No manual address set");
+		return FALSE;
+	}
+
 	if (timestamp) {
 		*timestamp = manual->timestamp;
 	}

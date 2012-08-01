@@ -9,12 +9,17 @@ GeocluePosition
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### MACRO GEOCLUE_POSITION_INTERFACE_NAME ##### -->
@@ -43,31 +48,6 @@ GeocluePosition
 @arg5: 
 @arg6: 
 
-<!-- ##### FUNCTION geoclue_position_new ##### -->
-<para>
-
-</para>
-
-@service: 
-@path: 
-@Returns: 
-
-
-<!-- ##### FUNCTION geoclue_position_get_position ##### -->
-<para>
-
-</para>
-
-@position: 
-@timestamp: 
-@latitude: 
-@longitude: 
-@altitude: 
-@accuracy: 
-@error: 
-@Returns: 
-
-
 <!-- ##### USER_FUNCTION GeocluePositionCallback ##### -->
 <para>
 
@@ -84,6 +64,29 @@ GeocluePosition
 @userdata: 
 
 
+<!-- ##### STRUCT GeocluePositionClass ##### -->
+<para>
+
+</para>
+
+@provider_class: 
+@position_changed: 
+
+<!-- ##### FUNCTION geoclue_position_get_position ##### -->
+<para>
+
+</para>
+
+@position: 
+@timestamp: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
 <!-- ##### FUNCTION geoclue_position_get_position_async ##### -->
 <para>
 
@@ -92,5 +95,15 @@ GeocluePosition
 @position: 
 @callback: 
 @userdata: 
+
+
+<!-- ##### FUNCTION geoclue_position_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
 
 

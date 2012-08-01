@@ -37,6 +37,10 @@
 #else
 #ifdef HAVE_CONIC
 #include "connectivity-conic.h"
+#else
+#ifdef HAVE_CONNMAN
+#include "connectivity-connman.h"
+#endif
 #endif
 #endif
 
@@ -172,15 +176,8 @@ gc_master_init (GcMaster *master)
 		g_error_free (error);
 	}
 	
-	master->connectivity = NULL;
-#ifdef HAVE_NETWORK_MANAGER
-	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_NETWORKMANAGER, NULL));
-#else
-#ifdef HAVE_CONIC
-	master->connectivity = GEOCLUE_CONNECTIVITY (g_object_new (GEOCLUE_TYPE_CONIC, NULL));
-#endif
-#endif
-	
+	master->connectivity = geoclue_connectivity_new ();
+
 	gc_master_load_providers (master);
 }
 

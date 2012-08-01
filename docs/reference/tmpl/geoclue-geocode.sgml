@@ -9,12 +9,17 @@ GeoclueGeocode
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
 
+
 <!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
 
 
 <!-- ##### MACRO GEOCLUE_GEOCODE_INTERFACE_NAME ##### -->
@@ -28,31 +33,6 @@ GeoclueGeocode
 <para>
 
 </para>
-
-
-<!-- ##### FUNCTION geoclue_geocode_new ##### -->
-<para>
-
-</para>
-
-@service: 
-@path: 
-@Returns: 
-
-
-<!-- ##### FUNCTION geoclue_geocode_address_to_position ##### -->
-<para>
-
-</para>
-
-@geocode: 
-@details: 
-@latitude: 
-@longitude: 
-@altitude: 
-@accuracy: 
-@error: 
-@Returns: 
 
 
 <!-- ##### USER_FUNCTION GeoclueGeocodeCallback ##### -->
@@ -70,6 +50,28 @@ GeoclueGeocode
 @userdata: 
 
 
+<!-- ##### STRUCT GeoclueGeocodeClass ##### -->
+<para>
+
+</para>
+
+@provider_class: 
+
+<!-- ##### FUNCTION geoclue_geocode_address_to_position ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@details: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
 <!-- ##### FUNCTION geoclue_geocode_address_to_position_async ##### -->
 <para>
 
@@ -79,5 +81,41 @@ GeoclueGeocode
 @details: 
 @callback: 
 @userdata: 
+
+
+<!-- ##### FUNCTION geoclue_geocode_freeform_address_to_position ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@address: 
+@latitude: 
+@longitude: 
+@altitude: 
+@accuracy: 
+@error: 
+@Returns: 
+
+
+<!-- ##### FUNCTION geoclue_geocode_freeform_address_to_position_async ##### -->
+<para>
+
+</para>
+
+@geocode: 
+@address: 
+@callback: 
+@userdata: 
+
+
+<!-- ##### FUNCTION geoclue_geocode_new ##### -->
+<para>
+
+</para>
+
+@service: 
+@path: 
+@Returns: 
 
 

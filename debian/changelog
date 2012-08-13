@@ -1,3 +1,16 @@
+geoclue (0.12.99-1) experimental; urgency=low
+
+  * [feec9810] Switch to experimental branches
+  * [187e0e61] Imported Upstream version 0.12.99
+  * [754f839d] Adjust the build-dependencies
+  * [b9d05053] Bump debhelper compatibility to 9
+  * [48a66a0d] Install geoclue GSettings schemas
+  * [68c959ca] Drop usage of quilt and autotools-dev
+  * [23e47b77] Bump Standards-Version to 3.9.3 (no further changes)
+  * [6f068365] Drop all the patches applied upstream
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 13 Aug 2012 02:22:03 +0200
+
 geoclue (0.12.0-4) unstable; urgency=low
 
   [ Laurent Bigonville ]

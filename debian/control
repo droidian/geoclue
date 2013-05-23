@@ -25,7 +25,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Recommends: geoclue-hostip,
             geoclue-localnet,
-            geoclue-yahoo,
+            geoclue-nominatim,
             geoclue-manual
 Description: Geographic information framework
  GeoClue provides applications access to various geographical information 

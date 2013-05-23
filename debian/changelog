@@ -1,3 +1,13 @@
+geoclue (0.12.99-2) unstable; urgency=low
+
+  * [3d2d3dbf] Adopt the package with Bernd blessing
+  * [f2270121] Bump Standards-Version to 3.9.4 (no further changes)
+  * [24cec588] Update the debian/watch file.
+    Thanks to Bart Martens <bartm@debian.org>
+  * [bc11de4e] Recommends geoclue-nominatim instead of geoclue-yahoo
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 24 May 2013 00:10:46 +0200
+
 geoclue (0.12.99-1) experimental; urgency=low
 
   * [feec9810] Switch to experimental branches

@@ -1,3 +1,2 @@
 version=3
-
-http://folks.o-hand.com/jku/geoclue-releases/geoclue-(\d.*)\.tar\.gz
+http://www.freedesktop.org/wiki/Software/GeoClue .*/geoclue-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))

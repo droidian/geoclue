@@ -39,6 +39,7 @@ Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Suggests: geoclue
 Pre-Depends: ${misc:Pre-Depends}
+Multi-Arch: same
 Description: C API for GeoClue
  libgeoclue is a convenience wrapper for the GeoClue service, and 
  the recommended way to use GeoClue in the C language.

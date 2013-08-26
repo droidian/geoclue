@@ -13,4 +13,4 @@ override_dh_auto_configure:
 	dh_auto_configure -- --libexecdir=/usr/lib/geoclue ${CONFIG_FLAGS}
 
 %:
-	dh $@ --with autotools-dev
+	dh $@ --with autotools-dev,autoreconf

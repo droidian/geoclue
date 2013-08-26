@@ -5,6 +5,7 @@ Maintainer: Laurent Bigonville <bigon@debian.org>
 Uploaders: Craig Andrews <candrews@integralblue.com>
 Build-Depends: autotools-dev,
                debhelper (>= 9),
+               dh-autoreconf,
                pkg-config,
                libglib2.0-dev (>= 2.25.7),
                libdbus-glib-1-dev (>= 0.86),

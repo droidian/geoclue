@@ -6,17 +6,11 @@ Uploaders: Craig Andrews <candrews@integralblue.com>
 Build-Depends: autotools-dev,
                debhelper (>= 9),
                dh-autoreconf,
-               pkg-config,
-               libglib2.0-dev (>= 2.25.7),
-               libdbus-glib-1-dev (>= 0.86),
-               libxml2-dev,
-               xsltproc,
-               libgtk2.0-dev,
-               libnm-glib-dev [linux-any],
-               libnm-util-dev [linux-any],
-               network-manager-dev [linux-any],
-               ofono-dev,
-               libsoup-gnome2.4-dev
+               libgeoip-dev,
+               libglib2.0-dev (>= 2.34.0),
+               libjson-glib-dev (>= 0.14),
+               libsoup-gnome2.4-dev,
+               pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.9.4
 Vcs-Git: git://anonscm.debian.org/collab-maint/geoclue.git
@@ -24,113 +18,98 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue.git
 
 Package: geoclue
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Recommends: geoclue-hostip,
-            geoclue-localnet,
-            geoclue-nominatim,
-            geoclue-manual
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: geoclue-hostip, geoclue-localnet, geoclue-manual, geoclue-nominatim
 Description: Geographic information framework
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package contains the master server for GeoClue.
 
 Package: libgeoclue0
 Section: libs
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Suggests: geoclue
 Pre-Depends: ${misc:Pre-Depends}
 Multi-Arch: same
 Description: C API for GeoClue
- libgeoclue is a convenience wrapper for the GeoClue service, and 
+ libgeoclue is a convenience wrapper for the GeoClue service, and
  the recommended way to use GeoClue in the C language.
 
-Package: libgeoclue-dev
+Package: geoclue-manual
 Section: libdevel
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends},
-         libgeoclue0 (= ${binary:Version}),
-         pkg-config,
-         libdbus-glib-1-dev,
-         libxml2-dev
-Description: C API for GeoClue (development files)
- libgeoclue is a convenience wrapper for the GeoClue service, and 
- the recommended way to use GeoClue in the C language.
- 
-Package: geoclue-manual
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
-Provides: geoclue-provider
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Description: Position server for GeoClue (manual)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package provides a positioning backend for GeoClue.
  It works by letting the user specify the location.
+Provides: geoclue-provider
 
 Package: geoclue-hostip
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Position server for GeoClue (hostip)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package provides a positioning backend for GeoClue.
  It uses the IP geolocation database (http://hostip.info).
 
 Package: geoclue-plazes
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Position server for GeoClue (Plazes)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package provides a positioning backend for GeoClue.
  It uses the plazes.com router/access point location database
  (http://plazes.com).
 
-
 Package: geoclue-geonames
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Geocoder provider for GeoClue (geonames)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
- This package provides a geocoder backend for GeoClue. The 
+ This package provides a geocoder backend for GeoClue. The
  location information comes from www.geonames.org.
 
 Package: geoclue-gsmloc
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Position server for GeoClue (GSM)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
- This package provides a positioning backend for GeoClue. The 
+ This package provides a positioning backend for GeoClue. The
  location information comes from a GSM (cellular) device
  through the ofono stack and opencellid.org.
 
 Package: geoclue-localnet
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Position server for GeoClue (local network)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
- This package provides a positioning backend for GeoClue. The 
+ This package provides a positioning backend for GeoClue. The
  location information comes from a configuration file containing
  information about the current network.
 
 Package: geoclue-skyhook
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Map and geocode server for GeoClue (Skyhook)
  GeoClue provides applications access to various geographical information
@@ -141,18 +120,18 @@ Description: Map and geocode server for GeoClue (Skyhook)
 
 Package: geoclue-yahoo
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Map and geocode server for GeoClue (Yahoo)
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package provides a map and geocoding backend for GeoClue.
  It uses the Yahoo map API.
 
 Package: geoclue-nominatim
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Provides: geoclue-provider
 Description: Geocoding and reverse-geocoding server for GeoClue (Nominatim)
  GeoClue provides applications access to various geographical information
@@ -163,12 +142,12 @@ Description: Geocoding and reverse-geocoding server for GeoClue (Nominatim)
 
 Package: geoclue-examples
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, geoclue (= ${binary:Version})
+Depends: geoclue (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
 Replaces: geoclue (<< 0.11.1-4)
 Section: devel
 Description: GeoClue example clients
- GeoClue provides applications access to various geographical information 
- sources using a D-Bus API or a C library. 
+ GeoClue provides applications access to various geographical information
+ sources using a D-Bus API or a C library.
  .
  This package provides examples of clients using different backends
  through the C library.

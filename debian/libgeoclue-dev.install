@@ -1,5 +1,0 @@
-usr/include/*
-usr/lib/*/pkgconfig/*
-usr/lib/*/libgeoclue.a
-usr/lib/*/libgeoclue.so
-usr/share/gtk-doc/*

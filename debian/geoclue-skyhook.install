@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/geoclue/geoclue-skyhook
-debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Skyhook.service
-debian/tmp/usr/share/geoclue-providers/geoclue-skyhook.provider

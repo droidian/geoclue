@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/geoclue/geoclue-yahoo
-debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Yahoo.service
-debian/tmp/usr/share/geoclue-providers/geoclue-yahoo.provider

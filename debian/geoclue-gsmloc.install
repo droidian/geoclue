@@ -1,3 +1,0 @@
-debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Gsmloc.service
-debian/tmp/usr/share/geoclue-providers/geoclue-gsmloc.provider
-debian/tmp/usr/lib/geoclue/geoclue-gsmloc

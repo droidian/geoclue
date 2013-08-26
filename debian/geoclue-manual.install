@@ -1,3 +1,0 @@
-debian/tmp/usr/lib/geoclue/geoclue-manual
-debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Manual.service
-debian/tmp/usr/share/geoclue-providers/geoclue-manual.provider

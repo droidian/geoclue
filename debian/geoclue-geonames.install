@@ -1,3 +1,0 @@
-debian/tmp/usr/share/dbus-1/services/org.freedesktop.Geoclue.Providers.Geonames.service
-debian/tmp/usr/share/geoclue-providers/geoclue-geonames.provider
-debian/tmp/usr/lib/geoclue/geoclue-geonames

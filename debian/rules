@@ -1,16 +1,5 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
-CONFIG_FLAGS = --enable-gtk \
-	       --enable-skyhook \
-	       --enable-connman=no
-
-ifeq ($(DEB_BUILD_ARCH_OS),linux)
-	CONFIG_FLAGS += --enable-networkmanager
-endif
-
-override_dh_auto_configure:
-	dh_auto_configure -- --libexecdir=/usr/lib/geoclue ${CONFIG_FLAGS}
-
 %:
 	dh $@ --with autotools-dev,autoreconf

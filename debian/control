@@ -6,6 +6,7 @@ Uploaders: Craig Andrews <candrews@integralblue.com>
 Build-Depends: autotools-dev,
                debhelper (>= 9),
                dh-autoreconf,
+               geoip-database,
                intltool (>= 0.40.0),
                libgeoip-dev,
                libglib2.0-dev (>= 2.34.0),

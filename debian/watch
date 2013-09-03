@@ -1,2 +1,2 @@
 version=3
-http://www.freedesktop.org/wiki/Software/GeoClue .*/geoclue-(\d.*)\.(?:tgz|tbz2|txz|tar\.(?:gz|bz2|xz))
+http://www.freedesktop.org/software/geoclue/releases/([\d\.]+)/geoclue-([\d\.]+)\.tar\..*

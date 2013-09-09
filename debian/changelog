@@ -1,3 +1,12 @@
+geoclue (0.12.99-3) unstable; urgency=low
+
+  * [cf5a5bd4] debian/control: Add Multi-Arch: same for libgeoclue0 package
+  * [df11e930] debian/control: Use canonical URL for the Vcs-* fields
+  * [b6eda579] Always update autotools helper files during build
+  * [52761c89] debian/gbp.conf: Set tarball-dir and export-dir
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 09 Sep 2013 21:43:46 +0200
+
 geoclue (0.12.99-2) unstable; urgency=low
 
   * [3d2d3dbf] Adopt the package with Bernd blessing

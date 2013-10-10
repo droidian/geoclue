@@ -1,4 +1,5 @@
-usr/lib/geoclue/geoclue-master
-usr/share/dbus-1/services/org.freedesktop.Geoclue.Master.service
-usr/share/glib-2.0/schemas/org.freedesktop.Geoclue.gschema.xml
-usr/share/GConf/gsettings/geoclue
+usr/lib/*/geoclue
+usr/lib/*/pkgconfig/geoclue-2.0.pc
+usr/share/dbus-1/system-services/org.freedesktop.GeoClue2.service
+usr/share/geoclue-2.0/geoclue-interface.xml
+etc/dbus-1/system.d/org.freedesktop.GeoClue2.conf

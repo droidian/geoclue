@@ -1,3 +1,0 @@
-[org.freedesktop.Geoclue]
-gps-baudrate = /apps/geoclue/master/org.freedesktop.Geoclue.GPSBaudRate
-gps-device = /apps/geoclue/master/org.freedesktop.Geoclue.GPSDevice

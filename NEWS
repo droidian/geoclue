@@ -1,0 +1,115 @@
+2.0.0
+=====
+
+- Generate docs for D-Bus interface. Online version:
+  http://www.freedesktop.org/software/geoclue/docs/
+- Fix build against Automake 1.13.
+- Two minor fixes/cleanups.
+
+All contributors to this release:
+
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+1.99.4
+======
+
+- Correct check for whether db needs update in geoip-update.
+- Fix geoip-update by direct usage of libsoup for HTTP GET.
+- Don't inhibit compiler warnings in build.
+- Fix various potential crashers.
+- Take 'DistanceThreshold' property into account.
+- Watch for and signal out location changes.
+- Add configure option to specify service user.
+- Add documentation comments to D-Bus interface XML.
+- Fix various compiler warnings.
+- Switch to Fedora's geoip server until we've our server setup.
+- Minor fixes to pkgconfig file.
+- Setup a glib log domain.
+- Some optimizations.
+- More debug logging.
+
+Dependency-related changes:
+
+- Require libsoup-2.4
+
+All contributors to this release:
+
+Bastien Nocera <hadess@hadess.net>
+Dominique Leuenberger <dimstar@opensuse.org>
+Kalev Lember <kalevlember@gmail.com>
+Stefan Sauer <ensonic@users.sf.net>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+1.99.3
+======
+
+- All D-Bus prop names capitalized as per general conventions.
+- Expose D-Bus specification XML file in pkg-config file.
+- Fix some potential crashes in error handling code.
+- Remove unused build-time yelp dependency.
+- Correct the libsoup dependency in pkg-config (although it doesn't affect any
+  applications at the moment).
+- Fix some compiler warnings.
+
+All contributors to this release:
+
+Evgeny Bobkin <evgen.ibqn@gmail.com>
+Guillaume Desmottes <guillaume.desmottes@collabora.co.uk>
+Kalev Lember <kalevlember@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+1.99.2
+======
+
+- Drop client-side library.
+- Add COPYING file.
+- Install geoip-lookup with make install. This makes life easier for binary
+  distributions that can then ship geoip-lookup in a package.
+- Distribute server documentation.
+- Distribute & install interface XML file.
+- Add/update forgotten copyright headers.
+
+All contributors to this release:
+
+Kalev Lember <kalevlember@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+1.99.1
+======
+
+- Move to system D-Bus.
+- Import geoip code from geocode-glib.
+- Add option to automatically exit on inactivity. By default it:
+  - Runs indefinitely when launched manually.
+  - Exits after 5 seconds of inactivity when (auto)launched by D-Bus.
+- Relicense from LGPLv2+ to GPLv2+.
+- Some build/installation related fixes.
+- Correctly version pkg-config file.
+- Fix crash on error.
+- Add --version cmdline option.
+
+Dependency-related changes:
+
+- Remove redundant GOA dep from pkg-config.
+- Drop dependency on geocode-glib.
+- New dependencies:
+  - json-glib-1.0 >= 0.14
+  - libsoup-2.4
+  - geoip >= 1.5.1 (Only needed by geoip server)
+
+All contributors to this release:
+
+Bastien Nocera <hadess@hadess.net>
+Colin Walters <walters@verbum.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+1.99.0
+======
+
+- Bump the version number
+
+0.0.1
+=====
+
+- First release (of geoclue2)
+

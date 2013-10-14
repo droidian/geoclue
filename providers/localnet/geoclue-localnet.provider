@@ -1,7 +1,0 @@
-[Geoclue Provider]
-Name=Localnet
-Service=org.freedesktop.Geoclue.Providers.Localnet
-Path=/org/freedesktop/Geoclue/Providers/Localnet
-Interfaces=org.freedesktop.Geoclue.Address
-Accuracy=Street
-Provides=ProvidesCacheableOnConnection

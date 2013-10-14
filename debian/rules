@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+override_dh_auto_configure:
+	dh_auto_configure -- --libdir=/usr/lib --libexec=/usr/lib/geoclue
+
 override_dh_auto_test:
 	# testsuite fails on missing latitude (et.al)
 	# which is only available when using GeoLiteCity.dat

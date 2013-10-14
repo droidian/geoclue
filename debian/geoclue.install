@@ -1,5 +1,5 @@
-usr/lib/*/geoclue
-usr/lib/*/pkgconfig/geoclue-2.0.pc
+usr/lib/geoclue/geoclue
+usr/lib/pkgconfig/geoclue-2.0.pc
 usr/share/dbus-1/system-services/org.freedesktop.GeoClue2.service
 usr/share/geoclue-2.0/geoclue-interface.xml
 etc/dbus-1/system.d/org.freedesktop.GeoClue2.conf

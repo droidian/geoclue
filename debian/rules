@@ -4,6 +4,7 @@
 override_dh_auto_configure:
 	dh_auto_configure -- --libdir=/usr/lib \
                              --libexec=/usr/lib/geoclue \
+                             --with-dbus-service-user=geoclue \
                              --enable-geoip-server=no
 
 override_dh_auto_install:

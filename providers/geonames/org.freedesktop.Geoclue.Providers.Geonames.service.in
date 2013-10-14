@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.freedesktop.Geoclue.Providers.Geonames
-Exec=@libexecdir@/geoclue-geonames

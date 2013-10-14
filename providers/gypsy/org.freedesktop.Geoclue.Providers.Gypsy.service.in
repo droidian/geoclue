@@ -1,3 +1,0 @@
-[D-BUS Service]
-Name=org.freedesktop.Geoclue.Providers.Gypsy
-Exec=@libexecdir@/geoclue-gypsy

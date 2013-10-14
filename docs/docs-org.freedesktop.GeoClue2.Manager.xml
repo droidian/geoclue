@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<refentry id="gdbus-org.freedesktop.GeoClue2.Manager">
+  <refmeta>    <refentrytitle role="top_of_page" id="gdbus-interface-org-freedesktop-GeoClue2-Manager.top_of_page">org.freedesktop.GeoClue2.Manager</refentrytitle>
+  <indexterm zone="gdbus-interface-org-freedesktop-GeoClue2-Manager.top_of_page"><primary sortas="Manager">org.freedesktop.GeoClue2.Manager</primary></indexterm>
+  </refmeta>  <refnamediv>    <refname>org.freedesktop.GeoClue2.Manager</refname>    <refpurpose>The GeoClue service manager</refpurpose>  </refnamediv>  <refsynopsisdiv role="synopsis">
+    <title role="synopsis.title">Methods</title>
+    <synopsis>
+<link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient">GetClient</link> (OUT o client);
+</synopsis>
+  </refsynopsisdiv>
+<refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Manager">
+  <title role="desc.title">Description</title>
+  <para>      This is the interface you use to talk to main GeoClue2 manager object at
+      path "/org/freedesktop/GeoClue2/Manager". The only thing you do with this
+      interface is to call <link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient">GetClient()</link> on it
+      to get your application specific client object.
+</para>
+</refsect1>
+<refsect1 role="details" id="gdbus-methods-org.freedesktop.GeoClue2.Manager">
+  <title role="details.title">Method Details</title>
+<refsect2 role="method" id="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient">
+  <title>The GetClient() method</title>
+  <indexterm zone="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient"><primary sortas="Manager.GetClient">org.freedesktop.GeoClue2.Manager.GetClient()</primary></indexterm>
+<programlisting>
+GetClient (OUT o client);
+</programlisting>
+<para>        Retrieves a client object which can only be used by the calling
+        application only.
+</para>
+<variablelist role="params">
+<varlistentry>
+  <term><literal>OUT o <parameter>client</parameter></literal>:</term>
+  <listitem><para>The path for newly created client object</para></listitem>
+</varlistentry>
+</variablelist>
+</refsect2>
+</refsect1>
+</refentry>
+

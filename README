@@ -1,24 +1,7 @@
+GeoClue: The Geoinformation Service
+===================================
 
-Current providers recognise these options:
+GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project is to
+make creating location-aware applications as simple as possible.
 
-	* org.freedesktop.Geoclue.GPSDevice
-		Gypsy provider will use this device name 
-		(e.g. "00:02:76:C5:81:BF" or "/dev/pgps")
-
-	* org.freedesktop.Geoclue.GPSHost
-		Gpsd provider will contact gpsd on this host.
-        Default is NULL (localhost)
-
-    * org.freedesktop.Geoclue.GPSPort
-		Gpsd provider will contact gpsd on this port.
-        Default is "2947".
-
-
-
-Provider options can be set with SetOptions-method. Geoclue-master
-reads options from gconf (/apps/geoclue/master): as an example, the 
-Gypsy device for geoclue master can be set with
- gconftool-2  \
-	-t string \
-	-s /apps/geoclue/master/org.freedesktop.Geoclue.GPSDevice 00:02:76:C5:81:BF
-
+Geoclue is Free Software, licensed under GNU GPLv2+.

@@ -1,90 +1,67 @@
-libexec_PROGRAMS = geoclue-master
-noinst_LTLIBRARIES = libconnectivity.la
-noinst_PROGRAMS = test-connectivity
+include $(top_srcdir)/Makefile.decl
 
-AM_CFLAGS =			\
-	-I$(top_srcdir)		\
-	-I$(srcdir)		\
-	-I$(top_builddir)	\
-	-DGEOCLUE_PROVIDERS_DIR=\""$(datadir)/geoclue-providers"\" \
-	$(GEOCLUE_CFLAGS) \
-	$(MASTER_CFLAGS) \
-	$(CONNECTIVITY_CFLAGS)
+libexec_PROGRAMS = geoclue
 
-geoclue_master_LDADD =				\
-	$(top_builddir)/geoclue/libgeoclue.la	\
-	libconnectivity.la			\
-	$(GEOCLUE_LIBS)				\
-	$(MASTER_LIBS)
+if BUILD_GEOIP_SERVER
+SUBDIRS = geoip-server
+else
+SUBDIRS =
+endif # BUILD_GEOIP_SERVER
 
-NOINST_H_FILES =		\
-	main.h			\
-	master.h		\
-	master-provider.h	\
-	client.h
+interfacedir = $(datadir)/geoclue-2.0
+interface_DATA = geoclue-interface.xml
 
-libconnectivity_la_SOURCES =		\
-	connectivity.h			\
-	connectivity-networkmanager.h	\
-	connectivity-conic.h		\
-	connectivity-connman.h		\
-	connectivity.c			\
-	connectivity-networkmanager.c	\
-	connectivity-conic.c		\
-	connectivity-connman.c
+dbus_built_sources = geoclue-interface.c geoclue-interface.h
+geoclue-interface.c: geoclue-interface.h
+geoclue-interface.h: Makefile.am $(interface_DATA)
+	gdbus-codegen						\
+		--interface-prefix org.freedesktop.GeoClue2.	\
+		--c-namespace GClue				\
+		--generate-c-code geoclue-interface		\
+    		--generate-docbook=docs				\
+		$(srcdir)/$(interface_DATA)
 
-libconnectivity_la_LIBADD = $(CONNECTIVITY_LIBS)
+BUILT_SOURCES = 		\
+	$(dbus_built_sources)	\
+	$(NULL)
 
-test_connectivity_SOURCES = test-connectivity.c
-test_connectivity_LDADD = libconnectivity.la $(GEOCLUE_LIBS)
+geoclue_SOURCES =	 	 \
+	$(BUILT_SOURCES) 	 \
+	gclue-main.c	 	 \
+	gclue-error.h 	 	 \
+	gclue-error.c 	 	 \
+	gclue-ipclient.h 	 \
+	gclue-ipclient.c 	 \
+	gclue-locator.h 	 \
+	gclue-locator.c 	 \
+	gclue-service-manager.h  \
+	gclue-service-manager.c  \
+	gclue-service-client.h   \
+	gclue-service-client.c   \
+	gclue-service-location.h \
+	gclue-service-location.c \
+	geocode-location.c       \
+	geocode-location.h       \
+	$(NULL)
 
-geoclue_master_SOURCES =	\
-	$(NOINST_H_FILES)	\
-	client.c		\
-	main.c			\
-	master.c		\
-	master-provider.c
+geoclue_CFLAGS = $(GEOCLUE_CFLAGS) 		     \
+		 $(WARN_CFLAGS)			     \
+		 -DLOCALEDIR="\"$(datadir)/locale\"" \
+		 -DG_LOG_DOMAIN=\""Geoclue"\"
+geoclue_LDADD = $(GEOCLUE_LIBS) $(LIBS)
 
-BUILT_SOURCES =			\
-	gc-iface-master-glue.h	\
-	gc-iface-master-client-glue.h
+CLEANFILES = $(BUILT_SOURCES)
+EXTRA_DIST = $(interface_DATA) \
+	     test-data/fedora-geoip-results.json \
+	     test-data/freegeoip-results.json
 
-%-glue.h: stamp-%-glue.h
-	@true
-stamp-gc-iface-master-glue.h: ../interfaces/gc-iface-master.xml
-	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_master --mode=glib-server $< > xgen-$(@F) \
-	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
-	&& rm -f xgen-$(@F)	\
-	&& echo timestamp > $(@F)
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = geoclue-2.0.pc
 
-stamp-gc-iface-master-client-glue.h: ../interfaces/gc-iface-master-client.xml
-	$(AM_V_GEN) $(DBUS_BINDING_TOOL) --prefix=gc_iface_master_client --mode=glib-server $< > xgen-$(@F) \
-	&& (cmp -s xgen-$(@F) $(@F:stamp-%=%) || cp xgen-$(@F) $(@F:stamp-%=%)) \
-	&& rm -f xgen-$(@F)	\
-	&& echo timestamp > $(@F)
+GEOCODEGLIBDIR=$(top_srcdir)/../geocode-glib/geocode-glib/
+GEOCODEGLIBFILES=geocode-location.c geocode-location.h
+update-from-geocode-glib:
+	FILES="$(GEOCODEGLIBFILES)" DIR="$(GEOCODEGLIBDIR)" $(srcdir)/update-from-geocode-glib.sh && changed=true ; \
+	git commit -m "location: Update from geocode-glib" $(GEOCODEGLIBFILES)
 
-servicedir = $(DBUS_SERVICES_DIR)
-service_in_files = org.freedesktop.Geoclue.Master.service.in
-service_DATA = $(service_in_files:.service.in=.service)
-
-$(service_DATA): $(service_in_files) Makefile
-	$(AM_V_GEN) sed -e "s|\@libexecdir\@|$(libexecdir)|" $< > $@
-
-convertdir = $(datadir)/GConf/gsettings
-convert_DATA = geoclue
-
-gsettings_SCHEMAS = org.freedesktop.Geoclue.gschema.xml
-@GSETTINGS_RULES@
-
-EXTRA_DIST =			\
-	$(service_in_files)	\
-	$(gsettings_SCHEMAS)	\
-	$(convert_DATA)
-
-CLEANFILES = 				\
-	$(BUILT_SOURCES) 		\
-	stamp-gc-iface-master-glue.h	\
-	stamp-gc-iface-master-client-glue.h
-
-DISTCLEANFILES = \
-	$(service_DATA)
+-include $(top_srcdir)/git.mk

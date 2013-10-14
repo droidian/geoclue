@@ -1,31 +1,22 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
-/* Where services dir for D-Bus is */
-#undef DBUS_SERVICES_DIR
+/* Build geoip server? */
+#undef BUILD_GEOIP_SERVER
 
-/* Use the session bus */
-#undef GEOCLUE_DBUS_BUS
-
-/* define if libconic is installed */
-#undef HAVE_CONIC
-
-/* define if libconmann is installed */
-#undef HAVE_CONNMAN
+/* The name of the gettext domain */
+#undef GETTEXT_PACKAGE
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
-/* Define if you have gtk+ */
-#undef HAVE_GTK
-
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
+/* Define to 1 if you have the `m' library (-lm). */
+#undef HAVE_LIBM
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
-
-/* define if Network Manager is installed */
-#undef HAVE_NETWORK_MANAGER
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -51,6 +42,9 @@
 /* Define to the sub-directory in which libtool stores uninstalled libraries.
    */
 #undef LT_OBJDIR
+
+/* Define to 1 if your C compiler doesn't accept -c and -o together. */
+#undef NO_MINUS_C_MINUS_O
 
 /* Name of package */
 #undef PACKAGE

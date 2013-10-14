@@ -2,7 +2,12 @@
 # -*- makefile -*-
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libdir=/usr/lib --libexec=/usr/lib/geoclue
+	dh_auto_configure -- --libdir=/usr/lib \
+                             --libexec=/usr/lib/geoclue \
+                             --enable-geoip-server=no
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
 
 override_dh_auto_test:
 	# testsuite fails on missing latitude (et.al)

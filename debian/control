@@ -26,7 +26,7 @@ Description: geoinformation service
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.
  .
- This package contains the dbus system service for GeoClue.
+ This package contains the D-Bus system service for GeoClue.
 
 Package: geoclue-tools
 Architecture: any

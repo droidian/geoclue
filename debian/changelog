@@ -1,3 +1,38 @@
+geoclue (2.0.0-1) experimental; urgency=low
+
+  [ Andreas Henriksson ]
+  * [c554933f] Update debian/watch for new release location
+  * [a416d4b8] Use dh-autoreconf
+  * [06a59fd0] Update build-dependencies according to configure.ac
+    - wrap-and-sort while at it.
+  * [dd1414ea] Add intltool build-dependency
+  * [c82386d7] Drop debian/patches/
+  * [48ba0870] Revamp binary packages for geoclue2
+    - only ip based lookup supported for now by upstream
+  * [60dfaa42] Drop obsolete configure flags
+  * [15678803] Add build-dependency on geoip-database
+    - used by geoip-server testsuite
+  * [975d22a6] Make test-suite non-fatal
+    - GeoLiteCity.dat is required for test-suite to pass
+    - "geoip-database" does not include the city database
+  * [328d889f] Update debian/geoclue.install for GeoClue2
+  * [a39a3d0f] Drop debian/docs
+  * [dac9048d] Drop debian/README.source
+    - we're using standard 3.0 (quilt) format
+  * [98e32cd5] Update debian/copyright for GeoClue2
+    - now in machine readable 1.0 format
+    - license changed to GPLv2+
+
+  [ Laurent Bigonville ]
+  * [b1480045] Imported Upstream version 2.0.0
+  * [fcb99b3a] Do not use multi-arch path for the daemon
+  * [45d8379b] debian/changelog: Fix D-Bus capitalization
+  * [32fb9c09] debian/control: Drop Recommends for geoclue package, not needed anymore
+  * [dd7a3e09] Disable server side binaries for now
+  * [e4186f23] Run the service under the "geoclue" user
+
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 15 Oct 2013 14:58:33 -0400
+
 geoclue (0.12.99-3) unstable; urgency=low
 
   * [cf5a5bd4] debian/control: Add Multi-Arch: same for libgeoclue0 package

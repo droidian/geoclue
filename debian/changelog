@@ -34,7 +34,7 @@ geoclue (2.0.0-1) experimental; urgency=low
   * [b1480045] Imported Upstream version 2.0.0
   * [fcb99b3a] Do not use multi-arch path for the daemon
   * [45d8379b] debian/changelog: Fix D-Bus capitalization
-  * [32fb9c09] debian/control: Drop Recommends for geoclue package, not needed anymore
+  * [32fb9c09] debian/control: Drop Recommends for geoclue package
   * [dd7a3e09] Disable server side binaries for now
   * [e4186f23] Run the service under the "geoclue" user
 

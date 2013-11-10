@@ -1,9 +1,10 @@
-geoclue (2.0.0-2) UNRELEASED; urgency=low
+geoclue (2.0.0-2) experimental; urgency=low
 
+  [ Andreas Henriksson ]
   * [906ea31c] Add dependency on adduser as it's used by postinst
     (Closes: #726620)
 
- -- Andreas Henriksson <andreas@fatal.se>  Thu, 17 Oct 2013 14:18:45 +0200
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 10 Nov 2013 22:04:25 +0100
 
 geoclue (2.0.0-1) experimental; urgency=low
 

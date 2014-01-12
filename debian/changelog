@@ -1,3 +1,13 @@
+geoclue-2.0 (2.0.0-3) unstable; urgency=medium
+
+  * [edf6939d] Rename the package to geoclue-2.0
+  * [f86c3d95] Move the geoclue daemon to /usr/lib/geoclue-2.0
+  * [81975651] Add Breaks/Replaces against geoclue (>= 2.0)
+  * [33218e3b] Bump Standards-Version to 3.9.5 (no further changes)
+  * [411ab144] Update debian/copyright file
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 13 Jan 2014 00:55:35 +0100
+
 geoclue (2.0.0-2) experimental; urgency=low
 
   [ Andreas Henriksson ]

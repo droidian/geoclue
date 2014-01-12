@@ -1,4 +1,4 @@
-Source: geoclue
+Source: geoclue-2.0
 Section: utils
 Priority: optional
 Maintainer: Laurent Bigonville <bigon@debian.org>
@@ -15,10 +15,10 @@ Build-Depends: autotools-dev,
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.9.4
-Vcs-Git: git://anonscm.debian.org/collab-maint/geoclue.git
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue.git
+Vcs-Git: git://anonscm.debian.org/collab-maint/geoclue-2.0.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
 
-Package: geoclue
+Package: geoclue-2.0
 Architecture: any
 Depends: ${misc:Depends}, ${shlibs:Depends}, adduser
 Description: geoinformation service

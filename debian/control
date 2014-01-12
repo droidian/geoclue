@@ -14,7 +14,7 @@ Build-Depends: autotools-dev,
                libsoup-gnome2.4-dev,
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
-Standards-Version: 3.9.4
+Standards-Version: 3.9.5
 Vcs-Git: git://anonscm.debian.org/collab-maint/geoclue-2.0.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
 

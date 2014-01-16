@@ -1,3 +1,11 @@
+geoclue-2.0 (2.0.0-4) unstable; urgency=medium
+
+  * [8a5379b3] debian/copyright: Add licence for docs/geoclue-docs.xml
+    (Closes: #735281)
+  * [6c74e39d] debian/copyright: Deduplicate LGPL2+ license text
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 16 Jan 2014 21:45:56 +0100
+
 geoclue-2.0 (2.0.0-3) unstable; urgency=medium
 
   * [edf6939d] Rename the package to geoclue-2.0

@@ -1,0 +1,9 @@
+# Configuration file for Geoclue
+
+# Agent configuration options
+[agent]
+
+# Whitelist of binary paths of all agents we recognise, separated by a ';'
+# For security reasons, its best to only allow agents that are installed
+# in privileged locations, e.g /usr/bin, /usr/sbin, /usr/libexec etc.
+whitelist=@demo_agent@/usr/bin/gnome-shell

@@ -2,6 +2,7 @@
 <ANCHOR id="gdbus-interface-org-freedesktop-GeoClue2-Manager" href="geoclue/gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-interface-org-freedesktop-GeoClue2-Manager">
 <ANCHOR id="gdbus-methods-org.freedesktop.GeoClue2.Manager" href="geoclue/gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-methods-org.freedesktop.GeoClue2.Manager">
 <ANCHOR id="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient" href="geoclue/gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient">
+<ANCHOR id="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent" href="geoclue/gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent">
 <ANCHOR id="gdbus-org.freedesktop.GeoClue2.Client" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html">
 <ANCHOR id="gdbus-interface-org-freedesktop-GeoClue2-Client" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-interface-org-freedesktop-GeoClue2-Client">
 <ANCHOR id="gdbus-methods-org.freedesktop.GeoClue2.Client" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-methods-org.freedesktop.GeoClue2.Client">
@@ -12,6 +13,7 @@
 <ANCHOR id="gdbus-properties-org.freedesktop.GeoClue2.Client" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-properties-org.freedesktop.GeoClue2.Client">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Client.Location" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold">
+<ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId" href="geoclue/gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">
 <ANCHOR id="gdbus-org.freedesktop.GeoClue2.Location" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html">
 <ANCHOR id="gdbus-interface-org-freedesktop-GeoClue2-Location" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-interface-org-freedesktop-GeoClue2-Location">
 <ANCHOR id="gdbus-properties-org.freedesktop.GeoClue2.Location" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-properties-org.freedesktop.GeoClue2.Location">
@@ -19,3 +21,7 @@
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Description" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description">
+<ANCHOR id="gdbus-org.freedesktop.GeoClue2.Agent" href="geoclue/gdbus-org.freedesktop.GeoClue2.Agent.html">
+<ANCHOR id="gdbus-interface-org-freedesktop-GeoClue2-Agent" href="geoclue/gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-interface-org-freedesktop-GeoClue2-Agent">
+<ANCHOR id="gdbus-methods-org.freedesktop.GeoClue2.Agent" href="geoclue/gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-methods-org.freedesktop.GeoClue2.Agent">
+<ANCHOR id="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp" href="geoclue/gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp">

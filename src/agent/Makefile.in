@@ -78,9 +78,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = data
-DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
-	$(srcdir)/org.freedesktop.GeoClue2.conf.in
+DIST_COMMON = $(top_srcdir)/Makefile.decl $(srcdir)/Makefile.in \
+	$(srcdir)/Makefile.am
+subdir = src/agent
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
 	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
@@ -91,7 +91,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = org.freedesktop.GeoClue2.conf
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -139,11 +139,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(dbusservicedir)" \
-	"$(DESTDIR)$(servicedir)" "$(DESTDIR)$(sysconfdir)" \
-	"$(DESTDIR)$(systemdservicedir)"
-DATA = $(dbusservice_DATA) $(service_DATA) $(sysconf_DATA) \
-	$(systemdservice_DATA)
+am__installdirs = "$(DESTDIR)$(interfacedir)"
+DATA = $(interface_DATA) $(noinst_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
@@ -310,33 +307,20 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-sysconf_in_files = geoclue.conf.in
-sysconf_DATA = $(sysconf_in_files:.conf.in=.conf)
-servicedir = $(datadir)/dbus-1/system-services
-service_in_files = org.freedesktop.GeoClue2.service.in
-service_DATA = $(service_in_files:.service.in=.service)
+GTESTER = gtester		# in $PATH for non-GLIB packages
+GTESTER_REPORT = gtester-report		# in $PATH for non-GLIB packages
 
-# DBus Service policy file
-dbusservicedir = $(DBUS_SYS_DIR)
-dbusservice_DATA = org.freedesktop.GeoClue2.conf \
-		   org.freedesktop.GeoClue2.Agent.conf
-
-systemdservice_in_files = geoclue.service.in
-@HAVE_SYSTEMD_TRUE@systemdservicedir = $(systemdsystemunitdir)
-@HAVE_SYSTEMD_TRUE@systemdservice_DATA = $(systemdservice_in_files:.service.in=.service)
-DISTCLEANFILES = $(service_DATA) \
-                 $(sysconf_DATA) \
-                 $(systemdservice_DATA)
-
-EXTRA_DIST = $(service_in_files) \
-             $(systemdservice_in_files) \
-             $(dbusservice_DATA) \
-             $(sysconf_in_files)
-
+# initialize variables for unconditional += appending
+TEST_PROGS = 
+interfacedir = $(datadir)/geoclue-2.0
+interface_DATA = geoclue-agent-interface.xml
+noinst_DATA = docs-org.freedesktop.GeoClue2.Agent.xml
+CLEANFILES = $(noinst_DATA)
+EXTRA_DIST = $(interface_DATA)
 all: all-am
 
 .SUFFIXES:
-$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
+$(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am $(top_srcdir)/Makefile.decl $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
@@ -345,9 +329,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign data/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign src/agent/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign data/Makefile
+	  $(AUTOMAKE) --foreign src/agent/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -357,6 +341,7 @@ Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	    echo ' cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)'; \
 	    cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe);; \
 	esac;
+$(top_srcdir)/Makefile.decl:
 
 $(top_builddir)/config.status: $(top_srcdir)/configure $(CONFIG_STATUS_DEPENDENCIES)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
@@ -366,98 +351,33 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-org.freedesktop.GeoClue2.conf: $(top_builddir)/config.status $(srcdir)/org.freedesktop.GeoClue2.conf.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 mostlyclean-libtool:
 	-rm -f *.lo
 
 clean-libtool:
 	-rm -rf .libs _libs
-install-dbusserviceDATA: $(dbusservice_DATA)
+install-interfaceDATA: $(interface_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(dbusservice_DATA)'; test -n "$(dbusservicedir)" || list=; \
+	@list='$(interface_DATA)'; test -n "$(interfacedir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(dbusservicedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(dbusservicedir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(interfacedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(interfacedir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dbusservicedir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dbusservicedir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(interfacedir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(interfacedir)" || exit $$?; \
 	done
 
-uninstall-dbusserviceDATA:
+uninstall-interfaceDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(dbusservice_DATA)'; test -n "$(dbusservicedir)" || list=; \
+	@list='$(interface_DATA)'; test -n "$(interfacedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(dbusservicedir)'; $(am__uninstall_files_from_dir)
-install-serviceDATA: $(service_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(service_DATA)'; test -n "$(servicedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(servicedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(servicedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(servicedir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(servicedir)" || exit $$?; \
-	done
-
-uninstall-serviceDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(service_DATA)'; test -n "$(servicedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(servicedir)'; $(am__uninstall_files_from_dir)
-install-sysconfDATA: $(sysconf_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(sysconfdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(sysconfdir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(sysconfdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(sysconfdir)" || exit $$?; \
-	done
-
-uninstall-sysconfDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(sysconfdir)'; $(am__uninstall_files_from_dir)
-install-systemdserviceDATA: $(systemdservice_DATA)
-	@$(NORMAL_INSTALL)
-	@list='$(systemdservice_DATA)'; test -n "$(systemdservicedir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(systemdservicedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(systemdservicedir)" || exit 1; \
-	fi; \
-	for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  echo "$$d$$p"; \
-	done | $(am__base_list) | \
-	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(systemdservicedir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(systemdservicedir)" || exit $$?; \
-	done
-
-uninstall-systemdserviceDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(systemdservice_DATA)'; test -n "$(systemdservicedir)" || list=; \
-	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(systemdservicedir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(interfacedir)'; $(am__uninstall_files_from_dir)
 tags TAGS:
 
 ctags CTAGS:
@@ -496,10 +416,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(dbusservicedir)" "$(DESTDIR)$(servicedir)" "$(DESTDIR)$(sysconfdir)" "$(DESTDIR)$(systemdservicedir)"; do \
+	for dir in "$(DESTDIR)$(interfacedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -524,11 +445,11 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
-	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -553,14 +474,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dbusserviceDATA install-serviceDATA \
-	install-systemdserviceDATA
+install-data-am: install-interfaceDATA
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-sysconfDATA
+install-exec-am:
 
 install-html: install-html-am
 
@@ -598,39 +518,78 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-dbusserviceDATA uninstall-serviceDATA \
-	uninstall-sysconfDATA uninstall-systemdserviceDATA
+uninstall-am: uninstall-interfaceDATA
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: all all-am check check-am clean clean-generic clean-libtool \
-	cscopelist-am ctags-am distclean distclean-generic \
-	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am \
-	install-dbusserviceDATA install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-serviceDATA \
-	install-strip install-sysconfDATA install-systemdserviceDATA \
+.PHONY: all all-am check check-am check-local clean clean-generic \
+	clean-libtool cscopelist-am ctags-am distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-interfaceDATA install-man install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-generic \
 	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-dbusserviceDATA uninstall-serviceDATA \
-	uninstall-sysconfDATA uninstall-systemdserviceDATA
+	uninstall-am uninstall-interfaceDATA
 
 
-@BUILD_DEMO_AGENT_TRUE@$(sysconf_DATA): $(sysconf_in_files) Makefile
-@BUILD_DEMO_AGENT_TRUE@	@sed -e "s|\@demo_agent\@|`$(REALPATH) $(abs_top_srcdir)`/demo/agent;|" $< > $@
-@BUILD_DEMO_AGENT_FALSE@$(sysconf_DATA): $(sysconf_in_files) Makefile
-@BUILD_DEMO_AGENT_FALSE@	@sed -e "s|\@demo_agent\@||" $< > $@
+# test: run all tests in cwd and subdirs
+test:	${TEST_PROGS}
+	@test -z "${TEST_PROGS}" || ${GTESTER} --verbose ${TEST_PROGS}
+	@ for subdir in $(SUBDIRS) . ; do \
+	    test "$$subdir" = "." -o "$$subdir" = "po" || \
+	    ( cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $@ ) || exit $? ; \
+	  done
 
-$(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
-	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
+# test-report: run tests in subdirs and generate report
+# perf-report: run tests in subdirs with -m perf and generate report
+# full-report: like test-report: with -m perf and -m slow
+test-report perf-report full-report:	${TEST_PROGS}
+	@test -z "${TEST_PROGS}" || { \
+	  case $@ in \
+	  test-report) test_options="-k";; \
+	  perf-report) test_options="-k -m=perf";; \
+	  full-report) test_options="-k -m=perf -m=slow";; \
+	  esac ; \
+	  if test -z "$$GTESTER_LOGDIR" ; then	\
+	    ${GTESTER} --verbose $$test_options -o test-report.xml ${TEST_PROGS} ; \
+	  elif test -n "${TEST_PROGS}" ; then \
+	    ${GTESTER} --verbose $$test_options -o `mktemp "$$GTESTER_LOGDIR/log-XXXXXX"` ${TEST_PROGS} ; \
+	  fi ; \
+	}
+	@ ignore_logdir=true ; \
+	  if test -z "$$GTESTER_LOGDIR" ; then \
+	    GTESTER_LOGDIR=`mktemp -d "\`pwd\`/.testlogs-XXXXXX"`; export GTESTER_LOGDIR ; \
+	    ignore_logdir=false ; \
+	  fi ; \
+	  for subdir in $(SUBDIRS) . ; do \
+	    test "$$subdir" = "." -o "$$subdir" = "po" || \
+	    ( cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) $@ ) || exit $? ; \
+	  done ; \
+	  $$ignore_logdir || { \
+	    echo '<?xml version="1.0"?>' > $@.xml ; \
+	    echo '<report-collection>'  >> $@.xml ; \
+	    for lf in `ls -L "$$GTESTER_LOGDIR"/.` ; do \
+	      sed '1,1s/^<?xml\b[^>?]*?>//' <"$$GTESTER_LOGDIR"/"$$lf" >> $@.xml ; \
+	    done ; \
+	    echo >> $@.xml ; \
+	    echo '</report-collection>' >> $@.xml ; \
+	    rm -rf "$$GTESTER_LOGDIR"/ ; \
+	    ${GTESTER_REPORT} --version 2>/dev/null 1>&2 ; test "$$?" != 0 || ${GTESTER_REPORT} $@.xml >$@.html ; \
+	  }
+.PHONY: test test-report perf-report full-report
+# run make test as part of make check
+check-local: test
 
-@HAVE_SYSTEMD_TRUE@$(systemdservice_DATA): $(systemdservice_in_files) Makefile
-@HAVE_SYSTEMD_TRUE@	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
-@HAVE_SYSTEMD_TRUE@	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
+docs-org.freedesktop.GeoClue2.Agent.xml: Makefile.am $(interface_DATA)
+	$(AM_V_GEN)$(GDBUS_CODEGEN) \
+		--interface-prefix org.freedesktop.GeoClue2.	\
+		--c-namespace GClue				\
+    		--generate-docbook=docs				\
+		$(srcdir)/$(interface_DATA)
 
 -include $(top_srcdir)/git.mk
 

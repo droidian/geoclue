@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.0.0],
+        [2.1.0],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -35,9 +35,6 @@ IT_PROG_INTLTOOL(0.40.0)
 GETTEXT_PACKAGE=AC_PACKAGE_NAME
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext domain])
-
-# GSettings support
-GLIB_GSETTINGS
 
 GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
@@ -101,7 +98,36 @@ else
 fi
 AM_CONDITIONAL([BUILD_GEOIP_SERVER], [test "x$build_geoip_server" = "xyes"])
 
+# Demo agent
+AC_ARG_ENABLE(demo-agent,
+              AS_HELP_STRING([--enable-demo-agent=yes|no],
+                             [Build demo agent (default=no)]),
+              [enable_demo_agent=$enableval],
+              [enable_demo_agent=no])
+if test "x$enable_demo_agent" = "xyes"; then
+    PKG_CHECK_MODULES(DEMO_AGENT, [
+                      glib-2.0 >= $GLIB_MIN_VERSION
+                      gio-2.0 >= $GLIB_MIN_VERSION
+                      gio-unix-2.0 >= $GLIB_MIN_VERSION
+                      libnotify])
+else
+    AC_DEFINE([BUILD_DEMO_AGENT], [0], [Build demo agent?])
+fi
+AM_CONDITIONAL([BUILD_DEMO_AGENT], [test "x$enable_demo_agent" = "xyes"])
+
 GNOME_COMPILE_WARNINGS([maximum])
+
+dnl Require agent?
+AC_ARG_ENABLE(require-auth,
+	      AS_HELP_STRING([--enable-require-auth=yes|no],
+                             [Require apps to be authorized by agent (default=no)]),
+              [require_auth=$enableval],
+              [require_auth=no])
+if test "x$require_auth" = "xyes"; then
+    AC_DEFINE([REQUIRE_AUTH], [1], [Require apps to be authorized by agent?])
+else
+    AC_DEFINE([REQUIRE_AUTH], [0], [Require apps to be authorized by agent?])
+fi
 
 dnl Debugging
 AC_ARG_ENABLE(debug,
@@ -127,10 +153,39 @@ AC_ARG_WITH(dbus-service-user,
 	    dbus_srv_user="root")
 AC_SUBST(dbus_srv_user)
 
+# gdbus-codegen
+if test x$cross_compiling != xyes; then
+	GDBUS_CODEGEN=`$PKG_CONFIG --variable gdbus_codegen gio-2.0`
+else
+	AC_PATH_PROG([GDBUS_CODEGEN],[gdbus-codegen])
+fi
+AC_SUBST([GDBUS_CODEGEN])
+
+if test "x$GDBUS_CODEGEN" = "x"; then
+	ifelse([$2],,[AC_MSG_ERROR([gdbus-codegen not found.])],[$2])
+else
+	ifelse([$1],,[:],[$1])
+fi
+
+# systemd
+AC_ARG_WITH([systemdsystemunitdir],
+            AS_HELP_STRING([--with-systemdsystemunitdir=DIR], [Directory for systemd service files]),
+            [],
+            [with_systemdsystemunitdir=$($PKG_CONFIG --variable=systemdsystemunitdir systemd)])
+if test "x$with_systemdsystemunitdir" != "xno"; then
+  AC_SUBST([systemdsystemunitdir], [$with_systemdsystemunitdir])
+fi
+AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$systemdsystemunitdir"])
+
+AC_PATH_PROG([REALPATH],[realpath])
+
+AC_PATH_PROG([SETCAP],[setcap])
+
 AC_CONFIG_FILES([
   Makefile
   src/Makefile
   src/geoclue-2.0.pc
+  src/agent/Makefile
   src/geoip-server/Makefile
   po/Makefile.in
   data/org.freedesktop.GeoClue2.conf
@@ -150,4 +205,5 @@ AC_MSG_NOTICE([
 
         prefix:                   ${prefix}
         c compiler:               ${CC} ${CFLAGS}
+        systemdsystemunitdir:     ${systemdsystemunitdir}
 ])

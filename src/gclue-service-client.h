@@ -25,6 +25,7 @@
 
 #include <glib-object.h>
 #include "geoclue-interface.h"
+#include "gclue-client-info.h"
 
 G_BEGIN_DECLS
 
@@ -51,19 +52,17 @@ struct _GClueServiceClient
 struct _GClueServiceClientClass
 {
         GClueClientSkeletonClass parent_class;
-
-        /* signals */
-        void (* peer_vanished)  (GClueServiceClient *client);
 };
 
 GType gclue_service_client_get_type (void) G_GNUC_CONST;
 
-GClueServiceClient * gclue_service_client_new      (const char      *peer,
-                                                    const char      *path,
-                                                    GDBusConnection *connection,
-                                                    GError         **error);
-const char *         gclue_service_client_get_path (GClueServiceClient *client);
-const char *         gclue_service_client_get_peer (GClueServiceClient *client);
+GClueServiceClient * gclue_service_client_new             (GClueClientInfo *info,
+                                                           const char      *path,
+                                                           GDBusConnection *connection,
+                                                           GDBusProxy      *agent_proxy,
+                                                           GError         **error);
+const char *         gclue_service_client_get_path        (GClueServiceClient *client);
+GClueClientInfo *    gclue_service_client_get_client_info (GClueServiceClient *client);
 
 G_END_DECLS
 

@@ -30,6 +30,15 @@
     <method name="GetClient">
       <arg name="client" type="o" direction="out"/>
     </method>
+
+    <!--
+        AddAgent:
+
+        An API for user authorization agents to register themselves. Each agent
+        is responsible for the user it is running as. Application developers
+        can and should simply ignore this API.
+    -->
+    <method name="AddAgent" />
   </interface>
 
   <!--
@@ -57,6 +66,14 @@
         below the threshold, it won't emit the LocationUpdated signal.
     -->
     <property name="DistanceThreshold" type="u" access="readwrite"/>
+
+    <!--
+        DesktopId:
+
+        The desktop file id (the basename of the desktop file). This property
+        must be set by applications for authorization to work.
+    -->
+    <property name="DesktopId" type="s" access="readwrite"/>
 
     <!--
         Start:

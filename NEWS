@@ -1,3 +1,36 @@
+2.1.0
+=====
+
+- Application authentication agents support:
+  - API for agents to register themselves.
+  - API that agents need to implement.
+  - configure option to enable requirement of authorization from agent. Until
+    there is at least one agent out there, this requirement is disabled by
+    default.
+  - A demo agent.
+  - Option in ${sysconfdir}/geoclue.conf containing whitelist of all our agents.
+- Don't use proxy. Seems proxy settings are per-user and system users (which
+  geoclue is supposed to run as) do not have access to them.
+- Add support for bus-activation via systemd service unit.
+- Add mandatory 'DesktopId' property to Client interface.
+- Use HTTPS to connect to geoip.fedoraproject.org. The actual resource is behind
+  HTTPS so using HTTP leads to redirections and thefore redundant TCP packets.
+- Fixes to build system.
+
+Note to package maintainers: For the agent support to work, geoclue binary
+need 'ptrace' capability. In near future we will try to get this through systemd
+so systemd-based distributions likely not need to bother about it. Having said
+that, for this release you can simply keep the agent requirement disabled.
+
+All contributors to this release:
+
+Colin Guthrie <colin@mageia.org>
+Colin Walters <walters@verbum.org>
+Kalev Lember <kalevlember@gmail.com>
+Philip Withnall <philip@tecnocode.co.uk>
+Stefan Bernhardsgrütter <s.bernhardsgruetter@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.0.0
 =====
 

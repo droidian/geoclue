@@ -41,9 +41,10 @@ G_DEFINE_TYPE_WITH_CODE (GClueServiceClient,
 
 struct _GClueServiceClientPrivate
 {
-        const char *peer;
+        GClueClientInfo *client_info;
         const char *path;
         GDBusConnection *connection;
+        GDBusProxy *agent_proxy;
 
         GClueServiceLocation *location;
         GClueServiceLocation *prev_location;
@@ -54,27 +55,20 @@ struct _GClueServiceClientPrivate
         /* Number of times location has been updated */
         guint locations_updated;
 
-        guint watch_id;
         gulong location_change_id;
 };
 
 enum
 {
         PROP_0,
-        PROP_PEER,
+        PROP_CLIENT_INFO,
         PROP_PATH,
         PROP_CONNECTION,
+        PROP_AGENT_PROXY,
         LAST_PROP
 };
 
 static GParamSpec *gParamSpecs[LAST_PROP];
-
-enum {
-        PEER_VANISHED,
-        SIGNAL_LAST
-};
-
-static guint signals[SIGNAL_LAST];
 
 static char *
 next_location_path (GClueServiceClient *client)
@@ -100,11 +94,13 @@ emit_location_updated (GClueServiceClient *client,
 {
         GClueServiceClientPrivate *priv = client->priv;
         GVariant *variant;
+        const char *peer;
 
         variant = g_variant_new ("(oo)", old, new);
+        peer = gclue_client_info_get_bus_name (priv->client_info);
 
         return g_dbus_connection_emit_signal (priv->connection,
-                                              priv->peer,
+                                              peer,
                                               priv->path,
                                               "org.freedesktop.GeoClue2.Client",
                                               "LocationUpdated",
@@ -165,7 +161,7 @@ on_locator_location_changed (GObject    *gobject,
         priv->prev_location = priv->location;
 
         path = next_location_path (client);
-        priv->location = gclue_service_location_new (priv->peer,
+        priv->location = gclue_service_location_new (priv->client_info,
                                                      path,
                                                      priv->connection,
                                                      location_info,
@@ -198,6 +194,14 @@ typedef struct
 } StartData;
 
 static void
+start_data_free (StartData *data)
+{
+        g_object_unref (data->client);
+        g_object_unref (data->invocation);
+        g_slice_free (StartData, data);
+}
+
+static void
 on_start_ready (GObject      *source_object,
                 GAsyncResult *res,
                 gpointer      user_data)
@@ -222,9 +226,52 @@ error_out:
         g_error_free (error);
 
 out:
-        g_object_unref (data->client);
-        g_object_unref (data->invocation);
-        g_slice_free (StartData, data);
+        start_data_free (data);
+}
+
+static void
+on_authorize_app_ready (GObject      *source_object,
+                        GAsyncResult *res,
+                        gpointer      user_data)
+{
+        StartData *data = (StartData *) user_data;
+        GClueServiceClientPrivate *priv = data->client->priv;
+        GError *error = NULL;
+        GVariant *results = NULL;
+        gboolean authorized = FALSE;
+
+        results = g_dbus_proxy_call_finish (G_DBUS_PROXY (source_object),
+                                            res,
+                                            &error);
+        if (results == NULL)
+                goto error_out;
+
+        g_variant_get_child (results, 0, "b", &authorized);
+        g_variant_unref (results);
+
+        if (!authorized) {
+                g_set_error_literal (&error,
+                                     G_DBUS_ERROR,
+                                     G_DBUS_ERROR_ACCESS_DENIED,
+                                     "Access denied");
+                goto error_out;
+        }
+
+        priv->location_change_id =
+                g_signal_connect (priv->locator,
+                                  "notify::location",
+                                  G_CALLBACK (on_locator_location_changed),
+                                  data->client);
+
+        gclue_locator_start (priv->locator,
+                             NULL,
+                             on_start_ready,
+                             data);
+        return;
+
+error_out:
+        g_dbus_method_invocation_take_error (data->invocation, error);
+        start_data_free (data);
 }
 
 static gboolean
@@ -233,28 +280,49 @@ gclue_service_client_handle_start (GClueClient           *client,
 {
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
         StartData *data;
+        const char *desktop_id;
 
         if (priv->location_change_id)
                 /* Already started */
                 return TRUE;
 
-        /* TODO: We need some kind of mechanism to ask user if location info can
-         *       be shared with peer app.
-         */
-
-        priv->location_change_id =
-                g_signal_connect (priv->locator,
-                                  "notify::location",
-                                  G_CALLBACK (on_locator_location_changed),
-                                  client);
+        desktop_id = gclue_client_get_desktop_id (client);
+        if (desktop_id == NULL) {
+                g_dbus_method_invocation_return_error (invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "'DesktopId' property must be set");
+                return TRUE;
+        }
 
         data = g_slice_new (StartData);
         data->client = g_object_ref (client);
         data->invocation =  g_object_ref (invocation);
-        gclue_locator_start (priv->locator,
-                             NULL,
-                             on_start_ready,
-                             data);
+
+        if (priv->agent_proxy == NULL) {
+                /* No agent == No authorization needed */
+                priv->location_change_id = g_signal_connect
+                        (priv->locator,
+                         "notify::location",
+                         G_CALLBACK (on_locator_location_changed),
+                         data->client);
+
+                gclue_locator_start (priv->locator,
+                                     NULL,
+                                     on_start_ready,
+                                     data);
+
+                return TRUE;
+        }
+
+        g_dbus_proxy_call (priv->agent_proxy,
+                           "AuthorizeApp",
+                           g_variant_new ("(s)", desktop_id),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           NULL,
+                           on_authorize_app_ready,
+                           data);
 
         return TRUE;
 }
@@ -287,12 +355,13 @@ gclue_service_client_finalize (GObject *object)
                 priv->location_change_id = 0;
         }
 
-        g_clear_pointer (&priv->peer, g_free);
         g_clear_pointer (&priv->path, g_free);
         g_clear_object (&priv->connection);
+        g_clear_object (&priv->agent_proxy);
         g_clear_object (&priv->locator);
         g_clear_object (&priv->location);
         g_clear_object (&priv->prev_location);
+        g_clear_object (&priv->client_info);
 
         /* Chain up to the parent class */
         G_OBJECT_CLASS (gclue_service_client_parent_class)->finalize (object);
@@ -307,8 +376,8 @@ gclue_service_client_get_property (GObject    *object,
         GClueServiceClient *client = GCLUE_SERVICE_CLIENT (object);
 
         switch (prop_id) {
-        case PROP_PEER:
-                g_value_set_string (value, client->priv->peer);
+        case PROP_CLIENT_INFO:
+                g_value_set_object (value, client->priv->client_info);
                 break;
 
         case PROP_PATH:
@@ -317,6 +386,10 @@ gclue_service_client_get_property (GObject    *object,
 
         case PROP_CONNECTION:
                 g_value_set_object (value, client->priv->connection);
+                break;
+
+        case PROP_AGENT_PROXY:
+                g_value_set_object (value, client->priv->agent_proxy);
                 break;
 
         default:
@@ -333,8 +406,8 @@ gclue_service_client_set_property (GObject      *object,
         GClueServiceClient *client = GCLUE_SERVICE_CLIENT (object);
 
         switch (prop_id) {
-        case PROP_PEER:
-                client->priv->peer = g_value_dup_string (value);
+        case PROP_CLIENT_INFO:
+                client->priv->client_info = g_value_dup_object (value);
                 break;
 
         case PROP_PATH:
@@ -343,6 +416,10 @@ gclue_service_client_set_property (GObject      *object,
 
         case PROP_CONNECTION:
                 client->priv->connection = g_value_dup_object (value);
+                break;
+
+        case PROP_AGENT_PROXY:
+                client->priv->agent_proxy = g_value_dup_object (value);
                 break;
 
         default:
@@ -364,7 +441,7 @@ gclue_service_client_handle_method_call (GDBusConnection       *connection,
         GDBusInterfaceSkeletonClass *skeleton_class;
         GDBusInterfaceVTable *skeleton_vtable;
 
-        if (strcmp (sender, priv->peer) != 0) {
+        if (!gclue_client_info_check_bus_name (priv->client_info, sender)) {
                 g_dbus_method_invocation_return_error (invocation,
                                                        G_DBUS_ERROR,
                                                        G_DBUS_ERROR_ACCESS_DENIED,
@@ -397,7 +474,7 @@ gclue_service_client_handle_get_property (GDBusConnection *connection,
         GDBusInterfaceSkeletonClass *skeleton_class;
         GDBusInterfaceVTable *skeleton_vtable;
 
-        if (strcmp (sender, priv->peer) != 0) {
+        if (!gclue_client_info_check_bus_name (priv->client_info, sender)) {
                 g_set_error (error,
                              G_DBUS_ERROR,
                              G_DBUS_ERROR_ACCESS_DENIED,
@@ -432,7 +509,7 @@ gclue_service_client_handle_set_property (GDBusConnection *connection,
         GDBusInterfaceVTable *skeleton_vtable;
         gboolean ret;
 
-        if (strcmp (sender, priv->peer) != 0) {
+        if (!gclue_client_info_check_bus_name (priv->client_info, sender)) {
                 g_set_error (error,
                              G_DBUS_ERROR,
                              G_DBUS_ERROR_ACCESS_DENIED,
@@ -488,15 +565,15 @@ gclue_service_client_class_init (GClueServiceClientClass *klass)
 
         g_type_class_add_private (object_class, sizeof (GClueServiceClientPrivate));
 
-        gParamSpecs[PROP_PEER] = g_param_spec_string ("peer",
-                                                      "Peer",
-                                                      "Bus name of client app",
-                                                      NULL,
-                                                      G_PARAM_READWRITE |
-                                                      G_PARAM_CONSTRUCT_ONLY);
+        gParamSpecs[PROP_CLIENT_INFO] = g_param_spec_object ("client-info",
+                                                             "ClientInfo",
+                                                             "Information on client",
+                                                             GCLUE_TYPE_CLIENT_INFO,
+                                                             G_PARAM_READWRITE |
+                                                             G_PARAM_CONSTRUCT_ONLY);
         g_object_class_install_property (object_class,
-                                         PROP_PEER,
-                                         gParamSpecs[PROP_PEER]);
+                                         PROP_CLIENT_INFO,
+                                         gParamSpecs[PROP_CLIENT_INFO]);
 
         gParamSpecs[PROP_PATH] = g_param_spec_string ("path",
                                                       "Path",
@@ -518,18 +595,15 @@ gclue_service_client_class_init (GClueServiceClientClass *klass)
                                          PROP_CONNECTION,
                                          gParamSpecs[PROP_CONNECTION]);
 
-        signals[PEER_VANISHED] =
-                g_signal_new ("peer-vanished",
-                              GCLUE_TYPE_SERVICE_CLIENT,
-                              G_SIGNAL_RUN_LAST,
-                              G_STRUCT_OFFSET (GClueServiceClientClass,
-                                               peer_vanished),
-                              NULL,
-                              NULL,
-                              g_cclosure_marshal_VOID__VOID,
-                              G_TYPE_NONE,
-                              0,
-                              G_TYPE_NONE);
+        gParamSpecs[PROP_AGENT_PROXY] = g_param_spec_object ("agent-proxy",
+                                                             "AgentProxy",
+                                                             "Proxy to app authorization agent",
+                                                             G_TYPE_DBUS_PROXY,
+                                                             G_PARAM_READWRITE |
+                                                             G_PARAM_CONSTRUCT);
+        g_object_class_install_property (object_class,
+                                         PROP_AGENT_PROXY,
+                                         gParamSpecs[PROP_AGENT_PROXY]);
 }
 
 static void
@@ -539,25 +613,11 @@ gclue_service_client_client_iface_init (GClueClientIface *iface)
         iface->handle_stop = gclue_service_client_handle_stop;
 }
 
-static void
-on_name_vanished (GDBusConnection *connection,
-                  const gchar     *name,
-                  gpointer         user_data)
-{
-        g_signal_emit (GCLUE_SERVICE_CLIENT (user_data),
-                       signals[PEER_VANISHED],
-                       0);
-
-        g_object_unref (G_OBJECT (user_data));
-}
-
 static gboolean
 gclue_service_client_initable_init (GInitable    *initable,
                                     GCancellable *cancellable,
                                     GError      **error)
 {
-        GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (initable)->priv;
-
         if (!g_dbus_interface_skeleton_export
                                 (G_DBUS_INTERFACE_SKELETON (initable),
                                  GCLUE_SERVICE_CLIENT (initable)->priv->connection,
@@ -565,13 +625,6 @@ gclue_service_client_initable_init (GInitable    *initable,
                                  error))
                 return FALSE;
 
-        priv->watch_id = g_bus_watch_name_on_connection (priv->connection,
-                                                         priv->peer,
-                                                         G_BUS_NAME_WATCHER_FLAGS_NONE, 
-                                                         NULL,
-                                                         on_name_vanished,
-                                                         g_object_ref (initable),
-                                                         g_object_unref);
         return TRUE;
 }
 
@@ -592,17 +645,19 @@ gclue_service_client_init (GClueServiceClient *client)
 }
 
 GClueServiceClient *
-gclue_service_client_new (const char      *peer,
+gclue_service_client_new (GClueClientInfo *info,
                           const char      *path,
                           GDBusConnection *connection,
+                          GDBusProxy      *agent_proxy,
                           GError         **error)
 {
         return g_initable_new (GCLUE_TYPE_SERVICE_CLIENT,
                                NULL,
                                error,
-                               "peer", peer,
+                               "client-info", info,
                                "path", path,
                                "connection", connection,
+                               "agent-proxy", agent_proxy,
                                NULL);
 }
 
@@ -614,10 +669,10 @@ gclue_service_client_get_path (GClueServiceClient *client)
         return client->priv->path;
 }
 
-const gchar *
-gclue_service_client_get_peer (GClueServiceClient *client)
+GClueClientInfo *
+gclue_service_client_get_client_info (GClueServiceClient *client)
 {
         g_return_val_if_fail (GCLUE_IS_SERVICE_CLIENT(client), NULL);
 
-        return client->priv->peer;
+        return client->priv->client_info;
 }

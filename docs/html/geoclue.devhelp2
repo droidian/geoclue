@@ -7,19 +7,25 @@
       <sub name="org.freedesktop.GeoClue2.Client" link="gdbus-org.freedesktop.GeoClue2.Client.html"/>
       <sub name="org.freedesktop.GeoClue2.Location" link="gdbus-org.freedesktop.GeoClue2.Location.html"/>
     </sub>
+    <sub name="Agent D-Bus API Reference" link="ref-agent-dbus.html">
+      <sub name="org.freedesktop.GeoClue2.Agent" link="gdbus-org.freedesktop.GeoClue2.Agent.html"/>
+    </sub>
     <sub name="Index" link="ix01.html"/>
     <sub name="License" link="license.html"/>
   </chapters>
   <functions>
     <keyword type="method" name="The GetClient() method" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient"/>
+    <keyword type="method" name="The AddAgent() method" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent"/>
     <keyword type="method" name="The Start() method" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-method-org-freedesktop-GeoClue2-Client.Start"/>
     <keyword type="method" name="The Stop() method" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-method-org-freedesktop-GeoClue2-Client.Stop"/>
     <keyword type="signal" name="The &quot;LocationUpdated&quot; signal" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-signal-org-freedesktop-GeoClue2-Client.LocationUpdated"/>
     <keyword type="property" name="The &quot;Location&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location"/>
     <keyword type="property" name="The &quot;DistanceThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold"/>
+    <keyword type="property" name="The &quot;DesktopId&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId"/>
     <keyword type="property" name="The &quot;Latitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Latitude"/>
     <keyword type="property" name="The &quot;Longitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude"/>
     <keyword type="property" name="The &quot;Accuracy&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy"/>
     <keyword type="property" name="The &quot;Description&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description"/>
+    <keyword type="method" name="The AuthorizeApp() method" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"/>
   </functions>
 </book>

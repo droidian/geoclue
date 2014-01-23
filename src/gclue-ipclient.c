@@ -31,7 +31,7 @@
 #include "geoip-server/geoip-server.h"
 #include "geocode-location.h"
 
-#define GEOIP_SERVER "http://geoip.fedoraproject.org/city"
+#define GEOIP_SERVER "https://geoip.fedoraproject.org/city"
 
 /**
  * SECTION:gclue-ipclient
@@ -83,7 +83,10 @@ gclue_ipclient_init (GClueIpclient *ipclient)
 {
         ipclient->priv = G_TYPE_INSTANCE_GET_PRIVATE ((ipclient), GCLUE_TYPE_IPCLIENT, GClueIpclientPrivate);
 
-        ipclient->priv->soup_session = soup_session_new ();
+        ipclient->priv->soup_session = soup_session_new_with_options
+                        (SOUP_SESSION_REMOVE_FEATURE_BY_TYPE,
+                         SOUP_TYPE_PROXY_RESOLVER_DEFAULT,
+                         NULL);
 }
 
 /**

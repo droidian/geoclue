@@ -39,6 +39,7 @@
 <h2>Methods</h2>
 <pre class="synopsis">
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient" title="The GetClient() method">GetClient</a> (OUT o client);
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent" title="The AddAgent() method">AddAgent</a>  ();
 </pre>
 </div>
 <div class="refsect1">
@@ -69,6 +70,17 @@ GetClient (OUT o client);
 <td><p>The path for newly created client object</p></td>
 </tr></tbody>
 </table></div>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent"></a><h3>The AddAgent() method</h3>
+<pre class="programlisting">
+AddAgent ();
+</pre>
+<p>        An API for user authorization agents to register themselves. Each agent
+        is responsible for the user it is running as. Application developers
+        can and should simply ignore this API.
+</p>
 </div>
 </div>
 </div>

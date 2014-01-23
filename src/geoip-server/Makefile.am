@@ -27,3 +27,4 @@ EXTRA_DIST = API-Documentation.txt
 
 MAINTAINERCLEANFILES = Makefile.in
 
+-include $(top_srcdir)/git.mk

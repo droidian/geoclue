@@ -141,6 +141,8 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DBUS_SYS_DIR = @DBUS_SYS_DIR@
 DEFS = @DEFS@
+DEMO_AGENT_CFLAGS = @DEMO_AGENT_CFLAGS@
+DEMO_AGENT_LIBS = @DEMO_AGENT_LIBS@
 DEPDIR = @DEPDIR@
 DESKTOP_FILE_VALIDATE = @DESKTOP_FILE_VALIDATE@
 DLLTOOL = @DLLTOOL@
@@ -152,6 +154,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GDBUS_CODEGEN = @GDBUS_CODEGEN@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
@@ -160,10 +163,8 @@ GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
 GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
 GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
-GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
-GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
@@ -215,7 +216,9 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
+REALPATH = @REALPATH@
 SED = @SED@
+SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -249,7 +252,6 @@ dbus_srv_user = @dbus_srv_user@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-gsettingsschemadir = @gsettingsschemadir@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -276,6 +278,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemunitdir = @systemdsystemunitdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
@@ -318,6 +321,7 @@ content_files = \
 	docs-org.freedesktop.GeoClue2.Manager.xml	\
 	docs-org.freedesktop.GeoClue2.Client.xml	\
 	docs-org.freedesktop.GeoClue2.Location.xml	\
+	docs-org.freedesktop.GeoClue2.Agent.xml		\
 	$(NULL)
 
 MAINTAINERCLEANFILES = \
@@ -374,12 +378,14 @@ MAINTAINERCLEANFILES = \
 @ENABLE_GTK_DOC_FALSE@	docs-org.freedesktop.GeoClue2.Manager.xml \
 @ENABLE_GTK_DOC_FALSE@	docs-org.freedesktop.GeoClue2.Client.xml \
 @ENABLE_GTK_DOC_FALSE@	docs-org.freedesktop.GeoClue2.Location.xml \
+@ENABLE_GTK_DOC_FALSE@	docs-org.freedesktop.GeoClue2.Agent.xml \
 @ENABLE_GTK_DOC_FALSE@	$(NULL)
 @ENABLE_GTK_DOC_TRUE@CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) \
 @ENABLE_GTK_DOC_TRUE@	$(DOC_STAMPS) \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Manager.xml \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Client.xml \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Location.xml \
+@ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Agent.xml \
 @ENABLE_GTK_DOC_TRUE@	$(NULL)
 @ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_HTML_FALSE@HTML_BUILD_STAMP = 
 @ENABLE_GTK_DOC_TRUE@@GTK_DOC_BUILD_HTML_TRUE@HTML_BUILD_STAMP = html-build.stamp
@@ -541,10 +547,10 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-@ENABLE_GTK_DOC_FALSE@uninstall-local:
-@ENABLE_GTK_DOC_FALSE@distclean-local:
-@ENABLE_GTK_DOC_FALSE@install-data-local:
 @ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
+@ENABLE_GTK_DOC_FALSE@install-data-local:
+@ENABLE_GTK_DOC_FALSE@distclean-local:
+@ENABLE_GTK_DOC_FALSE@uninstall-local:
 @ENABLE_GTK_DOC_FALSE@clean-local:
 clean: clean-am
 
@@ -636,6 +642,8 @@ docs-org.freedesktop.GeoClue2.Client.xml:
 	cp $(top_srcdir)/src/docs-org.freedesktop.GeoClue2.Client.xml .
 docs-org.freedesktop.GeoClue2.Location.xml:
 	cp $(top_srcdir)/src/docs-org.freedesktop.GeoClue2.Location.xml .
+docs-org.freedesktop.GeoClue2.Agent.xml:
+	cp $(top_srcdir)/src/agent/docs-org.freedesktop.GeoClue2.Agent.xml .
 
 @ENABLE_GTK_DOC_TRUE@all-local: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
 #all-local:
@@ -825,6 +833,8 @@ docs-org.freedesktop.GeoClue2.Location.xml:
 @ENABLE_GTK_DOC_TRUE@	@$(GTKDOC_REBASE) --online --relative --html-dir=$(distdir)/html
 
 @ENABLE_GTK_DOC_TRUE@.PHONY : dist-hook-local docs
+
+-include $(top_srcdir)/git.mk
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

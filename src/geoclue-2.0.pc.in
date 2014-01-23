@@ -4,6 +4,7 @@ datarootdir=@datarootdir@
 datadir=@datadir@
 
 dbus_interface=${datadir}/geoclue-2.0/geoclue-interface.xml
+agent_dbus_interface=${datadir}/geoclue-2.0/geoclue-agent-interface.xml
 
 Name: Geoclue
 Description: The Geoinformation Service

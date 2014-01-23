@@ -47,7 +47,7 @@ on_location_proxy_ready (GObject      *source_object,
         if (error != NULL) {
             g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
 
-            exit (-5);
+            exit (-7);
         }
 
         value = g_dbus_proxy_get_cached_property (location, "Latitude");
@@ -112,7 +112,7 @@ on_start_ready (GObject      *source_object,
         if (results == NULL) {
             g_critical ("Failed to start GeoClue2 client: %s", error->message);
 
-            exit (-4);
+            exit (-6);
         }
 
         g_variant_unref (results);
@@ -130,7 +130,7 @@ on_client_proxy_ready (GObject      *source_object,
         if (error != NULL) {
             g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
 
-            exit (-3);
+            exit (-5);
         }
 
         g_signal_connect (client, "g-signal",
@@ -143,6 +143,66 @@ on_client_proxy_ready (GObject      *source_object,
                            -1,
                            NULL,
                            on_start_ready,
+                           user_data);
+}
+
+static void
+on_set_desktop_id_ready (GObject      *source_object,
+                         GAsyncResult *res,
+                         gpointer      user_data)
+{
+        GDBusProxy *client_props = G_DBUS_PROXY (source_object);
+        GVariant *results;
+        GError *error = NULL;
+
+        results = g_dbus_proxy_call_finish (client_props, res, &error);
+        if (results == NULL) {
+            g_critical ("Failed to start GeoClue2 client: %s", error->message);
+
+            exit (-4);
+        }
+        g_variant_unref (results);
+
+        g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+                                  G_DBUS_PROXY_FLAGS_NONE,
+                                  NULL,
+                                  "org.freedesktop.GeoClue2",
+                                  g_dbus_proxy_get_object_path (client_props),
+                                  "org.freedesktop.GeoClue2.Client",
+                                  NULL,
+                                  on_client_proxy_ready,
+                                  user_data);
+}
+
+static void
+on_client_props_proxy_ready (GObject      *source_object,
+                             GAsyncResult *res,
+                             gpointer      user_data)
+{
+        GDBusProxy *client_props;
+        GVariant *desktop_id;
+        GError *error = NULL;
+
+        client_props = g_dbus_proxy_new_for_bus_finish (res, &error);
+        if (error != NULL) {
+            g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
+
+            exit (-3);
+        }
+
+        /* FIXME: We should provide a desktop file? */
+        desktop_id = g_variant_new ("s", "geoclue-demo-app");
+
+        g_dbus_proxy_call (client_props,
+                           "Set",
+                           g_variant_new ("(ssv)",
+                                          "org.freedesktop.GeoClue2.Client",
+                                          "DesktopId",
+                                          desktop_id),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           NULL,
+                           on_set_desktop_id_ready,
                            user_data);
 }
 
@@ -173,9 +233,9 @@ on_get_client_ready (GObject      *source_object,
                                   NULL,
                                   "org.freedesktop.GeoClue2",
                                   client_path,
-                                  "org.freedesktop.GeoClue2.Client",
+                                  "org.freedesktop.DBus.Properties",
                                   NULL,
-                                  on_client_proxy_ready,
+                                  on_client_props_proxy_ready,
                                   manager);
         g_variant_unref (results);
 }

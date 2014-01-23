@@ -1,2 +1,4 @@
+demo/agent.c
+demo/gclue-service-agent.c
 demo/where-am-i.c
 src/gclue-main.c

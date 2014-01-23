@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<refentry id="gdbus-org.freedesktop.GeoClue2.Agent">
+  <refmeta>    <refentrytitle role="top_of_page" id="gdbus-interface-org-freedesktop-GeoClue2-Agent.top_of_page">org.freedesktop.GeoClue2.Agent</refentrytitle>
+  <indexterm zone="gdbus-interface-org-freedesktop-GeoClue2-Agent.top_of_page"><primary sortas="Agent">org.freedesktop.GeoClue2.Agent</primary></indexterm>
+  </refmeta>  <refnamediv>    <refname>org.freedesktop.GeoClue2.Agent</refname>    <refpurpose>The GeoClue agent interface</refpurpose>  </refnamediv>  <refsynopsisdiv role="synopsis">
+    <title role="synopsis.title">Methods</title>
+    <synopsis>
+<link linkend="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp">AuthorizeApp</link> (IN  s desktop_id,
+              OUT b authorized);
+</synopsis>
+  </refsynopsisdiv>
+<refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Agent">
+  <title role="desc.title">Description</title>
+  <para>      This is the interface all application-authorizing agents must implement.
+      There must be a separate agent object for every logged-in user on path
+      "/org/freedesktop/GeoClue2/Agent/${UID}".
+</para>
+</refsect1>
+<refsect1 role="details" id="gdbus-methods-org.freedesktop.GeoClue2.Agent">
+  <title role="details.title">Method Details</title>
+<refsect2 role="method" id="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp">
+  <title>The AuthorizeApp() method</title>
+  <indexterm zone="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"><primary sortas="Agent.AuthorizeApp">org.freedesktop.GeoClue2.Agent.AuthorizeApp()</primary></indexterm>
+<programlisting>
+AuthorizeApp (IN  s desktop_id,
+              OUT b authorized);
+</programlisting>
+<para>        This is the method that will be called by geoclue to get applications
+        authorized to be given location information.
+</para>
+<variablelist role="params">
+<varlistentry>
+  <term><literal>IN s <parameter>desktop_id</parameter></literal>:</term>
+  <listitem><para>The desktop file id (the basename of the desktop file) of the application requesting location information.</para></listitem>
+</varlistentry>
+<varlistentry>
+  <term><literal>OUT b <parameter>authorized</parameter></literal>:</term>
+  <listitem><para>Return value indicating if application should be given location information or not.</para></listitem>
+</varlistentry>
+</variablelist>
+</refsect2>
+</refsect1>
+</refentry>
+

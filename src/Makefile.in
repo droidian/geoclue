@@ -83,6 +83,7 @@ DIST_COMMON = $(top_srcdir)/Makefile.decl $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(srcdir)/geoclue-2.0.pc.in \
 	$(top_srcdir)/build-aux/depcomp
 libexec_PROGRAMS = geoclue$(EXEEXT)
+@BUILD_GEOIP_SERVER_TRUE@am__append_1 = geoip-server
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
@@ -102,7 +103,9 @@ PROGRAMS = $(libexec_PROGRAMS)
 am__objects_1 = geoclue-geoclue-interface.$(OBJEXT)
 am__objects_2 = $(am__objects_1)
 am_geoclue_OBJECTS = $(am__objects_2) geoclue-gclue-main.$(OBJEXT) \
-	geoclue-gclue-error.$(OBJEXT) geoclue-gclue-ipclient.$(OBJEXT) \
+	geoclue-gclue-client-info.$(OBJEXT) \
+	geoclue-gclue-config.$(OBJEXT) geoclue-gclue-error.$(OBJEXT) \
+	geoclue-gclue-ipclient.$(OBJEXT) \
 	geoclue-gclue-locator.$(OBJEXT) \
 	geoclue-gclue-service-manager.$(OBJEXT) \
 	geoclue-gclue-service-client.$(OBJEXT) \
@@ -222,7 +225,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = geoip-server
+DIST_SUBDIRS = agent geoip-server
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -271,6 +274,8 @@ CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
 DBUS_SYS_DIR = @DBUS_SYS_DIR@
 DEFS = @DEFS@
+DEMO_AGENT_CFLAGS = @DEMO_AGENT_CFLAGS@
+DEMO_AGENT_LIBS = @DEMO_AGENT_LIBS@
 DEPDIR = @DEPDIR@
 DESKTOP_FILE_VALIDATE = @DESKTOP_FILE_VALIDATE@
 DLLTOOL = @DLLTOOL@
@@ -282,6 +287,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+GDBUS_CODEGEN = @GDBUS_CODEGEN@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
@@ -290,10 +296,8 @@ GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
 GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
 GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
-GLIB_COMPILE_SCHEMAS = @GLIB_COMPILE_SCHEMAS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
-GSETTINGS_DISABLE_SCHEMAS_COMPILE = @GSETTINGS_DISABLE_SCHEMAS_COMPILE@
 GTKDOC_CHECK = @GTKDOC_CHECK@
 GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
@@ -345,7 +349,9 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
+REALPATH = @REALPATH@
 SED = @SED@
+SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -379,7 +385,6 @@ dbus_srv_user = @dbus_srv_user@
 docdir = @docdir@
 dvidir = @dvidir@
 exec_prefix = @exec_prefix@
-gsettingsschemadir = @gsettingsschemadir@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
@@ -406,6 +411,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+systemdsystemunitdir = @systemdsystemunitdir@
 target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
@@ -415,8 +421,7 @@ GTESTER_REPORT = gtester-report		# in $PATH for non-GLIB packages
 
 # initialize variables for unconditional += appending
 TEST_PROGS = 
-@BUILD_GEOIP_SERVER_FALSE@SUBDIRS = 
-@BUILD_GEOIP_SERVER_TRUE@SUBDIRS = geoip-server
+SUBDIRS = agent $(am__append_1)
 interfacedir = $(datadir)/geoclue-2.0
 interface_DATA = geoclue-interface.xml
 dbus_built_sources = geoclue-interface.c geoclue-interface.h
@@ -427,6 +432,10 @@ BUILT_SOURCES = \
 geoclue_SOURCES = \
 	$(BUILT_SOURCES) 	 \
 	gclue-main.c	 	 \
+	gclue-client-info.h 	 \
+	gclue-client-info.c 	 \
+	gclue-config.h 	 	 \
+	gclue-config.c 	 	 \
 	gclue-error.h 	 	 \
 	gclue-error.c 	 	 \
 	gclue-ipclient.h 	 \
@@ -443,10 +452,12 @@ geoclue_SOURCES = \
 	geocode-location.h       \
 	$(NULL)
 
-geoclue_CFLAGS = $(GEOCLUE_CFLAGS) 		     \
-		 $(WARN_CFLAGS)			     \
-		 -DLOCALEDIR="\"$(datadir)/locale\"" \
-		 -DG_LOG_DOMAIN=\""Geoclue"\"
+geoclue_CFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
+		 $(WARN_CFLAGS)			     	  \
+		 -DLOCALEDIR="\"$(datadir)/locale\"" 	  \
+		 -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
+		 -DABS_TOP_SRCDIR=\""$(abs_top_srcdir)"\" \
+    		 -DSYSCONFDIR=\""$(sysconfdir)"\"
 
 geoclue_LDADD = $(GEOCLUE_LIBS) $(LIBS)
 CLEANFILES = $(BUILT_SOURCES)
@@ -556,6 +567,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-client-info.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-config.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-error.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-ipclient.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-locator.Po@am__quote@
@@ -614,6 +627,34 @@ geoclue-gclue-main.obj: gclue-main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-main.c' object='geoclue-gclue-main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-main.obj `if test -f 'gclue-main.c'; then $(CYGPATH_W) 'gclue-main.c'; else $(CYGPATH_W) '$(srcdir)/gclue-main.c'; fi`
+
+geoclue-gclue-client-info.o: gclue-client-info.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-client-info.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-client-info.Tpo -c -o geoclue-gclue-client-info.o `test -f 'gclue-client-info.c' || echo '$(srcdir)/'`gclue-client-info.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-client-info.Tpo $(DEPDIR)/geoclue-gclue-client-info.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-client-info.c' object='geoclue-gclue-client-info.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-client-info.o `test -f 'gclue-client-info.c' || echo '$(srcdir)/'`gclue-client-info.c
+
+geoclue-gclue-client-info.obj: gclue-client-info.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-client-info.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-client-info.Tpo -c -o geoclue-gclue-client-info.obj `if test -f 'gclue-client-info.c'; then $(CYGPATH_W) 'gclue-client-info.c'; else $(CYGPATH_W) '$(srcdir)/gclue-client-info.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-client-info.Tpo $(DEPDIR)/geoclue-gclue-client-info.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-client-info.c' object='geoclue-gclue-client-info.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-client-info.obj `if test -f 'gclue-client-info.c'; then $(CYGPATH_W) 'gclue-client-info.c'; else $(CYGPATH_W) '$(srcdir)/gclue-client-info.c'; fi`
+
+geoclue-gclue-config.o: gclue-config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-config.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-config.Tpo -c -o geoclue-gclue-config.o `test -f 'gclue-config.c' || echo '$(srcdir)/'`gclue-config.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-config.Tpo $(DEPDIR)/geoclue-gclue-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-config.c' object='geoclue-gclue-config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-config.o `test -f 'gclue-config.c' || echo '$(srcdir)/'`gclue-config.c
+
+geoclue-gclue-config.obj: gclue-config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-config.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-config.Tpo -c -o geoclue-gclue-config.obj `if test -f 'gclue-config.c'; then $(CYGPATH_W) 'gclue-config.c'; else $(CYGPATH_W) '$(srcdir)/gclue-config.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-config.Tpo $(DEPDIR)/geoclue-gclue-config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-config.c' object='geoclue-gclue-config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-config.obj `if test -f 'gclue-config.c'; then $(CYGPATH_W) 'gclue-config.c'; else $(CYGPATH_W) '$(srcdir)/gclue-config.c'; fi`
 
 geoclue-gclue-error.o: gclue-error.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-error.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-error.Tpo -c -o geoclue-gclue-error.o `test -f 'gclue-error.c' || echo '$(srcdir)/'`gclue-error.c
@@ -988,7 +1029,8 @@ install-dvi: install-dvi-recursive
 install-dvi-am:
 
 install-exec-am: install-libexecPROGRAMS
-
+	@$(NORMAL_INSTALL)
+	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
 install-html: install-html-recursive
 
 install-html-am:
@@ -1031,7 +1073,7 @@ uninstall-am: uninstall-interfaceDATA uninstall-libexecPROGRAMS \
 	uninstall-pkgconfigDATA
 
 .MAKE: $(am__recursive_targets) all check check-am install install-am \
-	install-strip
+	install-exec-am install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am check-local clean clean-generic clean-libexecPROGRAMS \
@@ -1039,8 +1081,8 @@ uninstall-am: uninstall-interfaceDATA uninstall-libexecPROGRAMS \
 	distclean-compile distclean-generic distclean-libtool \
 	distclean-tags distdir dvi dvi-am html html-am info info-am \
 	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am \
+	install-dvi-am install-exec install-exec-am install-exec-hook \
+	install-html install-html-am install-info install-info-am \
 	install-interfaceDATA install-libexecPROGRAMS install-man \
 	install-pdf install-pdf-am install-pkgconfigDATA install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
@@ -1098,9 +1140,14 @@ test-report perf-report full-report:	${TEST_PROGS}
 .PHONY: test test-report perf-report full-report
 # run make test as part of make check
 check-local: test
+
+install-exec-hook:
+	$(AM_V_GEN)$(SETCAP) cap_sys_ptrace+ep $(DESTDIR)$(libexecdir)/geoclue || \
+	echo "Unable to setcap cap_sys_ptrace+ep $(libexecdir)/geoclue. " \
+	     "Package systems may do this after installation."
 geoclue-interface.c: geoclue-interface.h
 geoclue-interface.h: Makefile.am $(interface_DATA)
-	gdbus-codegen						\
+	$(AM_V_GEN)$(GDBUS_CODEGEN) \
 		--interface-prefix org.freedesktop.GeoClue2.	\
 		--c-namespace GClue				\
 		--generate-c-code geoclue-interface		\

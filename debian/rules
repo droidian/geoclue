@@ -8,9 +8,6 @@ override_dh_auto_configure:
                              --enable-geoip-server=no \
                              --with-systemdsystemunitdir=/lib/systemd/system
 
-override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp
-
 override_dh_auto_test:
 	# testsuite fails on missing latitude (et.al)
 	# which is only available when using GeoLiteCity.dat

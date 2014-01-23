@@ -5,7 +5,8 @@ override_dh_auto_configure:
 	dh_auto_configure -- --libdir=/usr/lib \
                              --libexec=/usr/lib/geoclue-2.0 \
                              --with-dbus-service-user=geoclue \
-                             --enable-geoip-server=no
+                             --enable-geoip-server=no \
+                             --with-systemdsystemunitdir=/lib/systemd/system
 
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/tmp

@@ -22,6 +22,10 @@
 
 #include <glib/gi18n.h>
 #include <libnotify/notify.h>
+#include <gio/gio.h>
+#include <gio/gdesktopappinfo.h>
+
+#include <gclue-enums.h>
 
 #include "gclue-service-agent.h"
 
@@ -171,7 +175,8 @@ on_manager_proxy_ready (GObject      *source_object,
 
         g_dbus_proxy_call (proxy,
                            "AddAgent",
-                           NULL,
+                           g_variant_new ("(s)",
+                                          "geoclue-demo-agent"),
                            G_DBUS_CALL_FLAGS_NONE,
                            -1,
                            g_task_get_cancellable (task),
@@ -229,14 +234,15 @@ typedef struct
         GClueAgent *agent;
         GDBusMethodInvocation *invocation;
         NotifyNotification *notification;
-        char *desktop_id;
+        GAppInfo *app_info;
         gboolean authorized;
+        GClueAccuracyLevel accuracy_level;
 } NotificationData;
 
 static void
 notification_data_free (NotificationData *data)
 {
-        g_free (data->desktop_id);
+        g_object_unref (data->app_info);
         g_object_unref (data->notification);
         g_slice_free (NotificationData, data);
 }
@@ -267,34 +273,52 @@ on_notify_closed (NotifyNotification *notification,
         NotificationData *data = (NotificationData *) user_data;
 
         if (data->authorized)
-                g_debug ("Authorized %s", data->desktop_id);
+                g_debug ("Authorized '%s'", g_app_info_get_display_name (data->app_info));
         else
-                g_debug ("%s not authorized", data->desktop_id);
+                g_debug ("'%s' not authorized",  g_app_info_get_display_name (data->app_info));
         gclue_agent_complete_authorize_app (data->agent,
                                             data->invocation,
-                                            data->authorized);
+                                            data->authorized,
+                                            data->accuracy_level);
         notification_data_free (data);
 }
 
 static gboolean
 gclue_service_agent_handle_authorize_app (GClueAgent            *agent,
                                           GDBusMethodInvocation *invocation,
-                                          const char            *desktop_id)
+                                          const char            *desktop_id,
+                                          GClueAccuracyLevel     accuracy_level)
 {
         NotifyNotification *notification;
         NotificationData *data;
         GError *error = NULL;
+        char *desktop_file;
+        GAppInfo *app_info;
         char *msg;
 
-        msg = g_strdup_printf (_("Allow %s to access your location information?"),
-                               desktop_id);
+        desktop_file = g_strjoin (".", desktop_id, "desktop", NULL);
+        app_info = G_APP_INFO (g_desktop_app_info_new (desktop_file));
+        if (app_info == NULL) {
+                g_debug ("Failed to find %s", desktop_file);
+                gclue_agent_complete_authorize_app (agent,
+                                                    invocation,
+                                                    FALSE,
+                                                    accuracy_level);
+
+                return TRUE;
+        }
+        g_free (desktop_file);
+
+        msg = g_strdup_printf (_("Allow '%s' to access your location information?"),
+                               g_app_info_get_display_name (app_info));
         notification = notify_notification_new (_("Geolocation"), msg, "dialog-question");
         g_free (msg);
 
         data = g_slice_new0 (NotificationData);
         data->invocation = invocation;
         data->notification = notification;
-        data->desktop_id = g_strdup (desktop_id);
+        data->app_info = app_info;
+        data->accuracy_level = accuracy_level;
 
         notify_notification_add_action (notification,
                                         ACTION_YES,

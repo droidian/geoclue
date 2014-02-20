@@ -1,0 +1,33 @@
+<!-- ##### SECTION Title ##### -->
+gclue-enums
+
+<!-- ##### SECTION Short_Description ##### -->
+
+
+<!-- ##### SECTION Long_Description ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION See_Also ##### -->
+<para>
+
+</para>
+
+<!-- ##### SECTION Stability_Level ##### -->
+
+
+<!-- ##### SECTION Image ##### -->
+
+
+<!-- ##### ENUM GClueAccuracyLevel ##### -->
+<para>
+
+</para>
+
+@GCLUE_ACCURACY_LEVEL_COUNTRY: 
+@GCLUE_ACCURACY_LEVEL_CITY: 
+@GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD: 
+@GCLUE_ACCURACY_LEVEL_STREET: 
+@GCLUE_ACCURACY_LEVEL_EXACT: 
+

@@ -1,4 +1,6 @@
-noinst_PROGRAMS = where-am-i
+demodir = $(datadir)/geoclue-2.0/demos
+
+demo_PROGRAMS = where-am-i
 
 where_am_i_SOURCES = where-am-i.c
 where_am_i_CFLAGS = $(GEOCLUE_CFLAGS)   		\
@@ -6,22 +8,21 @@ where_am_i_CFLAGS = $(GEOCLUE_CFLAGS)   		\
 		    -DLOCALEDIR="\"$(datadir)/locale\""
 where_am_i_LDADD = $(GEOCLUE_LIBS)
 
+appsdir = $(datadir)/applications
+apps_DATA = geoclue-where-am-i.desktop \
+	    geoclue-demo-agent.desktop
+
+@INTLTOOL_DESKTOP_RULE@
+
+geoclue-where-am-i.desktop.in: geoclue-where-am-i.desktop.in.in
+	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
+
+geoclue-demo-agent.desktop.in: geoclue-demo-agent.desktop.in.in
+	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
+
 if BUILD_DEMO_AGENT
-noinst_PROGRAMS += agent
+demo_PROGRAMS += agent
 endif # BUILD_DEMO_AGENT
-
-interface_data = $(top_builddir)/src/agent/geoclue-agent-interface.xml
-dbus_built_sources = geoclue-agent-interface.c geoclue-agent-interface.h
-geoclue-agent-interface.c: geoclue-agent-interface.h
-geoclue-agent-interface.h: Makefile.am $(interface_data)
-	gdbus-codegen						\
-		--interface-prefix org.freedesktop.GeoClue2.	\
-		--c-namespace GClue				\
-		--generate-c-code geoclue-agent-interface	\
-		$(interface_data)
-
-BUILT_SOURCES = $(dbus_built_sources) \
-		$(NULL)
 
 agent_SOURCES = $(BUILT_SOURCES)       \
 		gclue-service-agent.h  \
@@ -31,7 +32,24 @@ agent_SOURCES = $(BUILT_SOURCES)       \
 agent_CFLAGS = $(DEMO_AGENT_CFLAGS)   		   \
 	       $(WARN_CFLAGS)			   \
  	       -DLOCALEDIR="\"$(datadir)/locale\"" \
-	       -DABS_SRCDIR=\""$(abs_srcdir)"\"
-agent_LDADD = $(DEMO_AGENT_LIBS)
+	       -DABS_SRCDIR=\""$(abs_srcdir)"\"	   \
+	       -I$(top_builddir)/src		   \
+	       -I$(top_builddir)/src/agent	   \
+	       -I$(top_builddir)/src/public-api
+agent_LDADD = $(DEMO_AGENT_LIBS) \
+	      $(top_builddir)/src/agent/libgeoclue-agent.la
 
 -include $(top_srcdir)/git.mk
+
+EXTRA_DIST = \
+	geoclue-demo-agent.desktop.in.in \
+	geoclue-demo-agent.desktop.in \
+        geoclue-where-am-i.desktop.in.in \
+        geoclue-where-am-i.desktop.in \
+        $(NULL)
+
+DISTCLEANFILES = \
+	geoclue-demo-agent.desktop \
+        geoclue-where-am-i.desktop \
+        $(NULL)
+

@@ -1,7 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 NULL =
 
-SUBDIRS = src data demo po docs
+SUBDIRS = build-aux src data demo po docs
 
 INTLTOOL_FILES =				\
 	intltool-extract.in			\

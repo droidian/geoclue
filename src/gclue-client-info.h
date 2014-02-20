@@ -66,7 +66,6 @@ void              gclue_client_info_new_async      (const char         *bus_name
 GClueClientInfo * gclue_client_info_new_finish     (GAsyncResult       *res,
                                                     GError            **error);
 const char *      gclue_client_info_get_bus_name   (GClueClientInfo    *info);
-const char *      gclue_client_info_get_bin_path   (GClueClientInfo    *info);
 guint32           gclue_client_info_get_user_id    (GClueClientInfo    *info);
 gboolean          gclue_client_info_check_bus_name (GClueClientInfo    *info,
                                                     const char         *bus_name);

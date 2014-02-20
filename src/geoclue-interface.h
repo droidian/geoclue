@@ -28,13 +28,19 @@ struct _GClueManagerIface
 {
   GTypeInterface parent_iface;
 
+
   gboolean (*handle_add_agent) (
     GClueManager *object,
-    GDBusMethodInvocation *invocation);
+    GDBusMethodInvocation *invocation,
+    const gchar *arg_id);
 
   gboolean (*handle_get_client) (
     GClueManager *object,
     GDBusMethodInvocation *invocation);
+
+  guint  (*get_available_accuracy_level) (GClueManager *object);
+
+  gboolean  (*get_in_use) (GClueManager *object);
 
 };
 
@@ -77,6 +83,7 @@ gboolean gclue_manager_call_get_client_sync (
 
 void gclue_manager_call_add_agent (
     GClueManager *proxy,
+    const gchar *arg_id,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -88,9 +95,18 @@ gboolean gclue_manager_call_add_agent_finish (
 
 gboolean gclue_manager_call_add_agent_sync (
     GClueManager *proxy,
+    const gchar *arg_id,
     GCancellable *cancellable,
     GError **error);
 
+
+
+/* D-Bus property accessors: */
+gboolean gclue_manager_get_in_use (GClueManager *object);
+void gclue_manager_set_in_use (GClueManager *object, gboolean value);
+
+guint gclue_manager_get_available_accuracy_level (GClueManager *object);
+void gclue_manager_set_available_accuracy_level (GClueManager *object, guint value);
 
 
 /* ---- */
@@ -221,6 +237,8 @@ struct _GClueClientIface
 
   const gchar * (*get_location) (GClueClient *object);
 
+  guint  (*get_requested_accuracy_level) (GClueClient *object);
+
   void (*location_updated) (
     GClueClient *object,
     const gchar *arg_old,
@@ -299,6 +317,9 @@ void gclue_client_set_distance_threshold (GClueClient *object, guint value);
 const gchar *gclue_client_get_desktop_id (GClueClient *object);
 gchar *gclue_client_dup_desktop_id (GClueClient *object);
 void gclue_client_set_desktop_id (GClueClient *object, const gchar *value);
+
+guint gclue_client_get_requested_accuracy_level (GClueClient *object);
+void gclue_client_set_requested_accuracy_level (GClueClient *object, guint value);
 
 
 /* ---- */

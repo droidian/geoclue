@@ -83,10 +83,10 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/org.freedesktop.GeoClue2.conf.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -140,9 +140,9 @@ am__uninstall_files_from_dir = { \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
 am__installdirs = "$(DESTDIR)$(dbusservicedir)" \
-	"$(DESTDIR)$(servicedir)" "$(DESTDIR)$(sysconfdir)" \
+	"$(DESTDIR)$(servicedir)" "$(DESTDIR)$(systemconfdir)" \
 	"$(DESTDIR)$(systemdservicedir)"
-DATA = $(dbusservice_DATA) $(service_DATA) $(sysconf_DATA) \
+DATA = $(dbusservice_DATA) $(service_DATA) $(systemconf_DATA) \
 	$(systemdservice_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -182,6 +182,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GDBUS_CODEGEN = @GDBUS_CODEGEN@
+GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
@@ -190,6 +191,7 @@ GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
 GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
 GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
@@ -225,8 +227,12 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+ModemManager_CFLAGS = @ModemManager_CFLAGS@
+ModemManager_LIBS = @ModemManager_LIBS@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NetworkManager_CFLAGS = @NetworkManager_CFLAGS@
+NetworkManager_LIBS = @NetworkManager_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -243,9 +249,7 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
-REALPATH = @REALPATH@
 SED = @SED@
-SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -310,8 +314,9 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-sysconf_in_files = geoclue.conf.in
-sysconf_DATA = $(sysconf_in_files:.conf.in=.conf)
+systemconfdir = $(sysconfdir)/geoclue
+systemconf_in_files = geoclue.conf.in
+systemconf_DATA = $(systemconf_in_files:.conf.in=.conf)
 servicedir = $(datadir)/dbus-1/system-services
 service_in_files = org.freedesktop.GeoClue2.service.in
 service_DATA = $(service_in_files:.service.in=.service)
@@ -325,13 +330,13 @@ systemdservice_in_files = geoclue.service.in
 @HAVE_SYSTEMD_TRUE@systemdservicedir = $(systemdsystemunitdir)
 @HAVE_SYSTEMD_TRUE@systemdservice_DATA = $(systemdservice_in_files:.service.in=.service)
 DISTCLEANFILES = $(service_DATA) \
-                 $(sysconf_DATA) \
+                 $(systemconf_DATA) \
                  $(systemdservice_DATA)
 
 EXTRA_DIST = $(service_in_files) \
              $(systemdservice_in_files) \
              $(dbusservice_DATA) \
-             $(sysconf_in_files)
+             $(systemconf_in_files)
 
 all: all-am
 
@@ -416,27 +421,27 @@ uninstall-serviceDATA:
 	@list='$(service_DATA)'; test -n "$(servicedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
 	dir='$(DESTDIR)$(servicedir)'; $(am__uninstall_files_from_dir)
-install-sysconfDATA: $(sysconf_DATA)
+install-systemconfDATA: $(systemconf_DATA)
 	@$(NORMAL_INSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
+	@list='$(systemconf_DATA)'; test -n "$(systemconfdir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(sysconfdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(sysconfdir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(systemconfdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(systemconfdir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(sysconfdir)'"; \
-	  $(INSTALL_DATA) $$files "$(DESTDIR)$(sysconfdir)" || exit $$?; \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(systemconfdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(systemconfdir)" || exit $$?; \
 	done
 
-uninstall-sysconfDATA:
+uninstall-systemconfDATA:
 	@$(NORMAL_UNINSTALL)
-	@list='$(sysconf_DATA)'; test -n "$(sysconfdir)" || list=; \
+	@list='$(systemconf_DATA)'; test -n "$(systemconfdir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(sysconfdir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(systemconfdir)'; $(am__uninstall_files_from_dir)
 install-systemdserviceDATA: $(systemdservice_DATA)
 	@$(NORMAL_INSTALL)
 	@list='$(systemdservice_DATA)'; test -n "$(systemdservicedir)" || list=; \
@@ -499,7 +504,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(dbusservicedir)" "$(DESTDIR)$(servicedir)" "$(DESTDIR)$(sysconfdir)" "$(DESTDIR)$(systemdservicedir)"; do \
+	for dir in "$(DESTDIR)$(dbusservicedir)" "$(DESTDIR)$(servicedir)" "$(DESTDIR)$(systemconfdir)" "$(DESTDIR)$(systemdservicedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -554,13 +559,13 @@ info: info-am
 info-am:
 
 install-data-am: install-dbusserviceDATA install-serviceDATA \
-	install-systemdserviceDATA
+	install-systemconfDATA install-systemdserviceDATA
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-sysconfDATA
+install-exec-am:
 
 install-html: install-html-am
 
@@ -599,7 +604,7 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-dbusserviceDATA uninstall-serviceDATA \
-	uninstall-sysconfDATA uninstall-systemdserviceDATA
+	uninstall-systemconfDATA uninstall-systemdserviceDATA
 
 .MAKE: install-am install-strip
 
@@ -611,17 +616,20 @@ uninstall-am: uninstall-dbusserviceDATA uninstall-serviceDATA \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
 	install-pdf-am install-ps install-ps-am install-serviceDATA \
-	install-strip install-sysconfDATA install-systemdserviceDATA \
-	installcheck installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am tags-am uninstall \
-	uninstall-am uninstall-dbusserviceDATA uninstall-serviceDATA \
-	uninstall-sysconfDATA uninstall-systemdserviceDATA
+	install-strip install-systemconfDATA \
+	install-systemdserviceDATA installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am tags-am uninstall uninstall-am \
+	uninstall-dbusserviceDATA uninstall-serviceDATA \
+	uninstall-systemconfDATA uninstall-systemdserviceDATA
 
 
-@BUILD_DEMO_AGENT_TRUE@$(sysconf_DATA): $(sysconf_in_files) Makefile
-@BUILD_DEMO_AGENT_TRUE@	@sed -e "s|\@demo_agent\@|`$(REALPATH) $(abs_top_srcdir)`/demo/agent;|" $< > $@
-@BUILD_DEMO_AGENT_FALSE@$(sysconf_DATA): $(sysconf_in_files) Makefile
+@BUILD_DEMO_AGENT_TRUE@$(systemconf_DATA): $(systemconf_in_files) Makefile
+@BUILD_DEMO_AGENT_TRUE@	@sed -e \
+@BUILD_DEMO_AGENT_TRUE@	"s|\@demo_agent\@|geoclue-demo-agent;|" \
+@BUILD_DEMO_AGENT_TRUE@	$< > $@
+@BUILD_DEMO_AGENT_FALSE@$(systemconf_DATA): $(systemconf_in_files) Makefile
 @BUILD_DEMO_AGENT_FALSE@	@sed -e "s|\@demo_agent\@||" $< > $@
 
 $(service_DATA): $(service_in_files) Makefile

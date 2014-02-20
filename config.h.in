@@ -6,6 +6,15 @@
 /* Build geoip server? */
 #undef BUILD_GEOIP_SERVER
 
+/* Build 3G source? */
+#undef GCLUE_USE_3G_SOURCE
+
+/* Build modem GPS source? */
+#undef GCLUE_USE_MODEM_GPS_SOURCE
+
+/* Build Wifi source? */
+#undef GCLUE_USE_WIFI_SOURCE
+
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 
@@ -69,9 +78,6 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
-
-/* Require apps to be authorized by agent? */
-#undef REQUIRE_AUTH
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

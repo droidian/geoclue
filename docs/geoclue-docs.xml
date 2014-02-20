@@ -66,6 +66,7 @@
     <xi:include href="docs-org.freedesktop.GeoClue2.Manager.xml"/>
     <xi:include href="docs-org.freedesktop.GeoClue2.Client.xml"/>
     <xi:include href="docs-org.freedesktop.GeoClue2.Location.xml"/>
+    <xi:include href="xml/gclue-enums.xml"/>
   </reference>
 
   <reference id="ref-agent-dbus">

@@ -56,9 +56,10 @@
 <div class="refsect1">
 <a name="id-1.2.4.5"></a><h2>Properties</h2>
 <pre class="synopsis">
-<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location" title='The "Location" property'>Location</a>           readable   o
-<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold" title='The "DistanceThreshold" property'>DistanceThreshold</a>  readwrite  u
-<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId" title='The "DesktopId" property'>DesktopId</a>          readwrite  s
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location" title='The "Location" property'>Location</a>                readable   o
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold" title='The "DistanceThreshold" property'>DistanceThreshold</a>       readwrite  u
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId" title='The "DesktopId" property'>DesktopId</a>               readwrite  s
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel" title='The "RequestedAccuracyLevel" property'>RequestedAccuracyLevel</a>  readwrite  u
 </pre>
 </div>
 <div class="refsect1">
@@ -150,6 +151,20 @@ DesktopId  readwrite  s
 </pre>
 <p>        The desktop file id (the basename of the desktop file). This property
         must be set by applications for authorization to work.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel"></a><h3>The "RequestedAccuracyLevel" property</h3>
+<pre class="programlisting">
+RequestedAccuracyLevel  readwrite  u
+</pre>
+<p>        The level of accuracy requested by client, as
+        <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a>.
+</p>
+<p>        Please keep in mind that the actual accuracy of location information is
+        dependent on available hardware on your machine, external resources
+        and/or how much accuracy user agrees to be confortable with.
 </p>
 </div>
 </div>

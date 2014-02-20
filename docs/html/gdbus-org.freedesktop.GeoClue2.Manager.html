@@ -24,6 +24,8 @@
 <a href="#gdbus-org.freedesktop.GeoClue2.Manager.synopsis" class="shortcut">Top</a>
                    | 
                   <a href="#gdbus-org.freedesktop.GeoClue2.Manager.description" class="shortcut">Description</a>
+                   | 
+                  <a href="#gdbus-org.freedesktop.GeoClue2.Manager.properties" class="shortcut">Properties</a>
 </td></tr>
 </table>
 <div class="refentry">
@@ -39,7 +41,14 @@
 <h2>Methods</h2>
 <pre class="synopsis">
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient" title="The GetClient() method">GetClient</a> (OUT o client);
-<a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent" title="The AddAgent() method">AddAgent</a>  ();
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent" title="The AddAgent() method">AddAgent</a>  (IN  s id);
+</pre>
+</div>
+<div class="refsect1">
+<a name="id-1.2.3.4"></a><h2>Properties</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-property-org-freedesktop-GeoClue2-Manager.InUse" title='The "InUse" property'>InUse</a>                   readable   b
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel" title='The "AvailableAccuracyLevel" property'>AvailableAccuracyLevel</a>  readable   u
 </pre>
 </div>
 <div class="refsect1">
@@ -75,11 +84,42 @@ GetClient (OUT o client);
 <div class="refsect2">
 <a name="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent"></a><h3>The AddAgent() method</h3>
 <pre class="programlisting">
-AddAgent ();
+AddAgent (IN  s id);
 </pre>
 <p>        An API for user authorization agents to register themselves. Each agent
         is responsible for the user it is running as. Application developers
         can and should simply ignore this API.
+</p>
+<div class="variablelist"><table border="0" class="variablelist">
+<colgroup>
+<col align="left" valign="top">
+<col>
+</colgroup>
+<tbody><tr>
+<td><p><span class="term"><code class="literal">IN s <em class="parameter"><code>id</code></em></code>:</span></p></td>
+<td><p>The Desktop ID (excluding .desktop) of the agent</p></td>
+</tr></tbody>
+</table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="gdbus-properties-org.freedesktop.GeoClue2.Manager"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse"></a><h3>The "InUse" property</h3>
+<pre class="programlisting">
+InUse  readable   b
+</pre>
+<p>        Whether service is currently is use by any application.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel"></a><h3>The "AvailableAccuracyLevel" property</h3>
+<pre class="programlisting">
+AvailableAccuracyLevel  readable   u
+</pre>
+<p>        The level of available accuracy, as
+        <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a>.
 </p>
 </div>
 </div>

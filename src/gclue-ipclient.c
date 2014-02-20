@@ -29,7 +29,6 @@
 #include "gclue-ipclient.h"
 #include "gclue-error.h"
 #include "geoip-server/geoip-server.h"
-#include "geocode-location.h"
 
 #define GEOIP_SERVER "https://geoip.fedoraproject.org/city"
 
@@ -41,28 +40,25 @@
  * Contains functions to get the geolocation corresponding to IP addresses from a server.
  **/
 
-enum {
-        PROP_0,
-        PROP_SERVER,
-        PROP_COMPAT_MODE,
-        N_PROPERTIES
-};
-
 struct _GClueIpclientPrivate {
-        SoupSession *soup_session;
-
         char *ip;
-
 };
 
-G_DEFINE_TYPE (GClueIpclient, gclue_ipclient, G_TYPE_OBJECT)
+static SoupMessage *
+gclue_ipclient_create_query (GClueWebSource *source,
+                             GError        **error);
+static GeocodeLocation *
+gclue_ipclient_parse_response (GClueWebSource *source,
+                               const char     *json,
+                               GError        **error);
+
+G_DEFINE_TYPE (GClueIpclient, gclue_ipclient, GCLUE_TYPE_WEB_SOURCE)
 
 static void
 gclue_ipclient_finalize (GObject *gipclient)
 {
         GClueIpclient *ipclient = (GClueIpclient *) gipclient;
 
-        g_clear_object (&ipclient->priv->soup_session);
         g_free (ipclient->priv->ip);
 
         G_OBJECT_CLASS (gclue_ipclient_parent_class)->finalize (gipclient);
@@ -71,8 +67,11 @@ gclue_ipclient_finalize (GObject *gipclient)
 static void
 gclue_ipclient_class_init (GClueIpclientClass *klass)
 {
+        GClueWebSourceClass *source_class = GCLUE_WEB_SOURCE_CLASS (klass);
         GObjectClass *gipclient_class = G_OBJECT_CLASS (klass);
 
+        source_class->create_query = gclue_ipclient_create_query;
+        source_class->parse_response = gclue_ipclient_parse_response;
         gipclient_class->finalize = gclue_ipclient_finalize;
 
         g_type_class_add_private (klass, sizeof (GClueIpclientPrivate));
@@ -82,61 +81,58 @@ static void
 gclue_ipclient_init (GClueIpclient *ipclient)
 {
         ipclient->priv = G_TYPE_INSTANCE_GET_PRIVATE ((ipclient), GCLUE_TYPE_IPCLIENT, GClueIpclientPrivate);
+}
 
-        ipclient->priv->soup_session = soup_session_new_with_options
-                        (SOUP_SESSION_REMOVE_FEATURE_BY_TYPE,
-                         SOUP_TYPE_PROXY_RESOLVER_DEFAULT,
-                         NULL);
+static void
+on_ipclient_destroyed (gpointer data,
+                       GObject *where_the_object_was)
+{
+        GClueIpclient **ipclient = (GClueIpclient **) data;
+
+        *ipclient = NULL;
 }
 
 /**
- * gclue_ipclient_new_for_ip:
- * @str: The IP address
+ * gclue_ipclient_get_singleton:
  *
- * Creates a new #GClueIpclient to fetch the geolocation data
- * Use gclue_ipclient_search_async() to query the server
+ * Get the #GClueIpclient singleton.
  *
- * Returns: a new #GClueIpclient. Use g_object_unref() when done.
+ * Returns: (transfer full): a new ref to #GClueIpclient. Use g_object_unref()
+ * when done.
  **/
 GClueIpclient *
-gclue_ipclient_new_for_ip (const char *ip)
+gclue_ipclient_get_singleton (void)
 {
-        GClueIpclient *ipclient;
+        static GClueIpclient *ipclient = NULL;
 
-        ipclient = g_object_new (GCLUE_TYPE_IPCLIENT, NULL);
-        ipclient->priv->ip = g_strdup (ip);
+        if (ipclient == NULL) {
+                ipclient = g_object_new (GCLUE_TYPE_IPCLIENT, NULL);
+                g_object_weak_ref (G_OBJECT (ipclient),
+                                   on_ipclient_destroyed,
+                                   &ipclient);
+        } else
+                g_object_ref (ipclient);
 
         return ipclient;
 }
 
-/**
- * gclue_ipclient_new:
- *
- * Creates a new #GClueIpclient to fetch the geolocation data.
- * Here the IP address is not provided the by client, hence the server
- * will try to get the IP address from various proxy variables.
- * Use gclue_ipclient_search_async() to query the server
- *
- * Returns: a new #GClueIpclient. Use g_object_unref() when done.
- **/
-GClueIpclient *
-gclue_ipclient_new (void)
-{
-        return gclue_ipclient_new_for_ip (NULL);
-}
-
 static SoupMessage *
-get_search_query (GClueIpclient *ipclient)
+gclue_ipclient_create_query (GClueWebSource *source,
+                             GError        **error)
 {
+        GClueIpclientPrivate *priv;
         SoupMessage *ret;
         char *uri;
 
-        if (ipclient->priv->ip) {
+        g_return_val_if_fail (GCLUE_IS_IPCLIENT (source), NULL);
+        priv = GCLUE_IPCLIENT (source)->priv;
+
+        if (priv->ip) {
                 GHashTable *ht;
                 char *query_string;
 
                 ht = g_hash_table_new (g_str_hash, g_str_equal);
-                g_hash_table_insert (ht, "ip", g_strdup (ipclient->priv->ip));
+                g_hash_table_insert (ht, "ip", g_strdup (priv->ip));
                 query_string = soup_form_encode_hash (ht);
                 g_hash_table_destroy (ht);
 
@@ -149,117 +145,6 @@ get_search_query (GClueIpclient *ipclient)
         g_free (uri);
 
         return ret;
-}
-
-typedef struct
-{
-        GSimpleAsyncResult *simple;
-        SoupMessage *message;
-        GCancellable *cancellable;
-
-        gulong cancelled_id;
-} QueryCallbackData;
-
-static void
-query_callback_data_free (QueryCallbackData *data)
-{
-        g_object_unref (data->simple);
-        g_clear_object (&data->cancellable);
-        g_slice_free (QueryCallbackData, data);
-}
-
-static void
-search_cancelled_callback (GCancellable      *cancellable,
-                           QueryCallbackData *data)
-{
-        GClueIpclient *ipclient = GCLUE_IPCLIENT
-                (g_async_result_get_source_object
-                        (G_ASYNC_RESULT (data->simple)));
-        g_debug ("Cancelling query");
-        soup_session_cancel_message (ipclient->priv->soup_session,
-                                     data->message,
-                                     SOUP_STATUS_CANCELLED);
-}
-
-static void
-query_callback (SoupSession *session,
-                SoupMessage *query,
-                gpointer     user_data)
-{
-        QueryCallbackData *data = (QueryCallbackData *) user_data;
-        GSimpleAsyncResult *simple = data->simple;
-        GError *error = NULL;
-        char *contents;
-
-        if (data->cancellable != NULL)
-                g_signal_handler_disconnect (data->cancellable,
-                                             data->cancelled_id);
-
-        if (query->status_code != SOUP_STATUS_OK) {
-                GIOErrorEnum code;
-
-                if (query->status_code == SOUP_STATUS_CANCELLED)
-                        code = G_IO_ERROR_CANCELLED;
-                else
-                        code = G_IO_ERROR_FAILED;
-		g_set_error_literal (&error, G_IO_ERROR, code,
-                                     query->reason_phrase ? query->reason_phrase : "Query failed");
-                g_simple_async_result_take_error (simple, error);
-		g_simple_async_result_complete (simple);
-		query_callback_data_free (data);
-		return;
-	}
-
-        contents = g_strndup (query->response_body->data, query->response_body->length);
-        g_simple_async_result_set_op_res_gpointer (simple, contents, NULL);
-
-        g_simple_async_result_complete (simple);
-        query_callback_data_free (data);
-}
-
-/**
- * gclue_ipclient_search_async:
- * @ipclient: a #GClueIpclient representing a query
- * @cancellable: optional #GCancellable forward, %NULL to ignore.
- * @callback: a #GAsyncReadyCallback to call when the request is satisfied
- * @user_data: the data to pass to callback function
- *
- * Asynchronously performs a query to get the geolocation information
- * from the server. Use gclue_ipclient_search() to do the same
- * thing synchronously.
- *
- * When the operation is finished, @callback will be called. You can then call
- * gclue_ipclient_search_finish() to get the result of the operation.
- **/
-void
-gclue_ipclient_search_async (GClueIpclient      *ipclient,
-                             GCancellable       *cancellable,
-                             GAsyncReadyCallback callback,
-                             gpointer            user_data)
-{
-        QueryCallbackData *data;
-
-        g_return_if_fail (GCLUE_IS_IPCLIENT (ipclient));
-
-        data = g_slice_new0 (QueryCallbackData);
-        data->simple = g_simple_async_result_new (g_object_ref (ipclient),
-                                                  callback,
-                                                  user_data,
-                                                  gclue_ipclient_search_async);
-        if (cancellable != NULL)
-                data->cancellable = g_object_ref (cancellable);
-        data->message = get_search_query (ipclient);
-
-        if (cancellable != NULL)
-                data->cancelled_id = g_signal_connect
-                        (cancellable,
-                         "cancelled",
-                         G_CALLBACK (search_cancelled_callback),
-                         data);
-        soup_session_queue_message (ipclient->priv->soup_session,
-                                    data->message,
-                                    query_callback,
-                                    data);
 }
 
 static gboolean
@@ -338,8 +223,9 @@ get_accuracy_from_json_location (JsonObject *object)
 }
 
 static GeocodeLocation *
-_gclue_ip_json_to_location (const char *json,
-                            GError    **error)
+gclue_ipclient_parse_response (GClueWebSource *source,
+                               const char     *json,
+                               GError        **error)
 {
         JsonParser *parser;
         JsonNode *node;
@@ -389,80 +275,6 @@ _gclue_ip_json_to_location (const char *json,
         }
 
         g_object_unref (parser);
-
-        return location;
-}
-
-/**
- * gclue_ipclient_search_finish:
- * @ipclient: a #GClueIpclient representing a query
- * @res: a #GAsyncResult
- * @error: a #GError
- *
- * Finishes a geolocation search operation. See gclue_ipclient_search_async().
- *
- * Returns: (transfer full): A #GeocodeLocation object or %NULL in case of
- * errors. Free the returned object with g_object_unref() when done.
- **/
-GeocodeLocation *
-gclue_ipclient_search_finish (GClueIpclient *ipclient,
-                              GAsyncResult  *res,
-                              GError       **error)
-{
-        GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-        char *contents = NULL;
-        GeocodeLocation *location;
-
-        g_return_val_if_fail (GCLUE_IS_IPCLIENT (ipclient), NULL);
-
-        g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == gclue_ipclient_search_async);
-
-        if (g_simple_async_result_propagate_error (simple, error))
-                return NULL;
-
-        contents = g_simple_async_result_get_op_res_gpointer (simple);
-        location = _gclue_ip_json_to_location (contents, error);
-        g_free (contents);
-        g_object_unref (ipclient);
-
-        return location;
-}
-
-/**
- * gclue_ipclient_search:
- * @ipclient: a #GClueIpclient representing a query
- * @error: a #GError
- *
- * Gets the geolocation data for an IP address from the server.
- *
- * Returns: (transfer full): A #GeocodeLocation object or %NULL in case of
- * errors. Free the returned object with g_object_unref() when done.
- **/
-GeocodeLocation *
-gclue_ipclient_search (GClueIpclient *ipclient,
-                       GError       **error)
-{
-        char *contents;
-        SoupMessage *query;
-        GeocodeLocation *location;
-
-        g_return_val_if_fail (GCLUE_IS_IPCLIENT (ipclient), NULL);
-
-        query = get_search_query (ipclient);
-
-        if (soup_session_send_message (ipclient->priv->soup_session,
-                                       query) != SOUP_STATUS_OK) {
-                g_set_error_literal (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-                                     query->reason_phrase ? query->reason_phrase : "Query failed");
-                g_object_unref (query);
-                return NULL;
-        }
-
-        contents = g_strndup (query->response_body->data, query->response_body->length);
-        g_object_unref (query);
-
-        location = _gclue_ip_json_to_location (contents, error);
-        g_free (contents);
 
         return location;
 }

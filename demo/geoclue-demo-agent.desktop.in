@@ -1,0 +1,9 @@
+[Desktop Entry]
+_Name=Geoclue Demo agent
+_GenericName=Demo geoclue agent
+_Keywords=geolocation;
+Exec=/usr/share/geoclue-2.0/demos/where-am-i
+Icon=mark-location-symbolic
+NoDisplay=true
+Terminal=false
+Type=Application

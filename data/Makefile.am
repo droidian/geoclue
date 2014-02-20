@@ -1,11 +1,14 @@
-sysconf_in_files = geoclue.conf.in
-sysconf_DATA = $(sysconf_in_files:.conf.in=.conf)
+systemconfdir    = $(sysconfdir)/geoclue
+systemconf_in_files = geoclue.conf.in
+systemconf_DATA = $(systemconf_in_files:.conf.in=.conf)
 
 if BUILD_DEMO_AGENT
-$(sysconf_DATA): $(sysconf_in_files) Makefile
-	@sed -e "s|\@demo_agent\@|`$(REALPATH) $(abs_top_srcdir)`/demo/agent;|" $< > $@
+$(systemconf_DATA): $(systemconf_in_files) Makefile
+	@sed -e \
+	"s|\@demo_agent\@|geoclue-demo-agent;|" \
+	$< > $@
 else
-$(sysconf_DATA): $(sysconf_in_files) Makefile
+$(systemconf_DATA): $(systemconf_in_files) Makefile
 	@sed -e "s|\@demo_agent\@||" $< > $@
 endif
 
@@ -34,11 +37,11 @@ $(systemdservice_DATA): $(systemdservice_in_files) Makefile
 endif
 
 DISTCLEANFILES = $(service_DATA) \
-                 $(sysconf_DATA) \
+                 $(systemconf_DATA) \
                  $(systemdservice_DATA)
 EXTRA_DIST = $(service_in_files) \
              $(systemdservice_in_files) \
              $(dbusservice_DATA) \
-             $(sysconf_in_files)
+             $(systemconf_in_files)
 
 -include $(top_srcdir)/git.mk

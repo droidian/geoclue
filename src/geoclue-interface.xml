@@ -19,6 +19,20 @@
       to get your application specific client object.
   -->
   <interface name="org.freedesktop.GeoClue2.Manager">
+    <!--
+        InUse:
+
+        Whether service is currently is use by any application.
+    -->
+    <property name="InUse" type="b" access="read"/>
+
+    <!--
+        AvailableAccuracyLevel:
+
+        The level of available accuracy, as
+        <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.
+    -->
+    <property name="AvailableAccuracyLevel" type="u" access="read"/>
 
     <!--
         GetClient:
@@ -33,12 +47,15 @@
 
     <!--
         AddAgent:
+        @id: The Desktop ID (excluding .desktop) of the agent
 
         An API for user authorization agents to register themselves. Each agent
         is responsible for the user it is running as. Application developers
         can and should simply ignore this API.
     -->
-    <method name="AddAgent" />
+    <method name="AddAgent">
+      <arg name="id" type="s" direction="in"/>
+    </method>
   </interface>
 
   <!--
@@ -74,6 +91,18 @@
         must be set by applications for authorization to work.
     -->
     <property name="DesktopId" type="s" access="readwrite"/>
+
+    <!--
+        RequestedAccuracyLevel:
+
+        The level of accuracy requested by client, as
+        <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.
+
+        Please keep in mind that the actual accuracy of location information is
+        dependent on available hardware on your machine, external resources
+        and/or how much accuracy user agrees to be confortable with.
+    -->
+    <property name="RequestedAccuracyLevel" type="u" access="readwrite"/>
 
     <!--
         Start:

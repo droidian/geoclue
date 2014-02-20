@@ -193,12 +193,29 @@ static const _ExtendedGDBusMethodInfo _gclue_manager_method_info_get_client =
   FALSE
 };
 
+static const _ExtendedGDBusArgInfo _gclue_manager_method_info_add_agent_IN_ARG_id =
+{
+  {
+    -1,
+    (gchar *) "id",
+    (gchar *) "s",
+    NULL
+  },
+  FALSE
+};
+
+static const _ExtendedGDBusArgInfo * const _gclue_manager_method_info_add_agent_IN_ARG_pointers[] =
+{
+  &_gclue_manager_method_info_add_agent_IN_ARG_id,
+  NULL
+};
+
 static const _ExtendedGDBusMethodInfo _gclue_manager_method_info_add_agent =
 {
   {
     -1,
     (gchar *) "AddAgent",
-    NULL,
+    (GDBusArgInfo **) &_gclue_manager_method_info_add_agent_IN_ARG_pointers,
     NULL,
     NULL
   },
@@ -213,6 +230,39 @@ static const _ExtendedGDBusMethodInfo * const _gclue_manager_method_info_pointer
   NULL
 };
 
+static const _ExtendedGDBusPropertyInfo _gclue_manager_property_info_in_use =
+{
+  {
+    -1,
+    (gchar *) "InUse",
+    (gchar *) "b",
+    G_DBUS_PROPERTY_INFO_FLAGS_READABLE,
+    NULL
+  },
+  "in-use",
+  FALSE
+};
+
+static const _ExtendedGDBusPropertyInfo _gclue_manager_property_info_available_accuracy_level =
+{
+  {
+    -1,
+    (gchar *) "AvailableAccuracyLevel",
+    (gchar *) "u",
+    G_DBUS_PROPERTY_INFO_FLAGS_READABLE,
+    NULL
+  },
+  "available-accuracy-level",
+  FALSE
+};
+
+static const _ExtendedGDBusPropertyInfo * const _gclue_manager_property_info_pointers[] =
+{
+  &_gclue_manager_property_info_in_use,
+  &_gclue_manager_property_info_available_accuracy_level,
+  NULL
+};
+
 static const _ExtendedGDBusInterfaceInfo _gclue_manager_interface_info =
 {
   {
@@ -220,7 +270,7 @@ static const _ExtendedGDBusInterfaceInfo _gclue_manager_interface_info =
     (gchar *) "org.freedesktop.GeoClue2.Manager",
     (GDBusMethodInfo **) &_gclue_manager_method_info_pointers,
     NULL,
-    NULL,
+    (GDBusPropertyInfo **) &_gclue_manager_property_info_pointers,
     NULL
   },
   "manager",
@@ -253,6 +303,8 @@ gclue_manager_interface_info (void)
 guint
 gclue_manager_override_properties (GObjectClass *klass, guint property_id_begin)
 {
+  g_object_class_override_property (klass, property_id_begin++, "in-use");
+  g_object_class_override_property (klass, property_id_begin++, "available-accuracy-level");
   return property_id_begin - 1;
 }
 
@@ -269,6 +321,8 @@ gclue_manager_override_properties (GObjectClass *klass, guint property_id_begin)
  * @parent_iface: The parent interface.
  * @handle_add_agent: Handler for the #GClueManager::handle-add-agent signal.
  * @handle_get_client: Handler for the #GClueManager::handle-get-client signal.
+ * @get_available_accuracy_level: Getter for the #GClueManager:available-accuracy-level property.
+ * @get_in_use: Getter for the #GClueManager:in-use property.
  *
  * Virtual table for the D-Bus interface <link linkend="gdbus-interface-org-freedesktop-GeoClue2-Manager.top_of_page">org.freedesktop.GeoClue2.Manager</link>.
  */
@@ -306,6 +360,7 @@ gclue_manager_default_init (GClueManagerIface *iface)
    * GClueManager::handle-add-agent:
    * @object: A #GClueManager.
    * @invocation: A #GDBusMethodInvocation.
+   * @arg_id: Argument passed by remote caller.
    *
    * Signal emitted when a remote caller is invoking the <link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent">AddAgent()</link> D-Bus method.
    *
@@ -321,9 +376,90 @@ gclue_manager_default_init (GClueManagerIface *iface)
     NULL,
     g_cclosure_marshal_generic,
     G_TYPE_BOOLEAN,
-    1,
-    G_TYPE_DBUS_METHOD_INVOCATION);
+    2,
+    G_TYPE_DBUS_METHOD_INVOCATION, G_TYPE_STRING);
 
+  /* GObject properties for D-Bus properties: */
+  /**
+   * GClueManager:in-use:
+   *
+   * Represents the D-Bus property <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse">"InUse"</link>.
+   *
+   * Since the D-Bus property for this #GObject property is readable but not writable, it is meaningful to read from it on both the client- and service-side. It is only meaningful, however, to write to it on the service-side.
+   */
+  g_object_interface_install_property (iface,
+    g_param_spec_boolean ("in-use", "InUse", "InUse", FALSE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+  /**
+   * GClueManager:available-accuracy-level:
+   *
+   * Represents the D-Bus property <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel">"AvailableAccuracyLevel"</link>.
+   *
+   * Since the D-Bus property for this #GObject property is readable but not writable, it is meaningful to read from it on both the client- and service-side. It is only meaningful, however, to write to it on the service-side.
+   */
+  g_object_interface_install_property (iface,
+    g_param_spec_uint ("available-accuracy-level", "AvailableAccuracyLevel", "AvailableAccuracyLevel", 0, G_MAXUINT32, 0, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+}
+
+/**
+ * gclue_manager_get_in_use: (skip)
+ * @object: A #GClueManager.
+ *
+ * Gets the value of the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse">"InUse"</link> D-Bus property.
+ *
+ * Since this D-Bus property is readable, it is meaningful to use this function on both the client- and service-side.
+ *
+ * Returns: The property value.
+ */
+gboolean 
+gclue_manager_get_in_use (GClueManager *object)
+{
+  return GCLUE_MANAGER_GET_IFACE (object)->get_in_use (object);
+}
+
+/**
+ * gclue_manager_set_in_use: (skip)
+ * @object: A #GClueManager.
+ * @value: The value to set.
+ *
+ * Sets the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse">"InUse"</link> D-Bus property to @value.
+ *
+ * Since this D-Bus property is not writable, it is only meaningful to use this function on the service-side.
+ */
+void
+gclue_manager_set_in_use (GClueManager *object, gboolean value)
+{
+  g_object_set (G_OBJECT (object), "in-use", value, NULL);
+}
+
+/**
+ * gclue_manager_get_available_accuracy_level: (skip)
+ * @object: A #GClueManager.
+ *
+ * Gets the value of the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel">"AvailableAccuracyLevel"</link> D-Bus property.
+ *
+ * Since this D-Bus property is readable, it is meaningful to use this function on both the client- and service-side.
+ *
+ * Returns: The property value.
+ */
+guint 
+gclue_manager_get_available_accuracy_level (GClueManager *object)
+{
+  return GCLUE_MANAGER_GET_IFACE (object)->get_available_accuracy_level (object);
+}
+
+/**
+ * gclue_manager_set_available_accuracy_level: (skip)
+ * @object: A #GClueManager.
+ * @value: The value to set.
+ *
+ * Sets the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel">"AvailableAccuracyLevel"</link> D-Bus property to @value.
+ *
+ * Since this D-Bus property is not writable, it is only meaningful to use this function on the service-side.
+ */
+void
+gclue_manager_set_available_accuracy_level (GClueManager *object, guint value)
+{
+  g_object_set (G_OBJECT (object), "available-accuracy-level", value, NULL);
 }
 
 /**
@@ -427,6 +563,7 @@ _out:
 /**
  * gclue_manager_call_add_agent:
  * @proxy: A #GClueManagerProxy.
+ * @arg_id: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @callback: A #GAsyncReadyCallback to call when the request is satisfied or %NULL.
  * @user_data: User data to pass to @callback.
@@ -440,13 +577,15 @@ _out:
 void
 gclue_manager_call_add_agent (
     GClueManager *proxy,
+    const gchar *arg_id,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data)
 {
   g_dbus_proxy_call (G_DBUS_PROXY (proxy),
     "AddAgent",
-    g_variant_new ("()"),
+    g_variant_new ("(s)",
+                   arg_id),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -484,6 +623,7 @@ _out:
 /**
  * gclue_manager_call_add_agent_sync:
  * @proxy: A #GClueManagerProxy.
+ * @arg_id: Argument to pass with the method invocation.
  * @cancellable: (allow-none): A #GCancellable or %NULL.
  * @error: Return location for error or %NULL.
  *
@@ -496,13 +636,15 @@ _out:
 gboolean
 gclue_manager_call_add_agent_sync (
     GClueManager *proxy,
+    const gchar *arg_id,
     GCancellable *cancellable,
     GError **error)
 {
   GVariant *_ret;
   _ret = g_dbus_proxy_call_sync (G_DBUS_PROXY (proxy),
     "AddAgent",
-    g_variant_new ("()"),
+    g_variant_new ("(s)",
+                   arg_id),
     G_DBUS_CALL_FLAGS_NONE,
     -1,
     cancellable,
@@ -595,6 +737,39 @@ gclue_manager_proxy_get_property (GObject      *object,
   GValue       *value,
   GParamSpec   *pspec G_GNUC_UNUSED)
 {
+  const _ExtendedGDBusPropertyInfo *info;
+  GVariant *variant;
+  g_assert (prop_id != 0 && prop_id - 1 < 2);
+  info = _gclue_manager_property_info_pointers[prop_id - 1];
+  variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (object), info->parent_struct.name);
+  if (info->use_gvariant)
+    {
+      g_value_set_variant (value, variant);
+    }
+  else
+    {
+      if (variant != NULL)
+        g_dbus_gvariant_to_gvalue (variant, value);
+    }
+  if (variant != NULL)
+    g_variant_unref (variant);
+}
+
+static void
+gclue_manager_proxy_set_property_cb (GDBusProxy *proxy,
+  GAsyncResult *res,
+  gpointer      user_data)
+{
+  const _ExtendedGDBusPropertyInfo *info = user_data;
+  GError *error;
+  error = NULL;
+  if (!g_dbus_proxy_call_finish (proxy, res, &error))
+    {
+      g_warning ("Error setting property '%s' on interface org.freedesktop.GeoClue2.Manager: %s (%s, %d)",
+                 info->parent_struct.name, 
+                 error->message, g_quark_to_string (error->domain), error->code);
+      g_error_free (error);
+    }
 }
 
 static void
@@ -603,6 +778,18 @@ gclue_manager_proxy_set_property (GObject      *object,
   const GValue *value,
   GParamSpec   *pspec G_GNUC_UNUSED)
 {
+  const _ExtendedGDBusPropertyInfo *info;
+  GVariant *variant;
+  g_assert (prop_id != 0 && prop_id - 1 < 2);
+  info = _gclue_manager_property_info_pointers[prop_id - 1];
+  variant = g_dbus_gvalue_to_gvariant (value, G_VARIANT_TYPE (info->parent_struct.signature));
+  g_dbus_proxy_call (G_DBUS_PROXY (object),
+    "org.freedesktop.DBus.Properties.Set",
+    g_variant_new ("(ssv)", "org.freedesktop.GeoClue2.Manager", info->parent_struct.name, variant),
+    G_DBUS_CALL_FLAGS_NONE,
+    -1,
+    NULL, (GAsyncReadyCallback) gclue_manager_proxy_set_property_cb, (GDBusPropertyInfo *) &info->parent_struct);
+  g_variant_unref (variant);
 }
 
 static void
@@ -675,6 +862,36 @@ gclue_manager_proxy_g_properties_changed (GDBusProxy *_proxy,
     }
 }
 
+static gboolean 
+gclue_manager_proxy_get_in_use (GClueManager *object)
+{
+  GClueManagerProxy *proxy = GCLUE_MANAGER_PROXY (object);
+  GVariant *variant;
+  gboolean value = 0;
+  variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (proxy), "InUse");
+  if (variant != NULL)
+    {
+      value = g_variant_get_boolean (variant);
+      g_variant_unref (variant);
+    }
+  return value;
+}
+
+static guint 
+gclue_manager_proxy_get_available_accuracy_level (GClueManager *object)
+{
+  GClueManagerProxy *proxy = GCLUE_MANAGER_PROXY (object);
+  GVariant *variant;
+  guint value = 0;
+  variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (proxy), "AvailableAccuracyLevel");
+  if (variant != NULL)
+    {
+      value = g_variant_get_uint32 (variant);
+      g_variant_unref (variant);
+    }
+  return value;
+}
+
 static void
 gclue_manager_proxy_init (GClueManagerProxy *proxy)
 {
@@ -697,11 +914,15 @@ gclue_manager_proxy_class_init (GClueManagerProxyClass *klass)
   proxy_class->g_signal = gclue_manager_proxy_g_signal;
   proxy_class->g_properties_changed = gclue_manager_proxy_g_properties_changed;
 
+
+  gclue_manager_override_properties (gobject_class, 1);
 }
 
 static void
 gclue_manager_proxy_iface_init (GClueManagerIface *iface)
 {
+  iface->get_in_use = gclue_manager_proxy_get_in_use;
+  iface->get_available_accuracy_level = gclue_manager_proxy_get_available_accuracy_level;
 }
 
 /**
@@ -1091,9 +1312,25 @@ out:
   return g_variant_builder_end (&builder);
 }
 
+static gboolean _gclue_manager_emit_changed (gpointer user_data);
+
 static void
 gclue_manager_skeleton_dbus_interface_flush (GDBusInterfaceSkeleton *_skeleton)
 {
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (_skeleton);
+  gboolean emit_changed = FALSE;
+
+  g_mutex_lock (&skeleton->priv->lock);
+  if (skeleton->priv->changed_properties_idle_source != NULL)
+    {
+      g_source_destroy (skeleton->priv->changed_properties_idle_source);
+      skeleton->priv->changed_properties_idle_source = NULL;
+      emit_changed = TRUE;
+    }
+  g_mutex_unlock (&skeleton->priv->lock);
+
+  if (emit_changed)
+    _gclue_manager_emit_changed (skeleton);
 }
 
 static void gclue_manager_skeleton_iface_init (GClueManagerIface *iface);
@@ -1105,6 +1342,10 @@ static void
 gclue_manager_skeleton_finalize (GObject *object)
 {
   GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  guint n;
+  for (n = 0; n < 2; n++)
+    g_value_unset (&skeleton->priv->properties[n]);
+  g_free (skeleton->priv->properties);
   g_list_free_full (skeleton->priv->changed_properties, (GDestroyNotify) _changed_property_free);
   if (skeleton->priv->changed_properties_idle_source != NULL)
     g_source_destroy (skeleton->priv->changed_properties_idle_source);
@@ -1114,11 +1355,174 @@ gclue_manager_skeleton_finalize (GObject *object)
 }
 
 static void
+gclue_manager_skeleton_get_property (GObject      *object,
+  guint         prop_id,
+  GValue       *value,
+  GParamSpec   *pspec G_GNUC_UNUSED)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  g_assert (prop_id != 0 && prop_id - 1 < 2);
+  g_mutex_lock (&skeleton->priv->lock);
+  g_value_copy (&skeleton->priv->properties[prop_id - 1], value);
+  g_mutex_unlock (&skeleton->priv->lock);
+}
+
+static gboolean
+_gclue_manager_emit_changed (gpointer user_data)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (user_data);
+  GList *l;
+  GVariantBuilder builder;
+  GVariantBuilder invalidated_builder;
+  guint num_changes;
+
+  g_mutex_lock (&skeleton->priv->lock);
+  g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+  g_variant_builder_init (&invalidated_builder, G_VARIANT_TYPE ("as"));
+  for (l = skeleton->priv->changed_properties, num_changes = 0; l != NULL; l = l->next)
+    {
+      ChangedProperty *cp = l->data;
+      GVariant *variant;
+      const GValue *cur_value;
+
+      cur_value = &skeleton->priv->properties[cp->prop_id - 1];
+      if (!_g_value_equal (cur_value, &cp->orig_value))
+        {
+          variant = g_dbus_gvalue_to_gvariant (cur_value, G_VARIANT_TYPE (cp->info->parent_struct.signature));
+          g_variant_builder_add (&builder, "{sv}", cp->info->parent_struct.name, variant);
+          g_variant_unref (variant);
+          num_changes++;
+        }
+    }
+  if (num_changes > 0)
+    {
+      GList *connections, *ll;
+      GVariant *signal_variant;
+      signal_variant = g_variant_ref_sink (g_variant_new ("(sa{sv}as)", "org.freedesktop.GeoClue2.Manager",
+                                           &builder, &invalidated_builder));
+      connections = g_dbus_interface_skeleton_get_connections (G_DBUS_INTERFACE_SKELETON (skeleton));
+      for (ll = connections; ll != NULL; ll = ll->next)
+        {
+          GDBusConnection *connection = ll->data;
+
+          g_dbus_connection_emit_signal (connection,
+                                         NULL, g_dbus_interface_skeleton_get_object_path (G_DBUS_INTERFACE_SKELETON (skeleton)),
+                                         "org.freedesktop.DBus.Properties",
+                                         "PropertiesChanged",
+                                         signal_variant,
+                                         NULL);
+        }
+      g_variant_unref (signal_variant);
+      g_list_free_full (connections, g_object_unref);
+    }
+  else
+    {
+      g_variant_builder_clear (&builder);
+      g_variant_builder_clear (&invalidated_builder);
+    }
+  g_list_free_full (skeleton->priv->changed_properties, (GDestroyNotify) _changed_property_free);
+  skeleton->priv->changed_properties = NULL;
+  skeleton->priv->changed_properties_idle_source = NULL;
+  g_mutex_unlock (&skeleton->priv->lock);
+  return FALSE;
+}
+
+static void
+_gclue_manager_schedule_emit_changed (GClueManagerSkeleton *skeleton, const _ExtendedGDBusPropertyInfo *info, guint prop_id, const GValue *orig_value)
+{
+  ChangedProperty *cp;
+  GList *l;
+  cp = NULL;
+  for (l = skeleton->priv->changed_properties; l != NULL; l = l->next)
+    {
+      ChangedProperty *i_cp = l->data;
+      if (i_cp->info == info)
+        {
+          cp = i_cp;
+          break;
+        }
+    }
+  if (cp == NULL)
+    {
+      cp = g_new0 (ChangedProperty, 1);
+      cp->prop_id = prop_id;
+      cp->info = info;
+      skeleton->priv->changed_properties = g_list_prepend (skeleton->priv->changed_properties, cp);
+      g_value_init (&cp->orig_value, G_VALUE_TYPE (orig_value));
+      g_value_copy (orig_value, &cp->orig_value);
+    }
+}
+
+static void
+gclue_manager_skeleton_notify (GObject      *object,
+  GParamSpec *pspec G_GNUC_UNUSED)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  g_mutex_lock (&skeleton->priv->lock);
+  if (skeleton->priv->changed_properties != NULL &&
+      skeleton->priv->changed_properties_idle_source == NULL)
+    {
+      skeleton->priv->changed_properties_idle_source = g_idle_source_new ();
+      g_source_set_priority (skeleton->priv->changed_properties_idle_source, G_PRIORITY_DEFAULT);
+      g_source_set_callback (skeleton->priv->changed_properties_idle_source, _gclue_manager_emit_changed, g_object_ref (skeleton), (GDestroyNotify) g_object_unref);
+      g_source_attach (skeleton->priv->changed_properties_idle_source, skeleton->priv->context);
+      g_source_unref (skeleton->priv->changed_properties_idle_source);
+    }
+  g_mutex_unlock (&skeleton->priv->lock);
+}
+
+static void
+gclue_manager_skeleton_set_property (GObject      *object,
+  guint         prop_id,
+  const GValue *value,
+  GParamSpec   *pspec)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  g_assert (prop_id != 0 && prop_id - 1 < 2);
+  g_mutex_lock (&skeleton->priv->lock);
+  g_object_freeze_notify (object);
+  if (!_g_value_equal (value, &skeleton->priv->properties[prop_id - 1]))
+    {
+      if (g_dbus_interface_skeleton_get_connection (G_DBUS_INTERFACE_SKELETON (skeleton)) != NULL)
+        _gclue_manager_schedule_emit_changed (skeleton, _gclue_manager_property_info_pointers[prop_id - 1], prop_id, &skeleton->priv->properties[prop_id - 1]);
+      g_value_copy (value, &skeleton->priv->properties[prop_id - 1]);
+      g_object_notify_by_pspec (object, pspec);
+    }
+  g_mutex_unlock (&skeleton->priv->lock);
+  g_object_thaw_notify (object);
+}
+
+static void
 gclue_manager_skeleton_init (GClueManagerSkeleton *skeleton)
 {
   skeleton->priv = gclue_manager_skeleton_get_instance_private (skeleton);
   g_mutex_init (&skeleton->priv->lock);
   skeleton->priv->context = g_main_context_ref_thread_default ();
+  skeleton->priv->properties = g_new0 (GValue, 2);
+  g_value_init (&skeleton->priv->properties[0], G_TYPE_BOOLEAN);
+  g_value_init (&skeleton->priv->properties[1], G_TYPE_UINT);
+}
+
+static gboolean 
+gclue_manager_skeleton_get_in_use (GClueManager *object)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  gboolean value;
+  g_mutex_lock (&skeleton->priv->lock);
+  value = g_value_get_boolean (&(skeleton->priv->properties[0]));
+  g_mutex_unlock (&skeleton->priv->lock);
+  return value;
+}
+
+static guint 
+gclue_manager_skeleton_get_available_accuracy_level (GClueManager *object)
+{
+  GClueManagerSkeleton *skeleton = GCLUE_MANAGER_SKELETON (object);
+  guint value;
+  g_mutex_lock (&skeleton->priv->lock);
+  value = g_value_get_uint (&(skeleton->priv->properties[1]));
+  g_mutex_unlock (&skeleton->priv->lock);
+  return value;
 }
 
 static void
@@ -1129,6 +1533,12 @@ gclue_manager_skeleton_class_init (GClueManagerSkeletonClass *klass)
 
   gobject_class = G_OBJECT_CLASS (klass);
   gobject_class->finalize = gclue_manager_skeleton_finalize;
+  gobject_class->get_property = gclue_manager_skeleton_get_property;
+  gobject_class->set_property = gclue_manager_skeleton_set_property;
+  gobject_class->notify       = gclue_manager_skeleton_notify;
+
+
+  gclue_manager_override_properties (gobject_class, 1);
 
   skeleton_class = G_DBUS_INTERFACE_SKELETON_CLASS (klass);
   skeleton_class->get_info = gclue_manager_skeleton_dbus_interface_get_info;
@@ -1140,6 +1550,8 @@ gclue_manager_skeleton_class_init (GClueManagerSkeletonClass *klass)
 static void
 gclue_manager_skeleton_iface_init (GClueManagerIface *iface)
 {
+  iface->get_in_use = gclue_manager_skeleton_get_in_use;
+  iface->get_available_accuracy_level = gclue_manager_skeleton_get_available_accuracy_level;
 }
 
 /**
@@ -1288,11 +1700,25 @@ static const _ExtendedGDBusPropertyInfo _gclue_client_property_info_desktop_id =
   FALSE
 };
 
+static const _ExtendedGDBusPropertyInfo _gclue_client_property_info_requested_accuracy_level =
+{
+  {
+    -1,
+    (gchar *) "RequestedAccuracyLevel",
+    (gchar *) "u",
+    G_DBUS_PROPERTY_INFO_FLAGS_READABLE | G_DBUS_PROPERTY_INFO_FLAGS_WRITABLE,
+    NULL
+  },
+  "requested-accuracy-level",
+  FALSE
+};
+
 static const _ExtendedGDBusPropertyInfo * const _gclue_client_property_info_pointers[] =
 {
   &_gclue_client_property_info_location,
   &_gclue_client_property_info_distance_threshold,
   &_gclue_client_property_info_desktop_id,
+  &_gclue_client_property_info_requested_accuracy_level,
   NULL
 };
 
@@ -1339,6 +1765,7 @@ gclue_client_override_properties (GObjectClass *klass, guint property_id_begin)
   g_object_class_override_property (klass, property_id_begin++, "location");
   g_object_class_override_property (klass, property_id_begin++, "distance-threshold");
   g_object_class_override_property (klass, property_id_begin++, "desktop-id");
+  g_object_class_override_property (klass, property_id_begin++, "requested-accuracy-level");
   return property_id_begin - 1;
 }
 
@@ -1358,6 +1785,7 @@ gclue_client_override_properties (GObjectClass *klass, guint property_id_begin)
  * @get_desktop_id: Getter for the #GClueClient:desktop-id property.
  * @get_distance_threshold: Getter for the #GClueClient:distance-threshold property.
  * @get_location: Getter for the #GClueClient:location property.
+ * @get_requested_accuracy_level: Getter for the #GClueClient:requested-accuracy-level property.
  * @location_updated: Handler for the #GClueClient::location-updated signal.
  *
  * Virtual table for the D-Bus interface <link linkend="gdbus-interface-org-freedesktop-GeoClue2-Client.top_of_page">org.freedesktop.GeoClue2.Client</link>.
@@ -1463,6 +1891,15 @@ gclue_client_default_init (GClueClientIface *iface)
    */
   g_object_interface_install_property (iface,
     g_param_spec_string ("desktop-id", "DesktopId", "DesktopId", NULL, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+  /**
+   * GClueClient:requested-accuracy-level:
+   *
+   * Represents the D-Bus property <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">"RequestedAccuracyLevel"</link>.
+   *
+   * Since the D-Bus property for this #GObject property is both readable and writable, it is meaningful to both read from it and write to it on both the service- and client-side.
+   */
+  g_object_interface_install_property (iface,
+    g_param_spec_uint ("requested-accuracy-level", "RequestedAccuracyLevel", "RequestedAccuracyLevel", 0, G_MAXUINT32, 0, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 }
 
 /**
@@ -1596,6 +2033,37 @@ void
 gclue_client_set_desktop_id (GClueClient *object, const gchar *value)
 {
   g_object_set (G_OBJECT (object), "desktop-id", value, NULL);
+}
+
+/**
+ * gclue_client_get_requested_accuracy_level: (skip)
+ * @object: A #GClueClient.
+ *
+ * Gets the value of the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">"RequestedAccuracyLevel"</link> D-Bus property.
+ *
+ * Since this D-Bus property is both readable and writable, it is meaningful to use this function on both the client- and service-side.
+ *
+ * Returns: The property value.
+ */
+guint 
+gclue_client_get_requested_accuracy_level (GClueClient *object)
+{
+  return GCLUE_CLIENT_GET_IFACE (object)->get_requested_accuracy_level (object);
+}
+
+/**
+ * gclue_client_set_requested_accuracy_level: (skip)
+ * @object: A #GClueClient.
+ * @value: The value to set.
+ *
+ * Sets the <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">"RequestedAccuracyLevel"</link> D-Bus property to @value.
+ *
+ * Since this D-Bus property is both readable and writable, it is meaningful to use this function on both the client- and service-side.
+ */
+void
+gclue_client_set_requested_accuracy_level (GClueClient *object, guint value)
+{
+  g_object_set (G_OBJECT (object), "requested-accuracy-level", value, NULL);
 }
 
 /**
@@ -1877,7 +2345,7 @@ gclue_client_proxy_get_property (GObject      *object,
 {
   const _ExtendedGDBusPropertyInfo *info;
   GVariant *variant;
-  g_assert (prop_id != 0 && prop_id - 1 < 3);
+  g_assert (prop_id != 0 && prop_id - 1 < 4);
   info = _gclue_client_property_info_pointers[prop_id - 1];
   variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (object), info->parent_struct.name);
   if (info->use_gvariant)
@@ -1918,7 +2386,7 @@ gclue_client_proxy_set_property (GObject      *object,
 {
   const _ExtendedGDBusPropertyInfo *info;
   GVariant *variant;
-  g_assert (prop_id != 0 && prop_id - 1 < 3);
+  g_assert (prop_id != 0 && prop_id - 1 < 4);
   info = _gclue_client_property_info_pointers[prop_id - 1];
   variant = g_dbus_gvalue_to_gvariant (value, G_VARIANT_TYPE (info->parent_struct.signature));
   g_dbus_proxy_call (G_DBUS_PROXY (object),
@@ -2045,6 +2513,21 @@ gclue_client_proxy_get_desktop_id (GClueClient *object)
   return value;
 }
 
+static guint 
+gclue_client_proxy_get_requested_accuracy_level (GClueClient *object)
+{
+  GClueClientProxy *proxy = GCLUE_CLIENT_PROXY (object);
+  GVariant *variant;
+  guint value = 0;
+  variant = g_dbus_proxy_get_cached_property (G_DBUS_PROXY (proxy), "RequestedAccuracyLevel");
+  if (variant != NULL)
+    {
+      value = g_variant_get_uint32 (variant);
+      g_variant_unref (variant);
+    }
+  return value;
+}
+
 static void
 gclue_client_proxy_init (GClueClientProxy *proxy)
 {
@@ -2077,6 +2560,7 @@ gclue_client_proxy_iface_init (GClueClientIface *iface)
   iface->get_location = gclue_client_proxy_get_location;
   iface->get_distance_threshold = gclue_client_proxy_get_distance_threshold;
   iface->get_desktop_id = gclue_client_proxy_get_desktop_id;
+  iface->get_requested_accuracy_level = gclue_client_proxy_get_requested_accuracy_level;
 }
 
 /**
@@ -2523,7 +3007,7 @@ gclue_client_skeleton_finalize (GObject *object)
 {
   GClueClientSkeleton *skeleton = GCLUE_CLIENT_SKELETON (object);
   guint n;
-  for (n = 0; n < 3; n++)
+  for (n = 0; n < 4; n++)
     g_value_unset (&skeleton->priv->properties[n]);
   g_free (skeleton->priv->properties);
   g_list_free_full (skeleton->priv->changed_properties, (GDestroyNotify) _changed_property_free);
@@ -2541,7 +3025,7 @@ gclue_client_skeleton_get_property (GObject      *object,
   GParamSpec   *pspec G_GNUC_UNUSED)
 {
   GClueClientSkeleton *skeleton = GCLUE_CLIENT_SKELETON (object);
-  g_assert (prop_id != 0 && prop_id - 1 < 3);
+  g_assert (prop_id != 0 && prop_id - 1 < 4);
   g_mutex_lock (&skeleton->priv->lock);
   g_value_copy (&skeleton->priv->properties[prop_id - 1], value);
   g_mutex_unlock (&skeleton->priv->lock);
@@ -2658,7 +3142,7 @@ gclue_client_skeleton_set_property (GObject      *object,
   GParamSpec   *pspec)
 {
   GClueClientSkeleton *skeleton = GCLUE_CLIENT_SKELETON (object);
-  g_assert (prop_id != 0 && prop_id - 1 < 3);
+  g_assert (prop_id != 0 && prop_id - 1 < 4);
   g_mutex_lock (&skeleton->priv->lock);
   g_object_freeze_notify (object);
   if (!_g_value_equal (value, &skeleton->priv->properties[prop_id - 1]))
@@ -2678,10 +3162,11 @@ gclue_client_skeleton_init (GClueClientSkeleton *skeleton)
   skeleton->priv = gclue_client_skeleton_get_instance_private (skeleton);
   g_mutex_init (&skeleton->priv->lock);
   skeleton->priv->context = g_main_context_ref_thread_default ();
-  skeleton->priv->properties = g_new0 (GValue, 3);
+  skeleton->priv->properties = g_new0 (GValue, 4);
   g_value_init (&skeleton->priv->properties[0], G_TYPE_STRING);
   g_value_init (&skeleton->priv->properties[1], G_TYPE_UINT);
   g_value_init (&skeleton->priv->properties[2], G_TYPE_STRING);
+  g_value_init (&skeleton->priv->properties[3], G_TYPE_UINT);
 }
 
 static const gchar *
@@ -2717,6 +3202,17 @@ gclue_client_skeleton_get_desktop_id (GClueClient *object)
   return value;
 }
 
+static guint 
+gclue_client_skeleton_get_requested_accuracy_level (GClueClient *object)
+{
+  GClueClientSkeleton *skeleton = GCLUE_CLIENT_SKELETON (object);
+  guint value;
+  g_mutex_lock (&skeleton->priv->lock);
+  value = g_value_get_uint (&(skeleton->priv->properties[3]));
+  g_mutex_unlock (&skeleton->priv->lock);
+  return value;
+}
+
 static void
 gclue_client_skeleton_class_init (GClueClientSkeletonClass *klass)
 {
@@ -2746,6 +3242,7 @@ gclue_client_skeleton_iface_init (GClueClientIface *iface)
   iface->get_location = gclue_client_skeleton_get_location;
   iface->get_distance_threshold = gclue_client_skeleton_get_distance_threshold;
   iface->get_desktop_id = gclue_client_skeleton_get_desktop_id;
+  iface->get_requested_accuracy_level = gclue_client_skeleton_get_requested_accuracy_level;
 }
 
 /**

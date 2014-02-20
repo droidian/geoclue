@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -78,17 +79,17 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = where-am-i$(EXEEXT) $(am__EXEEXT_1)
+demo_PROGRAMS = where-am-i$(EXEEXT) $(am__EXEEXT_1)
 @BUILD_DEMO_AGENT_TRUE@am__append_1 = agent
 subdir = demo
 DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -96,14 +97,14 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_DEMO_AGENT_TRUE@am__EXEEXT_1 = agent$(EXEEXT)
-PROGRAMS = $(noinst_PROGRAMS)
-am__objects_1 = agent-geoclue-agent-interface.$(OBJEXT)
-am__objects_2 = $(am__objects_1)
-am_agent_OBJECTS = $(am__objects_2) \
-	agent-gclue-service-agent.$(OBJEXT) agent-agent.$(OBJEXT)
+am__installdirs = "$(DESTDIR)$(demodir)" "$(DESTDIR)$(appsdir)"
+PROGRAMS = $(demo_PROGRAMS)
+am_agent_OBJECTS = agent-gclue-service-agent.$(OBJEXT) \
+	agent-agent.$(OBJEXT)
 agent_OBJECTS = $(am_agent_OBJECTS)
 am__DEPENDENCIES_1 =
-agent_DEPENDENCIES = $(am__DEPENDENCIES_1)
+agent_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/src/agent/libgeoclue-agent.la
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
@@ -158,6 +159,34 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
+am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
+am__vpath_adj = case $$p in \
+    $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
+    *) f=$$p;; \
+  esac;
+am__strip_dir = f=`echo $$p | sed -e 's|^.*/||'`;
+am__install_max = 40
+am__nobase_strip_setup = \
+  srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*|]/\\\\&/g'`
+am__nobase_strip = \
+  for p in $$list; do echo "$$p"; done | sed -e "s|$$srcdirstrip/||"
+am__nobase_list = $(am__nobase_strip_setup); \
+  for p in $$list; do echo "$$p $$p"; done | \
+  sed "s| $$srcdirstrip/| |;"' / .*\//!s/ .*/ ./; s,\( .*\)/[^/]*$$,\1,' | \
+  $(AWK) 'BEGIN { files["."] = "" } { files[$$2] = files[$$2] " " $$1; \
+    if (++n[$$2] == $(am__install_max)) \
+      { print $$2, files[$$2]; n[$$2] = 0; files[$$2] = "" } } \
+    END { for (dir in files) print dir, files[dir] }'
+am__base_list = \
+  sed '$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;$$!N;s/\n/ /g' | \
+  sed '$$!N;$$!N;$$!N;$$!N;s/\n/ /g'
+am__uninstall_files_from_dir = { \
+  test -z "$$files" \
+    || { test ! -d "$$dir" && test ! -f "$$dir" && test ! -r "$$dir"; } \
+    || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
+         $(am__cd) "$$dir" && rm -f $$files; }; \
+  }
+DATA = $(apps_DATA)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) $(LISP)
 # Read a list of newline-separated strings from the standard input,
 # and print each of them once, without duplicates.  Input order is
@@ -214,6 +243,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GDBUS_CODEGEN = @GDBUS_CODEGEN@
+GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
@@ -222,6 +252,7 @@ GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
 GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
 GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
@@ -257,8 +288,12 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+ModemManager_CFLAGS = @ModemManager_CFLAGS@
+ModemManager_LIBS = @ModemManager_LIBS@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NetworkManager_CFLAGS = @NetworkManager_CFLAGS@
+NetworkManager_LIBS = @NetworkManager_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -275,9 +310,7 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
-REALPATH = @REALPATH@
 SED = @SED@
-SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -342,16 +375,16 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+demodir = $(datadir)/geoclue-2.0/demos
 where_am_i_SOURCES = where-am-i.c
 where_am_i_CFLAGS = $(GEOCLUE_CFLAGS)   		\
 		    $(WARN_CFLAGS)			\
 		    -DLOCALEDIR="\"$(datadir)/locale\""
 
 where_am_i_LDADD = $(GEOCLUE_LIBS)
-interface_data = $(top_builddir)/src/agent/geoclue-agent-interface.xml
-dbus_built_sources = geoclue-agent-interface.c geoclue-agent-interface.h
-BUILT_SOURCES = $(dbus_built_sources) \
-		$(NULL)
+appsdir = $(datadir)/applications
+apps_DATA = geoclue-where-am-i.desktop \
+	    geoclue-demo-agent.desktop
 
 agent_SOURCES = $(BUILT_SOURCES)       \
 		gclue-service-agent.h  \
@@ -362,11 +395,27 @@ agent_SOURCES = $(BUILT_SOURCES)       \
 agent_CFLAGS = $(DEMO_AGENT_CFLAGS)   		   \
 	       $(WARN_CFLAGS)			   \
  	       -DLOCALEDIR="\"$(datadir)/locale\"" \
-	       -DABS_SRCDIR=\""$(abs_srcdir)"\"
+	       -DABS_SRCDIR=\""$(abs_srcdir)"\"	   \
+	       -I$(top_builddir)/src		   \
+	       -I$(top_builddir)/src/agent	   \
+	       -I$(top_builddir)/src/public-api
 
-agent_LDADD = $(DEMO_AGENT_LIBS)
-all: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) all-am
+agent_LDADD = $(DEMO_AGENT_LIBS) \
+	      $(top_builddir)/src/agent/libgeoclue-agent.la
+
+EXTRA_DIST = \
+	geoclue-demo-agent.desktop.in.in \
+	geoclue-demo-agent.desktop.in \
+        geoclue-where-am-i.desktop.in.in \
+        geoclue-where-am-i.desktop.in \
+        $(NULL)
+
+DISTCLEANFILES = \
+	geoclue-demo-agent.desktop \
+        geoclue-where-am-i.desktop \
+        $(NULL)
+
+all: all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .lo .o .obj
@@ -400,9 +449,49 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
+install-demoPROGRAMS: $(demo_PROGRAMS)
+	@$(NORMAL_INSTALL)
+	@list='$(demo_PROGRAMS)'; test -n "$(demodir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(demodir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(demodir)" || exit 1; \
+	fi; \
+	for p in $$list; do echo "$$p $$p"; done | \
+	sed 's/$(EXEEXT)$$//' | \
+	while read p p1; do if test -f $$p \
+	 || test -f $$p1 \
+	  ; then echo "$$p"; echo "$$p"; else :; fi; \
+	done | \
+	sed -e 'p;s,.*/,,;n;h' \
+	    -e 's|.*|.|' \
+	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
+	sed 'N;N;N;s,\n, ,g' | \
+	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
+	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
+	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
+	    else { print "f", $$3 "/" $$4, $$1; } } \
+	  END { for (d in files) print "f", d, files[d] }' | \
+	while read type dir files; do \
+	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
+	    test -z "$$files" || { \
+	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(demodir)$$dir'"; \
+	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(demodir)$$dir" || exit $$?; \
+	    } \
+	; done
 
-clean-noinstPROGRAMS:
-	@list='$(noinst_PROGRAMS)'; test -n "$$list" || exit 0; \
+uninstall-demoPROGRAMS:
+	@$(NORMAL_UNINSTALL)
+	@list='$(demo_PROGRAMS)'; test -n "$(demodir)" || list=; \
+	files=`for p in $$list; do echo "$$p"; done | \
+	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
+	      -e 's/$$/$(EXEEXT)/' \
+	`; \
+	test -n "$$list" || exit 0; \
+	echo " ( cd '$(DESTDIR)$(demodir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(demodir)" && rm -f $$files
+
+clean-demoPROGRAMS:
+	@list='$(demo_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
 	rm -f $$list || exit $$?; \
 	test -n "$(EXEEXT)" || exit 0; \
@@ -426,7 +515,6 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/agent-agent.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/agent-gclue-service-agent.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/agent-geoclue-agent-interface.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/where_am_i-where-am-i.Po@am__quote@
 
 .c.o:
@@ -449,20 +537,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-agent-geoclue-agent-interface.o: geoclue-agent-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(agent_CFLAGS) $(CFLAGS) -MT agent-geoclue-agent-interface.o -MD -MP -MF $(DEPDIR)/agent-geoclue-agent-interface.Tpo -c -o agent-geoclue-agent-interface.o `test -f 'geoclue-agent-interface.c' || echo '$(srcdir)/'`geoclue-agent-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/agent-geoclue-agent-interface.Tpo $(DEPDIR)/agent-geoclue-agent-interface.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geoclue-agent-interface.c' object='agent-geoclue-agent-interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(agent_CFLAGS) $(CFLAGS) -c -o agent-geoclue-agent-interface.o `test -f 'geoclue-agent-interface.c' || echo '$(srcdir)/'`geoclue-agent-interface.c
-
-agent-geoclue-agent-interface.obj: geoclue-agent-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(agent_CFLAGS) $(CFLAGS) -MT agent-geoclue-agent-interface.obj -MD -MP -MF $(DEPDIR)/agent-geoclue-agent-interface.Tpo -c -o agent-geoclue-agent-interface.obj `if test -f 'geoclue-agent-interface.c'; then $(CYGPATH_W) 'geoclue-agent-interface.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-agent-interface.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/agent-geoclue-agent-interface.Tpo $(DEPDIR)/agent-geoclue-agent-interface.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geoclue-agent-interface.c' object='agent-geoclue-agent-interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(agent_CFLAGS) $(CFLAGS) -c -o agent-geoclue-agent-interface.obj `if test -f 'geoclue-agent-interface.c'; then $(CYGPATH_W) 'geoclue-agent-interface.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-agent-interface.c'; fi`
 
 agent-gclue-service-agent.o: gclue-service-agent.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(agent_CFLAGS) $(CFLAGS) -MT agent-gclue-service-agent.o -MD -MP -MF $(DEPDIR)/agent-gclue-service-agent.Tpo -c -o agent-gclue-service-agent.o `test -f 'gclue-service-agent.c' || echo '$(srcdir)/'`gclue-service-agent.c
@@ -511,6 +585,27 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-appsDATA: $(apps_DATA)
+	@$(NORMAL_INSTALL)
+	@list='$(apps_DATA)'; test -n "$(appsdir)" || list=; \
+	if test -n "$$list"; then \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(appsdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(appsdir)" || exit 1; \
+	fi; \
+	for p in $$list; do \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$$d$$p"; \
+	done | $(am__base_list) | \
+	while read files; do \
+	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(appsdir)'"; \
+	  $(INSTALL_DATA) $$files "$(DESTDIR)$(appsdir)" || exit $$?; \
+	done
+
+uninstall-appsDATA:
+	@$(NORMAL_UNINSTALL)
+	@list='$(apps_DATA)'; test -n "$(appsdir)" || list=; \
+	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
+	dir='$(DESTDIR)$(appsdir)'; $(am__uninstall_files_from_dir)
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
@@ -595,12 +690,13 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
-check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-am
-all-am: Makefile $(PROGRAMS)
+check: check-am
+all-am: Makefile $(PROGRAMS) $(DATA)
 installdirs:
-install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-am
+	for dir in "$(DESTDIR)$(demodir)" "$(DESTDIR)$(appsdir)"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
+install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -626,14 +722,14 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
-clean-am: clean-generic clean-libtool clean-noinstPROGRAMS \
+clean-am: clean-demoPROGRAMS clean-generic clean-libtool \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -654,7 +750,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-appsDATA install-demoPROGRAMS
 
 install-dvi: install-dvi-am
 
@@ -700,31 +796,33 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am:
+uninstall-am: uninstall-appsDATA uninstall-demoPROGRAMS
 
-.MAKE: all check install install-am install-strip
+.MAKE: install-am install-strip
 
-.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean clean-generic \
-	clean-libtool clean-noinstPROGRAMS cscopelist-am ctags \
-	ctags-am distclean distclean-compile distclean-generic \
+.PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
+	clean-demoPROGRAMS clean-generic clean-libtool cscopelist-am \
+	ctags ctags-am distclean distclean-compile distclean-generic \
 	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags tags-am uninstall uninstall-am
+	html-am info info-am install install-am install-appsDATA \
+	install-data install-data-am install-demoPROGRAMS install-dvi \
+	install-dvi-am install-exec install-exec-am install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
+	uninstall-appsDATA uninstall-demoPROGRAMS
 
-geoclue-agent-interface.c: geoclue-agent-interface.h
-geoclue-agent-interface.h: Makefile.am $(interface_data)
-	gdbus-codegen						\
-		--interface-prefix org.freedesktop.GeoClue2.	\
-		--c-namespace GClue				\
-		--generate-c-code geoclue-agent-interface	\
-		$(interface_data)
+
+@INTLTOOL_DESKTOP_RULE@
+
+geoclue-where-am-i.desktop.in: geoclue-where-am-i.desktop.in.in
+	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
+
+geoclue-demo-agent.desktop.in: geoclue-demo-agent.desktop.in.in
+	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
 
 -include $(top_srcdir)/git.mk
 

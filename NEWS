@@ -1,3 +1,98 @@
+2.1.4
+=====
+
+- Don't depend on unreleased libnm-glib.
+
+All contributors to this release:
+
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+2.1.3
+=====
+
+- Agents can now dictate maximum accuracy level allowed for all clients through
+  a D-Bus property. The next version of gnome-shell will make use of that and
+  provide an option to enable/disable geolocation in topbar menu.
+- Add D-Bus property to specify available accuracy level. For now we just
+  hardcode it to report that we can provide exact accuracy.
+- Give agents time to register themselves on startup before processing client
+  requests.
+- Move configuration file under geoclue subdir so that in future we can easily
+  add more configuration files if needed.
+- Fixes to build.
+- Some internal clean-ups.
+
+All contributors to this release:
+
+Colin Walters <walters@verbum.org>
+Marvin Schmidt <marv@exherbo.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+2.1.2
+=====
+
+- Fix some crashing bugs.
+- Ignore WiFis with '_nomap' suffix.
+- Configure options for disabling WiFi, 3G and GPS modem sources.
+- Avoid spaming the network resources for ignorable changes to network setup.
+- Add some required files to distribution that we forgot in last release.
+
+All contributors to this release:
+
+Kalev Lember <kalevlember@gmail.com>
+Ryan Lortie <desrt@desrt.ca>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+2.1.1
+=====
+
+- 3GPP-based geolocation source.
+  - Uses ModemManager to get cell tower info from 3GPP modem and uses
+    opencellid.org's public API to translate that into a location.
+- GPS modem-based geolocation source: If your 3GPP modem has a GPS, geoclue can
+  now make use of it.
+- WiFi-based geolocation source
+  - Uses Mozilla Location Service to find location based on nearby WiFi
+    networks.
+  - Refresh location on changes in WiFi networks.
+  - Option in configuration file to make geoclue use Google Maps Geolocation API
+    rather than Mozilla Location Service.
+  - Option in configuration file to enable submission of wifi data to Mozilla
+    Location Service. If this option is enabled, the data is submitted each time
+    geoclue gets a GPS lock. That means, its not completely autonomous and data
+    is only submitted if an application, e.g gnome-maps requests current
+    location with exact accuracy.
+- API for clients to specify what level of geolocation accuracy they need,
+  e.g city-level, street-level or exact etc.
+- API to check if geolocation service is in use. Next version of gnome-shell
+  will make use of that to show an icon in the panel to indicate to user that
+  their location is being accessed.
+- Application authorization agent
+  - Make agent completely optional. We will revert this once we have a reliable
+    mechanism to identify applications.
+  - Identify agent and client applications by their desktop IDs rather than
+    paths of their binaries.
+  - Ability for agents to dictate the accuracy level allowed for clients.
+  - Maintain a whitelist of clients in configuration that do not need agent
+    authorization.
+- Avoid redundant queries to web services.
+- Install demo applications and provide a desktop file for them.
+- Many more internal fixes and clean-ups.
+
+Dependency-related changes:
+
+- Require libnm-glib >= 0.9.9.0 (new dependency)
+- Require libmm-glib >= 1.0 (new dependency)
+- Require libxml-2.0 (new dependency)
+
+Note to package maintainers: This version drops the requirement for geoclue
+binary to be given 'ptrace' capability that was introduced in last release,
+2.1.0.
+
+All contributors to this release:
+
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.1.0
 =====
 

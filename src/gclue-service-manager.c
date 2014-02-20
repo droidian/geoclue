@@ -26,9 +26,12 @@
 #include "gclue-service-manager.h"
 #include "gclue-service-client.h"
 #include "gclue-client-info.h"
+#include "geoclue-agent-interface.h"
+#include "gclue-enums.h"
 #include "gclue-config.h"
 
-#define AGENT_WAIT_TIMEOUT 1 /* seconds */
+#define AGENT_WAIT_TIMEOUT      100    /* milliseconds */
+#define AGENT_WAIT_TIMEOUT_USEC 100000 /* microseconds */
 
 static void
 gclue_service_manager_manager_iface_init (GClueManagerIface *iface);
@@ -50,6 +53,7 @@ struct _GClueServiceManagerPrivate
         GHashTable *agents;
 
         guint num_clients;
+        gint64 init_time;
 };
 
 enum
@@ -71,6 +75,8 @@ on_peer_vanished (GClueClientInfo *info,
         g_hash_table_remove (manager->priv->clients,
                              gclue_client_info_get_bus_name (info));
         g_object_notify (G_OBJECT (manager), "connected-clients");
+        if (g_hash_table_size (manager->priv->clients) == 0)
+                gclue_manager_set_in_use (GCLUE_MANAGER (manager), FALSE);
 }
 
 typedef struct
@@ -86,7 +92,7 @@ complete_get_client (OnClientInfoNewReadyData *data)
         GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (data->manager)->priv;
         GClueServiceClient *client;
         GClueClientInfo *info = data->client_info;
-        GDBusProxy *agent_proxy = NULL;
+        GClueAgent *agent_proxy = NULL;
         GError *error = NULL;
         char *path;
         guint32 user_id;
@@ -94,15 +100,6 @@ complete_get_client (OnClientInfoNewReadyData *data)
         user_id = gclue_client_info_get_user_id (info);
         agent_proxy = g_hash_table_lookup (priv->agents,
                                            GINT_TO_POINTER (user_id));
-        if (REQUIRE_AUTH && agent_proxy == NULL) {
-                g_dbus_method_invocation_return_error
-                        (data->invocation,
-                         G_DBUS_ERROR,
-                         G_DBUS_ERROR_ACCESS_DENIED,
-                         "No authorization agent available for user ID %u",
-                         user_id);
-                goto out;
-        }
 
         path = g_strdup_printf ("/org/freedesktop/GeoClue2/Client/%u",
                                 ++priv->num_clients);
@@ -119,6 +116,8 @@ complete_get_client (OnClientInfoNewReadyData *data)
                              g_strdup (gclue_client_info_get_bus_name (info)),
                              client);
         g_object_notify (G_OBJECT (data->manager), "connected-clients");
+        if (g_hash_table_size (priv->clients) == 1)
+                gclue_manager_set_in_use (data->manager, TRUE);
 
         g_signal_connect (info,
                           "peer-vanished",
@@ -149,9 +148,10 @@ on_client_info_new_ready (GObject      *source_object,
         OnClientInfoNewReadyData *data = (OnClientInfoNewReadyData *) user_data;
         GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (data->manager)->priv;
         GClueClientInfo *info = NULL;
-        GDBusProxy *agent_proxy = NULL;
+        GClueAgent *agent_proxy;
         GError *error = NULL;
         guint32 user_id;
+        gint64 now;
 
         info = gclue_client_info_new_finish (res, &error);
         if (info == NULL) {
@@ -170,14 +170,16 @@ on_client_info_new_ready (GObject      *source_object,
         user_id = gclue_client_info_get_user_id (info);
         agent_proxy = g_hash_table_lookup (priv->agents,
                                            GINT_TO_POINTER (user_id));
-        if (REQUIRE_AUTH && agent_proxy == NULL) {
+        now = g_get_monotonic_time ();
+        if (agent_proxy == NULL &&
+            now < (priv->init_time + AGENT_WAIT_TIMEOUT_USEC)) {
                 /* Its possible that geoclue was just launched on GetClient
                  * call, in which case agents need some time to register
                  * themselves to us.
                  */
-                g_timeout_add_seconds (AGENT_WAIT_TIMEOUT,
-                                       (GSourceFunc) complete_get_client,
-                                       user_data);
+                g_timeout_add (AGENT_WAIT_TIMEOUT,
+                               (GSourceFunc) complete_get_client,
+                               user_data);
                 return;
         }
 
@@ -222,12 +224,13 @@ typedef struct
         GClueManager *manager;
         GDBusMethodInvocation *invocation;
         GClueClientInfo *info;
+        char *desktop_id;
 } AddAgentData;
 
 static void
 add_agent_data_free (AddAgentData *data)
 {
-        g_clear_object (&data->info);
+        g_clear_pointer (&data->desktop_id, g_free);
         g_slice_free (AddAgentData, data);
 }
 
@@ -241,6 +244,7 @@ on_agent_vanished (GClueClientInfo *info,
         user_id = gclue_client_info_get_user_id (info);
         g_debug ("Agent for user '%u' vanished", user_id);
         g_hash_table_remove (manager->priv->agents, GINT_TO_POINTER (user_id));
+        g_object_unref (info);
 }
 
 static void
@@ -251,10 +255,10 @@ on_agent_proxy_ready (GObject      *source_object,
         AddAgentData *data = (AddAgentData *) user_data;
         GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (data->manager)->priv;
         guint32 user_id;
-        GDBusProxy *agent;
+        GClueAgent *agent;
         GError *error = NULL;
 
-        agent = g_dbus_proxy_new_for_bus_finish (res, &error);
+        agent = gclue_agent_proxy_new_for_bus_finish (res, &error);
         if (agent == NULL)
             goto error_out;
 
@@ -292,10 +296,6 @@ on_agent_info_new_ready (GObject      *source_object,
         GError *error = NULL;
         char *path;
         GClueConfig *config;
-        char **whitelisted_agents;
-        gsize num_agents;
-        gboolean allowed = FALSE;
-        gsize i;
 
         data->info = gclue_client_info_new_finish (res, &error);
         if (data->info == NULL) {
@@ -310,18 +310,9 @@ on_agent_info_new_ready (GObject      *source_object,
         }
 
         config = gclue_config_get_singleton ();
-        whitelisted_agents = gclue_config_get_agents (config, &num_agents);
-        for (i = 0; i < num_agents; i++) {
-                const char *path = gclue_client_info_get_bin_path (data->info);
-
-                if (g_strcmp0 (path, whitelisted_agents[i]) == 0) {
-                        allowed = TRUE;
-
-                        break;
-                }
-        }
-        g_strfreev (whitelisted_agents);
-        if (!allowed) {
+        if (!gclue_config_is_agent_allowed (config,
+                                            data->desktop_id,
+                                            data->info)) {
                 g_dbus_method_invocation_return_error (data->invocation,
                                                        G_DBUS_ERROR,
                                                        G_DBUS_ERROR_ACCESS_DENIED,
@@ -333,21 +324,20 @@ on_agent_info_new_ready (GObject      *source_object,
 
         path = g_strdup_printf (AGENT_PATH,
                                 gclue_client_info_get_user_id (data->info));
-        g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
-                                  G_DBUS_PROXY_FLAGS_NONE,
-                                  NULL,
-                                  gclue_client_info_get_bus_name (data->info),
-                                  path,
-                                  "org.freedesktop.GeoClue2.Agent",
-                                  NULL,
-                                  on_agent_proxy_ready,
-                                  user_data);
+        gclue_agent_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
+                                       G_DBUS_PROXY_FLAGS_NONE,
+                                       gclue_client_info_get_bus_name (data->info),
+                                       path,
+                                       NULL,
+                                       on_agent_proxy_ready,
+                                       user_data);
         g_free (path);
 }
 
 static gboolean
 gclue_service_manager_handle_add_agent (GClueManager          *manager,
-                                        GDBusMethodInvocation *invocation)
+                                        GDBusMethodInvocation *invocation,
+                                        const char            *id)
 {
         GClueServiceManager *self = GCLUE_SERVICE_MANAGER (manager);
         GClueServiceManagerPrivate *priv = self->priv;
@@ -359,6 +349,7 @@ gclue_service_manager_handle_add_agent (GClueManager          *manager,
         data = g_slice_new0 (AddAgentData);
         data->manager = manager;
         data->invocation = invocation;
+        data->desktop_id = g_strdup (id);
         gclue_client_info_new_async (peer,
                                      priv->connection,
                                      NULL,
@@ -425,6 +416,13 @@ gclue_service_manager_set_property (GObject      *object,
         }
 }
 
+static void
+gclue_service_manager_constructed (GObject *object)
+{
+        /* FIXME: We need to probe the sources, somehow */
+        gclue_manager_set_available_accuracy_level (GCLUE_MANAGER (object),
+                                                    GCLUE_ACCURACY_LEVEL_EXACT);
+}
 
 static void
 gclue_service_manager_class_init (GClueServiceManagerClass *klass)
@@ -435,6 +433,7 @@ gclue_service_manager_class_init (GClueServiceManagerClass *klass)
         object_class->finalize = gclue_service_manager_finalize;
         object_class->get_property = gclue_service_manager_get_property;
         object_class->set_property = gclue_service_manager_set_property;
+        object_class->constructed = gclue_service_manager_constructed;
 
         g_type_class_add_private (object_class, sizeof (GClueServiceManagerPrivate));
 
@@ -476,6 +475,7 @@ gclue_service_manager_init (GClueServiceManager *manager)
                                                        g_direct_equal,
                                                        NULL,
                                                        g_object_unref);
+        manager->priv->init_time = g_get_monotonic_time ();
 }
 
 static gboolean

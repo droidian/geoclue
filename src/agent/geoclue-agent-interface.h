@@ -28,10 +28,14 @@ struct _GClueAgentIface
 {
   GTypeInterface parent_iface;
 
+
   gboolean (*handle_authorize_app) (
     GClueAgent *object,
     GDBusMethodInvocation *invocation,
-    const gchar *arg_desktop_id);
+    const gchar *arg_desktop_id,
+    guint arg_req_accuracy_level);
+
+  guint  (*get_max_accuracy_level) (GClueAgent *object);
 
 };
 
@@ -45,7 +49,8 @@ guint gclue_agent_override_properties (GObjectClass *klass, guint property_id_be
 void gclue_agent_complete_authorize_app (
     GClueAgent *object,
     GDBusMethodInvocation *invocation,
-    gboolean authorized);
+    gboolean authorized,
+    guint allowed_accuracy_level);
 
 
 
@@ -53,6 +58,7 @@ void gclue_agent_complete_authorize_app (
 void gclue_agent_call_authorize_app (
     GClueAgent *proxy,
     const gchar *arg_desktop_id,
+    guint arg_req_accuracy_level,
     GCancellable *cancellable,
     GAsyncReadyCallback callback,
     gpointer user_data);
@@ -60,16 +66,24 @@ void gclue_agent_call_authorize_app (
 gboolean gclue_agent_call_authorize_app_finish (
     GClueAgent *proxy,
     gboolean *out_authorized,
+    guint *out_allowed_accuracy_level,
     GAsyncResult *res,
     GError **error);
 
 gboolean gclue_agent_call_authorize_app_sync (
     GClueAgent *proxy,
     const gchar *arg_desktop_id,
+    guint arg_req_accuracy_level,
     gboolean *out_authorized,
+    guint *out_allowed_accuracy_level,
     GCancellable *cancellable,
     GError **error);
 
+
+
+/* D-Bus property accessors: */
+guint gclue_agent_get_max_accuracy_level (GClueAgent *object);
+void gclue_agent_set_max_accuracy_level (GClueAgent *object, guint value);
 
 
 /* ---- */

@@ -22,9 +22,10 @@
   <refsect1 role="properties">
     <title role="properties.title">Properties</title>
     <synopsis>
-<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.Location">Location</link>           readable   o
-<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold">DistanceThreshold</link>  readwrite  u
-<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">DesktopId</link>          readwrite  s
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.Location">Location</link>                readable   o
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold">DistanceThreshold</link>       readwrite  u
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">DesktopId</link>               readwrite  s
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">RequestedAccuracyLevel</link>  readwrite  u
 </synopsis>
   </refsect1>
 <refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Client">
@@ -113,6 +114,19 @@ DesktopId  readwrite  s
 </programlisting>
 <para>        The desktop file id (the basename of the desktop file). This property
         must be set by applications for authorization to work.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">
+  <title>The "RequestedAccuracyLevel" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel"><primary sortas="Client:RequestedAccuracyLevel">org.freedesktop.GeoClue2.Client:RequestedAccuracyLevel</primary></indexterm>
+<programlisting>
+RequestedAccuracyLevel  readwrite  u
+</programlisting>
+<para>        The level of accuracy requested by client, as
+        <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.
+</para><para>        Please keep in mind that the actual accuracy of location information is
+        dependent on available hardware on your machine, external resources
+        and/or how much accuracy user agrees to be confortable with.
 </para>
 </refsect2>
 </refsect1>

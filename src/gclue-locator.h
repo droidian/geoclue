@@ -24,7 +24,9 @@
 #define GCLUE_LOCATOR_H
 
 #include <gio/gio.h>
-#include "geocode-location.h"
+#include "geocode-glib/geocode-location.h"
+#include "public-api/gclue-enum-types.h"
+#include "gclue-location-source.h"
 
 G_BEGIN_DECLS
 
@@ -42,7 +44,7 @@ typedef struct _GClueLocatorPrivate GClueLocatorPrivate;
 
 struct _GClueLocator
 {
-        GObject parent;
+        GClueLocationSource parent;
 
         /*< private >*/
         GClueLocatorPrivate *priv;
@@ -50,30 +52,13 @@ struct _GClueLocator
 
 struct _GClueLocatorClass
 {
-        GObjectClass parent_class;
+        GClueLocationSourceClass parent_class;
 };
 
 GType gclue_locator_get_type (void) G_GNUC_CONST;
 
-GClueLocator *      gclue_locator_new           (void);
-void                gclue_locator_start         (GClueLocator       *locator,
-                                                 GCancellable       *cancellable,
-                                                 GAsyncReadyCallback callback,
-                                                 gpointer            user_data);
-gboolean            gclue_locator_start_finish  (GClueLocator *locator,
-                                                 GAsyncResult *res,
-                                                 GError      **error);
-void                gclue_locator_stop          (GClueLocator       *locator,
-                                                 GCancellable       *cancellable,
-                                                 GAsyncReadyCallback callback,
-                                                 gpointer            user_data);
-gboolean            gclue_locator_stop_finish   (GClueLocator *locator,
-                                                 GAsyncResult *res,
-                                                 GError      **error);
-GeocodeLocation *   gclue_locator_get_location  (GClueLocator *locator);
-guint               gclue_locator_get_threshold (GClueLocator *locator);
-void                gclue_locator_set_threshold (GClueLocator *locator,
-                                                 guint         threshold);
+GClueLocator *      gclue_locator_new                (GClueAccuracyLevel level);
+GClueAccuracyLevel  gclue_locator_get_accuracy_level (GClueLocator *locator);
 
 G_END_DECLS
 

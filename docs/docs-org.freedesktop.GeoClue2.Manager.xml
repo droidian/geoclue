@@ -9,9 +9,16 @@
     <title role="synopsis.title">Methods</title>
     <synopsis>
 <link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient">GetClient</link> (OUT o client);
-<link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent">AddAgent</link>  ();
+<link linkend="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent">AddAgent</link>  (IN  s id);
 </synopsis>
   </refsynopsisdiv>
+  <refsect1 role="properties">
+    <title role="properties.title">Properties</title>
+    <synopsis>
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse">InUse</link>                   readable   b
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel">AvailableAccuracyLevel</link>  readable   u
+</synopsis>
+  </refsect1>
 <refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Manager">
   <title role="desc.title">Description</title>
   <para>      This is the interface you use to talk to main GeoClue2 manager object at
@@ -42,11 +49,39 @@ GetClient (OUT o client);
   <title>The AddAgent() method</title>
   <indexterm zone="gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent"><primary sortas="Manager.AddAgent">org.freedesktop.GeoClue2.Manager.AddAgent()</primary></indexterm>
 <programlisting>
-AddAgent ();
+AddAgent (IN  s id);
 </programlisting>
 <para>        An API for user authorization agents to register themselves. Each agent
         is responsible for the user it is running as. Application developers
         can and should simply ignore this API.
+</para>
+<variablelist role="params">
+<varlistentry>
+  <term><literal>IN s <parameter>id</parameter></literal>:</term>
+  <listitem><para>The Desktop ID (excluding .desktop) of the agent</para></listitem>
+</varlistentry>
+</variablelist>
+</refsect2>
+</refsect1>
+<refsect1 role="details" id="gdbus-properties-org.freedesktop.GeoClue2.Manager">
+  <title role="details.title">Property Details</title>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse">
+  <title>The "InUse" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Manager.InUse"><primary sortas="Manager:InUse">org.freedesktop.GeoClue2.Manager:InUse</primary></indexterm>
+<programlisting>
+InUse  readable   b
+</programlisting>
+<para>        Whether service is currently is use by any application.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel">
+  <title>The "AvailableAccuracyLevel" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel"><primary sortas="Manager:AvailableAccuracyLevel">org.freedesktop.GeoClue2.Manager:AvailableAccuracyLevel</primary></indexterm>
+<programlisting>
+AvailableAccuracyLevel  readable   u
+</programlisting>
+<para>        The level of available accuracy, as
+        <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.
 </para>
 </refsect2>
 </refsect1>

@@ -25,6 +25,10 @@
 #include "gclue-service-client.h"
 #include "gclue-service-location.h"
 #include "gclue-locator.h"
+#include "public-api/gclue-enum-types.h"
+#include "gclue-config.h"
+
+#define DEFAULT_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_CITY
 
 static void
 gclue_service_client_client_iface_init (GClueClientIface *iface);
@@ -44,7 +48,7 @@ struct _GClueServiceClientPrivate
         GClueClientInfo *client_info;
         const char *path;
         GDBusConnection *connection;
-        GDBusProxy *agent_proxy;
+        GClueAgent *agent_proxy;
 
         GClueServiceLocation *location;
         GClueServiceLocation *prev_location;
@@ -54,8 +58,6 @@ struct _GClueServiceClientPrivate
 
         /* Number of times location has been updated */
         guint locations_updated;
-
-        gulong location_change_id;
 };
 
 enum
@@ -141,13 +143,15 @@ on_locator_location_changed (GObject    *gobject,
 {
         GClueServiceClient *client = GCLUE_SERVICE_CLIENT (user_data);
         GClueServiceClientPrivate *priv = client->priv;
-        GClueLocator *locator = GCLUE_LOCATOR (gobject);
+        GClueLocationSource *locator = GCLUE_LOCATION_SOURCE (gobject);
         GeocodeLocation *location_info;
         char *path = NULL;
         const char *prev_path;
         GError *error = NULL;
 
-        location_info = gclue_locator_get_location (locator);
+        location_info = gclue_location_source_get_location (locator);
+        if (location_info == NULL)
+                return; /* No location found yet */
 
         if (priv->location != NULL && below_threshold (client, location_info)) {
                 g_debug ("Updating location, below threshold");
@@ -202,30 +206,23 @@ start_data_free (StartData *data)
 }
 
 static void
-on_start_ready (GObject      *source_object,
-                GAsyncResult *res,
-                gpointer      user_data)
+complete_start (StartData *data, GClueAccuracyLevel accuracy_level)
 {
-        StartData *data = (StartData *) user_data;
-        GClueLocator *locator = GCLUE_LOCATOR (source_object);
-        GError *error = NULL;
+        GClueServiceClientPrivate *priv = data->client->priv;
 
-        if (!gclue_locator_start_finish (locator, res, &error))
-                goto error_out;
+        priv->locator = gclue_locator_new (accuracy_level);
+        g_signal_connect (priv->locator,
+                          "notify::location",
+                          G_CALLBACK (on_locator_location_changed),
+                          data->client);
+
+        /* In case locator already has a location */
+        on_locator_location_changed (G_OBJECT (priv->locator),
+                                     NULL,
+                                     data->client);
 
         gclue_client_complete_start (GCLUE_CLIENT (data->client),
                                      data->invocation);
-        goto out;
-
-error_out:
-        g_dbus_method_invocation_return_error (data->invocation,
-                                               G_DBUS_ERROR,
-                                               G_DBUS_ERROR_FAILED,
-                                               "Failed to start: %s",
-                                               error->message);
-        g_error_free (error);
-
-out:
         start_data_free (data);
 }
 
@@ -235,19 +232,18 @@ on_authorize_app_ready (GObject      *source_object,
                         gpointer      user_data)
 {
         StartData *data = (StartData *) user_data;
-        GClueServiceClientPrivate *priv = data->client->priv;
         GError *error = NULL;
-        GVariant *results = NULL;
         gboolean authorized = FALSE;
+        GClueAccuracyLevel accuracy_level;
 
-        results = g_dbus_proxy_call_finish (G_DBUS_PROXY (source_object),
-                                            res,
-                                            &error);
-        if (results == NULL)
+        accuracy_level = gclue_client_get_requested_accuracy_level
+                                (GCLUE_CLIENT (data->client));
+        if (!gclue_agent_call_authorize_app_finish (GCLUE_AGENT (source_object),
+                                                    &authorized,
+                                                    &accuracy_level,
+                                                    res,
+                                                    &error))
                 goto error_out;
-
-        g_variant_get_child (results, 0, "b", &authorized);
-        g_variant_unref (results);
 
         if (!authorized) {
                 g_set_error_literal (&error,
@@ -257,16 +253,8 @@ on_authorize_app_ready (GObject      *source_object,
                 goto error_out;
         }
 
-        priv->location_change_id =
-                g_signal_connect (priv->locator,
-                                  "notify::location",
-                                  G_CALLBACK (on_locator_location_changed),
-                                  data->client);
+        complete_start (data, accuracy_level);
 
-        gclue_locator_start (priv->locator,
-                             NULL,
-                             on_start_ready,
-                             data);
         return;
 
 error_out:
@@ -279,10 +267,12 @@ gclue_service_client_handle_start (GClueClient           *client,
                                    GDBusMethodInvocation *invocation)
 {
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
+        GClueConfig *config;
         StartData *data;
         const char *desktop_id;
+        GClueAccuracyLevel accuracy_level, max_accuracy;
 
-        if (priv->location_change_id)
+        if (priv->locator != NULL)
                 /* Already started */
                 return TRUE;
 
@@ -299,30 +289,40 @@ gclue_service_client_handle_start (GClueClient           *client,
         data->client = g_object_ref (client);
         data->invocation =  g_object_ref (invocation);
 
-        if (priv->agent_proxy == NULL) {
-                /* No agent == No authorization needed */
-                priv->location_change_id = g_signal_connect
-                        (priv->locator,
-                         "notify::location",
-                         G_CALLBACK (on_locator_location_changed),
-                         data->client);
+        config = gclue_config_get_singleton ();
+        accuracy_level = gclue_client_get_requested_accuracy_level (client);
 
-                gclue_locator_start (priv->locator,
-                                     NULL,
-                                     on_start_ready,
-                                     data);
+        /* No agent == No authorization needed */
+        if (priv->agent_proxy == NULL ||
+            gclue_config_is_app_allowed (config,
+                                         desktop_id,
+                                         priv->client_info)) {
+                complete_start (data, accuracy_level);
 
                 return TRUE;
         }
 
-        g_dbus_proxy_call (priv->agent_proxy,
-                           "AuthorizeApp",
-                           g_variant_new ("(s)", desktop_id),
-                           G_DBUS_CALL_FLAGS_NONE,
-                           -1,
-                           NULL,
-                           on_authorize_app_ready,
-                           data);
+        max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
+        if (max_accuracy == 0) {
+                guint32 uid = gclue_client_info_get_user_id (priv->client_info);
+
+                g_dbus_method_invocation_return_error (invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "Geolocation disabled for"
+                                                       " UID %u",
+                                                       uid);
+                start_data_free (data);
+                return TRUE;
+        }
+        accuracy_level = CLAMP (accuracy_level, 0, max_accuracy);
+
+        gclue_agent_call_authorize_app (priv->agent_proxy,
+                                        desktop_id,
+                                        accuracy_level,
+                                        NULL,
+                                        on_authorize_app_ready,
+                                        data);
 
         return TRUE;
 }
@@ -333,12 +333,7 @@ gclue_service_client_handle_stop (GClueClient           *client,
 {
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
 
-        if (priv->location_change_id != 0) {
-                g_signal_handler_disconnect (priv->locator,
-                                             priv->location_change_id);
-                priv->location_change_id = 0;
-        }
-
+        g_clear_object (&priv->locator);
         gclue_client_complete_stop (client, invocation);
 
         return TRUE;
@@ -348,12 +343,6 @@ static void
 gclue_service_client_finalize (GObject *object)
 {
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (object)->priv;
-
-        if (priv->location_change_id != 0) {
-                g_signal_handler_disconnect (priv->locator,
-                                             priv->location_change_id);
-                priv->location_change_id = 0;
-        }
 
         g_clear_pointer (&priv->path, g_free);
         g_clear_object (&priv->connection);
@@ -598,7 +587,7 @@ gclue_service_client_class_init (GClueServiceClientClass *klass)
         gParamSpecs[PROP_AGENT_PROXY] = g_param_spec_object ("agent-proxy",
                                                              "AgentProxy",
                                                              "Proxy to app authorization agent",
-                                                             G_TYPE_DBUS_PROXY,
+                                                             GCLUE_TYPE_AGENT_PROXY,
                                                              G_PARAM_READWRITE |
                                                              G_PARAM_CONSTRUCT);
         g_object_class_install_property (object_class,
@@ -640,15 +629,15 @@ gclue_service_client_init (GClueServiceClient *client)
         client->priv = G_TYPE_INSTANCE_GET_PRIVATE (client,
                                                     GCLUE_TYPE_SERVICE_CLIENT,
                                                     GClueServiceClientPrivate);
-
-        client->priv->locator = gclue_locator_new ();
+        gclue_client_set_requested_accuracy_level (GCLUE_CLIENT (client),
+                                                   DEFAULT_ACCURACY_LEVEL);
 }
 
 GClueServiceClient *
 gclue_service_client_new (GClueClientInfo *info,
                           const char      *path,
                           GDBusConnection *connection,
-                          GDBusProxy      *agent_proxy,
+                          GClueAgent      *agent_proxy,
                           GError         **error)
 {
         return g_initable_new (GCLUE_TYPE_SERVICE_CLIENT,

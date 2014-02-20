@@ -28,14 +28,28 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
+#define LOCATION_TIMEOUT 30 /* seconds */
+
+GDBusProxy *manager;
 GMainLoop *main_loop;
+
+static gboolean
+on_location_timeout (gpointer user_data)
+{
+        GDBusProxy *client = G_DBUS_PROXY (user_data);
+
+        g_object_unref (client);
+        g_object_unref (manager);
+        g_main_loop_quit (main_loop);
+
+        return FALSE;
+}
 
 static void
 on_location_proxy_ready (GObject      *source_object,
                          GAsyncResult *res,
                          gpointer      user_data)
 {
-        GDBusProxy *manager = G_DBUS_PROXY (user_data);
         GDBusProxy *location = G_DBUS_PROXY (source_object);
         GVariant *value;
         gdouble latitude, longitude, accuracy;
@@ -57,6 +71,7 @@ on_location_proxy_ready (GObject      *source_object,
         value = g_dbus_proxy_get_cached_property (location, "Accuracy");
         accuracy = g_variant_get_double (value);
 
+        g_print ("\nNew location:\n");
         g_print ("Latitude: %f\nLongitude: %f\nAccuracy (in meters): %f\n",
                  latitude,
                  longitude,
@@ -68,9 +83,6 @@ on_location_proxy_ready (GObject      *source_object,
                 g_print ("Description: %s\n", desc);
 
         g_object_unref (location);
-        g_object_unref (manager);
-
-        g_main_loop_quit (main_loop);
 }
 
 static void
@@ -96,7 +108,6 @@ on_client_signal (GDBusProxy *client,
                                   NULL,
                                   on_location_proxy_ready,
                                   user_data);
-        g_object_unref (client);
 }
 
 static void
@@ -144,12 +155,14 @@ on_client_proxy_ready (GObject      *source_object,
                            NULL,
                            on_start_ready,
                            user_data);
+
+        g_timeout_add_seconds (LOCATION_TIMEOUT, on_location_timeout, client);
 }
 
 static void
-on_set_desktop_id_ready (GObject      *source_object,
-                         GAsyncResult *res,
-                         gpointer      user_data)
+on_set_accuracy_level_ready (GObject      *source_object,
+                             GAsyncResult *res,
+                             gpointer      user_data)
 {
         GDBusProxy *client_props = G_DBUS_PROXY (source_object);
         GVariant *results;
@@ -159,7 +172,7 @@ on_set_desktop_id_ready (GObject      *source_object,
         if (results == NULL) {
             g_critical ("Failed to start GeoClue2 client: %s", error->message);
 
-            exit (-4);
+            exit (-8);
         }
         g_variant_unref (results);
 
@@ -172,6 +185,46 @@ on_set_desktop_id_ready (GObject      *source_object,
                                   NULL,
                                   on_client_proxy_ready,
                                   user_data);
+}
+
+typedef enum {
+        GCLUE_ACCURACY_LEVEL_COUNTRY = 1,
+        GCLUE_ACCURACY_LEVEL_CITY = 4,
+        GCLUE_ACCURACY_LEVEL_STREET = 6,
+        GCLUE_ACCURACY_LEVEL_EXACT = 8,
+} GClueAccuracyLevel;
+
+static void
+on_set_desktop_id_ready (GObject      *source_object,
+                         GAsyncResult *res,
+                         gpointer      user_data)
+{
+        GDBusProxy *client_props = G_DBUS_PROXY (source_object);
+        GVariant *results;
+        GVariant *accuracy_level;
+        GError *error = NULL;
+
+        results = g_dbus_proxy_call_finish (client_props, res, &error);
+        if (results == NULL) {
+            g_critical ("Failed to start GeoClue2 client: %s", error->message);
+
+            exit (-4);
+        }
+        g_variant_unref (results);
+
+        accuracy_level = g_variant_new ("u", GCLUE_ACCURACY_LEVEL_EXACT);
+
+        g_dbus_proxy_call (client_props,
+                           "Set",
+                           g_variant_new ("(ssv)",
+                                          "org.freedesktop.GeoClue2.Client",
+                                          "RequestedAccuracyLevel",
+                                          accuracy_level),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           NULL,
+                           on_set_accuracy_level_ready,
+                           user_data);
 }
 
 static void
@@ -190,8 +243,7 @@ on_client_props_proxy_ready (GObject      *source_object,
             exit (-3);
         }
 
-        /* FIXME: We should provide a desktop file? */
-        desktop_id = g_variant_new ("s", "geoclue-demo-app");
+        desktop_id = g_variant_new ("s", "geoclue-where-am-i");
 
         g_dbus_proxy_call (client_props,
                            "Set",
@@ -211,7 +263,6 @@ on_get_client_ready (GObject      *source_object,
                      GAsyncResult *res,
                      gpointer      user_data)
 {
-        GDBusProxy *manager = G_DBUS_PROXY (source_object);
         GVariant *results;
         const char *client_path;
         GError *error = NULL;
@@ -245,7 +296,6 @@ on_manager_proxy_ready (GObject      *source_object,
                         GAsyncResult *res,
                         gpointer      user_data)
 {
-        GDBusProxy *manager;
         GError *error = NULL;
 
         manager = g_dbus_proxy_new_for_bus_finish (res, &error);
@@ -272,7 +322,6 @@ main (gint argc, gchar *argv[])
         textdomain (GETTEXT_PACKAGE);
         bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
         bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
-        g_set_application_name (_("Where Am I"));
 
         g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
                                   G_DBUS_PROXY_FLAGS_NONE,

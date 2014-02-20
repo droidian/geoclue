@@ -24,7 +24,7 @@
 
 #include "gclue-config.h"
 
-#define CONFIG_FILE_PATH SYSCONFDIR "/geoclue.conf"
+#define CONFIG_FILE_PATH SYSCONFDIR "/geoclue/geoclue.conf"
 
 /* This class will be responsible for fetching configuration. */
 
@@ -72,7 +72,8 @@ gclue_config_init (GClueConfig *config)
                                    0,
                                    &error);
         if (error != NULL) {
-                g_critical ("Failed to load configuration file '%s': %s", CONFIG_FILE_PATH, error->message);
+                g_critical ("Failed to load configuration file '%s': %s",
+                            CONFIG_FILE_PATH, error->message);
                 g_error_free (error);
         }
 }
@@ -88,23 +89,130 @@ gclue_config_get_singleton (void)
         return config;
 }
 
-gchar **
-gclue_config_get_agents (GClueConfig *config,
-                         gsize       *num_agents)
+gboolean
+gclue_config_is_agent_allowed (GClueConfig     *config,
+                               const char      *desktop_id,
+                               GClueClientInfo *agent_info)
 {
         GClueConfigPrivate *priv = config->priv;
-        gchar **ret;
+        char **agents;
+        gsize num_agents, i;
+        gboolean allowed = FALSE;
         GError *error = NULL;
 
-        ret = g_key_file_get_string_list (priv->key_file,
-                                          "agent",
-                                          "whitelist",
-                                          num_agents,
-                                          &error);
+        agents = g_key_file_get_string_list (priv->key_file,
+                                             "agent",
+                                             "whitelist",
+                                             &num_agents,
+                                             &error);
         if (error != NULL) {
-                g_critical ("Failed to read 'agent/whitelist' key: %s", error->message);
+                g_critical ("Failed to read 'agent/whitelist' key: %s",
+                            error->message);
+                g_error_free (error);
+
+                return FALSE;
+        }
+
+        for (i = 0; i < num_agents; i++) {
+                if (g_strcmp0 (desktop_id, agents[i]) == 0) {
+                        allowed = TRUE;
+
+                        break;
+                }
+        }
+        g_strfreev (agents);
+
+        return allowed;
+}
+
+gboolean
+gclue_config_is_app_allowed (GClueConfig     *config,
+                             const char      *desktop_id,
+                             GClueClientInfo *app_info)
+{
+        GClueConfigPrivate *priv = config->priv;
+        int* users = NULL;
+        guint64 uid;
+        gsize num_users, i;
+        gboolean allowed = FALSE;
+        GError *error = NULL;
+
+        g_return_val_if_fail (desktop_id != NULL, FALSE);
+
+        allowed = g_key_file_get_boolean (priv->key_file,
+                                          desktop_id,
+                                          "allowed",
+                                          &error);
+        if (error != NULL || !allowed) {
+                g_debug ("'%s' not in configuration or not allowed", desktop_id);
+                goto out;
+        }
+
+        uid = gclue_client_info_get_user_id (app_info);
+        users = g_key_file_get_integer_list (priv->key_file,
+                                             desktop_id,
+                                             "users",
+                                             &num_users,
+                                             &error);
+        if (error != NULL) {
+                g_warning ("%s", error->message);
+                goto out;
+        }
+        if (num_users == 0) {
+                allowed = TRUE;
+                goto out;
+        }
+
+        for (i = 0; i < num_users; i++) {
+                if (users[i] == uid) {
+                        allowed = TRUE;
+
+                        break;
+                }
+        }
+
+out:
+        g_clear_pointer (&users, g_free);
+        g_clear_error (&error);
+
+        return allowed;
+}
+
+#define DEFAULT_WIFI_URL "https://location.services.mozilla.com/v1/geolocate?key=geoclue"
+
+char *
+gclue_config_get_wifi_url (GClueConfig *config)
+{
+        char *url;
+        GError *error = NULL;
+
+        url = g_key_file_get_string (config->priv->key_file,
+                                     "wifi",
+                                     "url",
+                                     &error);
+        if (error != NULL) {
+                g_warning ("%s", error->message);
+                g_error_free (error);
+                url = g_strdup (DEFAULT_WIFI_URL);
+        }
+
+        return url;
+}
+
+char *
+gclue_config_get_wifi_submit_url (GClueConfig *config)
+{
+        char *url;
+        GError *error = NULL;
+
+        url = g_key_file_get_string (config->priv->key_file,
+                                     "wifi",
+                                     "submission-url",
+                                     &error);
+        if (error != NULL) {
+                g_debug ("No wifi submission URL: %s", error->message);
                 g_error_free (error);
         }
 
-        return ret;
+        return url;
 }

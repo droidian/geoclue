@@ -3,7 +3,50 @@
 # Agent configuration options
 [agent]
 
-# Whitelist of binary paths of all agents we recognise, separated by a ';'
-# For security reasons, its best to only allow agents that are installed
-# in privileged locations, e.g /usr/bin, /usr/sbin, /usr/libexec etc.
-whitelist=@demo_agent@/usr/bin/gnome-shell
+# Whitelist of desktop IDs (without .desktop part) of all agents we recognise,
+# separated by a ';'.
+whitelist=@demo_agent@gnome-shell
+
+# WiFi source configuration options
+[wifi]
+
+# URL to the wifi geolocation service. The key can currenty be anything, just
+# needs to be present but that is likely going to change in future.
+url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
+
+# URL to submission API of Mozilla Location Service
+# If uncommented, geoclue will automatically submit network data to Mozilla
+# each time it gets a GPS lock.
+#submission-url=https://location.services.mozilla.com/v1/submit?key=geoclue
+
+# To use the Google geolocation service instead of mozilla's, simply uncomment
+# this url while changing API_KEY to your Google API key and comment out or
+# remove the url above.
+#
+#url=https://www.googleapis.com/geolocation/v1/geolocate?key=YOUR_KEY
+
+# Application configuration options
+#
+# Format:
+#
+# # Desktop ID of application without .desktop part
+# [random-app]
+#
+# # Allowed access to location information?
+# allowed=true|false
+#
+# # List of UIDs of all users for which this application is allowed location
+# # info access, separate by ';'. Keep it empty for allowing it for all users.
+# users=
+
+[gnome-settings-daemon]
+allowed=true
+users=
+
+[epiphany]
+allowed=true
+users=
+
+[firefox]
+allowed=true
+users=

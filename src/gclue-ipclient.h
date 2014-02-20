@@ -26,9 +26,11 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include "geocode-location.h"
+#include "gclue-web-source.h"
 
 G_BEGIN_DECLS
+
+#define GCLUE_IPCLIENT_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_CITY
 
 GType gclue_ipclient_get_type (void) G_GNUC_CONST;
 
@@ -50,7 +52,7 @@ typedef struct _GClueIpclientPrivate GClueIpclientPrivate;
 
 struct _GClueIpclient {
         /* <private> */
-        GObject parent_instance;
+        GClueWebSource parent_instance;
         GClueIpclientPrivate *priv;
 };
 
@@ -61,23 +63,10 @@ struct _GClueIpclient {
 **/
 struct _GClueIpclientClass {
         /* <private> */
-        GObjectClass parent_class;
+        GClueWebSourceClass parent_class;
 };
 
-GClueIpclient *gclue_ipclient_new               (void);
-GClueIpclient *gclue_ipclient_new_for_ip        (const char *str);
-
-void gclue_ipclient_search_async                (GClueIpclient      *ipclient,
-                                                 GCancellable       *cancellable,
-                                                 GAsyncReadyCallback callback,
-                                                 gpointer            user_data);
-
-GeocodeLocation *gclue_ipclient_search_finish   (GClueIpclient *ipclient,
-                                                 GAsyncResult  *res,
-                                                 GError       **error);
-
-GeocodeLocation *gclue_ipclient_search          (GClueIpclient *ipclient,
-                                                 GError       **error);
+GClueIpclient *gclue_ipclient_get_singleton (void);
 
 G_END_DECLS
 

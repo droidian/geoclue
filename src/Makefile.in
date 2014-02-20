@@ -15,6 +15,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 am__is_gnu_make = test -n '$(MAKEFILE_LIST)' && test -n '$(MAKELEVEL)'
 am__make_running_with_option = \
@@ -80,47 +81,70 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 DIST_COMMON = $(top_srcdir)/Makefile.decl $(srcdir)/Makefile.in \
-	$(srcdir)/Makefile.am $(srcdir)/geoclue-2.0.pc.in \
+	$(srcdir)/Makefile.am $(srcdir)/geoclue.pc.in \
 	$(top_srcdir)/build-aux/depcomp
 libexec_PROGRAMS = geoclue$(EXEEXT)
 @BUILD_GEOIP_SERVER_TRUE@am__append_1 = geoip-server
+@BUILD_WIFI_SOURCE_TRUE@am__append_2 = gclue-wifi.h gclue-wifi.c
+@BUILD_MODEM_SOURCE_TRUE@am__append_3 = gclue-modem-source.c gclue-modem-source.h
+@BUILD_3G_SOURCE_TRUE@am__append_4 = gclue-3g.c gclue-3g.h
+@BUILD_MODEM_GPS_SOURCE_TRUE@am__append_5 = gclue-modem-gps.c gclue-modem-gps.h
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = geoclue-2.0.pc
+CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(libexecdir)" \
-	"$(DESTDIR)$(interfacedir)" "$(DESTDIR)$(pkgconfigdir)"
-PROGRAMS = $(libexec_PROGRAMS)
-am__objects_1 = geoclue-geoclue-interface.$(OBJEXT)
-am__objects_2 = $(am__objects_1)
-am_geoclue_OBJECTS = $(am__objects_2) geoclue-gclue-main.$(OBJEXT) \
-	geoclue-gclue-client-info.$(OBJEXT) \
-	geoclue-gclue-config.$(OBJEXT) geoclue-gclue-error.$(OBJEXT) \
-	geoclue-gclue-ipclient.$(OBJEXT) \
-	geoclue-gclue-locator.$(OBJEXT) \
-	geoclue-gclue-service-manager.$(OBJEXT) \
-	geoclue-gclue-service-client.$(OBJEXT) \
-	geoclue-gclue-service-location.$(OBJEXT) \
-	geoclue-geocode-location.$(OBJEXT)
-geoclue_OBJECTS = $(am_geoclue_OBJECTS)
+LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
-geoclue_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+libgeoclue_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+am__libgeoclue_la_SOURCES_DIST = geoclue-interface.c \
+	geoclue-interface.h gclue-client-info.h gclue-client-info.c \
+	gclue-config.h gclue-config.c gclue-error.h gclue-error.c \
+	gclue-ipclient.h gclue-ipclient.c gclue-location-source.h \
+	gclue-location-source.c gclue-locator.h gclue-locator.c \
+	gclue-service-manager.h gclue-service-manager.c \
+	gclue-service-client.h gclue-service-client.c \
+	gclue-service-location.h gclue-service-location.c \
+	gclue-web-source.c gclue-web-source.h gclue-wifi.h \
+	gclue-wifi.c gclue-modem-source.c gclue-modem-source.h \
+	gclue-3g.c gclue-3g.h gclue-modem-gps.c gclue-modem-gps.h
+am__objects_1 = geoclue-interface.lo
+am__objects_2 = $(am__objects_1)
+@BUILD_WIFI_SOURCE_TRUE@am__objects_3 = gclue-wifi.lo
+@BUILD_MODEM_SOURCE_TRUE@am__objects_4 = gclue-modem-source.lo
+@BUILD_3G_SOURCE_TRUE@am__objects_5 = gclue-3g.lo
+@BUILD_MODEM_GPS_SOURCE_TRUE@am__objects_6 = gclue-modem-gps.lo
+am_libgeoclue_la_OBJECTS = $(am__objects_2) gclue-client-info.lo \
+	gclue-config.lo gclue-error.lo gclue-ipclient.lo \
+	gclue-location-source.lo gclue-locator.lo \
+	gclue-service-manager.lo gclue-service-client.lo \
+	gclue-service-location.lo gclue-web-source.lo $(am__objects_3) \
+	$(am__objects_4) $(am__objects_5) $(am__objects_6)
+libgeoclue_la_OBJECTS = $(am_libgeoclue_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
 am__v_lt_0 = --silent
 am__v_lt_1 = 
-geoclue_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(geoclue_CFLAGS) \
-	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+am__installdirs = "$(DESTDIR)$(libexecdir)" \
+	"$(DESTDIR)$(interfacedir)" "$(DESTDIR)$(pkgconfigdir)"
+PROGRAMS = $(libexec_PROGRAMS)
+am_geoclue_OBJECTS = gclue-main.$(OBJEXT)
+geoclue_OBJECTS = $(am_geoclue_OBJECTS)
+geoclue_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(builddir)/libgeoclue.la \
+	$(builddir)/agent/libgeoclue-agent.la \
+	$(builddir)/geocode-glib/libgeocode-glib.la \
+	$(builddir)/public-api/libgeoclue-public-api.la
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -155,8 +179,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(geoclue_SOURCES)
-DIST_SOURCES = $(geoclue_SOURCES)
+SOURCES = $(libgeoclue_la_SOURCES) $(geoclue_SOURCES)
+DIST_SOURCES = $(am__libgeoclue_la_SOURCES_DIST) $(geoclue_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
 	ctags-recursive dvi-recursive html-recursive info-recursive \
 	install-data-recursive install-dvi-recursive \
@@ -225,7 +249,7 @@ am__define_uniq_tagged_files = \
   done | $(am__uniquify_input)`
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = agent geoip-server
+DIST_SUBDIRS = public-api agent geocode-glib geoip-server
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 am__relativize = \
   dir0=`pwd`; \
@@ -288,6 +312,7 @@ EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
 GDBUS_CODEGEN = @GDBUS_CODEGEN@
+GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
@@ -296,6 +321,7 @@ GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
 GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
 GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
@@ -331,8 +357,12 @@ MANIFEST_TOOL = @MANIFEST_TOOL@
 MKDIR_P = @MKDIR_P@
 MSGFMT = @MSGFMT@
 MSGMERGE = @MSGMERGE@
+ModemManager_CFLAGS = @ModemManager_CFLAGS@
+ModemManager_LIBS = @ModemManager_LIBS@
 NM = @NM@
 NMEDIT = @NMEDIT@
+NetworkManager_CFLAGS = @NetworkManager_CFLAGS@
+NetworkManager_LIBS = @NetworkManager_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -349,9 +379,7 @@ PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
-REALPATH = @REALPATH@
 SED = @SED@
-SETCAP = @SETCAP@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -421,54 +449,64 @@ GTESTER_REPORT = gtester-report		# in $PATH for non-GLIB packages
 
 # initialize variables for unconditional += appending
 TEST_PROGS = 
-SUBDIRS = agent $(am__append_1)
-interfacedir = $(datadir)/geoclue-2.0
+SUBDIRS = public-api agent geocode-glib $(am__append_1)
+interfacedir = $(datadir)/geoclue-$(GEOCLUE_API_VERSION)
 interface_DATA = geoclue-interface.xml
 dbus_built_sources = geoclue-interface.c geoclue-interface.h
 BUILT_SOURCES = \
 	$(dbus_built_sources)	\
 	$(NULL)
 
-geoclue_SOURCES = \
-	$(BUILT_SOURCES) 	 \
-	gclue-main.c	 	 \
-	gclue-client-info.h 	 \
-	gclue-client-info.c 	 \
-	gclue-config.h 	 	 \
-	gclue-config.c 	 	 \
-	gclue-error.h 	 	 \
-	gclue-error.c 	 	 \
-	gclue-ipclient.h 	 \
-	gclue-ipclient.c 	 \
-	gclue-locator.h 	 \
-	gclue-locator.c 	 \
-	gclue-service-manager.h  \
-	gclue-service-manager.c  \
-	gclue-service-client.h   \
-	gclue-service-client.c   \
-	gclue-service-location.h \
-	gclue-service-location.c \
-	geocode-location.c       \
-	geocode-location.h       \
+noinst_LTLIBRARIES = libgeoclue.la
+AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
+	      $(ModemManager_CFLAGS)			  \
+	      $(NetworkManager_CFLAGS)			  \
+	      $(WARN_CFLAGS)			     	  \
+	      -DLOCALEDIR="\"$(datadir)/locale\"" 	  \
+	      -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
+	      -DABS_TOP_SRCDIR=\""$(abs_top_srcdir)"\" 	  \
+	      -DSYSCONFDIR=\""$(sysconfdir)"\"		  \
+	      -I$(srcdir)/agent				  \
+	      -I$(builddir)/agent			  \
+	      -I$(srcdir)/public-api			  \
+	      -I$(builddir)/public-api
+
+libgeoclue_la_SOURCES = $(BUILT_SOURCES) gclue-client-info.h \
+	gclue-client-info.c gclue-config.h gclue-config.c \
+	gclue-error.h gclue-error.c gclue-ipclient.h gclue-ipclient.c \
+	gclue-location-source.h gclue-location-source.c \
+	gclue-locator.h gclue-locator.c gclue-service-manager.h \
+	gclue-service-manager.c gclue-service-client.h \
+	gclue-service-client.c gclue-service-location.h \
+	gclue-service-location.c gclue-web-source.c gclue-web-source.h \
+	$(NULL) $(am__append_2) $(am__append_3) $(am__append_4) \
+	$(am__append_5)
+libgeoclue_la_LIBADD = \
+	$(GEOCLUE_LIBS)			\
+	$(NetworkManager_LIBS)		\
+	$(ModemManager_LIBS)		\
+	$(LIBS)				\
 	$(NULL)
 
-geoclue_CFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
-		 $(WARN_CFLAGS)			     	  \
-		 -DLOCALEDIR="\"$(datadir)/locale\"" 	  \
-		 -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
-		 -DABS_TOP_SRCDIR=\""$(abs_top_srcdir)"\" \
-    		 -DSYSCONFDIR=\""$(sysconfdir)"\"
+geoclue_SOURCES = \
+	gclue-main.c	 	  \
+	$(NULL)
 
-geoclue_LDADD = $(GEOCLUE_LIBS) $(LIBS)
+geoclue_LDADD = $(GEOCLUE_LIBS) 	  		    	\
+		$(LIBS) 		  		    	\
+		$(builddir)/libgeoclue.la		    	\
+		$(builddir)/agent/libgeoclue-agent.la 		\
+		$(builddir)/geocode-glib/libgeocode-glib.la 	\
+		$(builddir)/public-api/libgeoclue-public-api.la
+
 CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(interface_DATA) \
 	     test-data/fedora-geoip-results.json \
 	     test-data/freegeoip-results.json
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = geoclue-2.0.pc
-GEOCODEGLIBDIR = $(top_srcdir)/../geocode-glib/geocode-glib/
-GEOCODEGLIBFILES = geocode-location.c geocode-location.h
+pkgconfig_DATA = geoclue-$(GEOCLUE_API_VERSION).pc
+DISTCLEANFILES = $(pkgconfig_DATA)
 all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -505,8 +543,20 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-geoclue-2.0.pc: $(top_builddir)/config.status $(srcdir)/geoclue-2.0.pc.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+
+clean-noinstLTLIBRARIES:
+	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+	@list='$(noinst_LTLIBRARIES)'; \
+	locs=`for p in $$list; do echo $$p; done | \
+	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
+	      sort -u`; \
+	test -z "$$locs" || { \
+	  echo rm -f $${locs}; \
+	  rm -f $${locs}; \
+	}
+
+libgeoclue.la: $(libgeoclue_la_OBJECTS) $(libgeoclue_la_DEPENDENCIES) $(EXTRA_libgeoclue_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(LINK)  $(libgeoclue_la_OBJECTS) $(libgeoclue_la_LIBADD) $(LIBS)
 install-libexecPROGRAMS: $(libexec_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(libexec_PROGRAMS)'; test -n "$(libexecdir)" || list=; \
@@ -559,7 +609,7 @@ clean-libexecPROGRAMS:
 
 geoclue$(EXEEXT): $(geoclue_OBJECTS) $(geoclue_DEPENDENCIES) $(EXTRA_geoclue_DEPENDENCIES) 
 	@rm -f geoclue$(EXEEXT)
-	$(AM_V_CCLD)$(geoclue_LINK) $(geoclue_OBJECTS) $(geoclue_LDADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) $(geoclue_OBJECTS) $(geoclue_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -567,17 +617,22 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-client-info.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-ipclient.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-locator.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-service-client.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-service-location.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-gclue-service-manager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-geoclue-interface.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-geocode-location.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-3g.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-client-info.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-config.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-error.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-ipclient.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-location-source.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-locator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-modem-gps.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-modem-source.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-client.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-location.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-web-source.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-wifi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-interface.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -599,160 +654,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-geoclue-geoclue-interface.o: geoclue-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-geoclue-interface.o -MD -MP -MF $(DEPDIR)/geoclue-geoclue-interface.Tpo -c -o geoclue-geoclue-interface.o `test -f 'geoclue-interface.c' || echo '$(srcdir)/'`geoclue-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-geoclue-interface.Tpo $(DEPDIR)/geoclue-geoclue-interface.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geoclue-interface.c' object='geoclue-geoclue-interface.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-geoclue-interface.o `test -f 'geoclue-interface.c' || echo '$(srcdir)/'`geoclue-interface.c
-
-geoclue-geoclue-interface.obj: geoclue-interface.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-geoclue-interface.obj -MD -MP -MF $(DEPDIR)/geoclue-geoclue-interface.Tpo -c -o geoclue-geoclue-interface.obj `if test -f 'geoclue-interface.c'; then $(CYGPATH_W) 'geoclue-interface.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-interface.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-geoclue-interface.Tpo $(DEPDIR)/geoclue-geoclue-interface.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geoclue-interface.c' object='geoclue-geoclue-interface.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-geoclue-interface.obj `if test -f 'geoclue-interface.c'; then $(CYGPATH_W) 'geoclue-interface.c'; else $(CYGPATH_W) '$(srcdir)/geoclue-interface.c'; fi`
-
-geoclue-gclue-main.o: gclue-main.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-main.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-main.Tpo -c -o geoclue-gclue-main.o `test -f 'gclue-main.c' || echo '$(srcdir)/'`gclue-main.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-main.Tpo $(DEPDIR)/geoclue-gclue-main.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-main.c' object='geoclue-gclue-main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-main.o `test -f 'gclue-main.c' || echo '$(srcdir)/'`gclue-main.c
-
-geoclue-gclue-main.obj: gclue-main.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-main.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-main.Tpo -c -o geoclue-gclue-main.obj `if test -f 'gclue-main.c'; then $(CYGPATH_W) 'gclue-main.c'; else $(CYGPATH_W) '$(srcdir)/gclue-main.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-main.Tpo $(DEPDIR)/geoclue-gclue-main.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-main.c' object='geoclue-gclue-main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-main.obj `if test -f 'gclue-main.c'; then $(CYGPATH_W) 'gclue-main.c'; else $(CYGPATH_W) '$(srcdir)/gclue-main.c'; fi`
-
-geoclue-gclue-client-info.o: gclue-client-info.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-client-info.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-client-info.Tpo -c -o geoclue-gclue-client-info.o `test -f 'gclue-client-info.c' || echo '$(srcdir)/'`gclue-client-info.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-client-info.Tpo $(DEPDIR)/geoclue-gclue-client-info.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-client-info.c' object='geoclue-gclue-client-info.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-client-info.o `test -f 'gclue-client-info.c' || echo '$(srcdir)/'`gclue-client-info.c
-
-geoclue-gclue-client-info.obj: gclue-client-info.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-client-info.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-client-info.Tpo -c -o geoclue-gclue-client-info.obj `if test -f 'gclue-client-info.c'; then $(CYGPATH_W) 'gclue-client-info.c'; else $(CYGPATH_W) '$(srcdir)/gclue-client-info.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-client-info.Tpo $(DEPDIR)/geoclue-gclue-client-info.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-client-info.c' object='geoclue-gclue-client-info.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-client-info.obj `if test -f 'gclue-client-info.c'; then $(CYGPATH_W) 'gclue-client-info.c'; else $(CYGPATH_W) '$(srcdir)/gclue-client-info.c'; fi`
-
-geoclue-gclue-config.o: gclue-config.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-config.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-config.Tpo -c -o geoclue-gclue-config.o `test -f 'gclue-config.c' || echo '$(srcdir)/'`gclue-config.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-config.Tpo $(DEPDIR)/geoclue-gclue-config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-config.c' object='geoclue-gclue-config.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-config.o `test -f 'gclue-config.c' || echo '$(srcdir)/'`gclue-config.c
-
-geoclue-gclue-config.obj: gclue-config.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-config.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-config.Tpo -c -o geoclue-gclue-config.obj `if test -f 'gclue-config.c'; then $(CYGPATH_W) 'gclue-config.c'; else $(CYGPATH_W) '$(srcdir)/gclue-config.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-config.Tpo $(DEPDIR)/geoclue-gclue-config.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-config.c' object='geoclue-gclue-config.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-config.obj `if test -f 'gclue-config.c'; then $(CYGPATH_W) 'gclue-config.c'; else $(CYGPATH_W) '$(srcdir)/gclue-config.c'; fi`
-
-geoclue-gclue-error.o: gclue-error.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-error.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-error.Tpo -c -o geoclue-gclue-error.o `test -f 'gclue-error.c' || echo '$(srcdir)/'`gclue-error.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-error.Tpo $(DEPDIR)/geoclue-gclue-error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-error.c' object='geoclue-gclue-error.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-error.o `test -f 'gclue-error.c' || echo '$(srcdir)/'`gclue-error.c
-
-geoclue-gclue-error.obj: gclue-error.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-error.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-error.Tpo -c -o geoclue-gclue-error.obj `if test -f 'gclue-error.c'; then $(CYGPATH_W) 'gclue-error.c'; else $(CYGPATH_W) '$(srcdir)/gclue-error.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-error.Tpo $(DEPDIR)/geoclue-gclue-error.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-error.c' object='geoclue-gclue-error.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-error.obj `if test -f 'gclue-error.c'; then $(CYGPATH_W) 'gclue-error.c'; else $(CYGPATH_W) '$(srcdir)/gclue-error.c'; fi`
-
-geoclue-gclue-ipclient.o: gclue-ipclient.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-ipclient.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-ipclient.Tpo -c -o geoclue-gclue-ipclient.o `test -f 'gclue-ipclient.c' || echo '$(srcdir)/'`gclue-ipclient.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-ipclient.Tpo $(DEPDIR)/geoclue-gclue-ipclient.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-ipclient.c' object='geoclue-gclue-ipclient.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-ipclient.o `test -f 'gclue-ipclient.c' || echo '$(srcdir)/'`gclue-ipclient.c
-
-geoclue-gclue-ipclient.obj: gclue-ipclient.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-ipclient.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-ipclient.Tpo -c -o geoclue-gclue-ipclient.obj `if test -f 'gclue-ipclient.c'; then $(CYGPATH_W) 'gclue-ipclient.c'; else $(CYGPATH_W) '$(srcdir)/gclue-ipclient.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-ipclient.Tpo $(DEPDIR)/geoclue-gclue-ipclient.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-ipclient.c' object='geoclue-gclue-ipclient.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-ipclient.obj `if test -f 'gclue-ipclient.c'; then $(CYGPATH_W) 'gclue-ipclient.c'; else $(CYGPATH_W) '$(srcdir)/gclue-ipclient.c'; fi`
-
-geoclue-gclue-locator.o: gclue-locator.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-locator.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-locator.Tpo -c -o geoclue-gclue-locator.o `test -f 'gclue-locator.c' || echo '$(srcdir)/'`gclue-locator.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-locator.Tpo $(DEPDIR)/geoclue-gclue-locator.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-locator.c' object='geoclue-gclue-locator.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-locator.o `test -f 'gclue-locator.c' || echo '$(srcdir)/'`gclue-locator.c
-
-geoclue-gclue-locator.obj: gclue-locator.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-locator.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-locator.Tpo -c -o geoclue-gclue-locator.obj `if test -f 'gclue-locator.c'; then $(CYGPATH_W) 'gclue-locator.c'; else $(CYGPATH_W) '$(srcdir)/gclue-locator.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-locator.Tpo $(DEPDIR)/geoclue-gclue-locator.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-locator.c' object='geoclue-gclue-locator.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-locator.obj `if test -f 'gclue-locator.c'; then $(CYGPATH_W) 'gclue-locator.c'; else $(CYGPATH_W) '$(srcdir)/gclue-locator.c'; fi`
-
-geoclue-gclue-service-manager.o: gclue-service-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-manager.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-manager.Tpo -c -o geoclue-gclue-service-manager.o `test -f 'gclue-service-manager.c' || echo '$(srcdir)/'`gclue-service-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-manager.Tpo $(DEPDIR)/geoclue-gclue-service-manager.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-manager.c' object='geoclue-gclue-service-manager.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-manager.o `test -f 'gclue-service-manager.c' || echo '$(srcdir)/'`gclue-service-manager.c
-
-geoclue-gclue-service-manager.obj: gclue-service-manager.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-manager.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-manager.Tpo -c -o geoclue-gclue-service-manager.obj `if test -f 'gclue-service-manager.c'; then $(CYGPATH_W) 'gclue-service-manager.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-manager.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-manager.Tpo $(DEPDIR)/geoclue-gclue-service-manager.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-manager.c' object='geoclue-gclue-service-manager.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-manager.obj `if test -f 'gclue-service-manager.c'; then $(CYGPATH_W) 'gclue-service-manager.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-manager.c'; fi`
-
-geoclue-gclue-service-client.o: gclue-service-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-client.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-client.Tpo -c -o geoclue-gclue-service-client.o `test -f 'gclue-service-client.c' || echo '$(srcdir)/'`gclue-service-client.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-client.Tpo $(DEPDIR)/geoclue-gclue-service-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-client.c' object='geoclue-gclue-service-client.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-client.o `test -f 'gclue-service-client.c' || echo '$(srcdir)/'`gclue-service-client.c
-
-geoclue-gclue-service-client.obj: gclue-service-client.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-client.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-client.Tpo -c -o geoclue-gclue-service-client.obj `if test -f 'gclue-service-client.c'; then $(CYGPATH_W) 'gclue-service-client.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-client.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-client.Tpo $(DEPDIR)/geoclue-gclue-service-client.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-client.c' object='geoclue-gclue-service-client.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-client.obj `if test -f 'gclue-service-client.c'; then $(CYGPATH_W) 'gclue-service-client.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-client.c'; fi`
-
-geoclue-gclue-service-location.o: gclue-service-location.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-location.o -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-location.Tpo -c -o geoclue-gclue-service-location.o `test -f 'gclue-service-location.c' || echo '$(srcdir)/'`gclue-service-location.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-location.Tpo $(DEPDIR)/geoclue-gclue-service-location.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-location.c' object='geoclue-gclue-service-location.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-location.o `test -f 'gclue-service-location.c' || echo '$(srcdir)/'`gclue-service-location.c
-
-geoclue-gclue-service-location.obj: gclue-service-location.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-gclue-service-location.obj -MD -MP -MF $(DEPDIR)/geoclue-gclue-service-location.Tpo -c -o geoclue-gclue-service-location.obj `if test -f 'gclue-service-location.c'; then $(CYGPATH_W) 'gclue-service-location.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-location.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-gclue-service-location.Tpo $(DEPDIR)/geoclue-gclue-service-location.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='gclue-service-location.c' object='geoclue-gclue-service-location.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-gclue-service-location.obj `if test -f 'gclue-service-location.c'; then $(CYGPATH_W) 'gclue-service-location.c'; else $(CYGPATH_W) '$(srcdir)/gclue-service-location.c'; fi`
-
-geoclue-geocode-location.o: geocode-location.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-geocode-location.o -MD -MP -MF $(DEPDIR)/geoclue-geocode-location.Tpo -c -o geoclue-geocode-location.o `test -f 'geocode-location.c' || echo '$(srcdir)/'`geocode-location.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-geocode-location.Tpo $(DEPDIR)/geoclue-geocode-location.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geocode-location.c' object='geoclue-geocode-location.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-geocode-location.o `test -f 'geocode-location.c' || echo '$(srcdir)/'`geocode-location.c
-
-geoclue-geocode-location.obj: geocode-location.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -MT geoclue-geocode-location.obj -MD -MP -MF $(DEPDIR)/geoclue-geocode-location.Tpo -c -o geoclue-geocode-location.obj `if test -f 'geocode-location.c'; then $(CYGPATH_W) 'geocode-location.c'; else $(CYGPATH_W) '$(srcdir)/geocode-location.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/geoclue-geocode-location.Tpo $(DEPDIR)/geoclue-geocode-location.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='geocode-location.c' object='geoclue-geocode-location.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(geoclue_CFLAGS) $(CFLAGS) -c -o geoclue-geocode-location.obj `if test -f 'geocode-location.c'; then $(CYGPATH_W) 'geocode-location.c'; else $(CYGPATH_W) '$(srcdir)/geocode-location.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -960,7 +861,7 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(PROGRAMS) $(DATA)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(DATA)
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(libexecdir)" "$(DESTDIR)$(interfacedir)" "$(DESTDIR)$(pkgconfigdir)"; do \
@@ -994,6 +895,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -1002,7 +904,7 @@ maintainer-clean-generic:
 clean: clean-recursive
 
 clean-am: clean-generic clean-libexecPROGRAMS clean-libtool \
-	mostlyclean-am
+	clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 	-rm -rf ./$(DEPDIR)
@@ -1029,8 +931,7 @@ install-dvi: install-dvi-recursive
 install-dvi-am:
 
 install-exec-am: install-libexecPROGRAMS
-	@$(NORMAL_INSTALL)
-	$(MAKE) $(AM_MAKEFLAGS) install-exec-hook
+
 install-html: install-html-recursive
 
 install-html-am:
@@ -1073,20 +974,20 @@ uninstall-am: uninstall-interfaceDATA uninstall-libexecPROGRAMS \
 	uninstall-pkgconfigDATA
 
 .MAKE: $(am__recursive_targets) all check check-am install install-am \
-	install-exec-am install-strip
+	install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am check \
 	check-am check-local clean clean-generic clean-libexecPROGRAMS \
-	clean-libtool cscopelist-am ctags ctags-am distclean \
-	distclean-compile distclean-generic distclean-libtool \
-	distclean-tags distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-hook \
-	install-html install-html-am install-info install-info-am \
-	install-interfaceDATA install-libexecPROGRAMS install-man \
-	install-pdf install-pdf-am install-pkgconfigDATA install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs installdirs-am maintainer-clean \
+	clean-libtool clean-noinstLTLIBRARIES cscopelist-am ctags \
+	ctags-am distclean distclean-compile distclean-generic \
+	distclean-libtool distclean-tags distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-interfaceDATA install-libexecPROGRAMS \
+	install-man install-pdf install-pdf-am install-pkgconfigDATA \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags tags-am uninstall uninstall-am uninstall-interfaceDATA \
@@ -1140,11 +1041,6 @@ test-report perf-report full-report:	${TEST_PROGS}
 .PHONY: test test-report perf-report full-report
 # run make test as part of make check
 check-local: test
-
-install-exec-hook:
-	$(AM_V_GEN)$(SETCAP) cap_sys_ptrace+ep $(DESTDIR)$(libexecdir)/geoclue || \
-	echo "Unable to setcap cap_sys_ptrace+ep $(libexecdir)/geoclue. " \
-	     "Package systems may do this after installation."
 geoclue-interface.c: geoclue-interface.h
 geoclue-interface.h: Makefile.am $(interface_DATA)
 	$(AM_V_GEN)$(GDBUS_CODEGEN) \
@@ -1153,9 +1049,6 @@ geoclue-interface.h: Makefile.am $(interface_DATA)
 		--generate-c-code geoclue-interface		\
     		--generate-docbook=docs				\
 		$(srcdir)/$(interface_DATA)
-update-from-geocode-glib:
-	FILES="$(GEOCODEGLIBFILES)" DIR="$(GEOCODEGLIBDIR)" $(srcdir)/update-from-geocode-glib.sh && changed=true ; \
-	git commit -m "location: Update from geocode-glib" $(GEOCODEGLIBFILES)
 
 -include $(top_srcdir)/git.mk
 

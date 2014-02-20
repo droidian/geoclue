@@ -20,50 +20,76 @@
  * Authors: Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
  */
 
+#include "config.h"
+
 #include <glib/gi18n.h>
 
 #include "gclue-locator.h"
 #include "gclue-ipclient.h"
+#include "public-api/gclue-enum-types.h"
 
-/* This class will be responsible for doing the actual geolocating. */
+#if GCLUE_USE_WIFI_SOURCE
+#include "gclue-wifi.h"
+#endif
 
-G_DEFINE_TYPE (GClueLocator, gclue_locator, G_TYPE_OBJECT)
+#if GCLUE_USE_3G_SOURCE
+#include "gclue-3g.h"
+#endif
+
+#if GCLUE_USE_MODEM_GPS_SOURCE
+#include "gclue-modem-gps.h"
+#endif
+
+/* This class is like a master location source that hides all individual
+ * location sources from rest of the code
+ */
+
+G_DEFINE_TYPE (GClueLocator, gclue_locator, GCLUE_TYPE_LOCATION_SOURCE)
 
 struct _GClueLocatorPrivate
 {
-        GClueIpclient *ipclient;
+        GList *sources;
 
-        GeocodeLocation *location;
-
-        GCancellable *cancellable;
-
-        gulong network_changed_id;
+        GClueAccuracyLevel accuracy_level;
 };
 
 enum
 {
         PROP_0,
-        PROP_LOCATION,
+        PROP_ACCURACY_LEVEL,
         LAST_PROP
 };
 
 static GParamSpec *gParamSpecs[LAST_PROP];
 
 static void
-gclue_locator_stop_sync (GClueLocator *locator);
-
-static void
-gclue_locator_finalize (GObject *object)
+on_location_changed (GObject    *gobject,
+                     GParamSpec *pspec,
+                     gpointer    user_data)
 {
-        GClueLocatorPrivate *priv;
+        GClueLocationSource *locator = GCLUE_LOCATION_SOURCE (user_data);
+        GClueLocationSource *source = GCLUE_LOCATION_SOURCE (gobject);
+        GeocodeLocation *location, *cur_location;
 
-        priv = GCLUE_LOCATOR (object)->priv;
+        cur_location = gclue_location_source_get_location (locator);
+        location = gclue_location_source_get_location (source);
 
-        gclue_locator_stop_sync (GCLUE_LOCATOR (object));
-        g_clear_object (&priv->ipclient);
-        g_clear_object (&priv->location);
+        g_debug ("New location available");
 
-        G_OBJECT_CLASS (gclue_locator_parent_class)->finalize (object);
+        if (cur_location != NULL &&
+            geocode_location_get_distance_from (location, cur_location) <
+            geocode_location_get_accuracy (location) &&
+            geocode_location_get_accuracy (location) >
+            geocode_location_get_accuracy (cur_location)) {
+                /* We only take the new location if either the previous one
+                 * lies outside its accuracy circle or its more or as
+                 * accurate as previous one.
+                 */
+                g_debug ("Ignoring less accurate new location");
+                return;
+        }
+
+        gclue_location_source_set_location (locator, location);
 }
 
 static void
@@ -75,8 +101,8 @@ gclue_locator_get_property (GObject    *object,
         GClueLocator *locator = GCLUE_LOCATOR (object);
 
         switch (prop_id) {
-        case PROP_LOCATION:
-                g_value_set_object (value, locator->priv->location);
+        case PROP_ACCURACY_LEVEL:
+                g_value_set_enum (value, locator->priv->accuracy_level);
                 break;
 
         default:
@@ -90,7 +116,84 @@ gclue_locator_set_property (GObject      *object,
                             const GValue *value,
                             GParamSpec   *pspec)
 {
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+        GClueLocator *locator = GCLUE_LOCATOR (object);
+
+        switch (prop_id) {
+        case PROP_ACCURACY_LEVEL:
+                locator->priv->accuracy_level = g_value_get_enum (value);
+                break;
+
+        default:
+                G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+        }
+}
+
+static void
+gclue_locator_finalize (GObject *gsource)
+{
+        GClueLocator *locator = GCLUE_LOCATOR (gsource);
+        GClueLocatorPrivate *priv = locator->priv;
+
+        g_list_free_full (priv->sources, g_object_unref);
+        priv->sources = NULL;
+
+        G_OBJECT_CLASS (gclue_locator_parent_class)->finalize (gsource);
+}
+
+static void
+gclue_locator_constructed (GObject *object)
+{
+        GClueLocator *locator = GCLUE_LOCATOR (object);
+        GClueLocationSource *submit_source = NULL;
+        GList *node;
+
+        if (locator->priv->accuracy_level >= GCLUE_IPCLIENT_ACCURACY_LEVEL) {
+                GClueIpclient *ipclient = gclue_ipclient_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        ipclient);
+        }
+#if GCLUE_USE_3G_SOURCE
+        if (locator->priv->accuracy_level >= GCLUE_3G_ACCURACY_LEVEL) {
+                GClue3G *source = gclue_3g_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        source);
+        }
+#endif
+#if GCLUE_USE_WIFI_SOURCE
+        if (locator->priv->accuracy_level >= GCLUE_WIFI_ACCURACY_LEVEL) {
+                GClueWifi *wifi = gclue_wifi_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        wifi);
+        }
+#endif
+#if GCLUE_USE_MODEM_GPS_SOURCE
+        if (locator->priv->accuracy_level >= GCLUE_MODEM_GPS_ACCURACY_LEVEL) {
+                GClueModemGPS *gps = gclue_modem_gps_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        gps);
+                submit_source = GCLUE_LOCATION_SOURCE (gps);
+        }
+#endif
+
+        for (node = locator->priv->sources; node != NULL; node = node->next) {
+                GClueLocationSource *src = GCLUE_LOCATION_SOURCE (node->data);
+                GeocodeLocation *location;
+
+                location = gclue_location_source_get_location (src);
+                if (location != NULL)
+                        gclue_location_source_set_location
+                                (GCLUE_LOCATION_SOURCE (locator), location);
+
+                g_signal_connect (G_OBJECT (src),
+                                  "notify::location",
+                                  G_CALLBACK (on_location_changed),
+                                  locator);
+
+                if (submit_source != NULL && GCLUE_IS_WEB_SOURCE (src))
+                        gclue_web_source_set_submit_source
+                                (GCLUE_WEB_SOURCE (src),
+                                 submit_source);
+        }
 }
 
 static void
@@ -99,19 +202,22 @@ gclue_locator_class_init (GClueLocatorClass *klass)
         GObjectClass *object_class;
 
         object_class = G_OBJECT_CLASS (klass);
-        object_class->finalize = gclue_locator_finalize;
         object_class->get_property = gclue_locator_get_property;
         object_class->set_property = gclue_locator_set_property;
+        object_class->finalize = gclue_locator_finalize;
+        object_class->constructed = gclue_locator_constructed;
         g_type_class_add_private (object_class, sizeof (GClueLocatorPrivate));
 
-        gParamSpecs[PROP_LOCATION] = g_param_spec_object ("location",
-                                                          "Location",
-                                                          "Location",
-                                                          GEOCODE_TYPE_LOCATION,
-                                                          G_PARAM_READABLE);
+        gParamSpecs[PROP_ACCURACY_LEVEL] = g_param_spec_enum ("accuracy-level",
+                                                              "AccuracyLevel",
+                                                              "Accuracy level",
+                                                              GCLUE_TYPE_ACCURACY_LEVEL,
+                                                              GCLUE_ACCURACY_LEVEL_CITY,
+                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_CONSTRUCT_ONLY);
         g_object_class_install_property (object_class,
-                                         PROP_LOCATION,
-                                         gParamSpecs[PROP_LOCATION]);
+                                         PROP_ACCURACY_LEVEL,
+                                         gParamSpecs[PROP_ACCURACY_LEVEL]);
 }
 
 static void
@@ -121,184 +227,21 @@ gclue_locator_init (GClueLocator *locator)
                 G_TYPE_INSTANCE_GET_PRIVATE (locator,
                                             GCLUE_TYPE_LOCATOR,
                                             GClueLocatorPrivate);
-        locator->priv->cancellable = g_cancellable_new ();
 }
 
 GClueLocator *
-gclue_locator_new (void)
+gclue_locator_new (GClueAccuracyLevel level)
 {
-        return g_object_new (GCLUE_TYPE_LOCATOR, NULL);
+        return g_object_new (GCLUE_TYPE_LOCATOR,
+                             "accuracy-level", level,
+                             NULL);
 }
 
-static void
-gclue_locator_update_location (GClueLocator    *locator,
-                               GeocodeLocation *location)
+GClueAccuracyLevel
+gclue_locator_get_accuracy_level (GClueLocator *locator)
 {
-        GClueLocatorPrivate *priv = locator->priv;
+        g_return_val_if_fail (GCLUE_IS_LOCATOR (locator),
+                              GCLUE_ACCURACY_LEVEL_COUNTRY);
 
-        if (priv->location == NULL)
-                priv->location = g_object_new (GEOCODE_TYPE_LOCATION, NULL);
-
-        g_object_set (priv->location,
-                      "latitude", geocode_location_get_latitude (location),
-                      "longitude", geocode_location_get_longitude (location),
-                      "accuracy", geocode_location_get_accuracy (location),
-                      "description", geocode_location_get_description (location),
-                      NULL);
-
-        g_object_notify (G_OBJECT (locator), "location");
-}
-
-static void
-on_ipclient_search_ready (GObject      *source_object,
-                          GAsyncResult *res,
-                          gpointer      user_data)
-{
-        GClueIpclient *ipclient = GCLUE_IPCLIENT (source_object);
-        GClueLocator *locator = GCLUE_LOCATOR (user_data);
-        GeocodeLocation *location;
-        GError *error = NULL;
-
-        location = gclue_ipclient_search_finish (ipclient, res, &error);
-        if (location == NULL) {
-                if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-                        g_warning ("Error fetching location from geoip server: %s",
-                                   error->message);
-                g_error_free (error);
-                return;
-        }
-
-        g_debug ("New location available");
-        gclue_locator_update_location (locator, location);
-        g_object_unref (location);
-}
-
-static void
-on_network_changed (GNetworkMonitor *monitor,
-                    gboolean         available,
-                    gpointer         user_data)
-{
-        GClueLocator *locator = GCLUE_LOCATOR (user_data);
-
-        if (!available) {
-                g_debug ("Network unreachable");
-                return;
-        }
-        g_debug ("Network changed");
-
-        g_cancellable_cancel (locator->priv->cancellable);
-        g_cancellable_reset (locator->priv->cancellable);
-        gclue_ipclient_search_async (locator->priv->ipclient,
-                                     locator->priv->cancellable,
-                                     on_ipclient_search_ready,
-                                     locator);
-}
-
-void
-gclue_locator_start (GClueLocator        *locator,
-                     GCancellable        *cancellable,
-                     GAsyncReadyCallback  callback,
-                     gpointer             user_data)
-{
-        GSimpleAsyncResult *simple;
-        GNetworkMonitor *monitor;
-
-        g_return_if_fail (GCLUE_IS_LOCATOR (locator));
-
-        if (locator->priv->network_changed_id)
-                return; /* Already started */
-
-        locator->priv->ipclient = gclue_ipclient_new ();
-
-        monitor = g_network_monitor_get_default ();
-        locator->priv->network_changed_id =
-                g_signal_connect (monitor,
-                                  "network-changed",
-                                  G_CALLBACK (on_network_changed),
-                                  locator);
-
-        if (g_network_monitor_get_network_available (monitor))
-                on_network_changed (monitor, TRUE, locator);
-
-        simple = g_simple_async_result_new (G_OBJECT (locator),
-                                            callback,
-                                            user_data,
-                                            gclue_locator_start);
-        g_simple_async_result_complete_in_idle (simple);
-
-        g_object_unref (simple);
-}
-
-gboolean
-gclue_locator_start_finish (GClueLocator  *locator,
-                            GAsyncResult  *res,
-                            GError       **error)
-{
-        GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-
-        g_return_val_if_fail (GCLUE_IS_LOCATOR (locator), FALSE);
-        g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == gclue_locator_start);
-
-        if (g_simple_async_result_propagate_error (simple, error))
-                return FALSE;
-
-        return TRUE;
-}
-
-static void
-gclue_locator_stop_sync (GClueLocator *locator)
-{
-        if (locator->priv->network_changed_id) {
-                g_signal_handler_disconnect (g_network_monitor_get_default (),
-                                             locator->priv->network_changed_id);
-                locator->priv->network_changed_id = 0;
-        }
-
-        g_cancellable_cancel (locator->priv->cancellable);
-        g_cancellable_reset (locator->priv->cancellable);
-        g_clear_object (&locator->priv->ipclient);
-}
-
-void
-gclue_locator_stop (GClueLocator        *locator,
-                    GCancellable        *cancellable,
-                    GAsyncReadyCallback  callback,
-                    gpointer             user_data)
-{
-        GSimpleAsyncResult *simple;
-
-        g_return_if_fail (GCLUE_IS_LOCATOR (locator));
-
-        gclue_locator_stop_sync (locator);
-
-        simple = g_simple_async_result_new (G_OBJECT (locator),
-                                            callback,
-                                            user_data,
-                                            gclue_locator_stop);
-        g_simple_async_result_complete_in_idle (simple);
-
-        g_object_unref (simple);
-}
-
-gboolean
-gclue_locator_stop_finish (GClueLocator  *locator,
-                            GAsyncResult  *res,
-                            GError       **error)
-{
-        GSimpleAsyncResult *simple = G_SIMPLE_ASYNC_RESULT (res);
-
-        g_return_val_if_fail (GCLUE_IS_LOCATOR (locator), FALSE);
-        g_warn_if_fail (g_simple_async_result_get_source_tag (simple) == gclue_locator_stop);
-
-        if (g_simple_async_result_propagate_error (simple, error))
-                return FALSE;
-
-        return TRUE;
-}
-
-GeocodeLocation * gclue_locator_get_location (GClueLocator *locator)
-{
-        g_return_val_if_fail (GCLUE_IS_LOCATOR (locator), NULL);
-
-        return locator->priv->location;
+        return locator->priv->accuracy_level;
 }

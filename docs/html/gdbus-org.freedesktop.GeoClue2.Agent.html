@@ -24,6 +24,8 @@
 <a href="#gdbus-org.freedesktop.GeoClue2.Agent.synopsis" class="shortcut">Top</a>
                    | 
                   <a href="#gdbus-org.freedesktop.GeoClue2.Agent.description" class="shortcut">Description</a>
+                   | 
+                  <a href="#gdbus-org.freedesktop.GeoClue2.Agent.properties" class="shortcut">Properties</a>
 </td></tr>
 </table>
 <div class="refentry">
@@ -39,7 +41,15 @@
 <h2>Methods</h2>
 <pre class="synopsis">
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp" title="The AuthorizeApp() method">AuthorizeApp</a> (IN  s desktop_id,
-              OUT b authorized);
+              IN  u req_accuracy_level,
+              OUT b authorized,
+              OUT u allowed_accuracy_level);
+</pre>
+</div>
+<div class="refsect1">
+<a name="id-1.3.3.4"></a><h2>Properties</h2>
+<pre class="synopsis">
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel" title='The "MaxAccuracyLevel" property'>MaxAccuracyLevel</a>  readable   u
 </pre>
 </div>
 <div class="refsect1">
@@ -55,7 +65,9 @@
 <a name="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"></a><h3>The AuthorizeApp() method</h3>
 <pre class="programlisting">
 AuthorizeApp (IN  s desktop_id,
-              OUT b authorized);
+              IN  u req_accuracy_level,
+              OUT b authorized,
+              OUT u allowed_accuracy_level);
 </pre>
 <p>        This is the method that will be called by geoclue to get applications
         authorized to be given location information.
@@ -71,11 +83,33 @@ AuthorizeApp (IN  s desktop_id,
 <td><p>The desktop file id (the basename of the desktop file) of the application requesting location information.</p></td>
 </tr>
 <tr>
+<td><p><span class="term"><code class="literal">IN u <em class="parameter"><code>req_accuracy_level</code></em></code>:</span></p></td>
+<td><p>The level of location accuracy requested by client, as <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a>.</p></td>
+</tr>
+<tr>
 <td><p><span class="term"><code class="literal">OUT b <em class="parameter"><code>authorized</code></em></code>:</span></p></td>
 <td><p>Return value indicating if application should be given location information or not.</p></td>
 </tr>
+<tr>
+<td><p><span class="term"><code class="literal">OUT u <em class="parameter"><code>allowed_accuracy_level</code></em></code>:</span></p></td>
+<td><p>The level of location accuracy allowed for client, as <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a>.</p></td>
+</tr>
 </tbody>
 </table></div>
+</div>
+</div>
+<div class="refsect1">
+<a name="gdbus-properties-org.freedesktop.GeoClue2.Agent"></a><h2>Property Details</h2>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel"></a><h3>The "MaxAccuracyLevel" property</h3>
+<pre class="programlisting">
+MaxAccuracyLevel  readable   u
+</pre>
+<p>        The global maximum level of accuracy allowed for all clients. Since
+        agents are per-user, this can be different for each user. See
+        <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a> for
+        possible values.
+</p>
 </div>
 </div>
 </div>

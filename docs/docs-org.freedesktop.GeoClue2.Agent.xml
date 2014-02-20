@@ -9,9 +9,17 @@
     <title role="synopsis.title">Methods</title>
     <synopsis>
 <link linkend="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp">AuthorizeApp</link> (IN  s desktop_id,
-              OUT b authorized);
+              IN  u req_accuracy_level,
+              OUT b authorized,
+              OUT u allowed_accuracy_level);
 </synopsis>
   </refsynopsisdiv>
+  <refsect1 role="properties">
+    <title role="properties.title">Properties</title>
+    <synopsis>
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel">MaxAccuracyLevel</link>  readable   u
+</synopsis>
+  </refsect1>
 <refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Agent">
   <title role="desc.title">Description</title>
   <para>      This is the interface all application-authorizing agents must implement.
@@ -26,7 +34,9 @@
   <indexterm zone="gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"><primary sortas="Agent.AuthorizeApp">org.freedesktop.GeoClue2.Agent.AuthorizeApp()</primary></indexterm>
 <programlisting>
 AuthorizeApp (IN  s desktop_id,
-              OUT b authorized);
+              IN  u req_accuracy_level,
+              OUT b authorized,
+              OUT u allowed_accuracy_level);
 </programlisting>
 <para>        This is the method that will be called by geoclue to get applications
         authorized to be given location information.
@@ -37,10 +47,33 @@ AuthorizeApp (IN  s desktop_id,
   <listitem><para>The desktop file id (the basename of the desktop file) of the application requesting location information.</para></listitem>
 </varlistentry>
 <varlistentry>
+  <term><literal>IN u <parameter>req_accuracy_level</parameter></literal>:</term>
+  <listitem><para>The level of location accuracy requested by client, as <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.</para></listitem>
+</varlistentry>
+<varlistentry>
   <term><literal>OUT b <parameter>authorized</parameter></literal>:</term>
   <listitem><para>Return value indicating if application should be given location information or not.</para></listitem>
 </varlistentry>
+<varlistentry>
+  <term><literal>OUT u <parameter>allowed_accuracy_level</parameter></literal>:</term>
+  <listitem><para>The level of location accuracy allowed for client, as <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link>.</para></listitem>
+</varlistentry>
 </variablelist>
+</refsect2>
+</refsect1>
+<refsect1 role="details" id="gdbus-properties-org.freedesktop.GeoClue2.Agent">
+  <title role="details.title">Property Details</title>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel">
+  <title>The "MaxAccuracyLevel" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel"><primary sortas="Agent:MaxAccuracyLevel">org.freedesktop.GeoClue2.Agent:MaxAccuracyLevel</primary></indexterm>
+<programlisting>
+MaxAccuracyLevel  readable   u
+</programlisting>
+<para>        The global maximum level of accuracy allowed for all clients. Since
+        agents are per-user, this can be different for each user. See
+        <link linkend="GClueAccuracyLevel">GClueAccuracyLevel</link> for
+        possible values.
+</para>
 </refsect2>
 </refsect1>
 </refentry>

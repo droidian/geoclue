@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.0],
+        [2.1.4],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -14,6 +14,8 @@ AM_INIT_AUTOMAKE([1.11 dist-xz no-dist-gzip tar-ustar foreign -Wall -Werror -Wno
 AM_MAINTAINER_MODE([enable])
 
 AM_SILENT_RULES([yes])
+
+AC_SUBST([GEOCLUE_API_VERSION], [2.0])
 
 # Check for programs
 AC_PROG_CC
@@ -39,6 +41,9 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext d
 GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
 GEOIP_MIN_VERSION=1.5.1
+LIBNM_GLIB_MIN_VERSION=0.9.8.0
+LIBMM_GLIB_MIN_VERSION=1.0
+LIBXML_MIN_VERSION=2.7
 
 AC_CHECK_LIB([m],[sin])
 
@@ -53,6 +58,7 @@ PKG_CHECK_MODULES(GEOCLUE, [
   gio-unix-2.0 >= $GLIB_MIN_VERSION
   json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
   libsoup-2.4
+  libxml-2.0 >= $LIBXML_MIN_VERSION
 ])
 
 # Geoip server
@@ -98,6 +104,58 @@ else
 fi
 AM_CONDITIONAL([BUILD_GEOIP_SERVER], [test "x$build_geoip_server" = "xyes"])
 
+# 3G source
+AC_ARG_ENABLE(3g-source,
+              AS_HELP_STRING([--disable-3g-source], [Disable 3G backend (requires ModemManager)]),
+              [build_3g_source=$enableval], [build_3g_source=yes])
+if test "$build_3g_source" = "yes"; then
+  build_modem_source=yes
+  AC_DEFINE([GCLUE_USE_3G_SOURCE], [1], [Build 3G source?])
+else
+  AC_DEFINE([GCLUE_USE_3G_SOURCE], [0], [Build 3G source?])
+fi
+AM_CONDITIONAL([BUILD_3G_SOURCE], [test "$build_3g_source" = "yes"])
+
+# GPS source
+AC_ARG_ENABLE(modem-gps-source,
+              AS_HELP_STRING([--disable-modem-gps-source], [Disable modem GPS backend (requires ModemManager)]),
+              [build_modem_gps_source=$enableval], [build_modem_gps_source=yes])
+if test "$build_modem_gps_source" = "yes"; then
+  build_modem_source=yes
+  AC_DEFINE([GCLUE_USE_MODEM_GPS_SOURCE], [1], [Build modem GPS source?])
+else
+  AC_DEFINE([GCLUE_USE_MODEM_GPS_SOURCE], [0], [Build modem GPS source?])
+fi
+AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "$build_modem_gps_source" = "yes"])
+
+# Wifi source
+AC_ARG_ENABLE(wifi-source,
+              AS_HELP_STRING([--disable-wifi-source], [Disable Wifi backend (requires ModemManager)]),
+              [build_wifi_source=$enableval], [build_wifi_source=yes])
+if test "$build_wifi_source" = "yes"; then
+  require_networkmanager=yes
+  AC_DEFINE([GCLUE_USE_WIFI_SOURCE], [1], [Build Wifi source?])
+else
+  AC_DEFINE([GCLUE_USE_WIFI_SOURCE], [0], [Build Wifi source?])
+fi
+AM_CONDITIONAL([BUILD_WIFI_SOURCE], [test "$build_wifi_source" = "yes"])
+
+# Modem source is used in common by GPS and 3G sources
+if test "$build_modem_source" = "yes"; then
+  require_modemmanager=yes
+fi
+AM_CONDITIONAL([BUILD_MODEM_SOURCE], [test "$build_modem_source" = "yes"])
+
+# Check for ModemManager if one of the sources requires it
+if test "$require_modemmanager" = "yes"; then
+  PKG_CHECK_MODULES(ModemManager, mm-glib >= $LIBMM_GLIB_MIN_VERSION)
+fi
+
+# Check for NetworkManager if one of the sources requires it
+if test "$require_networkmanager" = "yes"; then
+  PKG_CHECK_MODULES(NetworkManager, libnm-glib >= $LIBNM_GLIB_MIN_VERSION)
+fi
+
 # Demo agent
 AC_ARG_ENABLE(demo-agent,
               AS_HELP_STRING([--enable-demo-agent=yes|no],
@@ -116,18 +174,6 @@ fi
 AM_CONDITIONAL([BUILD_DEMO_AGENT], [test "x$enable_demo_agent" = "xyes"])
 
 GNOME_COMPILE_WARNINGS([maximum])
-
-dnl Require agent?
-AC_ARG_ENABLE(require-auth,
-	      AS_HELP_STRING([--enable-require-auth=yes|no],
-                             [Require apps to be authorized by agent (default=no)]),
-              [require_auth=$enableval],
-              [require_auth=no])
-if test "x$require_auth" = "xyes"; then
-    AC_DEFINE([REQUIRE_AUTH], [1], [Require apps to be authorized by agent?])
-else
-    AC_DEFINE([REQUIRE_AUTH], [0], [Require apps to be authorized by agent?])
-fi
 
 dnl Debugging
 AC_ARG_ENABLE(debug,
@@ -177,15 +223,17 @@ if test "x$with_systemdsystemunitdir" != "xno"; then
 fi
 AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$systemdsystemunitdir"])
 
-AC_PATH_PROG([REALPATH],[realpath])
-
-AC_PATH_PROG([SETCAP],[setcap])
+GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
+AC_SUBST(GLIB_MKENUMS)
 
 AC_CONFIG_FILES([
   Makefile
+  build-aux/Makefile
   src/Makefile
-  src/geoclue-2.0.pc
+  src/geoclue-$GEOCLUE_API_VERSION.pc:src/geoclue.pc.in
   src/agent/Makefile
+  src/geocode-glib/Makefile
+  src/public-api/Makefile
   src/geoip-server/Makefile
   po/Makefile.in
   data/org.freedesktop.GeoClue2.conf
@@ -206,4 +254,8 @@ AC_MSG_NOTICE([
         prefix:                   ${prefix}
         c compiler:               ${CC} ${CFLAGS}
         systemdsystemunitdir:     ${systemdsystemunitdir}
+
+        3G source:                ${build_3g_source}
+        Wifi source:              ${build_wifi_source}
+        Modem GPS source:         ${build_modem_gps_source}
 ])

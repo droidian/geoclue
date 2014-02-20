@@ -24,7 +24,7 @@
 #define GCLUE_SERVICE_LOCATION_H
 
 #include <glib-object.h>
-#include "geocode-location.h"
+#include "geocode-glib/geocode-location.h"
 #include "gclue-client-info.h"
 #include "geoclue-interface.h"
 

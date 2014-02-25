@@ -1,12 +1,19 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+ifneq ($(DEB_BUILD_ARCH_OS),linux)
+  MM_NM_FLAGS := --disable-3g-source \
+                 --disable-modem-gps-source \
+                 --disable-wifi-source
+endif
+
 override_dh_auto_configure:
 	dh_auto_configure -- --libdir=/usr/lib \
                              --libexec=/usr/lib/geoclue-2.0 \
                              --with-dbus-service-user=geoclue \
                              --enable-geoip-server=no \
-                             --with-systemdsystemunitdir=/lib/systemd/system
+                             --with-systemdsystemunitdir=/lib/systemd/system \
+                             ${MM_NM_FLAGS}
 
 override_dh_auto_test:
 	# testsuite fails on missing latitude (et.al)

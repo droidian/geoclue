@@ -275,6 +275,9 @@ gclue_wifi_init (GClueWifi *wifi)
                           wifi);
 
         devices = nm_client_get_devices (wifi->priv->client);
+        if (devices == NULL)
+                return;
+
         for (i = 0; i < devices->len; i++) {
                 NMDevice *device = g_ptr_array_index (devices, i);
                 if (NM_IS_DEVICE_WIFI (device)) {

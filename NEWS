@@ -1,3 +1,17 @@
+2.1.5
+=====
+
+- Add a NULL check to fix a crasher.
+- Setup D-Bus policy to be able to access NetworManager API.
+- Expected agent object path now static. This breaks agent interface but it was
+  needed to fix the D-Bus policy.
+- Fix issue of us giving every connection access to every property on the system
+  bus.
+
+All contributors to this release:
+
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.1.4
 =====
 

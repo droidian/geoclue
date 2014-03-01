@@ -22,5 +22,11 @@ override_dh_auto_test:
 	# does not include.
 	dh_auto_test || true
 
+override_dh_auto_install:
+	dh_auto_install
+	rm -f $(CURDIR)/debian/geoclue-2.0/usr/share/applications/geoclue-demo-agent.desktop
+	mv $(CURDIR)/debian/geoclue-2.0/usr/share/geoclue-2.0/demos \
+		$(CURDIR)/debian/geoclue-2.0/usr/lib/geoclue-2.0/demos
+
 %:
 	dh $@ --with autotools-dev,autoreconf

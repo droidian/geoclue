@@ -285,7 +285,7 @@ out:
         add_agent_data_free (data);
 }
 
-#define AGENT_PATH "/org/freedesktop/GeoClue2/Agent/%u"
+#define AGENT_PATH "/org/freedesktop/GeoClue2/Agent"
 
 static void
 on_agent_info_new_ready (GObject      *source_object,
@@ -294,7 +294,6 @@ on_agent_info_new_ready (GObject      *source_object,
 {
         AddAgentData *data = (AddAgentData *) user_data;
         GError *error = NULL;
-        char *path;
         GClueConfig *config;
 
         data->info = gclue_client_info_new_finish (res, &error);
@@ -322,16 +321,13 @@ on_agent_info_new_ready (GObject      *source_object,
                 return;
         }
 
-        path = g_strdup_printf (AGENT_PATH,
-                                gclue_client_info_get_user_id (data->info));
         gclue_agent_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
                                        G_DBUS_PROXY_FLAGS_NONE,
                                        gclue_client_info_get_bus_name (data->info),
-                                       path,
+                                       AGENT_PATH,
                                        NULL,
                                        on_agent_proxy_ready,
                                        user_data);
-        g_free (path);
 }
 
 static gboolean

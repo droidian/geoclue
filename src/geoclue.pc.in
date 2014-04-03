@@ -3,8 +3,8 @@ exec_prefix=@exec_prefix@
 datarootdir=@datarootdir@
 datadir=@datadir@
 
-dbus_interface=${datadir}/geoclue-2.0/geoclue-interface.xml
-agent_dbus_interface=${datadir}/geoclue-2.0/geoclue-agent-interface.xml
+dbus_interface=${datadir}/dbus-1/interfaces/org.freedesktop.GeoClue2.xml
+agent_dbus_interface=${datadir}/dbus-1/interfaces/org.freedesktop.GeoClue2.Agent.xml
 
 Name: Geoclue
 Description: The Geoinformation Service

@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.5],
+        [2.1.7],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -20,7 +20,6 @@ AC_SUBST([GEOCLUE_API_VERSION], [2.0])
 # Check for programs
 AC_PROG_CC
 AM_PROG_CC_C_O
-AC_PROG_CXX
 AM_PROG_AR
 AC_CHECK_TOOL([DESKTOP_FILE_VALIDATE], [desktop-file-validate], [/bin/true])
 

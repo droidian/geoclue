@@ -1,4 +1,4 @@
-demodir = $(datadir)/geoclue-2.0/demos
+demodir = $(libexecdir)/geoclue-2.0/demos
 
 demo_PROGRAMS = where-am-i
 
@@ -15,10 +15,10 @@ apps_DATA = geoclue-where-am-i.desktop \
 @INTLTOOL_DESKTOP_RULE@
 
 geoclue-where-am-i.desktop.in: geoclue-where-am-i.desktop.in.in
-	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
+	$(AM_V_GEN) sed -e "s|[@]libexecdir@|$(libexecdir)|g" $< > $@
 
 geoclue-demo-agent.desktop.in: geoclue-demo-agent.desktop.in.in
-	$(AM_V_GEN) sed -e "s|[@]datadir@|$(datadir)|g" $< > $@
+	$(AM_V_GEN) sed -e "s|[@]libexecdir@|$(libexecdir)|g" $< > $@
 
 if BUILD_DEMO_AGENT
 demo_PROGRAMS += agent

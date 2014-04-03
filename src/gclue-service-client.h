@@ -64,6 +64,7 @@ GClueServiceClient * gclue_service_client_new             (GClueClientInfo *info
                                                            GError         **error);
 const char *         gclue_service_client_get_path        (GClueServiceClient *client);
 GClueClientInfo *    gclue_service_client_get_client_info (GClueServiceClient *client);
+gboolean             gclue_service_client_get_active      (GClueServiceClient *client);
 
 G_END_DECLS
 

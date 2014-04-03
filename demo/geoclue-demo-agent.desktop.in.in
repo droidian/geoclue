@@ -2,7 +2,7 @@
 _Name=Geoclue Demo agent
 _GenericName=Demo geoclue agent
 _Keywords=geolocation;
-Exec=@datadir@/geoclue-2.0/demos/where-am-i
+Exec=@libexecdir@/geoclue-2.0/demos/agent
 Icon=mark-location-symbolic
 NoDisplay=true
 Terminal=false

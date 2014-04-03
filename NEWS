@@ -1,3 +1,24 @@
+2.1.7
+=====
+
+- 'InUse' property now only affected by active clients. This fixes the issue of
+  gnome-shell incorrectly showing 'geolocation in use' icon.
+- Move DBus interface files to their canonical location:
+  /usr/share/dbus-1/interfaces/.
+- Drop redundant check for the C++ compiler in configure script.
+- Demo agent now prints 'geolocation in use' info.
+
+All contributors to this release:
+
+Kalev Lember <kalevlember@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
+2.1.6
+=====
+
+- Correct binary path is demo's desktop file.
+- Move demo apps from /usr/share to /usr/libexec.
+
 2.1.5
 =====
 

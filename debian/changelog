@@ -1,3 +1,10 @@
+geoclue-2.0 (2.1.7-1) unstable; urgency=medium
+
+  * [a9fca2b3] Imported Upstream version 2.1.7
+  * [fec0846e] Fix the path for the demos again
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 03 Apr 2014 22:25:54 +0200
+
 geoclue-2.0 (2.1.5-1) experimental; urgency=medium
 
   * [5870445e] Imported Upstream version 2.1.5

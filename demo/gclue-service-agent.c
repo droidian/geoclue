@@ -160,6 +160,43 @@ on_add_agent_ready (GObject      *source_object,
 }
 
 static void
+print_in_use_info (GDBusProxy *manager_proxy)
+{
+        GVariant *variant;
+
+        variant = g_dbus_proxy_get_cached_property (manager_proxy, "InUse");
+
+        if (g_variant_get_boolean (variant))
+                g_print (_("Geolocation service in use\n"));
+        else
+                g_print (_("Geolocation service not in use\n"));
+}
+
+static void
+on_manager_props_changed (GDBusProxy *manager_proxy,
+                          GVariant   *changed_properties,
+                          GStrv       invalidated_properties,
+                          gpointer    user_data)
+{
+        GVariantIter *iter;
+        GVariant *value;
+        gchar *key;
+
+        if (g_variant_n_children (changed_properties) < 0)
+                return;
+
+        g_variant_get (changed_properties, "a{sv}", &iter);
+        while (g_variant_iter_loop (iter, "{&sv}", &key, &value)) {
+                if (strcmp (key, "InUse") != 0)
+                        continue;
+
+                print_in_use_info (manager_proxy);
+                break;
+        }
+        g_variant_iter_free (iter);
+}
+
+static void
 on_manager_proxy_ready (GObject      *source_object,
                         GAsyncResult *res,
                         gpointer      user_data)
@@ -188,6 +225,11 @@ on_manager_proxy_ready (GObject      *source_object,
                            g_task_get_cancellable (task),
                            on_add_agent_ready,
                            task);
+        print_in_use_info (proxy);
+        g_signal_connect (proxy,
+                          "g-properties-changed",
+                          G_CALLBACK (on_manager_props_changed),
+                          agent);
 }
 
 static void

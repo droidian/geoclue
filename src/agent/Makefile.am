@@ -1,7 +1,7 @@
 include $(top_srcdir)/Makefile.decl
 
-interfacedir = $(datadir)/geoclue-2.0
-interface_DATA = geoclue-agent-interface.xml
+interfacedir = $(datadir)/dbus-1/interfaces
+interface_DATA = org.freedesktop.GeoClue2.Agent.xml
 
 docs-org.freedesktop.GeoClue2.Agent.xml: Makefile.am $(interface_DATA)
 	$(AM_V_GEN)$(GDBUS_CODEGEN) \

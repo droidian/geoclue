@@ -8,8 +8,8 @@ if BUILD_GEOIP_SERVER
 SUBDIRS += geoip-server
 endif # BUILD_GEOIP_SERVER
 
-interfacedir = $(datadir)/geoclue-$(GEOCLUE_API_VERSION)
-interface_DATA = geoclue-interface.xml
+interfacedir = $(datadir)/dbus-1/interfaces
+interface_DATA = org.freedesktop.GeoClue2.xml
 
 dbus_built_sources = geoclue-interface.c geoclue-interface.h
 geoclue-interface.c: geoclue-interface.h

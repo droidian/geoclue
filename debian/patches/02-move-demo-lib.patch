@@ -7,7 +7,7 @@ Author: Laurent Bigonville <bigon@debian.org>
  _GenericName=Demo geolocation application
  _Comment=Find your current location
  _Keywords=geolocation;
--Exec=@datadir@/geoclue-2.0/demos/where-am-i
+-Exec=@libexecdir@/geoclue-2.0/demos/where-am-i
 +Exec=/usr/lib/geoclue-2.0/demos/where-am-i
  Icon=mark-location-symbolic
  NoDisplay=true

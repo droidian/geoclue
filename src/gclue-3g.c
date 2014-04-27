@@ -85,14 +85,14 @@ gclue_3g_finalize (GObject *g3g)
         GClue3G *source = (GClue3G *) g3g;
         GClue3GPrivate *priv = source->priv;
 
+        G_OBJECT_CLASS (gclue_3g_parent_class)->finalize (g3g);
+
         cancel_pending_query (source);
 
         g_clear_object (&priv->soup_session);
         g_cancellable_cancel (priv->cancellable);
         g_clear_object (&priv->cancellable);
         g_clear_object (&priv->location_3gpp);
-
-        G_OBJECT_CLASS (gclue_3g_parent_class)->finalize (g3g);
 }
 
 static void
@@ -345,6 +345,9 @@ on_get_3gpp_ready (GObject      *source_object,
                 g_error_free (error);
                 return;
         }
+
+        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source)))
+                return;
 
         if (location_3gpp == NULL) {
                 g_debug ("No 3GPP");

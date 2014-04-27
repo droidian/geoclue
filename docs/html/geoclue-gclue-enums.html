@@ -2,32 +2,27 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>gclue-enums</title>
+<title>Geoclue Reference Manual: gclue-enums</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="ref-dbus.html" title="D-Bus API Reference">
 <link rel="prev" href="gdbus-org.freedesktop.GeoClue2.Location.html" title="org.freedesktop.GeoClue2.Location">
 <link rel="next" href="ref-agent-dbus.html" title="Agent D-Bus API Reference">
-<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
-<tr valign="middle">
-<td><a accesskey="p" href="gdbus-org.freedesktop.GeoClue2.Location.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
-<td><a accesskey="u" href="ref-dbus.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
-<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
-<th width="100%" align="center">Geoclue Reference Manual</th>
-<td><a accesskey="n" href="ref-agent-dbus.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
-</tr>
-<tr><td colspan="5" class="shortcuts">
-<a href="#geoclue-gclue-enums.synopsis" class="shortcut">Top</a>
-                   | 
-                  <a href="#geoclue-gclue-enums.description" class="shortcut">Description</a>
-                   | 
-                  <a href="#geoclue-gclue-enums.object-hierarchy" class="shortcut">Object Hierarchy</a>
-</td></tr>
-</table>
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
+                  <a href="#geoclue-gclue-enums.description" class="shortcut">Description</a></span><span id="nav_hierarchy"> <span class="dim">|</span> 
+                  <a href="#geoclue-gclue-enums.object-hierarchy" class="shortcut">Object Hierarchy</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ref-dbus.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="gdbus-org.freedesktop.GeoClue2.Location.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="ref-agent-dbus.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
 <div class="refentry">
 <a name="geoclue-gclue-enums"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
@@ -35,18 +30,25 @@
 <h2><span class="refentrytitle"><a name="geoclue-gclue-enums.top_of_page"></a>gclue-enums</span></h2>
 <p>gclue-enums</p>
 </td>
-<td valign="top" align="right"></td>
+<td class="gallery_image" valign="top" align="right"></td>
 </tr></table></div>
-<div class="refsynopsisdiv">
-<a name="geoclue-gclue-enums.synopsis"></a><h2>Synopsis</h2>
-<a name="GClueAccuracyLevel"></a><pre class="synopsis">enum                <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel-enum" title="enum GClueAccuracyLevel">GClueAccuracyLevel</a>;
-</pre>
+<div class="refsect1">
+<a name="geoclue-gclue-enums.other"></a><h2>Types and Values</h2>
+<div class="informaltable"><table width="100%" border="0">
+<colgroup>
+<col width="150px" class="name">
+<col class="description">
+</colgroup>
+<tbody><tr>
+<td class="datatype_keyword">enum</td>
+<td class="function_name"><a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel" title="enum GClueAccuracyLevel">GClueAccuracyLevel</a></td>
+</tr></tbody>
+</table></div>
 </div>
 <div class="refsect1">
 <a name="geoclue-gclue-enums.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="synopsis">
-  GEnum
-   +----GClueAccuracyLevel
+<pre class="screen">    GEnum
+    <span class="lineart">╰──</span> GClueAccuracyLevel
 </pre>
 </div>
 <div class="refsect1">
@@ -55,59 +57,72 @@
 </p>
 </div>
 <div class="refsect1">
-<a name="geoclue-gclue-enums.details"></a><h2>Details</h2>
+<a name="geoclue-gclue-enums.functions_details"></a><h2>Functions</h2>
+</div>
+<div class="refsect1">
+<a name="geoclue-gclue-enums.other_details"></a><h2>Types and Values</h2>
 <div class="refsect2">
-<a name="GClueAccuracyLevel-enum"></a><h3>enum GClueAccuracyLevel</h3>
-<pre class="programlisting">typedef enum {
-/*&lt; underscore_name=gclue_accuracy_level&gt;*/
-        GCLUE_ACCURACY_LEVEL_COUNTRY = 1,
-        GCLUE_ACCURACY_LEVEL_CITY = 4,
-        GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD = 5,
-        GCLUE_ACCURACY_LEVEL_STREET = 6,
-        GCLUE_ACCURACY_LEVEL_EXACT = 8,
-} GClueAccuracyLevel;
-</pre>
-<p>
-Used to specify level of accuracy requested by, or allowed for a client.
-</p>
-<div class="variablelist"><table border="0" class="variablelist">
+<a name="GClueAccuracyLevel"></a><h3>enum GClueAccuracyLevel</h3>
+<p>Used to specify level of accuracy requested by, or allowed for a client.</p>
+<div class="refsect3">
+<a name="id-1.2.6.7.2.4"></a><h4>Members</h4>
+<div class="informaltable"><table width="100%" border="0">
 <colgroup>
-<col align="left" valign="top">
-<col>
+<col width="300px" class="enum_members_name">
+<col class="enum_members_description">
+<col width="200px" class="enum_members_annotations">
 </colgroup>
 <tbody>
 <tr>
-<td><p><a name="GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"></a><span class="term"><code class="literal">GCLUE_ACCURACY_LEVEL_COUNTRY</code></span></p></td>
-<td>Country-level accuracy.
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-NONE:CAPS"></a>GCLUE_ACCURACY_LEVEL_NONE</p></td>
+<td class="enum_member_description">
+<p>Accuracy level unknown or unset.</p>
 </td>
+<td class="enum_member_annotations"> </td>
 </tr>
 <tr>
-<td><p><a name="GCLUE-ACCURACY-LEVEL-CITY:CAPS"></a><span class="term"><code class="literal">GCLUE_ACCURACY_LEVEL_CITY</code></span></p></td>
-<td>City-level accuracy.
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"></a>GCLUE_ACCURACY_LEVEL_COUNTRY</p></td>
+<td class="enum_member_description">
+<p>Country-level accuracy.</p>
 </td>
+<td class="enum_member_annotations"> </td>
 </tr>
 <tr>
-<td><p><a name="GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"></a><span class="term"><code class="literal">GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD</code></span></p></td>
-<td>neighborhood-level accuracy.
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-CITY:CAPS"></a>GCLUE_ACCURACY_LEVEL_CITY</p></td>
+<td class="enum_member_description">
+<p>City-level accuracy.</p>
 </td>
+<td class="enum_member_annotations"> </td>
 </tr>
 <tr>
-<td><p><a name="GCLUE-ACCURACY-LEVEL-STREET:CAPS"></a><span class="term"><code class="literal">GCLUE_ACCURACY_LEVEL_STREET</code></span></p></td>
-<td>Street-level accuracy.
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"></a>GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD</p></td>
+<td class="enum_member_description">
+<p>neighborhood-level accuracy.</p>
 </td>
+<td class="enum_member_annotations"> </td>
 </tr>
 <tr>
-<td><p><a name="GCLUE-ACCURACY-LEVEL-EXACT:CAPS"></a><span class="term"><code class="literal">GCLUE_ACCURACY_LEVEL_EXACT</code></span></p></td>
-<td>Exact accuracy. Typically requires GPS receiver.
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-STREET:CAPS"></a>GCLUE_ACCURACY_LEVEL_STREET</p></td>
+<td class="enum_member_description">
+<p>Street-level accuracy.</p>
 </td>
+<td class="enum_member_annotations"> </td>
+</tr>
+<tr>
+<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-EXACT:CAPS"></a>GCLUE_ACCURACY_LEVEL_EXACT</p></td>
+<td class="enum_member_description">
+<p>Exact accuracy. Typically requires GPS receiver.</p>
+</td>
+<td class="enum_member_annotations"> </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 </div>
 </div>
+</div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.19</div>
+          Generated by GTK-Doc V1.20</div>
 </body>
 </html>

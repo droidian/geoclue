@@ -1,3 +1,38 @@
+2.1.8
+=====
+
+- Switch to Mozilla Location Service for geoip as well.
+- Allow specifying nickname to submit network data with.
+- Report actual available accuracy level and keep it up2date.
+- Add 'Active' property to indicate client state.
+- Expose altitude info (if known).
+- Timeout on inactivity, rather than no clients.
+- Automatically:
+  - stop the client if max accuracy level is set to 0.
+  - start the client if max accuracy level is set to non-0 and it was
+    automatically stopped.
+- Don't disable modem after using it. Disabling the modem, disables it for
+  everyone so if there was an active connection going on through the modem,
+  geoclue will cause it to disconnect. While we need to have some centralized
+  means to enable/disable modem and ideally geoclue shouldn't do any
+  enabling/disabling of modems at all, for now lets just only enable the
+  modem.
+- Fix issue of missed location updates.
+- Whitelist correct ID for gnome-settings-daemon in default config.
+- Replace '--disable-wifi-source' configure option with
+  '--disable-network-manager'. i-e now you disable usage of NetworkManger
+  explicitly rather than wifi source, which is now always built and enabled.
+- Drop now redundant geoip server.
+- Don't distribute .desktop.in files for demos.
+- Plug some leaks.
+- More debug log.
+- Other minor fixes.
+
+All contributors to this release:
+
+Kalev Lember <kalevlember@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.1.7
 =====
 

@@ -28,8 +28,6 @@
 
 G_BEGIN_DECLS
 
-#define GCLUE_3G_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD
-
 GType gclue_3g_get_type (void) G_GNUC_CONST;
 
 #define GCLUE_TYPE_3G                  (gclue_3g_get_type ())

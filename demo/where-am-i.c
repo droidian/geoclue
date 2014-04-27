@@ -52,7 +52,7 @@ on_location_proxy_ready (GObject      *source_object,
 {
         GDBusProxy *location = G_DBUS_PROXY (source_object);
         GVariant *value;
-        gdouble latitude, longitude, accuracy;
+        gdouble latitude, longitude, accuracy, altitude;
         const char *desc;
         gsize desc_len;
         GError *error = NULL;
@@ -70,12 +70,16 @@ on_location_proxy_ready (GObject      *source_object,
         longitude = g_variant_get_double (value);
         value = g_dbus_proxy_get_cached_property (location, "Accuracy");
         accuracy = g_variant_get_double (value);
+        value = g_dbus_proxy_get_cached_property (location, "Altitude");
+        altitude = g_variant_get_double (value);
 
         g_print ("\nNew location:\n");
         g_print ("Latitude: %f\nLongitude: %f\nAccuracy (in meters): %f\n",
                  latitude,
                  longitude,
                  accuracy);
+        if (altitude != -G_MAXDOUBLE)
+                g_print ("Altitude (in meters): %f\n", altitude);
 
         value = g_dbus_proxy_get_cached_property (location, "Description");
         desc = g_variant_get_string (value, &desc_len);

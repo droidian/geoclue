@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.7],
+        [2.1.8],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -60,49 +60,6 @@ PKG_CHECK_MODULES(GEOCLUE, [
   libxml-2.0 >= $LIBXML_MIN_VERSION
 ])
 
-# Geoip server
-AC_ARG_ENABLE(geoip-server,
-              AS_HELP_STRING([--enable-geoip-server=yes|no|auto], [Build geoip server]),
-              [enable_geoip_server=$enableval],
-              [enable_geoip_server=auto])
-case "x$enable_geoip_server" in
-  xyes)
-    PKG_CHECK_MODULES(GEOIP_SERVER,
-		      gio-2.0 >= $GLIB_MIN_VERSION
-                      json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
-                      libsoup-2.4
-                      geoip >= GEOIP_MIN_VERSION)
-    build_geoip_server="yes"
-    ;;
-  xauto)
-    PKG_CHECK_MODULES(GEOIP_SERVER,
-		      gio-2.0 >= $GLIB_MIN_VERSION
-                      json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
-                      libsoup-2.4
-                      geoip >= GEOIP_MIN_VERSION,
-                      [build_geoip_server=yes],
-                      [build_geoip_server=no])
-    ;;
-  xno)
-    build_geoip_server="xno"
-    ;;
-  x*)
-    AC_MSG_ERROR([Unknown --enable-geoip-server argument: $enable_geoip_server])
-    ;;
-esac
-if test "x$build_geoip_server" = "xyes"; then
-  # Requires for the database update
-  PKG_CHECK_MODULES(GEOIP_DBUPDATE,
-		    gio-2.0 >= $GLIB_MIN_VERSION
-                    libsoup-2.4)
-  GEOIP_DATABASE_PATH=`$PKG_CONFIG --variable=databasedir geoip`
-  AC_SUBST(GEOIP_DATABASE_PATH)
-  AC_DEFINE([BUILD_GEOIP_SERVER], [1], [Build geoip server?])
-else
-  AC_DEFINE([BUILD_GEOIP_SERVER], [0], [Build geoip server?])
-fi
-AM_CONDITIONAL([BUILD_GEOIP_SERVER], [test "x$build_geoip_server" = "xyes"])
-
 # 3G source
 AC_ARG_ENABLE(3g-source,
               AS_HELP_STRING([--disable-3g-source], [Disable 3G backend (requires ModemManager)]),
@@ -127,17 +84,16 @@ else
 fi
 AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "$build_modem_gps_source" = "yes"])
 
-# Wifi source
-AC_ARG_ENABLE(wifi-source,
-              AS_HELP_STRING([--disable-wifi-source], [Disable Wifi backend (requires ModemManager)]),
-              [build_wifi_source=$enableval], [build_wifi_source=yes])
-if test "$build_wifi_source" = "yes"; then
-  require_networkmanager=yes
-  AC_DEFINE([GCLUE_USE_WIFI_SOURCE], [1], [Build Wifi source?])
+# NetworkManager
+AC_ARG_ENABLE(network-manager,
+              AS_HELP_STRING([--disable-network-manager], [Disable use of NetworkManager)]),
+              [use_nm=$enableval], [use_nm=yes])
+if test "$use_nm" = "yes"; then
+  PKG_CHECK_MODULES(NetworkManager, libnm-glib >= $LIBNM_GLIB_MIN_VERSION)
+  AC_DEFINE([GCLUE_USE_NETWORK_MANAGER], [1], [Use NetowrkManager?])
 else
-  AC_DEFINE([GCLUE_USE_WIFI_SOURCE], [0], [Build Wifi source?])
+  AC_DEFINE([GCLUE_USE_NETWORK_MANAGER], [0], [Use NetowrkManager?])
 fi
-AM_CONDITIONAL([BUILD_WIFI_SOURCE], [test "$build_wifi_source" = "yes"])
 
 # Modem source is used in common by GPS and 3G sources
 if test "$build_modem_source" = "yes"; then
@@ -148,11 +104,6 @@ AM_CONDITIONAL([BUILD_MODEM_SOURCE], [test "$build_modem_source" = "yes"])
 # Check for ModemManager if one of the sources requires it
 if test "$require_modemmanager" = "yes"; then
   PKG_CHECK_MODULES(ModemManager, mm-glib >= $LIBMM_GLIB_MIN_VERSION)
-fi
-
-# Check for NetworkManager if one of the sources requires it
-if test "$require_networkmanager" = "yes"; then
-  PKG_CHECK_MODULES(NetworkManager, libnm-glib >= $LIBNM_GLIB_MIN_VERSION)
 fi
 
 # Demo agent
@@ -233,7 +184,6 @@ AC_CONFIG_FILES([
   src/agent/Makefile
   src/geocode-glib/Makefile
   src/public-api/Makefile
-  src/geoip-server/Makefile
   po/Makefile.in
   data/org.freedesktop.GeoClue2.conf
   data/Makefile
@@ -255,6 +205,5 @@ AC_MSG_NOTICE([
         systemdsystemunitdir:     ${systemdsystemunitdir}
 
         3G source:                ${build_3g_source}
-        Wifi source:              ${build_wifi_source}
         Modem GPS source:         ${build_modem_gps_source}
 ])

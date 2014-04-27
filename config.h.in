@@ -3,17 +3,14 @@
 /* Build demo agent? */
 #undef BUILD_DEMO_AGENT
 
-/* Build geoip server? */
-#undef BUILD_GEOIP_SERVER
-
 /* Build 3G source? */
 #undef GCLUE_USE_3G_SOURCE
 
 /* Build modem GPS source? */
 #undef GCLUE_USE_MODEM_GPS_SOURCE
 
-/* Build Wifi source? */
-#undef GCLUE_USE_WIFI_SOURCE
+/* Use NetowrkManager? */
+#undef GCLUE_USE_NETWORK_MANAGER
 
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE

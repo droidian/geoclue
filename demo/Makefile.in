@@ -86,10 +86,10 @@ DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(top_srcdir)/build-aux/depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -242,16 +242,12 @@ GDBUS_CODEGEN = @GDBUS_CODEGEN@
 GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
-GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
-GEOIP_DBUPDATE_CFLAGS = @GEOIP_DBUPDATE_CFLAGS@
-GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
-GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
-GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_CHECK_PATH = @GTKDOC_CHECK_PATH@
 GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
@@ -400,14 +396,14 @@ agent_LDADD = $(DEMO_AGENT_LIBS) \
 
 EXTRA_DIST = \
 	geoclue-demo-agent.desktop.in.in \
-	geoclue-demo-agent.desktop.in \
         geoclue-where-am-i.desktop.in.in \
-        geoclue-where-am-i.desktop.in \
         $(NULL)
 
 DISTCLEANFILES = \
 	geoclue-demo-agent.desktop \
+	geoclue-demo-agent.desktop.in \
         geoclue-where-am-i.desktop \
+        geoclue-where-am-i.desktop.in \
         $(NULL)
 
 all: all-am

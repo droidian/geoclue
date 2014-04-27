@@ -28,8 +28,6 @@
 
 G_BEGIN_DECLS
 
-#define GCLUE_WIFI_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_STREET
-
 GType gclue_wifi_get_type (void) G_GNUC_CONST;
 
 #define GCLUE_TYPE_WIFI                  (gclue_wifi_get_type ())
@@ -64,7 +62,8 @@ struct _GClueWifiClass {
         GClueWebSourceClass parent_class;
 };
 
-GClueWifi * gclue_wifi_get_singleton (void);
+GClueWifi *        gclue_wifi_get_singleton      (GClueAccuracyLevel level);
+GClueAccuracyLevel gclue_wifi_get_accuracy_level (GClueWifi *wifi);
 
 G_END_DECLS
 

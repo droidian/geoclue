@@ -2,34 +2,28 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>org.freedesktop.GeoClue2.Client</title>
+<title>Geoclue Reference Manual: org.freedesktop.GeoClue2.Client</title>
 <meta name="generator" content="DocBook XSL Stylesheets V1.78.1">
 <link rel="home" href="index.html" title="Geoclue Reference Manual">
 <link rel="up" href="ref-dbus.html" title="D-Bus API Reference">
 <link rel="prev" href="gdbus-org.freedesktop.GeoClue2.Manager.html" title="org.freedesktop.GeoClue2.Manager">
 <link rel="next" href="gdbus-org.freedesktop.GeoClue2.Location.html" title="org.freedesktop.GeoClue2.Location">
-<meta name="generator" content="GTK-Doc V1.19 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.20 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
-<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="2">
-<tr valign="middle">
-<td><a accesskey="p" href="gdbus-org.freedesktop.GeoClue2.Manager.html"><img src="left.png" width="24" height="24" border="0" alt="Prev"></a></td>
-<td><a accesskey="u" href="ref-dbus.html"><img src="up.png" width="24" height="24" border="0" alt="Up"></a></td>
-<td><a accesskey="h" href="index.html"><img src="home.png" width="24" height="24" border="0" alt="Home"></a></td>
-<th width="100%" align="center">Geoclue Reference Manual</th>
-<td><a accesskey="n" href="gdbus-org.freedesktop.GeoClue2.Location.html"><img src="right.png" width="24" height="24" border="0" alt="Next"></a></td>
-</tr>
-<tr><td colspan="5" class="shortcuts">
-<a href="#gdbus-org.freedesktop.GeoClue2.Client.synopsis" class="shortcut">Top</a>
-                   | 
-                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.description" class="shortcut">Description</a>
-                   | 
-                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.properties" class="shortcut">Properties</a>
-                   | 
-                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.signals" class="shortcut">Signals</a>
-</td></tr>
-</table>
+<table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="10"><tr valign="middle">
+<td width="100%" align="left" class="shortcuts">
+<a href="#" class="shortcut">Top</a><span id="nav_description"> <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.description" class="shortcut">Description</a></span><span id="nav_properties"> <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.properties" class="shortcut">Properties</a></span><span id="nav_signals"> <span class="dim">|</span> 
+                  <a href="#gdbus-org.freedesktop.GeoClue2.Client.signals" class="shortcut">Signals</a></span>
+</td>
+<td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
+<td><a accesskey="u" href="ref-dbus.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
+<td><a accesskey="p" href="gdbus-org.freedesktop.GeoClue2.Manager.html"><img src="left.png" width="16" height="16" border="0" alt="Prev"></a></td>
+<td><a accesskey="n" href="gdbus-org.freedesktop.GeoClue2.Location.html"><img src="right.png" width="16" height="16" border="0" alt="Next"></a></td>
+</tr></table>
 <div class="refentry">
 <a name="gdbus-org.freedesktop.GeoClue2.Client"></a><div class="titlepage"></div>
 <div class="refnamediv"><table width="100%"><tr>
@@ -37,7 +31,7 @@
 <h2><span class="refentrytitle"><a name="gdbus-interface-org-freedesktop-GeoClue2-Client.top_of_page"></a>org.freedesktop.GeoClue2.Client</span></h2>
 <p>org.freedesktop.GeoClue2.Client — The Application-specific client API</p>
 </td>
-<td valign="top" align="right"></td>
+<td class="gallery_image" valign="top" align="right"></td>
 </tr></table></div>
 <div class="refsynopsisdiv">
 <h2>Methods</h2>
@@ -60,6 +54,7 @@
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold" title='The "DistanceThreshold" property'>DistanceThreshold</a>       readwrite  u
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId" title='The "DesktopId" property'>DesktopId</a>               readwrite  s
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel" title='The "RequestedAccuracyLevel" property'>RequestedAccuracyLevel</a>  readwrite  u
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Active" title='The "Active" property'>Active</a>                  readable   b
 </pre>
 </div>
 <div class="refsect1">
@@ -160,17 +155,31 @@ DesktopId  readwrite  s
 RequestedAccuracyLevel  readwrite  u
 </pre>
 <p>        The level of accuracy requested by client, as
-        <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel">GClueAccuracyLevel</a>.
+        <a class="link" href="geoclue-gclue-enums.html#GClueAccuracyLevel" title="enum GClueAccuracyLevel">GClueAccuracyLevel</a>.
 </p>
 <p>        Please keep in mind that the actual accuracy of location information is
         dependent on available hardware on your machine, external resources
         and/or how much accuracy user agrees to be confortable with.
 </p>
 </div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Client.Active"></a><h3>The "Active" property</h3>
+<pre class="programlisting">
+Active  readable   b
+</pre>
+<p>        If client is active, i-e started successfully using
+        <a class="link" href="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-method-org-freedesktop-GeoClue2-Client.Start" title="The Start() method">Start()</a> and receiving location updates.
+</p>
+<p>        Please keep in mind that geoclue can at any time stop and start the
+        client on user (agent) request. Applications that are interested in
+        in these changes, should watch for changes in this property.
+</p>
+</div>
 </div>
 </div>
 <div class="footer">
 <hr>
-          Generated by GTK-Doc V1.19</div>
+          Generated by GTK-Doc V1.20</div>
 </body>
 </html>

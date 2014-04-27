@@ -57,7 +57,6 @@ GType gclue_service_manager_get_type (void) G_GNUC_CONST;
 
 GClueServiceManager * gclue_service_manager_new                   (GDBusConnection *connection,
                                                                    GError         **error);
-guint                 gclue_service_manager_get_connected_clients (GClueServiceManager *manager);
 
 G_END_DECLS
 

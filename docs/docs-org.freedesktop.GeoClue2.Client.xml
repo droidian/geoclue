@@ -26,6 +26,7 @@
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold">DistanceThreshold</link>       readwrite  u
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">DesktopId</link>               readwrite  s
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">RequestedAccuracyLevel</link>  readwrite  u
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.Active">Active</link>                  readable   b
 </synopsis>
   </refsect1>
 <refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Client">
@@ -127,6 +128,19 @@ RequestedAccuracyLevel  readwrite  u
 </para><para>        Please keep in mind that the actual accuracy of location information is
         dependent on available hardware on your machine, external resources
         and/or how much accuracy user agrees to be confortable with.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Client.Active">
+  <title>The "Active" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Client.Active"><primary sortas="Client:Active">org.freedesktop.GeoClue2.Client:Active</primary></indexterm>
+<programlisting>
+Active  readable   b
+</programlisting>
+<para>        If client is active, i-e started successfully using
+        <link linkend="gdbus-method-org-freedesktop-GeoClue2-Client.Start">Start()</link> and receiving location updates.
+</para><para>        Please keep in mind that geoclue can at any time stop and start the
+        client on user (agent) request. Applications that are interested in
+        in these changes, should watch for changes in this property.
 </para>
 </refsect2>
 </refsect1>

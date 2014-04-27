@@ -28,8 +28,6 @@
 
 G_BEGIN_DECLS
 
-#define GCLUE_MODEM_GPS_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_EXACT
-
 GType gclue_modem_gps_get_type (void) G_GNUC_CONST;
 
 #define GCLUE_TYPE_MODEM_GPS                  (gclue_modem_gps_get_type ())

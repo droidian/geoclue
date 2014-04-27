@@ -70,6 +70,9 @@ struct _GClueWebSourceClass {
         GeocodeLocation * (*parse_response)      (GClueWebSource *source,
                                                   const char     *response,
                                                   GError        **error);
+        GClueAccuracyLevel (*get_available_accuracy_level)
+                                                 (GClueWebSource *source,
+                                                  gboolean        network_available);
 };
 
 void gclue_web_source_refresh           (GClueWebSource      *source);

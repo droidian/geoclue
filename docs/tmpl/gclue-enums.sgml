@@ -9,10 +9,12 @@ gclue-enums
 
 </para>
 
+
 <!-- ##### SECTION See_Also ##### -->
 <para>
 
 </para>
+
 
 <!-- ##### SECTION Stability_Level ##### -->
 
@@ -25,6 +27,7 @@ gclue-enums
 
 </para>
 
+@GCLUE_ACCURACY_LEVEL_NONE: 
 @GCLUE_ACCURACY_LEVEL_COUNTRY: 
 @GCLUE_ACCURACY_LEVEL_CITY: 
 @GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD: 

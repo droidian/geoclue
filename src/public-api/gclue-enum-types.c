@@ -4,6 +4,7 @@
 #include "gclue-enum-types.h"
 /* enumerations from "./gclue-enums.h" */
 static const GEnumValue gclue_accuracy_level_values[] = {
+    { GCLUE_ACCURACY_LEVEL_NONE, "GCLUE_ACCURACY_LEVEL_NONE", "none" },
     { GCLUE_ACCURACY_LEVEL_COUNTRY, "GCLUE_ACCURACY_LEVEL_COUNTRY", "country" },
     { GCLUE_ACCURACY_LEVEL_CITY, "GCLUE_ACCURACY_LEVEL_CITY", "city" },
     { GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD, "GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD", "neighborhood" },

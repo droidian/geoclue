@@ -19,6 +19,11 @@ url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
 # each time it gets a GPS lock.
 #submission-url=https://location.services.mozilla.com/v1/submit?key=geoclue
 
+# A nickname to submit network data with. This is currently used for leaderboard:
+# https://location.services.mozilla.com/leaders
+# A nickname must be 2-32 characters long.
+#submission-nick=geoclue
+
 # To use the Google geolocation service instead of mozilla's, simply uncomment
 # this url while changing API_KEY to your Google API key and comment out or
 # remove the url above.
@@ -39,7 +44,7 @@ url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
 # # info access, separate by ';'. Keep it empty for allowing it for all users.
 # users=
 
-[gnome-settings-daemon]
+[gnome-datetime-panel]
 allowed=true
 users=
 

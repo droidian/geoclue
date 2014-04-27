@@ -55,10 +55,10 @@ static GOptionEntry entries[] =
 
 GMainLoop *main_loop;
 GClueServiceManager *manager = NULL;
-guint no_client_timeout_id = 0;
+guint inactivity_timeout_id = 0;
 
 static gboolean
-no_client_timeout (gpointer user_data)
+on_inactivity_timeout (gpointer user_data)
 {
         g_main_loop_quit (main_loop);
 
@@ -66,27 +66,27 @@ no_client_timeout (gpointer user_data)
 }
 
 static void
-on_connected_clients_notify (GObject    *gobject,
-                             GParamSpec *pspec,
-                             gpointer    user_data)
+on_in_use_notify (GObject    *gobject,
+                  GParamSpec *pspec,
+                  gpointer    user_data)
 {
-        guint connected;
+        gboolean in_use;
 
-        connected = gclue_service_manager_get_connected_clients
-                        (GCLUE_SERVICE_MANAGER (gobject));
-        g_debug ("Number of connected clients: %u", connected);
+        in_use = gclue_manager_get_in_use (GCLUE_MANAGER (gobject));
 
         if (inactivity_timeout <= 0)
                 return;
 
-        if (connected == 0)
-                no_client_timeout_id =
+        g_debug ("Service %s in use", in_use? "now" : "not");
+
+        if (!in_use)
+                inactivity_timeout_id =
                         g_timeout_add_seconds (inactivity_timeout,
-                                               no_client_timeout,
+                                               on_inactivity_timeout,
                                                NULL);
-        else if (no_client_timeout_id != 0) {
-                g_source_remove (no_client_timeout_id);
-                no_client_timeout_id = 0;
+        else if (inactivity_timeout_id != 0) {
+                g_source_remove (inactivity_timeout_id);
+                inactivity_timeout_id = 0;
         }
 }
 
@@ -106,14 +106,14 @@ on_bus_acquired (GDBusConnection *connection,
         }
 
         g_signal_connect (manager,
-                          "notify::connected-clients",
-                          G_CALLBACK (on_connected_clients_notify),
+                          "notify::in-use",
+                          G_CALLBACK (on_in_use_notify),
                           NULL);
 
         if (inactivity_timeout > 0)
-                no_client_timeout_id =
+                inactivity_timeout_id =
                         g_timeout_add_seconds (inactivity_timeout,
-                                               no_client_timeout,
+                                               on_inactivity_timeout,
                                                NULL);
 }
 
@@ -147,6 +147,7 @@ main (int argc, char **argv)
                 g_critical ("option parsing failed: %s\n", error->message);
                 exit (-1);
         }
+        g_option_context_free (context);
 
         if (version) {
                 g_print ("%s\n", PACKAGE_VERSION);

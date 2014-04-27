@@ -4,7 +4,7 @@
 ifneq ($(DEB_BUILD_ARCH_OS),linux)
   MM_NM_FLAGS := --disable-3g-source \
                  --disable-modem-gps-source \
-                 --disable-wifi-source
+                 --disable-network-manager
 endif
 
 override_dh_auto_configure:

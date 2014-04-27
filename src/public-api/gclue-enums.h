@@ -29,6 +29,7 @@ G_BEGIN_DECLS
 
 /**
  * GClueAccuracyLevel:
+ * @GCLUE_ACCURACY_LEVEL_NONE: Accuracy level unknown or unset.
  * @GCLUE_ACCURACY_LEVEL_COUNTRY: Country-level accuracy.
  * @GCLUE_ACCURACY_LEVEL_CITY: City-level accuracy.
  * @GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD: neighborhood-level accuracy.
@@ -38,6 +39,7 @@ G_BEGIN_DECLS
  * Used to specify level of accuracy requested by, or allowed for a client.
  **/
 typedef enum {/*< underscore_name=gclue_accuracy_level>*/
+        GCLUE_ACCURACY_LEVEL_NONE = 0,
         GCLUE_ACCURACY_LEVEL_COUNTRY = 1,
         GCLUE_ACCURACY_LEVEL_CITY = 4,
         GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD = 5,

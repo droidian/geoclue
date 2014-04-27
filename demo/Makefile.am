@@ -43,13 +43,13 @@ agent_LDADD = $(DEMO_AGENT_LIBS) \
 
 EXTRA_DIST = \
 	geoclue-demo-agent.desktop.in.in \
-	geoclue-demo-agent.desktop.in \
         geoclue-where-am-i.desktop.in.in \
-        geoclue-where-am-i.desktop.in \
         $(NULL)
 
 DISTCLEANFILES = \
 	geoclue-demo-agent.desktop \
+	geoclue-demo-agent.desktop.in \
         geoclue-where-am-i.desktop \
+        geoclue-where-am-i.desktop.in \
         $(NULL)
 

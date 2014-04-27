@@ -88,10 +88,10 @@ DIST_COMMON = $(top_srcdir)/gtk-doc.make $(srcdir)/Makefile.in \
 subdir = docs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -154,16 +154,12 @@ GDBUS_CODEGEN = @GDBUS_CODEGEN@
 GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
-GEOIP_DATABASE_PATH = @GEOIP_DATABASE_PATH@
-GEOIP_DBUPDATE_CFLAGS = @GEOIP_DBUPDATE_CFLAGS@
-GEOIP_DBUPDATE_LIBS = @GEOIP_DBUPDATE_LIBS@
-GEOIP_SERVER_CFLAGS = @GEOIP_SERVER_CFLAGS@
-GEOIP_SERVER_LIBS = @GEOIP_SERVER_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
 GTKDOC_CHECK = @GTKDOC_CHECK@
+GTKDOC_CHECK_PATH = @GTKDOC_CHECK_PATH@
 GTKDOC_DEPS_CFLAGS = @GTKDOC_DEPS_CFLAGS@
 GTKDOC_DEPS_LIBS = @GTKDOC_DEPS_LIBS@
 GTKDOC_MKPDF = @GTKDOC_MKPDF@
@@ -379,7 +375,7 @@ MAINTAINERCLEANFILES = \
 @ENABLE_GTK_DOC_FALSE@	docs-org.freedesktop.GeoClue2.Agent.xml \
 @ENABLE_GTK_DOC_FALSE@	$(NULL)
 @ENABLE_GTK_DOC_TRUE@CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) \
-@ENABLE_GTK_DOC_TRUE@	$(DOC_STAMPS) \
+@ENABLE_GTK_DOC_TRUE@	$(DOC_STAMPS) gtkdoc-check.test \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Manager.xml \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Client.xml \
 @ENABLE_GTK_DOC_TRUE@	docs-org.freedesktop.GeoClue2.Location.xml \
@@ -545,11 +541,11 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-@ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
-@ENABLE_GTK_DOC_FALSE@install-data-local:
-@ENABLE_GTK_DOC_FALSE@uninstall-local:
 @ENABLE_GTK_DOC_FALSE@clean-local:
+@ENABLE_GTK_DOC_FALSE@install-data-local:
 @ENABLE_GTK_DOC_FALSE@distclean-local:
+@ENABLE_GTK_DOC_FALSE@uninstall-local:
+@ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -643,8 +639,15 @@ docs-org.freedesktop.GeoClue2.Location.xml:
 docs-org.freedesktop.GeoClue2.Agent.xml:
 	cp $(top_srcdir)/src/agent/docs-org.freedesktop.GeoClue2.Agent.xml .
 
-@ENABLE_GTK_DOC_TRUE@all-local: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
-#all-local:
+@ENABLE_GTK_DOC_TRUE@gtkdoc-check.test: Makefile
+@ENABLE_GTK_DOC_TRUE@	$(AM_V_GEN)echo "#!/bin/sh -e" > $@; \
+@ENABLE_GTK_DOC_TRUE@		echo "$(GTKDOC_CHECK_PATH) || exit 1" >> $@; \
+@ENABLE_GTK_DOC_TRUE@		chmod +x $@
+
+@ENABLE_GTK_DOC_TRUE@all-gtk-doc: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
+@ENABLE_GTK_DOC_TRUE@.PHONY: all-gtk-doc
+
+@ENABLE_GTK_DOC_TRUE@all-local: all-gtk-doc
 
 @ENABLE_GTK_DOC_TRUE@docs: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
 
@@ -655,17 +658,19 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 @ENABLE_GTK_DOC_TRUE@	    files=`echo $(SETUP_FILES) $(expand_content_files) $(DOC_MODULE).types`; \
 @ENABLE_GTK_DOC_TRUE@	    if test "x$$files" != "x" ; then \
 @ENABLE_GTK_DOC_TRUE@	        for file in $$files ; do \
+@ENABLE_GTK_DOC_TRUE@	            destdir=`dirname $(abs_builddir)/$$file` ;\
+@ENABLE_GTK_DOC_TRUE@	            test -d "$$destdir" || mkdir -p "$$destdir"; \
 @ENABLE_GTK_DOC_TRUE@	            test -f $(abs_srcdir)/$$file && \
-@ENABLE_GTK_DOC_TRUE@	                cp -pu $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
+@ENABLE_GTK_DOC_TRUE@	                cp -pf $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
 @ENABLE_GTK_DOC_TRUE@	        done; \
 @ENABLE_GTK_DOC_TRUE@	    fi; \
 @ENABLE_GTK_DOC_TRUE@	    test -d $(abs_srcdir)/tmpl && \
-@ENABLE_GTK_DOC_TRUE@	        { cp -rp $(abs_srcdir)/tmpl $(abs_builddir)/; \
+@ENABLE_GTK_DOC_TRUE@	        { cp -pR $(abs_srcdir)/tmpl $(abs_builddir)/; \
 @ENABLE_GTK_DOC_TRUE@	        chmod -R u+w $(abs_builddir)/tmpl; } \
 @ENABLE_GTK_DOC_TRUE@	fi
 @ENABLE_GTK_DOC_TRUE@	$(AM_V_at)touch setup-build.stamp
 
-@ENABLE_GTK_DOC_TRUE@scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB)
+@ENABLE_GTK_DOC_TRUE@scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 @ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_SCAN)_source_dir='' ; \
 @ENABLE_GTK_DOC_TRUE@	for i in $(DOC_SOURCE_DIR) ; do \
 @ENABLE_GTK_DOC_TRUE@	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
@@ -695,7 +700,7 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 @ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_TMPL)gtkdoc-mktmpl --module=$(DOC_MODULE) $(MKTMPL_OPTIONS)
 @ENABLE_GTK_DOC_TRUE@	$(AM_V_at)if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
 @ENABLE_GTK_DOC_TRUE@	  if test -w $(abs_srcdir) ; then \
-@ENABLE_GTK_DOC_TRUE@	    cp -rp $(abs_builddir)/tmpl $(abs_srcdir)/; \
+@ENABLE_GTK_DOC_TRUE@	    cp -pR $(abs_builddir)/tmpl $(abs_srcdir)/; \
 @ENABLE_GTK_DOC_TRUE@	  fi \
 @ENABLE_GTK_DOC_TRUE@	fi
 @ENABLE_GTK_DOC_TRUE@	$(AM_V_at)touch tmpl-build.stamp
@@ -707,7 +712,7 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 @ENABLE_GTK_DOC_TRUE@	@true
 
 @ENABLE_GTK_DOC_TRUE@sgml-build.stamp: tmpl.stamp $(DOC_MODULE)-sections.txt $(srcdir)/tmpl/*.sgml $(expand_content_files)
-@ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_XML)-chmod -R u+w $(srcdir) && _source_dir='' ; \
+@ENABLE_GTK_DOC_TRUE@	-$(GTK_DOC_V_XML)chmod -R u+w $(srcdir) && _source_dir='' ; \
 @ENABLE_GTK_DOC_TRUE@	for i in $(DOC_SOURCE_DIR) ; do \
 @ENABLE_GTK_DOC_TRUE@	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
 @ENABLE_GTK_DOC_TRUE@	done ; \
@@ -769,6 +774,9 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 @ENABLE_GTK_DOC_TRUE@clean-local:
 @ENABLE_GTK_DOC_TRUE@	@rm -f *~ *.bak
 @ENABLE_GTK_DOC_TRUE@	@rm -rf .libs
+@ENABLE_GTK_DOC_TRUE@	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-types" ; then \
+@ENABLE_GTK_DOC_TRUE@	  rm -f $(DOC_MODULE).types; \
+@ENABLE_GTK_DOC_TRUE@	fi
 
 @ENABLE_GTK_DOC_TRUE@distclean-local:
 @ENABLE_GTK_DOC_TRUE@	@rm -rf xml html $(REPORT_FILES) $(DOC_MODULE).pdf \
@@ -814,12 +822,14 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 #
 # Require gtk-doc when making dist
 #
-@ENABLE_GTK_DOC_TRUE@dist-check-gtkdoc: docs
-#dist-check-gtkdoc:
-#	@echo "*** gtk-doc must be installed and enabled in order to make dist"
-#	@false
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_TRUE@dist-check-gtkdoc: docs
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_FALSE@dist-check-gtkdoc:
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_FALSE@	@echo "*** gtk-doc is needed to run 'make dist'.         ***"
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_FALSE@	@echo "*** gtk-doc was not found when 'configure' ran.   ***"
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_FALSE@	@echo "*** please install gtk-doc and rerun 'configure'. ***"
+@ENABLE_GTK_DOC_TRUE@@HAVE_GTK_DOC_FALSE@	@false
 
-@ENABLE_GTK_DOC_TRUE@dist-hook: dist-check-gtkdoc dist-hook-local
+@ENABLE_GTK_DOC_TRUE@dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 @ENABLE_GTK_DOC_TRUE@	@mkdir $(distdir)/tmpl
 @ENABLE_GTK_DOC_TRUE@	@mkdir $(distdir)/html
 @ENABLE_GTK_DOC_TRUE@	@-cp ./tmpl/*.sgml $(distdir)/tmpl

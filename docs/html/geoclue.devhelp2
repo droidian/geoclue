@@ -26,17 +26,14 @@
     <keyword type="property" name="The &quot;DistanceThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold"/>
     <keyword type="property" name="The &quot;DesktopId&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId"/>
     <keyword type="property" name="The &quot;RequestedAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel"/>
+    <keyword type="property" name="The &quot;Active&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Active"/>
     <keyword type="property" name="The &quot;Latitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Latitude"/>
     <keyword type="property" name="The &quot;Longitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude"/>
     <keyword type="property" name="The &quot;Accuracy&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy"/>
+    <keyword type="property" name="The &quot;Altitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Altitude"/>
     <keyword type="property" name="The &quot;Description&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description"/>
-    <keyword type="enum" name="enum GClueAccuracyLevel" link="geoclue-gclue-enums.html#GClueAccuracyLevel-enum"/>
+    <keyword type="enum" name="enum GClueAccuracyLevel" link="geoclue-gclue-enums.html#GClueAccuracyLevel"/>
     <keyword type="method" name="The AuthorizeApp() method" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"/>
     <keyword type="property" name="The &quot;MaxAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel"/>
-    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_COUNTRY" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"/>
-    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_CITY" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-CITY:CAPS"/>
-    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"/>
-    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_STREET" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-STREET:CAPS"/>
-    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_EXACT" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-EXACT:CAPS"/>
   </functions>
 </book>

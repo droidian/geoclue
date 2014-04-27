@@ -105,6 +105,18 @@
     <property name="RequestedAccuracyLevel" type="u" access="readwrite"/>
 
     <!--
+        Active:
+
+        If client is active, i-e started successfully using
+        org.freedesktop.GeoClue2.Client.Start() and receiving location updates.
+
+        Please keep in mind that geoclue can at any time stop and start the
+        client on user (agent) request. Applications that are interested in
+        in these changes, should watch for changes in this property.
+    -->
+    <property name="Active" type="b" access="read"/>
+
+    <!--
         Start:
 
         Start receiving events about the current location. Applications should
@@ -163,6 +175,14 @@
         The accuracy of the location fix, in meters.
     -->
     <property name="Accuracy" type="d" access="read"/>
+
+    <!--
+        Altitude:
+
+        The altitude of the location fix, in meters. When unknown, its set to
+        minimum double value, -1.7976931348623157e+308.
+    -->
+    <property name="Altitude" type="d" access="read"/>
 
     <!--
         Description:

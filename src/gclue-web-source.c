@@ -36,6 +36,9 @@
  * Baseclass for all sources that solely use a web resource for geolocation.
  **/
 
+static gboolean
+gclue_web_source_start (GClueLocationSource *source);
+
 struct _GClueWebSourcePrivate {
         SoupSession *soup_session;
 
@@ -58,6 +61,7 @@ query_callback (SoupSession *session,
         GClueWebSource *web;
         GError *error = NULL;
         char *contents;
+        char *str;
         GeocodeLocation *location;
         SoupURI *uri;
 
@@ -74,9 +78,11 @@ query_callback (SoupSession *session,
 
         contents = g_strndup (query->response_body->data, query->response_body->length);
         uri = soup_message_get_uri (query);
+        str = soup_uri_to_string (uri, FALSE);
         g_debug ("Got following response from '%s':\n%s",
-                 soup_uri_to_string (uri, FALSE),
+                 str,
                  contents);
+        g_free (str);
         location = GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_response (web,
                                                                      contents,
                                                                      &error);
@@ -88,6 +94,26 @@ query_callback (SoupSession *session,
 
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (web),
                                             location);
+        g_object_unref (location);
+}
+
+static void
+refresh_accuracy_level (GClueWebSource *web,
+                        gboolean        available)
+{
+        GClueAccuracyLevel new, existing;
+
+        existing = gclue_location_source_get_available_accuracy_level
+                        (GCLUE_LOCATION_SOURCE (web));
+        new = GCLUE_WEB_SOURCE_GET_CLASS (web)->get_available_accuracy_level
+                        (web, available);
+        if (new != existing) {
+                g_debug ("Available accuracy level from %s: %u",
+                         G_OBJECT_TYPE_NAME (web), new);
+                g_object_set (G_OBJECT (web),
+                              "available-accuracy-level", new,
+                              NULL);
+        }
 }
 
 static void
@@ -98,6 +124,11 @@ on_network_changed (GNetworkMonitor *monitor,
         GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
         GError *error = NULL;
         gboolean last_available = web->priv->network_available;
+
+        refresh_accuracy_level (web, available);
+
+        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (user_data)))
+                return;
 
         web->priv->network_available = available;
         if (last_available == available)
@@ -157,6 +188,8 @@ gclue_web_source_constructed (GObject *object)
         GNetworkMonitor *monitor;
         GClueWebSourcePrivate *priv = GCLUE_WEB_SOURCE (object)->priv;
 
+        G_OBJECT_CLASS (gclue_web_source_parent_class)->constructed (object);
+
         priv->soup_session = soup_session_new_with_options
                         (SOUP_SESSION_REMOVE_FEATURE_BY_TYPE,
                          SOUP_TYPE_PROXY_RESOLVER_DEFAULT,
@@ -168,15 +201,18 @@ gclue_web_source_constructed (GObject *object)
                                   "network-changed",
                                   G_CALLBACK (on_network_changed),
                                   object);
-
-        if (g_network_monitor_get_network_available (monitor))
-                on_network_changed (monitor, TRUE, object);
+        on_network_changed (monitor,
+                            g_network_monitor_get_network_available (monitor),
+                            object);
 }
 
 static void
 gclue_web_source_class_init (GClueWebSourceClass *klass)
 {
+        GClueLocationSourceClass *source_class = GCLUE_LOCATION_SOURCE_CLASS (klass);
         GObjectClass *gsource_class = G_OBJECT_CLASS (klass);
+
+        source_class->start = gclue_web_source_start;
 
         gsource_class->finalize = gclue_web_source_finalize;
         gsource_class->constructed = gclue_web_source_constructed;
@@ -194,24 +230,35 @@ gclue_web_source_init (GClueWebSource *web)
  * gclue_web_source_refresh:
  * @source: a #GClueWebSource
  *
- * Causes @source to refresh location. Its meant to be used by subclasses if
- * they have reason to suspect location might have changed.
+ * Causes @source to refresh location and available accuracy level. Its meant
+ * to be used by subclasses if they have reason to suspect location and/or
+ * available accuracy level might have changed.
  **/
 void
 gclue_web_source_refresh (GClueWebSource *source)
 {
         GNetworkMonitor *monitor;
-        GClueWebSourcePrivate *priv;
 
         g_return_if_fail (GCLUE_IS_WEB_SOURCE (source));
 
-        priv = source->priv;
-        if (priv->query != NULL)
-                return;
-
         monitor = g_network_monitor_get_default ();
-        if (g_network_monitor_get_network_available (monitor))
+        if (g_network_monitor_get_network_available (monitor)) {
+                source->priv->network_available = FALSE;
                 on_network_changed (monitor, TRUE, source);
+        }
+}
+
+static gboolean
+gclue_web_source_start (GClueLocationSource *source)
+{
+        GClueLocationSourceClass *base_class;
+
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_web_source_parent_class);
+        if (!base_class->start (source))
+                return FALSE;
+
+        gclue_web_source_refresh (GCLUE_WEB_SOURCE (source));
+        return TRUE;
 }
 
 static void

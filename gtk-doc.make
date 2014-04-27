@@ -49,9 +49,13 @@ REPORT_FILES = \
 	$(DOC_MODULE)-undeclared.txt \
 	$(DOC_MODULE)-unused.txt
 
-CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS)
+gtkdoc-check.test: Makefile
+	$(AM_V_GEN)echo "#!/bin/sh -e" > $@; \
+		echo "$(GTKDOC_CHECK_PATH) || exit 1" >> $@; \
+		chmod +x $@
 
-if ENABLE_GTK_DOC
+CLEANFILES = $(SCANOBJ_FILES) $(REPORT_FILES) $(DOC_STAMPS) gtkdoc-check.test
+
 if GTK_DOC_BUILD_HTML
 HTML_BUILD_STAMP=html-build.stamp
 else
@@ -63,9 +67,11 @@ else
 PDF_BUILD_STAMP=
 endif
 
-all-local: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
-else
-all-local:
+all-gtk-doc: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
+.PHONY: all-gtk-doc
+
+if ENABLE_GTK_DOC
+all-local: all-gtk-doc
 endif
 
 docs: $(HTML_BUILD_STAMP) $(PDF_BUILD_STAMP)
@@ -83,12 +89,14 @@ setup-build.stamp:
 	    files=`echo $(SETUP_FILES) $(expand_content_files) $(DOC_MODULE).types`; \
 	    if test "x$$files" != "x" ; then \
 	        for file in $$files ; do \
+	            destdir=`dirname $(abs_builddir)/$$file` ;\
+	            test -d "$$destdir" || mkdir -p "$$destdir"; \
 	            test -f $(abs_srcdir)/$$file && \
-	                cp -pu $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
+	                cp -pf $(abs_srcdir)/$$file $(abs_builddir)/$$file || true; \
 	        done; \
 	    fi; \
 	    test -d $(abs_srcdir)/tmpl && \
-	        { cp -rp $(abs_srcdir)/tmpl $(abs_builddir)/; \
+	        { cp -pR $(abs_srcdir)/tmpl $(abs_builddir)/; \
 	        chmod -R u+w $(abs_builddir)/tmpl; } \
 	fi
 	$(AM_V_at)touch setup-build.stamp
@@ -103,7 +111,7 @@ GTK_DOC_V_INTROSPECT=$(GTK_DOC_V_INTROSPECT_$(V))
 GTK_DOC_V_INTROSPECT_=$(GTK_DOC_V_INTROSPECT_$(AM_DEFAULT_VERBOSITY))
 GTK_DOC_V_INTROSPECT_0=@echo "  DOC   Introspecting gobjects";
 
-scan-build.stamp: $(HFILE_GLOB) $(CFILE_GLOB)
+scan-build.stamp: setup-build.stamp $(HFILE_GLOB) $(CFILE_GLOB)
 	$(GTK_DOC_V_SCAN)_source_dir='' ; \
 	for i in $(DOC_SOURCE_DIR) ; do \
 	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
@@ -139,7 +147,7 @@ tmpl-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DO
 	$(GTK_DOC_V_TMPL)gtkdoc-mktmpl --module=$(DOC_MODULE) $(MKTMPL_OPTIONS)
 	$(AM_V_at)if test "$(abs_srcdir)" != "$(abs_builddir)" ; then \
 	  if test -w $(abs_srcdir) ; then \
-	    cp -rp $(abs_builddir)/tmpl $(abs_srcdir)/; \
+	    cp -pR $(abs_builddir)/tmpl $(abs_srcdir)/; \
 	  fi \
 	fi
 	$(AM_V_at)touch tmpl-build.stamp
@@ -157,7 +165,7 @@ GTK_DOC_V_XML_=$(GTK_DOC_V_XML_$(AM_DEFAULT_VERBOSITY))
 GTK_DOC_V_XML_0=@echo "  DOC   Building XML";
 
 sgml-build.stamp: tmpl.stamp $(DOC_MODULE)-sections.txt $(srcdir)/tmpl/*.sgml $(expand_content_files)
-	$(GTK_DOC_V_XML)-chmod -R u+w $(srcdir) && _source_dir='' ; \
+	-$(GTK_DOC_V_XML)chmod -R u+w $(srcdir) && _source_dir='' ; \
 	for i in $(DOC_SOURCE_DIR) ; do \
 	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
 	done ; \
@@ -235,6 +243,9 @@ pdf-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files)
 clean-local:
 	@rm -f *~ *.bak
 	@rm -rf .libs
+	@if echo $(SCAN_OPTIONS) | grep -q "\-\-rebuild-types" ; then \
+	  rm -f $(DOC_MODULE).types; \
+	fi
 
 distclean-local:
 	@rm -rf xml html $(REPORT_FILES) $(DOC_MODULE).pdf \
@@ -280,15 +291,17 @@ uninstall-local:
 #
 # Require gtk-doc when making dist
 #
-if ENABLE_GTK_DOC
+if HAVE_GTK_DOC
 dist-check-gtkdoc: docs
 else
 dist-check-gtkdoc:
-	@echo "*** gtk-doc must be installed and enabled in order to make dist"
+	@echo "*** gtk-doc is needed to run 'make dist'.         ***"
+	@echo "*** gtk-doc was not found when 'configure' ran.   ***"
+	@echo "*** please install gtk-doc and rerun 'configure'. ***"
 	@false
 endif
 
-dist-hook: dist-check-gtkdoc dist-hook-local
+dist-hook: dist-check-gtkdoc all-gtk-doc dist-hook-local
 	@mkdir $(distdir)/tmpl
 	@mkdir $(distdir)/html
 	@-cp ./tmpl/*.sgml $(distdir)/tmpl

@@ -32,6 +32,11 @@
  * Baseclass for all sources that use a modem through ModemManager.
  **/
 
+static gboolean
+gclue_modem_source_start (GClueLocationSource *source);
+static gboolean
+gclue_modem_source_stop (GClueLocationSource *source);
+
 G_DEFINE_ABSTRACT_TYPE (GClueModemSource, gclue_modem_source, GCLUE_TYPE_LOCATION_SOURCE)
 
 struct _GClueModemSourcePrivate {
@@ -41,6 +46,7 @@ struct _GClueModemSourcePrivate {
         MMModemLocation *modem_location;
 
         GCancellable *cancellable;
+        GCancellable *active_cancellable;
 };
 
 static void
@@ -70,7 +76,7 @@ gclue_modem_source_finalize (GObject *gsource)
         GClueModemSource *source = GCLUE_MODEM_SOURCE (gsource);
         GClueModemSourcePrivate *priv = source->priv;
 
-        clear_caps (source);
+        G_OBJECT_CLASS (gclue_modem_source_parent_class)->finalize (gsource);
 
         g_cancellable_cancel (priv->cancellable);
         g_clear_object (&priv->cancellable);
@@ -78,8 +84,6 @@ gclue_modem_source_finalize (GObject *gsource)
         g_clear_object (&priv->mm_object);
         g_clear_object (&priv->modem);
         g_clear_object (&priv->modem_location);
-
-        G_OBJECT_CLASS (gclue_modem_source_parent_class)->finalize (gsource);
 }
 
 static void
@@ -88,7 +92,11 @@ gclue_modem_source_constructed (GObject *object);
 static void
 gclue_modem_source_class_init (GClueModemSourceClass *klass)
 {
+        GClueLocationSourceClass *source_class = GCLUE_LOCATION_SOURCE_CLASS (klass);
         GObjectClass *gsource_class = G_OBJECT_CLASS (klass);
+
+        source_class->start = gclue_modem_source_start;
+        source_class->stop = gclue_modem_source_stop;
 
         gsource_class->finalize = gclue_modem_source_finalize;
         gsource_class->constructed = gclue_modem_source_constructed;
@@ -112,17 +120,21 @@ on_modem_location_setup (GObject      *source_object,
                          GAsyncResult *res,
                          gpointer      user_data)
 {
-        GClueModemSourcePrivate *priv = GCLUE_MODEM_SOURCE (user_data)->priv;
+        GClueModemSourcePrivate *priv;
         GError *error = NULL;
 
-        if (!mm_modem_location_setup_finish (priv->modem_location, res, &error)) {
+        if (!mm_modem_location_setup_finish (MM_MODEM_LOCATION (source_object),
+                                             res,
+                                             &error)) {
                 g_warning ("Failed to setup modem: %s", error->message);
                 g_error_free (error);
 
                 return;
         }
+        priv = GCLUE_MODEM_SOURCE (user_data)->priv;
+        g_debug ("Modem '%s' setup.", mm_object_get_path (priv->mm_object));
 
-        on_location_changed (G_OBJECT (priv->modem_location), NULL, user_data);
+        on_location_changed (source_object, NULL, user_data);
 }
 
 static void
@@ -130,24 +142,26 @@ on_modem_enabled (GObject      *source_object,
                   GAsyncResult *res,
                   gpointer      user_data)
 {
-        GClueModemSource *source= GCLUE_MODEM_SOURCE (user_data);
-        GClueModemSourcePrivate *priv = source->priv;
+        GClueModemSourcePrivate *priv;
         MMModemLocationSource caps;
         GError *error = NULL;
 
-        if (!mm_modem_enable_finish (priv->modem, res, &error)) {
-                if (error->code == MM_CORE_ERROR_IN_PROGRESS)
+        if (!mm_modem_enable_finish (MM_MODEM (source_object), res, &error)) {
+                if (error->code == MM_CORE_ERROR_IN_PROGRESS) {
                         /* Seems another source instance is already on it */
+                        priv = GCLUE_MODEM_SOURCE (user_data)->priv;
                         g_signal_connect (G_OBJECT (priv->modem_location),
                                           "notify::location",
                                           G_CALLBACK (on_location_changed),
                                           user_data);
-                else
+                } else
                         g_warning ("Failed to enable modem: %s", error->message);
                 g_error_free (error);
 
                 return;
         }
+        priv = GCLUE_MODEM_SOURCE (user_data)->priv;
+        g_debug ("modem '%s' enabled.", mm_object_get_path (priv->mm_object));
 
         g_signal_connect (G_OBJECT (priv->modem_location),
                           "notify::location",
@@ -159,9 +173,94 @@ on_modem_enabled (GObject      *source_object,
         mm_modem_location_setup (priv->modem_location,
                                  caps,
                                  TRUE,
-                                 priv->cancellable,
+                                 priv->active_cancellable,
                                  on_modem_location_setup,
                                  user_data);
+}
+
+static gboolean
+gclue_modem_source_start (GClueLocationSource *source)
+{
+        GClueLocationSourceClass *base_class;
+        GClueModemSourcePrivate *priv;
+
+        g_return_val_if_fail (GCLUE_IS_MODEM_SOURCE (source), FALSE);
+        priv = GCLUE_MODEM_SOURCE (source)->priv;
+
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_source_parent_class);
+        if (!base_class->start (source))
+                return FALSE;
+
+        if (priv->modem == NULL)
+                return TRUE;
+
+        priv->active_cancellable = g_cancellable_new ();
+        mm_modem_enable (priv->modem,
+                         priv->active_cancellable,
+                         on_modem_enabled,
+                         source);
+        return TRUE;
+}
+
+static gboolean
+gclue_modem_source_stop (GClueLocationSource *source)
+{
+        GClueModemSourcePrivate *priv = GCLUE_MODEM_SOURCE (source)->priv;
+        GClueLocationSourceClass *base_class;
+
+        g_return_val_if_fail (GCLUE_IS_MODEM_SOURCE (source), FALSE);
+
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_source_parent_class);
+        if (!base_class->stop (source))
+                return FALSE;
+
+        if (priv->modem == NULL)
+                return TRUE;
+
+        g_signal_handlers_disconnect_by_func (G_OBJECT (priv->modem_location),
+                                              G_CALLBACK (on_location_changed),
+                                              source);
+        g_cancellable_cancel (priv->active_cancellable);
+        g_clear_object (&priv->active_cancellable);
+        clear_caps (GCLUE_MODEM_SOURCE (source));
+
+        return TRUE;
+}
+
+static void
+refresh_accuracy_level (GClueModemSource *source)
+{
+        GClueAccuracyLevel new, existing;
+
+        existing = gclue_location_source_get_available_accuracy_level
+                        (GCLUE_LOCATION_SOURCE (source));
+        new = GCLUE_ACCURACY_LEVEL_NONE;
+
+        if (source->priv->mm_object != NULL) {
+                MMModemLocationSource req_caps;
+                GClueModemSourceClass *klass;
+
+                klass = GCLUE_MODEM_SOURCE_GET_CLASS (source);
+                req_caps = klass->get_req_modem_location_caps (source, NULL);
+                if (req_caps & (MM_MODEM_LOCATION_SOURCE_3GPP_LAC_CI |
+                                MM_MODEM_LOCATION_SOURCE_CDMA_BS))
+                        /* FIXME: This is the case of 3G source and that depends
+                           on network too so this level is only correct if
+                           network is available.
+                        */
+                        new = GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD;
+                if (req_caps & (MM_MODEM_LOCATION_SOURCE_GPS_RAW |
+                                MM_MODEM_LOCATION_SOURCE_GPS_NMEA))
+                        new = GCLUE_ACCURACY_LEVEL_EXACT;
+        }
+
+        if (new != existing) {
+                g_debug ("Available accuracy level from %s: %u",
+                         G_OBJECT_TYPE_NAME (source), new);
+                g_object_set (G_OBJECT (source),
+                              "available-accuracy-level", new,
+                              NULL);
+        }
 }
 
 static void
@@ -198,10 +297,15 @@ on_mm_object_added (GDBusObjectManager *manager,
         source->priv->modem = mm_object_get_modem (mm_object);
         source->priv->modem_location = mm_object_get_modem_location (mm_object);
 
-        mm_modem_enable (source->priv->modem,
-                         source->priv->cancellable,
-                         on_modem_enabled,
-                         user_data);
+        if (gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source))) {
+                source->priv->active_cancellable = g_cancellable_new ();
+                mm_modem_enable (source->priv->modem,
+                                 source->priv->active_cancellable,
+                                 on_modem_enabled,
+                                 user_data);
+        }
+
+        refresh_accuracy_level (source);
 }
 
 static void
@@ -214,10 +318,16 @@ on_mm_object_removed (GDBusObjectManager *manager,
 
         if (priv->mm_object == NULL || priv->mm_object != mm_object)
                 return;
+        g_debug ("Modem '%s' removed.", mm_object_get_path (priv->mm_object));
 
+        g_signal_handlers_disconnect_by_func (G_OBJECT (priv->modem_location),
+                                              G_CALLBACK (on_location_changed),
+                                              user_data);
         g_clear_object (&priv->mm_object);
         g_clear_object (&priv->modem);
         g_clear_object (&priv->modem_location);
+
+        refresh_accuracy_level (GCLUE_MODEM_SOURCE (user_data));
 }
 
 static void
@@ -291,6 +401,8 @@ static void
 gclue_modem_source_constructed (GObject *object)
 {
         GClueModemSourcePrivate *priv = GCLUE_MODEM_SOURCE (object)->priv;
+
+        G_OBJECT_CLASS (gclue_modem_source_parent_class)->constructed (object);
 
         priv->cancellable = g_cancellable_new ();
 

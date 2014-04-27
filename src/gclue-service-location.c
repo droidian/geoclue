@@ -90,12 +90,16 @@ gclue_service_location_get_property (GObject    *object,
         case PROP_LOCATION:
         {
                 GeocodeLocation *loc;
+                gdouble altitude;
 
                 loc = geocode_location_new_with_description
                         (gclue_location_get_latitude (location),
                          gclue_location_get_longitude (location),
                          gclue_location_get_accuracy (location),
                          gclue_location_get_description (location));
+                altitude = gclue_location_get_altitude (location);
+                if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
+                        g_object_set (loc, "altitude", altitude, NULL);
 
                 g_value_take_object (value, loc);
                 break;
@@ -131,6 +135,7 @@ gclue_service_location_set_property (GObject      *object,
         case PROP_LOCATION:
         {
                 GeocodeLocation *loc;
+                gdouble altitude;
 
                 loc = g_value_get_object (value);
                 gclue_location_set_latitude
@@ -141,6 +146,9 @@ gclue_service_location_set_property (GObject      *object,
                         (location, geocode_location_get_accuracy (loc));
                 gclue_location_set_description
                         (location, geocode_location_get_description (loc));
+                altitude = geocode_location_get_altitude (loc);
+                if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
+                        gclue_location_set_altitude (location, altitude);
                 break;
         }
 
@@ -325,6 +333,8 @@ gclue_service_location_init (GClueServiceLocation *location)
         location->priv = G_TYPE_INSTANCE_GET_PRIVATE (location,
                                                       GCLUE_TYPE_SERVICE_LOCATION,
                                                       GClueServiceLocationPrivate);
+        gclue_location_set_altitude (GCLUE_LOCATION (location),
+                                     GEOCODE_LOCATION_ALTITUDE_UNKNOWN);
 }
 
 static gboolean

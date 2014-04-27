@@ -4,10 +4,6 @@ libexec_PROGRAMS = geoclue
 
 SUBDIRS = public-api agent geocode-glib
 
-if BUILD_GEOIP_SERVER
-SUBDIRS += geoip-server
-endif # BUILD_GEOIP_SERVER
-
 interfacedir = $(datadir)/dbus-1/interfaces
 interface_DATA = org.freedesktop.GeoClue2.xml
 
@@ -48,8 +44,6 @@ libgeoclue_la_SOURCES =	 	 \
 	gclue-config.c 	 	 \
 	gclue-error.h 	 	 \
 	gclue-error.c 	 	 \
-	gclue-ipclient.h 	 \
-	gclue-ipclient.c 	 \
 	gclue-location-source.h	 \
 	gclue-location-source.c	 \
 	gclue-locator.h 	 \
@@ -62,11 +56,9 @@ libgeoclue_la_SOURCES =	 	 \
 	gclue-service-location.c \
 	gclue-web-source.c	 \
 	gclue-web-source.h	 \
+	gclue-wifi.h 		 \
+	gclue-wifi.c		 \
 	$(NULL)
-
-if BUILD_WIFI_SOURCE
-libgeoclue_la_SOURCES += gclue-wifi.h gclue-wifi.c
-endif
 
 if BUILD_MODEM_SOURCE
 libgeoclue_la_SOURCES += gclue-modem-source.c gclue-modem-source.h

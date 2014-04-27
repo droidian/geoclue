@@ -11,6 +11,7 @@
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Latitude">Latitude</link>     readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">Longitude</link>    readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">Accuracy</link>     readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">Altitude</link>     readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Description">Description</link>  readable   s
 </synopsis>
   </refsect1>
@@ -46,6 +47,16 @@ Longitude  readable   d
 Accuracy  readable   d
 </programlisting>
 <para>        The accuracy of the location fix, in meters.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">
+  <title>The "Altitude" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude"><primary sortas="Location:Altitude">org.freedesktop.GeoClue2.Location:Altitude</primary></indexterm>
+<programlisting>
+Altitude  readable   d
+</programlisting>
+<para>        The altitude of the location fix, in meters. When unknown, its set to
+        minimum double value, -1.7976931348623157e+308.
 </para>
 </refsect2>
 <refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Description">

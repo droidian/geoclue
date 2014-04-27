@@ -24,7 +24,7 @@
   <title role="desc.title">Description</title>
   <para>      This is the interface all application-authorizing agents must implement.
       There must be a separate agent object for every logged-in user on path
-      "/org/freedesktop/GeoClue2/Agent/${UID}".
+      "/org/freedesktop/GeoClue2/Agent".
 </para>
 </refsect1>
 <refsect1 role="details" id="gdbus-methods-org.freedesktop.GeoClue2.Agent">

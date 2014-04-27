@@ -53,11 +53,11 @@ gclue_modem_gps_finalize (GObject *ggps)
 {
         GClueModemGPSPrivate *priv = GCLUE_MODEM_GPS (ggps)->priv;
 
+        G_OBJECT_CLASS (gclue_modem_gps_parent_class)->finalize (ggps);
+
         g_cancellable_cancel (priv->cancellable);
         g_clear_object (&priv->cancellable);
         g_clear_object (&priv->gps_raw);
-
-        G_OBJECT_CLASS (gclue_modem_gps_parent_class)->finalize (ggps);
 }
 
 static void
@@ -167,7 +167,7 @@ on_get_gps_nmea_ready (GObject      *source_object,
         MMModemLocation *modem_location = MM_MODEM_LOCATION (source_object);
         MMLocationGpsNmea *location_nmea;
         GeocodeLocation *location;
-        gdouble latitude, longitude, accuracy;
+        gdouble latitude, longitude, accuracy, altitude;
         GError *error = NULL;
 
         location_nmea = mm_modem_location_get_gps_nmea_finish (modem_location,
@@ -187,12 +187,15 @@ on_get_gps_nmea_ready (GObject      *source_object,
 
         latitude = mm_location_gps_raw_get_latitude (priv->gps_raw);
         longitude = mm_location_gps_raw_get_longitude (priv->gps_raw);
+        altitude = mm_location_gps_raw_get_altitude (priv->gps_raw);
         g_clear_object (&priv->gps_raw);
 
         accuracy = get_accuracy_from_nmea (source, location_nmea);
         g_object_unref (location_nmea);
 
         location = geocode_location_new (latitude, longitude, accuracy);
+        if (altitude != MM_LOCATION_ALTITUDE_UNKNOWN)
+                g_object_set (location, "altitude", altitude, NULL);
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (source),
                                             location);
 }
@@ -216,6 +219,9 @@ on_get_gps_raw_ready (GObject      *source_object,
                 g_error_free (error);
                 return;
         }
+
+        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source)))
+                return;
 
         if (priv->gps_raw == NULL) {
                 g_debug ("No GPS");

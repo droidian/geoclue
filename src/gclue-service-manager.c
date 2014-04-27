@@ -28,6 +28,7 @@
 #include "gclue-client-info.h"
 #include "geoclue-agent-interface.h"
 #include "gclue-enums.h"
+#include "gclue-locator.h"
 #include "gclue-config.h"
 
 #define AGENT_WAIT_TIMEOUT      100    /* milliseconds */
@@ -54,13 +55,14 @@ struct _GClueServiceManagerPrivate
 
         guint num_clients;
         gint64 init_time;
+
+        GClueLocator *locator;
 };
 
 enum
 {
         PROP_0,
         PROP_CONNECTION,
-        PROP_CONNECTED_CLIENTS,
         LAST_PROP
 };
 
@@ -70,19 +72,19 @@ static void
 sync_in_use_property (GClueServiceManager *manager)
 {
         gboolean in_use = FALSE;
-        GList *l;
+        GList *clients, *l;
 
-        for (l = g_hash_table_get_values (manager->priv->clients);
-             l != NULL;
-             l = l->next) {
-                GClueServiceClient *client = GCLUE_SERVICE_CLIENT (l->data);
+        clients = g_hash_table_get_values (manager->priv->clients);
+        for (l = clients; l != NULL; l = l->next) {
+                GClueClient *client = GCLUE_CLIENT (l->data);
 
-                if (gclue_service_client_get_active (client)) {
+                if (gclue_client_get_active (client)) {
                         in_use = TRUE;
 
                         break;
                 }
         }
+        g_list_free (clients);
 
         if (in_use != gclue_manager_get_in_use (GCLUE_MANAGER (manager)))
                 gclue_manager_set_in_use (GCLUE_MANAGER (manager), in_use);
@@ -96,7 +98,8 @@ on_peer_vanished (GClueClientInfo *info,
 
         g_hash_table_remove (manager->priv->clients,
                              gclue_client_info_get_bus_name (info));
-        g_object_notify (G_OBJECT (manager), "connected-clients");
+        g_debug ("Number of connected clients: %u",
+                 g_hash_table_size (manager->priv->clients));
         sync_in_use_property (manager);
 }
 
@@ -136,7 +139,8 @@ complete_get_client (OnClientInfoNewReadyData *data)
         g_hash_table_insert (priv->clients,
                              g_strdup (gclue_client_info_get_bus_name (info)),
                              client);
-        g_object_notify (G_OBJECT (data->manager), "connected-clients");
+        g_debug ("Number of connected clients: %u",
+                 g_hash_table_size (priv->clients));
 
         g_signal_connect (info,
                           "peer-vanished",
@@ -159,6 +163,7 @@ out:
         g_clear_error (&error);
         g_clear_object (&info);
         g_slice_free (OnClientInfoNewReadyData, data);
+        g_free (path);
 
         return FALSE;
 }
@@ -382,6 +387,7 @@ gclue_service_manager_finalize (GObject *object)
 {
         GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (object)->priv;
 
+        g_clear_object (&priv->locator);
         g_clear_object (&priv->connection);
         g_clear_pointer (&priv->clients, g_hash_table_unref);
         g_clear_pointer (&priv->agents, g_hash_table_unref);
@@ -402,15 +408,6 @@ gclue_service_manager_get_property (GObject    *object,
         case PROP_CONNECTION:
                 g_value_set_object (value, manager->priv->connection);
                 break;
-
-        case PROP_CONNECTED_CLIENTS:
-        {
-                guint num;
-
-                num = gclue_service_manager_get_connected_clients (manager);
-                g_value_set_uint (value, num);
-                break;
-        }
 
         default:
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -436,11 +433,34 @@ gclue_service_manager_set_property (GObject      *object,
 }
 
 static void
+on_avail_accuracy_level_changed (GObject    *object,
+                                 GParamSpec *pspec,
+                                 gpointer    user_data)
+{
+        GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (user_data)->priv;
+        GClueAccuracyLevel level;
+
+        level = gclue_location_source_get_available_accuracy_level
+                        (GCLUE_LOCATION_SOURCE (priv->locator));
+        gclue_manager_set_available_accuracy_level (GCLUE_MANAGER (user_data),
+                                                    level);
+}
+
+static void
 gclue_service_manager_constructed (GObject *object)
 {
-        /* FIXME: We need to probe the sources, somehow */
-        gclue_manager_set_available_accuracy_level (GCLUE_MANAGER (object),
-                                                    GCLUE_ACCURACY_LEVEL_EXACT);
+        GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (object)->priv;
+
+        G_OBJECT_CLASS (gclue_service_manager_parent_class)->constructed (object);
+
+        priv->locator = gclue_locator_new (GCLUE_ACCURACY_LEVEL_EXACT);
+        g_signal_connect (G_OBJECT (priv->locator),
+                          "notify::available-accuracy-level",
+                          G_CALLBACK (on_avail_accuracy_level_changed),
+                          object);
+        on_avail_accuracy_level_changed (G_OBJECT (priv->locator),
+                                         NULL,
+                                         object);
 }
 
 static void
@@ -465,18 +485,6 @@ gclue_service_manager_class_init (GClueServiceManagerClass *klass)
         g_object_class_install_property (object_class,
                                          PROP_CONNECTION,
                                          gParamSpecs[PROP_CONNECTION]);
-
-        gParamSpecs[PROP_CONNECTED_CLIENTS] =
-                g_param_spec_uint ("connected-clients",
-                                   "ConnectedClients",
-                                   "Number of connected clients",
-                                   0,
-                                   G_MAXUINT,
-                                   0,
-                                   G_PARAM_READABLE);
-        g_object_class_install_property (object_class,
-                                         PROP_CONNECTED_CLIENTS,
-                                         gParamSpecs[PROP_CONNECTED_CLIENTS]);
 }
 
 static void
@@ -531,10 +539,4 @@ gclue_service_manager_new (GDBusConnection *connection,
                                error,
                                "connection", connection,
                                NULL);
-}
-
-guint
-gclue_service_manager_get_connected_clients (GClueServiceManager *manager)
-{
-        return g_hash_table_size (manager->priv->clients);
 }

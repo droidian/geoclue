@@ -216,3 +216,21 @@ gclue_config_get_wifi_submit_url (GClueConfig *config)
 
         return url;
 }
+
+char *
+gclue_config_get_wifi_submit_nick (GClueConfig *config)
+{
+        char *nick;
+        GError *error = NULL;
+
+        nick = g_key_file_get_string (config->priv->key_file,
+                                     "wifi",
+                                     "submission-nick",
+                                     &error);
+        if (error != NULL) {
+                g_debug ("No wifi submission nick: %s", error->message);
+                g_error_free (error);
+        }
+
+        return nick;
+}

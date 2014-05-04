@@ -1,3 +1,10 @@
+geoclue-2.0 (2.1.8-1) unstable; urgency=medium
+
+  * [be92d2de] Imported Upstream version 2.1.8
+  * [cd6b5b05] Rename --disable-wifi-source flag to --disable-network-manager
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 04 May 2014 21:14:19 +0200
+
 geoclue-2.0 (2.1.7-1) unstable; urgency=medium
 
   * [a9fca2b3] Imported Upstream version 2.1.7

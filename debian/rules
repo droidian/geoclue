@@ -12,6 +12,7 @@ override_dh_auto_configure:
                              --libexec=/usr/lib/geoclue-2.0 \
                              --with-dbus-service-user=geoclue \
                              --with-systemdsystemunitdir=/lib/systemd/system \
+                             --disable-silent-rules \
                              ${MM_NM_FLAGS}
 
 override_dh_auto_test:

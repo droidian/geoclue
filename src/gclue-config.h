@@ -64,9 +64,16 @@ gboolean            gclue_config_is_agent_allowed     (GClueConfig     *config,
 gboolean            gclue_config_is_app_allowed       (GClueConfig     *config,
                                                        const char      *desktop_id,
                                                        GClueClientInfo *app_info);
-char *              gclue_config_get_wifi_url         (GClueConfig     *config);
-char *              gclue_config_get_wifi_submit_url  (GClueConfig     *config);
-char *              gclue_config_get_wifi_submit_nick (GClueConfig     *config);
+gboolean            gclue_config_is_system_component  (GClueConfig     *config,
+                                                       const char      *desktop_id);
+const char *        gclue_config_get_wifi_url         (GClueConfig     *config);
+const char *        gclue_config_get_wifi_submit_url  (GClueConfig     *config);
+const char *        gclue_config_get_wifi_submit_nick (GClueConfig     *config);
+void                gclue_config_set_wifi_submit_nick (GClueConfig     *config,
+                                                       const char      *nick);
+gboolean            gclue_config_get_wifi_submit_data (GClueConfig     *config);
+void                gclue_config_set_wifi_submit_data (GClueConfig     *config,
+                                                       gboolean         submit);
 
 G_END_DECLS
 

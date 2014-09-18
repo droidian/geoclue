@@ -232,11 +232,13 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
         g_variant_get (changed_properties, "a{sv}", &iter);
         while (g_variant_iter_loop (iter, "{&sv}", &key, &value)) {
                 GClueAccuracyLevel max_accuracy;
+                GClueConfig *config;
                 const char *id;
 
                 if (strcmp (key, "MaxAccuracyLevel") != 0)
                         continue;
 
+                config = gclue_config_get_singleton ();
                 id = gclue_client_get_desktop_id (GCLUE_CLIENT (client));
                 max_accuracy = g_variant_get_uint32 (value);
                 /* FIXME: We should be handling all values of max accuracy
@@ -253,7 +255,8 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
                         start_client (client, accuracy);
                         g_debug ("Re-started '%s'.", id);
                 } else if (max_accuracy == 0 &&
-                           gclue_client_get_active (GCLUE_CLIENT (client))) {
+                           gclue_client_get_active (GCLUE_CLIENT (client)) &&
+                           !gclue_config_is_system_component (config, id)) {
                         stop_client (client);
                         client->priv->agent_stopped = TRUE;
                         g_debug ("Stopped '%s'.", id);
@@ -358,6 +361,7 @@ gclue_service_client_handle_start (GClueClient           *client,
 
         /* No agent == No authorization needed */
         if (priv->agent_proxy == NULL ||
+            gclue_config_is_system_component (config, desktop_id) ||
             gclue_config_is_app_allowed (config,
                                          desktop_id,
                                          priv->client_info)) {
@@ -409,6 +413,9 @@ gclue_service_client_finalize (GObject *object)
 
         g_clear_pointer (&priv->path, g_free);
         g_clear_object (&priv->connection);
+        g_signal_handlers_disconnect_by_func (priv->agent_proxy,
+                                              G_CALLBACK (on_agent_props_changed),
+                                              object);
         g_clear_object (&priv->agent_proxy);
         g_clear_object (&priv->locator);
         g_clear_object (&priv->location);

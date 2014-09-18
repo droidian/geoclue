@@ -90,6 +90,33 @@ on_location_proxy_ready (GObject      *source_object,
 }
 
 static void
+on_client_props_changed (GDBusProxy *client,
+                         GVariant   *changed_properties,
+                         GStrv       invalidated_properties,
+                         gpointer    user_data)
+{
+        GVariantIter *iter;
+        const gchar *key;
+        GVariant *value;
+
+        if (g_variant_n_children (changed_properties) <= 0)
+                return;
+
+        g_variant_get (changed_properties, "a{sv}", &iter);
+        while (g_variant_iter_loop (iter, "{&sv}", &key, &value)) {
+
+                if (g_strcmp0 (key, "Active") != 0)
+                        continue;
+
+                if (!g_variant_get_boolean (value)) {
+                        g_print ("Geolocation disabled. Quiting..\n");
+                        on_location_timeout (client);
+                }
+        }
+        g_variant_iter_free (iter);
+}
+
+static void
 on_client_signal (GDBusProxy *client,
                   gchar      *sender_name,
                   gchar      *signal_name,
@@ -150,6 +177,8 @@ on_client_proxy_ready (GObject      *source_object,
 
         g_signal_connect (client, "g-signal",
                           G_CALLBACK (on_client_signal), user_data);
+        g_signal_connect (client, "g-properties-changed",
+                          G_CALLBACK (on_client_props_changed), user_data);
 
         g_dbus_proxy_call (client,
                            "Start",

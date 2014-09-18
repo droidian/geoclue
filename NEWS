@@ -1,3 +1,32 @@
+2.1.9
+=====
+
+- Move from NetworkManager to direct use of wpa_supplicant to retreive WiFI
+  data, for greater portability.
+- Port from opencellid.org to Mozilla Location Service for 3G-geolocation.
+- Network data submission
+  - Explicit option in config to enable submission.
+  - Commandline options to enable network data submission and set nickname.
+  - Submit 3G data.
+  - Submit under 'geoclue' nick by default.
+- Fix a few crashes.
+- Drop now redundant workaround for pure geoip queries.
+- Ability to mark an app as system component in the config so that
+  - Agent can't decide its accuracy level nor agent is asked to authorize it.
+    This mean automatic timezone in GNOME will continue working even if you
+    disable geolocation.
+  - app is not taken into account for 'InUse' property. That means you will no
+    longer have to see location crosshair in gnome-shell's topbar forever just
+    because you have automatic timezone enabled.
+- Exit demo app if geoclue deactivates it.
+- Improved debug log.
+- Many other internal changes and minor improvements.
+
+Dependency-related changes:
+
+- Drop libnm-glib dependency
+- Drop libxml2 dependency
+
 2.1.8
 =====
 

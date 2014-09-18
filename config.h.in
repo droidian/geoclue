@@ -9,9 +9,6 @@
 /* Build modem GPS source? */
 #undef GCLUE_USE_MODEM_GPS_SOURCE
 
-/* Use NetowrkManager? */
-#undef GCLUE_USE_NETWORK_MANAGER
-
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 

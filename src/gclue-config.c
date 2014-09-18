@@ -30,9 +30,36 @@
 
 G_DEFINE_TYPE (GClueConfig, gclue_config, G_TYPE_OBJECT)
 
+typedef struct
+{
+        char *id;
+        gboolean allowed;
+        gboolean system;
+        int* users;
+        gsize num_users;
+} AppConfig;
+
+static void
+app_config_free (AppConfig *app_config)
+{
+        g_free (app_config->id);
+        g_free (app_config->users);
+        g_slice_free (AppConfig, app_config);
+}
+
 struct _GClueConfigPrivate
 {
         GKeyFile *key_file;
+
+        char **agents;
+        gsize num_agents;
+
+        char *wifi_url;
+        gboolean wifi_submit;
+        char *wifi_submit_url;
+        char *wifi_submit_nick;
+
+        GList *app_configs;
 };
 
 static void
@@ -43,6 +70,12 @@ gclue_config_finalize (GObject *object)
         priv = GCLUE_CONFIG (object)->priv;
 
         g_clear_pointer (&priv->key_file, g_key_file_unref);
+        g_clear_pointer (&priv->agents, g_strfreev);
+        g_clear_pointer (&priv->wifi_url, g_free);
+        g_clear_pointer (&priv->wifi_submit_url, g_free);
+        g_clear_pointer (&priv->wifi_submit_nick, g_free);
+
+        g_list_foreach (priv->app_configs, (GFunc) app_config_free, NULL);
 
         G_OBJECT_CLASS (gclue_config_parent_class)->finalize (object);
 }
@@ -55,6 +88,147 @@ gclue_config_class_init (GClueConfigClass *klass)
         object_class = G_OBJECT_CLASS (klass);
         object_class->finalize = gclue_config_finalize;
         g_type_class_add_private (object_class, sizeof (GClueConfigPrivate));
+}
+
+static void
+load_agent_config (GClueConfig *config)
+{
+        GClueConfigPrivate *priv = config->priv;
+        GError *error = NULL;
+
+        priv->agents = g_key_file_get_string_list (priv->key_file,
+                                                   "agent",
+                                                   "whitelist",
+                                                   &priv->num_agents,
+                                                   &error);
+        if (error != NULL) {
+                g_critical ("Failed to read 'agent/whitelist' key: %s",
+                            error->message);
+                g_error_free (error);
+        }
+}
+
+static void
+load_app_configs (GClueConfig *config)
+{
+        const char *known_groups[] = { "agent", "wifi", NULL };
+        GClueConfigPrivate *priv = config->priv;
+        gsize num_groups = 0, i;
+        char **groups;
+
+        groups = g_key_file_get_groups (priv->key_file, &num_groups);
+        if (num_groups == 0)
+                return;
+
+        for (i = 0; i < num_groups; i++) {
+                AppConfig *app_config;
+                int* users;
+                gsize num_users = 0, j;
+                gboolean allowed, system;
+                gboolean ignore = FALSE;
+                GError *error = NULL;
+
+                for (j = 0; known_groups[j] != NULL; j++)
+                        if (strcmp (groups[i], known_groups[j]) == 0) {
+                                ignore = TRUE;
+
+                                continue;
+                        }
+
+                if (ignore)
+                        continue;
+
+                allowed = g_key_file_get_boolean (priv->key_file,
+                                                  groups[i],
+                                                  "allowed",
+                                                  &error);
+                if (error != NULL)
+                        goto error_out;
+
+                system = g_key_file_get_boolean (priv->key_file,
+                                                 groups[i],
+                                                 "system",
+                                                 &error);
+                if (error != NULL)
+                        goto error_out;
+
+                users = g_key_file_get_integer_list (priv->key_file,
+                                                     groups[i],
+                                                     "users",
+                                                     &num_users,
+                                                     &error);
+                if (error != NULL)
+                        goto error_out;
+
+                app_config = g_slice_new0 (AppConfig);
+                app_config->id = g_strdup (groups[i]);
+                app_config->allowed = allowed;
+                app_config->system = system;
+                app_config->users = users;
+                app_config->num_users = num_users;
+
+                priv->app_configs = g_list_prepend (priv->app_configs, app_config);
+
+                continue;
+error_out:
+                g_warning ("Failed to load configuration for app '%s': %s",
+                           groups[i],
+                           error->message);
+                g_error_free (error);
+        }
+
+        g_strfreev (groups);
+}
+
+#define DEFAULT_WIFI_URL "https://location.services.mozilla.com/v1/geolocate?key=geoclue"
+#define DEFAULT_WIFI_SUBMIT_URL "https://location.services.mozilla.com/v1/submit?key=geoclue"
+
+static void
+load_wifi_config (GClueConfig *config)
+{
+        GClueConfigPrivate *priv = config->priv;
+        GError *error = NULL;
+
+        priv->wifi_url = g_key_file_get_string (priv->key_file,
+                                                "wifi",
+                                                "url",
+                                                &error);
+        if (error != NULL) {
+                g_warning ("%s", error->message);
+                g_clear_error (&error);
+                priv->wifi_url = g_strdup (DEFAULT_WIFI_URL);
+        }
+
+        priv->wifi_submit = g_key_file_get_boolean (priv->key_file,
+                                                    "wifi",
+                                                    "submit-data",
+                                                    &error);
+        if (error != NULL) {
+                g_debug ("Failed to get config wifi/submit-data: %s",
+                         error->message);
+                g_error_free (error);
+
+                return;
+        }
+
+        priv->wifi_submit_url = g_key_file_get_string (priv->key_file,
+                                                       "wifi",
+                                                       "submission-url",
+                                                       &error);
+        if (error != NULL) {
+                g_debug ("No wifi submission URL: %s", error->message);
+                g_error_free (error);
+                priv->wifi_submit_url = g_strdup (DEFAULT_WIFI_SUBMIT_URL);
+        }
+
+        priv->wifi_submit_nick = g_key_file_get_string (priv->key_file,
+                                                        "wifi",
+                                                        "submission-nick",
+                                                        &error);
+        if (error != NULL) {
+                g_debug ("No wifi submission nick: %s", error->message);
+                g_error_free (error);
+        }
 }
 
 static void
@@ -75,7 +249,13 @@ gclue_config_init (GClueConfig *config)
                 g_critical ("Failed to load configuration file '%s': %s",
                             CONFIG_FILE_PATH, error->message);
                 g_error_free (error);
+
+                return;
         }
+
+        load_agent_config (config);
+        load_app_configs (config);
+        load_wifi_config (config);
 }
 
 GClueConfig *
@@ -94,35 +274,14 @@ gclue_config_is_agent_allowed (GClueConfig     *config,
                                const char      *desktop_id,
                                GClueClientInfo *agent_info)
 {
-        GClueConfigPrivate *priv = config->priv;
-        char **agents;
-        gsize num_agents, i;
-        gboolean allowed = FALSE;
-        GError *error = NULL;
+        gsize i;
 
-        agents = g_key_file_get_string_list (priv->key_file,
-                                             "agent",
-                                             "whitelist",
-                                             &num_agents,
-                                             &error);
-        if (error != NULL) {
-                g_critical ("Failed to read 'agent/whitelist' key: %s",
-                            error->message);
-                g_error_free (error);
-
-                return FALSE;
+        for (i = 0; i < config->priv->num_agents; i++) {
+                if (g_strcmp0 (desktop_id, config->priv->agents[i]) == 0)
+                        return TRUE;
         }
 
-        for (i = 0; i < num_agents; i++) {
-                if (g_strcmp0 (desktop_id, agents[i]) == 0) {
-                        allowed = TRUE;
-
-                        break;
-                }
-        }
-        g_strfreev (agents);
-
-        return allowed;
+        return FALSE;
 }
 
 gboolean
@@ -131,106 +290,97 @@ gclue_config_is_app_allowed (GClueConfig     *config,
                              GClueClientInfo *app_info)
 {
         GClueConfigPrivate *priv = config->priv;
-        int* users = NULL;
+        GList *node;
+        AppConfig *app_config = NULL;
+        gsize i;
         guint64 uid;
-        gsize num_users, i;
-        gboolean allowed = FALSE;
-        GError *error = NULL;
 
         g_return_val_if_fail (desktop_id != NULL, FALSE);
 
-        allowed = g_key_file_get_boolean (priv->key_file,
-                                          desktop_id,
-                                          "allowed",
-                                          &error);
-        if (error != NULL || !allowed) {
-                g_debug ("'%s' not in configuration or not allowed", desktop_id);
-                goto out;
-        }
-
-        uid = gclue_client_info_get_user_id (app_info);
-        users = g_key_file_get_integer_list (priv->key_file,
-                                             desktop_id,
-                                             "users",
-                                             &num_users,
-                                             &error);
-        if (error != NULL) {
-                g_warning ("%s", error->message);
-                goto out;
-        }
-        if (num_users == 0) {
-                allowed = TRUE;
-                goto out;
-        }
-
-        for (i = 0; i < num_users; i++) {
-                if (users[i] == uid) {
-                        allowed = TRUE;
+        for (node = priv->app_configs; node != NULL; node = node->next) {
+                if (strcmp (((AppConfig *) node->data)->id, desktop_id) == 0) {
+                        app_config = (AppConfig *) node->data;
 
                         break;
                 }
         }
 
-out:
-        g_clear_pointer (&users, g_free);
-        g_clear_error (&error);
+        if (app_config == NULL || !app_config->allowed) {
+                g_debug ("'%s' not in configuration or not allowed", desktop_id);
 
-        return allowed;
+                return FALSE;
+        }
+
+        if (app_config->num_users == 0)
+                return TRUE;
+
+        uid = gclue_client_info_get_user_id (app_info);
+
+        for (i = 0; i < app_config->num_users; i++) {
+                if (app_config->users[i] == uid)
+                        return TRUE;
+        }
+
+        return FALSE;
 }
 
-#define DEFAULT_WIFI_URL "https://location.services.mozilla.com/v1/geolocate?key=geoclue"
+gboolean
+gclue_config_is_system_component (GClueConfig *config,
+                                  const char  *desktop_id)
+{
+        GClueConfigPrivate *priv = config->priv;
+        GList *node;
+        AppConfig *app_config = NULL;
 
-char *
+        g_return_val_if_fail (desktop_id != NULL, FALSE);
+
+        for (node = priv->app_configs; node != NULL; node = node->next) {
+                if (strcmp (((AppConfig *) node->data)->id, desktop_id) == 0) {
+                        app_config = (AppConfig *) node->data;
+
+                        break;
+                }
+        }
+
+        return (app_config != NULL && app_config->system);
+}
+
+const char *
 gclue_config_get_wifi_url (GClueConfig *config)
 {
-        char *url;
-        GError *error = NULL;
-
-        url = g_key_file_get_string (config->priv->key_file,
-                                     "wifi",
-                                     "url",
-                                     &error);
-        if (error != NULL) {
-                g_warning ("%s", error->message);
-                g_error_free (error);
-                url = g_strdup (DEFAULT_WIFI_URL);
-        }
-
-        return url;
+        return config->priv->wifi_url;
 }
 
-char *
+const char *
 gclue_config_get_wifi_submit_url (GClueConfig *config)
 {
-        char *url;
-        GError *error = NULL;
-
-        url = g_key_file_get_string (config->priv->key_file,
-                                     "wifi",
-                                     "submission-url",
-                                     &error);
-        if (error != NULL) {
-                g_debug ("No wifi submission URL: %s", error->message);
-                g_error_free (error);
-        }
-
-        return url;
+        return config->priv->wifi_submit_url;
 }
 
-char *
+const char *
 gclue_config_get_wifi_submit_nick (GClueConfig *config)
 {
-        char *nick;
-        GError *error = NULL;
+        return config->priv->wifi_submit_nick;
+}
 
-        nick = g_key_file_get_string (config->priv->key_file,
-                                     "wifi",
-                                     "submission-nick",
-                                     &error);
-        if (error != NULL) {
-                g_debug ("No wifi submission nick: %s", error->message);
-                g_error_free (error);
-        }
+void
+gclue_config_set_wifi_submit_nick (GClueConfig *config,
+                                   const char  *nick)
+{
 
-        return nick;
+        config->priv->wifi_submit_nick = g_strdup (nick);
+}
+
+gboolean
+gclue_config_get_wifi_submit_data (GClueConfig *config)
+{
+        return config->priv->wifi_submit;
+}
+
+void
+gclue_config_set_wifi_submit_data (GClueConfig *config,
+                                   gboolean     submit)
+{
+
+        config->priv->wifi_submit = submit;
 }

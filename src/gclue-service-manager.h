@@ -55,8 +55,9 @@ struct _GClueServiceManagerClass
 
 GType gclue_service_manager_get_type (void) G_GNUC_CONST;
 
-GClueServiceManager * gclue_service_manager_new                   (GDBusConnection *connection,
-                                                                   GError         **error);
+GClueServiceManager * gclue_service_manager_new        (GDBusConnection *connection,
+                                                        GError         **error);
+gboolean              gclue_service_manager_get_active (GClueServiceManager *manager);
 
 G_END_DECLS
 

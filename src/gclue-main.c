@@ -27,12 +27,15 @@
 #include <stdlib.h>
 
 #include "gclue-service-manager.h"
+#include "gclue-config.h"
 
 #define BUS_NAME "org.freedesktop.GeoClue2"
 
 /* Commandline options */
-static gboolean version;
+static gboolean version = FALSE;
 static gint inactivity_timeout = 0;
+static gboolean submit_data = FALSE;
+static char *submit_nick = NULL;
 
 static GOptionEntry entries[] =
 {
@@ -50,6 +53,20 @@ static GOptionEntry entries[] =
           &inactivity_timeout,
           N_("Exit after T seconds of inactivity. Default: 0 (never)"),
           "T" },
+        { "submit-data",
+          's',
+          0,
+          G_OPTION_ARG_NONE,
+          &submit_data,
+          N_("Enable submission of network data"),
+          NULL },
+        { "submit-nick",
+          'n',
+          0,
+          G_OPTION_ARG_STRING,
+          &submit_nick,
+          N_("Nickname to submit network data under (2-32 characters)"),
+          "NICK" },
         { NULL }
 };
 
@@ -66,20 +83,21 @@ on_inactivity_timeout (gpointer user_data)
 }
 
 static void
-on_in_use_notify (GObject    *gobject,
+on_active_notify (GObject    *gobject,
                   GParamSpec *pspec,
                   gpointer    user_data)
 {
-        gboolean in_use;
+        GClueServiceManager *manager = GCLUE_SERVICE_MANAGER (gobject);
+        gboolean active;
 
-        in_use = gclue_manager_get_in_use (GCLUE_MANAGER (gobject));
+        active = gclue_service_manager_get_active (manager);
 
         if (inactivity_timeout <= 0)
                 return;
 
-        g_debug ("Service %s in use", in_use? "now" : "not");
+        g_debug ("Service %s in use", active? "now" : "not");
 
-        if (!in_use)
+        if (!active)
                 inactivity_timeout_id =
                         g_timeout_add_seconds (inactivity_timeout,
                                                on_inactivity_timeout,
@@ -106,8 +124,8 @@ on_bus_acquired (GDBusConnection *connection,
         }
 
         g_signal_connect (manager,
-                          "notify::in-use",
-                          G_CALLBACK (on_in_use_notify),
+                          "notify::active",
+                          G_CALLBACK (on_active_notify),
                           NULL);
 
         if (inactivity_timeout > 0)
@@ -133,6 +151,7 @@ main (int argc, char **argv)
         guint owner_id;
         GError *error = NULL;
         GOptionContext *context;
+        GClueConfig *config;
 
         setlocale (LC_ALL, "");
 
@@ -153,6 +172,12 @@ main (int argc, char **argv)
                 g_print ("%s\n", PACKAGE_VERSION);
                 exit (0);
         }
+
+        config = gclue_config_get_singleton ();
+        if (submit_data)
+                gclue_config_set_wifi_submit_data (config, submit_data);
+        if (submit_nick != NULL)
+                gclue_config_set_wifi_submit_nick (config, submit_nick);
 
         owner_id = g_bus_own_name (G_BUS_TYPE_SYSTEM,
                                    BUS_NAME,

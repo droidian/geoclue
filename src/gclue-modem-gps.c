@@ -23,6 +23,7 @@
 #include <glib.h>
 #include <string.h>
 #include "gclue-modem-gps.h"
+#include "gclue-modem.h"
 #include "geocode-glib/geocode-location.h"
 
 /**
@@ -34,19 +35,76 @@
  **/
 
 struct _GClueModemGPSPrivate {
-        MMLocationGpsRaw *gps_raw;
+        GClueModem *modem;
 
         GCancellable *cancellable;
+
+        gulong gps_notify_id;
 };
 
-static MMModemLocationSource
-gclue_modem_gps_get_req_modem_location_caps (GClueModemSource *source,
-                                             const char      **caps_name);
-static void
-gclue_modem_gps_modem_location_changed (GClueModemSource *source,
-                                        MMModemLocation  *modem_location);
 
-G_DEFINE_TYPE (GClueModemGPS, gclue_modem_gps, GCLUE_TYPE_MODEM_SOURCE)
+G_DEFINE_TYPE (GClueModemGPS, gclue_modem_gps, GCLUE_TYPE_LOCATION_SOURCE)
+
+static gboolean
+gclue_modem_gps_start (GClueLocationSource *source);
+static gboolean
+gclue_modem_gps_stop (GClueLocationSource *source);
+
+static void
+refresh_accuracy_level (GClueModemGPS *source)
+{
+        GClueAccuracyLevel new, existing;
+
+        existing = gclue_location_source_get_available_accuracy_level
+                        (GCLUE_LOCATION_SOURCE (source));
+
+        if (gclue_modem_get_is_gps_available (source->priv->modem))
+                new = GCLUE_ACCURACY_LEVEL_EXACT;
+        else
+                new = GCLUE_ACCURACY_LEVEL_NONE;
+
+        if (new != existing) {
+                g_debug ("Available accuracy level from %s: %u",
+                         G_OBJECT_TYPE_NAME (source), new);
+                g_object_set (G_OBJECT (source),
+                              "available-accuracy-level", new,
+                              NULL);
+        }
+}
+
+static void
+on_gps_enabled (GObject      *source_object,
+                GAsyncResult *result,
+                gpointer      user_data)
+{
+        GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
+        GError *error = NULL;
+
+        if (!gclue_modem_enable_gps_finish (source->priv->modem,
+                                            result,
+                                            &error)) {
+                g_warning ("Failed to enable GPS: %s", error->message);
+                g_error_free (error);
+        }
+}
+
+static void
+on_is_gps_available_notify (GObject    *gobject,
+                            GParamSpec *pspec,
+                            gpointer    user_data)
+{
+        GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
+        GClueModemGPSPrivate *priv = source->priv;
+
+        refresh_accuracy_level (source);
+
+        if (gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source)) &&
+            gclue_modem_get_is_gps_available (priv->modem))
+                gclue_modem_enable_gps (priv->modem,
+                                       priv->cancellable,
+                                       on_gps_enabled,
+                                       source);
+}
 
 static void
 gclue_modem_gps_finalize (GObject *ggps)
@@ -55,22 +113,25 @@ gclue_modem_gps_finalize (GObject *ggps)
 
         G_OBJECT_CLASS (gclue_modem_gps_parent_class)->finalize (ggps);
 
+        g_signal_handler_disconnect (priv->modem,
+                                     priv->gps_notify_id);
+        priv->gps_notify_id = 0;
+
         g_cancellable_cancel (priv->cancellable);
         g_clear_object (&priv->cancellable);
-        g_clear_object (&priv->gps_raw);
+        g_clear_object (&priv->modem);
 }
 
 static void
 gclue_modem_gps_class_init (GClueModemGPSClass *klass)
 {
-        GClueModemSourceClass *source_class = GCLUE_MODEM_SOURCE_CLASS (klass);
+        GClueLocationSourceClass *source_class = GCLUE_LOCATION_SOURCE_CLASS (klass);
         GObjectClass *ggps_class = G_OBJECT_CLASS (klass);
 
-        source_class->get_req_modem_location_caps =
-                gclue_modem_gps_get_req_modem_location_caps;
-        source_class->modem_location_changed =
-                gclue_modem_gps_modem_location_changed;
         ggps_class->finalize = gclue_modem_gps_finalize;
+
+        source_class->start = gclue_modem_gps_start;
+        source_class->stop = gclue_modem_gps_stop;
 
         g_type_class_add_private (klass, sizeof (GClueModemGPSPrivate));
 }
@@ -78,9 +139,19 @@ gclue_modem_gps_class_init (GClueModemGPSClass *klass)
 static void
 gclue_modem_gps_init (GClueModemGPS *source)
 {
-        source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source), GCLUE_TYPE_MODEM_GPS, GClueModemGPSPrivate);
+        GClueModemGPSPrivate *priv;
 
-        source->priv->cancellable = g_cancellable_new ();
+        source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source), GCLUE_TYPE_MODEM_GPS, GClueModemGPSPrivate);
+        priv = source->priv;
+
+        priv->cancellable = g_cancellable_new ();
+
+        priv->modem = gclue_modem_get_singleton ();
+        priv->gps_notify_id =
+                        g_signal_connect (priv->modem,
+                                          "notify::is-gps-available",
+                                          G_CALLBACK (on_is_gps_available_notify),
+                                          source);
 }
 
 static void
@@ -117,29 +188,8 @@ gclue_modem_gps_get_singleton (void)
 }
 
 static gdouble
-get_accuracy_from_nmea (GClueModemGPS     *source,
-                        MMLocationGpsNmea *location_nmea)
+get_accuracy_from_hdop (gdouble hdop)
 {
-        const char *gga;
-        gdouble hdop; /* Horizontal Dilution Of Precision */
-        char **parts;
-
-        gga = mm_location_gps_nmea_get_trace (location_nmea, "$GPGGA");
-        if (gga == NULL) {
-                g_warning ("Failed to find GGA sentence:\n");
-                return 300;
-        }
-
-        parts = g_strsplit (gga, ",", -1);
-        if (g_strv_length (parts) < 14 ) {
-                g_warning ("Failed to parse NMEA GGA sentence:\n%s", gga);
-                g_strfreev (parts);
-                return 300;
-        }
-
-        hdop = g_ascii_strtod (parts[8], NULL);
-        g_strfreev (parts);
-
         /* FIXME: These are really just rough estimates based on:
          *        http://en.wikipedia.org/wiki/Dilution_of_precision_%28GPS%29#Meaning_of_DOP_Values
          */
@@ -157,100 +207,155 @@ get_accuracy_from_nmea (GClueModemGPS     *source,
                 return 300;
 }
 
+#define INVALID_COORDINATE -G_MAXDOUBLE
+
+static gdouble
+parse_coordinate_string (const char *coordinate,
+                         const char *direction)
+{
+        gdouble minutes, degrees, out;
+        gchar *degrees_str;
+
+        if (coordinate[0] == '\0' ||
+            direction[0] == '\0' ||
+            direction[0] == '\0')
+                return INVALID_COORDINATE;
+
+        if (direction[0] != 'N' &&
+            direction[0] != 'S' &&
+            direction[0] != 'E' &&
+            direction[0] != 'W') {
+                g_warning ("Unknown direction '%s' for coordinates, ignoring..",
+                           direction);
+                return INVALID_COORDINATE;
+        }
+
+        degrees_str = g_strndup (coordinate, 2);
+        degrees = g_ascii_strtod (degrees_str, NULL);
+        g_free (degrees_str);
+
+        minutes = g_ascii_strtod (coordinate + 2, NULL);
+
+        /* Include the minutes as part of the degrees */
+        out = degrees + (minutes / 60.0);
+
+        if (direction[0] == 'S' || direction[0] == 'W')
+                out = 0 - out;
+
+        return out;
+}
+
+static gdouble
+parse_altitude_string (const char *altitude,
+                       const char *unit)
+{
+        if (altitude[0] == '\0' || unit[0] == '\0')
+                return GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
+
+        if (unit[0] != 'M') {
+                g_warning ("Unknown unit '%s' for altitude, ignoring..",
+                           unit);
+
+                return GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
+        }
+
+        return g_ascii_strtod (altitude, NULL);
+}
+
 static void
-on_get_gps_nmea_ready (GObject      *source_object,
-                       GAsyncResult *res,
-                       gpointer      user_data)
+on_fix_gps (GClueModem *modem,
+            const char *gga,
+            gpointer    user_data)
 {
         GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
-        GClueModemGPSPrivate *priv = source->priv;
-        MMModemLocation *modem_location = MM_MODEM_LOCATION (source_object);
-        MMLocationGpsNmea *location_nmea;
         GeocodeLocation *location;
         gdouble latitude, longitude, accuracy, altitude;
-        GError *error = NULL;
+        gdouble hdop; /* Horizontal Dilution Of Precision */
+        char **parts;
 
-        location_nmea = mm_modem_location_get_gps_nmea_finish (modem_location,
-                                                               res,
-                                                               &error);
-        if (error != NULL) {
-                g_warning ("Failed to get location from NMEA information: %s",
-                           error->message);
-                g_error_free (error);
-                return;
+        parts = g_strsplit (gga, ",", -1);
+        if (g_strv_length (parts) < 14 ) {
+                g_warning ("Failed to parse NMEA GGA sentence:\n%s", gga);
+
+                goto out;
         }
 
-        if (location_nmea == NULL) {
-                g_debug ("No NMEA");
-                return;
-        }
+        /* For sentax of GGA senentences:
+         * http://www.gpsinformation.org/dale/nmea.htm#GGA
+         */
+        latitude = parse_coordinate_string (parts[2], parts[3]);
+        longitude = parse_coordinate_string (parts[4], parts[5]);
+        if (latitude == INVALID_COORDINATE || longitude == INVALID_COORDINATE)
+                goto out;
 
-        latitude = mm_location_gps_raw_get_latitude (priv->gps_raw);
-        longitude = mm_location_gps_raw_get_longitude (priv->gps_raw);
-        altitude = mm_location_gps_raw_get_altitude (priv->gps_raw);
-        g_clear_object (&priv->gps_raw);
+        altitude = parse_altitude_string (parts[9], parts[10]);
+        if (altitude == GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
+                goto out;
 
-        accuracy = get_accuracy_from_nmea (source, location_nmea);
-        g_object_unref (location_nmea);
+        hdop = g_ascii_strtod (parts[8], NULL);
+        accuracy = get_accuracy_from_hdop (hdop);
 
         location = geocode_location_new (latitude, longitude, accuracy);
-        if (altitude != MM_LOCATION_ALTITUDE_UNKNOWN)
+        if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
                 g_object_set (location, "altitude", altitude, NULL);
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (source),
                                             location);
+out:
+        g_strfreev (parts);
 }
 
-static void
-on_get_gps_raw_ready (GObject      *source_object,
-                      GAsyncResult *res,
-                      gpointer      user_data)
+static gboolean
+gclue_modem_gps_start (GClueLocationSource *source)
 {
-        GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
-        GClueModemGPSPrivate *priv = source->priv;
-        MMModemLocation *modem_location = MM_MODEM_LOCATION (source_object);
+        GClueLocationSourceClass *base_class;
+        GClueModemGPSPrivate *priv;
+
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
+        priv = GCLUE_MODEM_GPS (source)->priv;
+
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_gps_parent_class);
+        if (!base_class->start (source))
+                return FALSE;
+
+        g_signal_connect (priv->modem,
+                          "fix-gps",
+                          G_CALLBACK (on_fix_gps),
+                          source);
+
+        if (gclue_modem_get_is_gps_available (priv->modem))
+                gclue_modem_enable_gps (priv->modem,
+                                        priv->cancellable,
+                                        on_gps_enabled,
+                                        source);
+
+        return TRUE;
+}
+
+static gboolean
+gclue_modem_gps_stop (GClueLocationSource *source)
+{
+        GClueModemGPSPrivate *priv = GCLUE_MODEM_GPS (source)->priv;
+        GClueLocationSourceClass *base_class;
         GError *error = NULL;
 
-        priv->gps_raw = mm_modem_location_get_gps_raw_finish (modem_location,
-                                                              res,
-                                                              &error);
-        if (error != NULL) {
-                g_warning ("Failed to get location from 3GPP: %s",
-                           error->message);
-                g_error_free (error);
-                return;
-        }
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
 
-        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source)))
-                return;
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_gps_parent_class);
+        if (!base_class->stop (source))
+                return FALSE;
 
-        if (priv->gps_raw == NULL) {
-                g_debug ("No GPS");
-                return;
-        }
+        g_signal_handlers_disconnect_by_func (G_OBJECT (priv->modem),
+                                              G_CALLBACK (on_fix_gps),
+                                              source);
 
-        mm_modem_location_get_gps_nmea (modem_location,
-                                        source->priv->cancellable,
-                                        on_get_gps_nmea_ready,
-                                        source);
-}
+        if (gclue_modem_get_is_gps_available (priv->modem))
+                if (!gclue_modem_disable_gps (priv->modem,
+                                              priv->cancellable,
+                                              &error)) {
+                        g_warning ("Failed to disable GPS: %s",
+                                   error->message);
+                        g_error_free (error);
+                }
 
-static void
-gclue_modem_gps_modem_location_changed (GClueModemSource *source,
-                                        MMModemLocation  *modem_location)
-{
-        mm_modem_location_get_gps_raw (modem_location,
-                                       GCLUE_MODEM_GPS (source)->priv->cancellable,
-                                       on_get_gps_raw_ready,
-                                       source);
-}
-
-static MMModemLocationSource
-gclue_modem_gps_get_req_modem_location_caps (GClueModemSource *source,
-                                             const char      **caps_name)
-{
-        if (caps_name != NULL)
-                *caps_name = "GPS";
-
-        return MM_MODEM_LOCATION_SOURCE_GPS_RAW |
-               MM_MODEM_LOCATION_SOURCE_GPS_NMEA;
+        return TRUE;
 }

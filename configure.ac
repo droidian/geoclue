@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.8],
+        [2.1.9],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -40,9 +40,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext d
 GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
 GEOIP_MIN_VERSION=1.5.1
-LIBNM_GLIB_MIN_VERSION=0.9.8.0
 LIBMM_GLIB_MIN_VERSION=1.0
-LIBXML_MIN_VERSION=2.7
 
 AC_CHECK_LIB([m],[sin])
 
@@ -57,7 +55,6 @@ PKG_CHECK_MODULES(GEOCLUE, [
   gio-unix-2.0 >= $GLIB_MIN_VERSION
   json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
   libsoup-2.4
-  libxml-2.0 >= $LIBXML_MIN_VERSION
 ])
 
 # 3G source
@@ -83,17 +80,6 @@ else
   AC_DEFINE([GCLUE_USE_MODEM_GPS_SOURCE], [0], [Build modem GPS source?])
 fi
 AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "$build_modem_gps_source" = "yes"])
-
-# NetworkManager
-AC_ARG_ENABLE(network-manager,
-              AS_HELP_STRING([--disable-network-manager], [Disable use of NetworkManager)]),
-              [use_nm=$enableval], [use_nm=yes])
-if test "$use_nm" = "yes"; then
-  PKG_CHECK_MODULES(NetworkManager, libnm-glib >= $LIBNM_GLIB_MIN_VERSION)
-  AC_DEFINE([GCLUE_USE_NETWORK_MANAGER], [1], [Use NetowrkManager?])
-else
-  AC_DEFINE([GCLUE_USE_NETWORK_MANAGER], [0], [Use NetowrkManager?])
-fi
 
 # Modem source is used in common by GPS and 3G sources
 if test "$build_modem_source" = "yes"; then
@@ -175,6 +161,9 @@ AM_CONDITIONAL(HAVE_SYSTEMD, [test -n "$systemdsystemunitdir"])
 
 GLIB_MKENUMS=`$PKG_CONFIG --variable=glib_mkenums glib-2.0`
 AC_SUBST(GLIB_MKENUMS)
+
+GLIB_GENMARSHAL=`pkg-config --variable=glib_genmarshal glib-2.0`
+AC_SUBST(GLIB_GENMARSHAL)
 
 AC_CONFIG_FILES([
   Makefile

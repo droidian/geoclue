@@ -84,16 +84,16 @@ DIST_COMMON = $(top_srcdir)/Makefile.decl $(srcdir)/Makefile.in \
 	$(srcdir)/Makefile.am $(srcdir)/geoclue.pc.in \
 	$(top_srcdir)/build-aux/depcomp
 libexec_PROGRAMS = geoclue$(EXEEXT)
-@BUILD_MODEM_SOURCE_TRUE@am__append_1 = gclue-modem-source.c gclue-modem-source.h
+@BUILD_MODEM_SOURCE_TRUE@am__append_1 = gclue-modem.c gclue-modem.h
 @BUILD_3G_SOURCE_TRUE@am__append_2 = gclue-3g.c gclue-3g.h
 @BUILD_MODEM_GPS_SOURCE_TRUE@am__append_3 = gclue-modem-gps.c gclue-modem-gps.h
 subdir = src
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
@@ -103,30 +103,31 @@ CONFIG_CLEAN_VPATH_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 libgeoclue_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-	$(am__DEPENDENCIES_1)
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am__libgeoclue_la_SOURCES_DIST = geoclue-interface.c \
-	geoclue-interface.h gclue-client-info.h gclue-client-info.c \
+	geoclue-interface.h wpa_supplicant-interface.c \
+	wpa_supplicant-interface.h gclue-marshal.c gclue-marshal.h \
+	gclue-3g-tower.h gclue-client-info.h gclue-client-info.c \
 	gclue-config.h gclue-config.c gclue-error.h gclue-error.c \
 	gclue-location-source.h gclue-location-source.c \
 	gclue-locator.h gclue-locator.c gclue-service-manager.h \
 	gclue-service-manager.c gclue-service-client.h \
 	gclue-service-client.c gclue-service-location.h \
 	gclue-service-location.c gclue-web-source.c gclue-web-source.h \
-	gclue-wifi.h gclue-wifi.c gclue-modem-source.c \
-	gclue-modem-source.h gclue-3g.c gclue-3g.h gclue-modem-gps.c \
-	gclue-modem-gps.h
-am__objects_1 = geoclue-interface.lo
-am__objects_2 = $(am__objects_1)
-@BUILD_MODEM_SOURCE_TRUE@am__objects_3 = gclue-modem-source.lo
+	gclue-wifi.h gclue-wifi.c gclue-mozilla.h gclue-mozilla.c \
+	gclue-modem.c gclue-modem.h gclue-3g.c gclue-3g.h \
+	gclue-modem-gps.c gclue-modem-gps.h
+am__objects_1 = geoclue-interface.lo wpa_supplicant-interface.lo
+am__objects_2 = $(am__objects_1) gclue-marshal.lo
+@BUILD_MODEM_SOURCE_TRUE@am__objects_3 = gclue-modem.lo
 @BUILD_3G_SOURCE_TRUE@am__objects_4 = gclue-3g.lo
 @BUILD_MODEM_GPS_SOURCE_TRUE@am__objects_5 = gclue-modem-gps.lo
 am_libgeoclue_la_OBJECTS = $(am__objects_2) gclue-client-info.lo \
 	gclue-config.lo gclue-error.lo gclue-location-source.lo \
 	gclue-locator.lo gclue-service-manager.lo \
 	gclue-service-client.lo gclue-service-location.lo \
-	gclue-web-source.lo gclue-wifi.lo $(am__objects_3) \
-	$(am__objects_4) $(am__objects_5)
+	gclue-web-source.lo gclue-wifi.lo gclue-mozilla.lo \
+	$(am__objects_3) $(am__objects_4) $(am__objects_5)
 libgeoclue_la_OBJECTS = $(am_libgeoclue_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -309,6 +310,7 @@ GEOCLUE_API_VERSION = @GEOCLUE_API_VERSION@
 GEOCLUE_CFLAGS = @GEOCLUE_CFLAGS@
 GEOCLUE_LIBS = @GEOCLUE_LIBS@
 GETTEXT_PACKAGE = @GETTEXT_PACKAGE@
+GLIB_GENMARSHAL = @GLIB_GENMARSHAL@
 GLIB_MKENUMS = @GLIB_MKENUMS@
 GMSGFMT = @GMSGFMT@
 GREP = @GREP@
@@ -350,8 +352,6 @@ ModemManager_CFLAGS = @ModemManager_CFLAGS@
 ModemManager_LIBS = @ModemManager_LIBS@
 NM = @NM@
 NMEDIT = @NMEDIT@
-NetworkManager_CFLAGS = @NetworkManager_CFLAGS@
-NetworkManager_LIBS = @NetworkManager_LIBS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 OTOOL = @OTOOL@
@@ -440,15 +440,20 @@ TEST_PROGS =
 SUBDIRS = public-api agent geocode-glib
 interfacedir = $(datadir)/dbus-1/interfaces
 interface_DATA = org.freedesktop.GeoClue2.xml
-dbus_built_sources = geoclue-interface.c geoclue-interface.h
+dbus_built_sources = geoclue-interface.c 	\
+		     geoclue-interface.h 	\
+		     wpa_supplicant-interface.c \
+		     wpa_supplicant-interface.h
+
 BUILT_SOURCES = \
 	$(dbus_built_sources)	\
+	gclue-marshal.c 	\
+	gclue-marshal.h		\
 	$(NULL)
 
 noinst_LTLIBRARIES = libgeoclue.la
 AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      $(ModemManager_CFLAGS)			  \
-	      $(NetworkManager_CFLAGS)			  \
 	      $(WARN_CFLAGS)			     	  \
 	      -DLOCALEDIR="\"$(datadir)/locale\"" 	  \
 	      -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
@@ -459,19 +464,18 @@ AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      -I$(srcdir)/public-api			  \
 	      -I$(builddir)/public-api
 
-libgeoclue_la_SOURCES = $(BUILT_SOURCES) gclue-client-info.h \
-	gclue-client-info.c gclue-config.h gclue-config.c \
-	gclue-error.h gclue-error.c gclue-location-source.h \
-	gclue-location-source.c gclue-locator.h gclue-locator.c \
-	gclue-service-manager.h gclue-service-manager.c \
-	gclue-service-client.h gclue-service-client.c \
-	gclue-service-location.h gclue-service-location.c \
-	gclue-web-source.c gclue-web-source.h gclue-wifi.h \
-	gclue-wifi.c $(NULL) $(am__append_1) $(am__append_2) \
-	$(am__append_3)
+libgeoclue_la_SOURCES = $(BUILT_SOURCES) gclue-3g-tower.h \
+	gclue-client-info.h gclue-client-info.c gclue-config.h \
+	gclue-config.c gclue-error.h gclue-error.c \
+	gclue-location-source.h gclue-location-source.c \
+	gclue-locator.h gclue-locator.c gclue-service-manager.h \
+	gclue-service-manager.c gclue-service-client.h \
+	gclue-service-client.c gclue-service-location.h \
+	gclue-service-location.c gclue-web-source.c gclue-web-source.h \
+	gclue-wifi.h gclue-wifi.c gclue-mozilla.h gclue-mozilla.c \
+	$(NULL) $(am__append_1) $(am__append_2) $(am__append_3)
 libgeoclue_la_LIBADD = \
 	$(GEOCLUE_LIBS)			\
-	$(NetworkManager_LIBS)		\
 	$(ModemManager_LIBS)		\
 	$(LIBS)				\
 	$(NULL)
@@ -488,9 +492,9 @@ geoclue_LDADD = $(GEOCLUE_LIBS) 	  		    	\
 		$(builddir)/public-api/libgeoclue-public-api.la
 
 CLEANFILES = $(BUILT_SOURCES)
-EXTRA_DIST = $(interface_DATA) \
-	     test-data/fedora-geoip-results.json \
-	     test-data/freegeoip-results.json
+EXTRA_DIST = $(interface_DATA) 	       \
+	     fi.w1.wpa_supplicant1.xml \
+	     gclue-marshal.list
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = geoclue-$(GEOCLUE_API_VERSION).pc
@@ -612,14 +616,17 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-location-source.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-locator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-marshal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-modem-gps.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-modem-source.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-modem.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-mozilla.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-client.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-location.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-service-manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-web-source.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-wifi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/geoclue-interface.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wpa_supplicant-interface.Plo@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -1036,6 +1043,33 @@ geoclue-interface.h: Makefile.am $(interface_DATA)
 		--generate-c-code geoclue-interface		\
     		--generate-docbook=docs				\
 		$(srcdir)/$(interface_DATA)
+
+wpa_supplicant-interface.c: wpa_supplicant-interface.h
+wpa_supplicant-interface.h: Makefile.am fi.w1.wpa_supplicant1.xml
+	$(AM_V_GEN)$(GDBUS_CODEGEN) \
+		--interface-prefix fi.w1			\
+		--annotate "fi.w1.wpa_supplicant1"		\
+		org.gtk.GDBus.C.Name WPA_Supplicant		\
+		--annotate "fi.w1.wpa_supplicant1.Interface"	\
+		org.gtk.GDBus.C.Name WPA_Interface		\
+		--annotate "fi.w1.wpa_supplicant1.BSS"		\
+		org.gtk.GDBus.C.Name WPA_BSS			\
+		--annotate "fi.w1.wpa_supplicant1.BSS:SSID"	\
+		org.gtk.GDBus.C.ForceGVariant whatever		\
+		--annotate "fi.w1.wpa_supplicant1.BSS:BSSID"	\
+		org.gtk.GDBus.C.ForceGVariant whatever		\
+		--annotate "fi.w1.wpa_supplicant1.Interface::BSSAdded"	 \
+		org.gtk.GDBus.C.Name BSS_Added				 \
+		--annotate "fi.w1.wpa_supplicant1.Interface::BSSRemoved" \
+		org.gtk.GDBus.C.Name BSS_Removed			 \
+		--generate-c-code wpa_supplicant-interface 	\
+		$(srcdir)/fi.w1.wpa_supplicant1.xml
+
+gclue-marshal.c: gclue-marshal.list
+	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=gclue_marshal $(srcdir)/gclue-marshal.list --header --body > gclue-marshal.c
+
+gclue-marshal.h: gclue-marshal.list
+	$(AM_V_GEN)$(GLIB_GENMARSHAL) --prefix=gclue_marshal $(srcdir)/gclue-marshal.list --header > gclue-marshal.h
 
 -include $(top_srcdir)/git.mk
 

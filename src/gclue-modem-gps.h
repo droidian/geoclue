@@ -24,7 +24,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include "gclue-modem-source.h"
+#include "gclue-location-source.h"
 
 G_BEGIN_DECLS
 
@@ -48,7 +48,7 @@ typedef struct _GClueModemGPSPrivate GClueModemGPSPrivate;
 
 struct _GClueModemGPS {
         /* <private> */
-        GClueModemSource parent_instance;
+        GClueLocationSource parent_instance;
         GClueModemGPSPrivate *priv;
 };
 
@@ -59,7 +59,7 @@ struct _GClueModemGPS {
 **/
 struct _GClueModemGPSClass {
         /* <private> */
-        GClueModemSourceClass parent_class;
+        GClueLocationSourceClass parent_class;
 };
 
 GClueModemGPS * gclue_modem_gps_get_singleton (void);

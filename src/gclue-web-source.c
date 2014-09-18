@@ -88,7 +88,9 @@ query_callback (SoupSession *session,
                                                                      &error);
         g_free (contents);
         if (error != NULL) {
-                g_warning ("Failed to query location: %s", error->message);
+                g_warning ("Failed to parse following response: %s\n%s",
+                           error->message,
+                           contents);
                 return;
         }
 
@@ -257,7 +259,6 @@ gclue_web_source_start (GClueLocationSource *source)
         if (!base_class->start (source))
                 return FALSE;
 
-        gclue_web_source_refresh (GCLUE_WEB_SOURCE (source));
         return TRUE;
 }
 

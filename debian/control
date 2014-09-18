@@ -12,9 +12,7 @@ Build-Depends: autotools-dev,
                libglib2.0-dev (>= 2.34.0),
                libjson-glib-dev (>= 0.14),
                libmm-glib-dev (>= 1.0) [linux-any],
-               libnm-glib-dev (>= 0.9.8.0) [linux-any],
                libsoup2.4-dev,
-               libxml2-dev (>= 2.7),
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.9.5

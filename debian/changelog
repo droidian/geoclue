@@ -1,3 +1,16 @@
+geoclue-2.0 (2.1.9-1) unstable; urgency=medium
+
+  * [99a40345] debian/rules: Drop --enable-geoip-server=no, removed upstream
+  * [fea6d4ca] Imported Upstream version 2.1.9
+  * [b9f6f7b4] Adjust build-dependencies
+  * [bdb99eb1] Refresh debian/patches/01-debianize-desktop-name.patch
+  * [e22479f3] debian/rules: Pass --disable-silent-rules to the configure
+  * [53b1af2f] debian/rules: Drop --disable-network-manager flag, removed upstream
+  * [089a553b] debian/control: Recommends modemmanager and wpasupplicant
+  * [ce8b13d9] debian/control: Bump Standards-Version to 3.9.6 (no further changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 13 Oct 2014 21:04:34 +0200
+
 geoclue-2.0 (2.1.8-1) unstable; urgency=medium
 
   * [be92d2de] Imported Upstream version 2.1.8

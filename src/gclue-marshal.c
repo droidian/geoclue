@@ -100,6 +100,49 @@ gclue_marshal_VOID__UINT_UINT_ULONG_ULONG (GClosure     *closure,
             data2);
 }
 
+/* VOID:DOUBLE,DOUBLE (./gclue-marshal.list:2) */
+extern void gclue_marshal_VOID__DOUBLE_DOUBLE (GClosure     *closure,
+                                               GValue       *return_value,
+                                               guint         n_param_values,
+                                               const GValue *param_values,
+                                               gpointer      invocation_hint,
+                                               gpointer      marshal_data);
+void
+gclue_marshal_VOID__DOUBLE_DOUBLE (GClosure     *closure,
+                                   GValue       *return_value G_GNUC_UNUSED,
+                                   guint         n_param_values,
+                                   const GValue *param_values,
+                                   gpointer      invocation_hint G_GNUC_UNUSED,
+                                   gpointer      marshal_data)
+{
+  typedef void (*GMarshalFunc_VOID__DOUBLE_DOUBLE) (gpointer     data1,
+                                                    gdouble      arg_1,
+                                                    gdouble      arg_2,
+                                                    gpointer     data2);
+  register GMarshalFunc_VOID__DOUBLE_DOUBLE callback;
+  register GCClosure *cc = (GCClosure*) closure;
+  register gpointer data1, data2;
+
+  g_return_if_fail (n_param_values == 3);
+
+  if (G_CCLOSURE_SWAP_DATA (closure))
+    {
+      data1 = closure->data;
+      data2 = g_value_peek_pointer (param_values + 0);
+    }
+  else
+    {
+      data1 = g_value_peek_pointer (param_values + 0);
+      data2 = closure->data;
+    }
+  callback = (GMarshalFunc_VOID__DOUBLE_DOUBLE) (marshal_data ? marshal_data : cc->callback);
+
+  callback (data1,
+            g_marshal_value_peek_double (param_values + 1),
+            g_marshal_value_peek_double (param_values + 2),
+            data2);
+}
+
 G_END_DECLS
 
 #endif /* __gclue_marshal_MARSHAL_H__ */

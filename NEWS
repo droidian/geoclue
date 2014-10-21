@@ -1,3 +1,21 @@
+2.1.10
+======
+
+- Disallow application if disabled explicitly in the configuration.
+- Make it easy to add alternative modem source(s), e.g ofono-based.
+- Map:
+  - country-level accuracy to city-level since no source provides country-level
+    accuracy.
+  - neighborhood-level accuracy to city-level in WiFi source (only) so
+    applications requesting neighborhood-level accuracy still get a location
+    even if there is no modem available.
+- Fixes to WiFi source.
+- For easier debugging, add:
+  - more debug prints.
+  - commandline options to where-am-i demo application to specify timeout and
+    requested accuracy level.
+- Fix a potential build failure.
+
 2.1.9
 =====
 

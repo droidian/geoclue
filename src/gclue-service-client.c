@@ -338,6 +338,8 @@ gclue_service_client_handle_start (GClueClient           *client,
         StartData *data;
         const char *desktop_id;
         GClueAccuracyLevel accuracy_level, max_accuracy;
+        GClueAppPerm app_perm;
+        guint32 uid;
 
         if (priv->locator != NULL)
                 /* Already started */
@@ -352,19 +354,32 @@ gclue_service_client_handle_start (GClueClient           *client,
                 return TRUE;
         }
 
+        config = gclue_config_get_singleton ();
+        uid = gclue_client_info_get_user_id (priv->client_info);
+        app_perm = gclue_config_get_app_perm (config,
+                                              desktop_id,
+                                              priv->client_info);
+        if (app_perm == GCLUE_APP_PERM_DISALLOWED) {
+                g_dbus_method_invocation_return_error (invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "'%s' disallowed by "
+                                                       "configuration for UID %u",
+                                                       desktop_id,
+                                                       uid);
+                return TRUE;
+        }
+
         data = g_slice_new (StartData);
         data->client = g_object_ref (client);
         data->invocation =  g_object_ref (invocation);
 
-        config = gclue_config_get_singleton ();
         accuracy_level = gclue_client_get_requested_accuracy_level (client);
 
         /* No agent == No authorization needed */
         if (priv->agent_proxy == NULL ||
             gclue_config_is_system_component (config, desktop_id) ||
-            gclue_config_is_app_allowed (config,
-                                         desktop_id,
-                                         priv->client_info)) {
+            app_perm == GCLUE_APP_PERM_ALLOWED) {
                 complete_start (data, accuracy_level);
 
                 return TRUE;
@@ -372,8 +387,6 @@ gclue_service_client_handle_start (GClueClient           *client,
 
         max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
         if (max_accuracy == 0) {
-                guint32 uid = gclue_client_info_get_user_id (priv->client_info);
-
                 g_dbus_method_invocation_return_error (invocation,
                                                        G_DBUS_ERROR,
                                                        G_DBUS_ERROR_ACCESS_DENIED,
@@ -383,6 +396,9 @@ gclue_service_client_handle_start (GClueClient           *client,
                 start_data_free (data);
                 return TRUE;
         }
+        g_debug ("requested accuracy level: %u. "
+                 "Accuracy level allowed by agent: %u",
+                 accuracy_level, max_accuracy);
         accuracy_level = CLAMP (accuracy_level, 0, max_accuracy);
 
         gclue_agent_call_authorize_app (priv->agent_proxy,

@@ -1,3 +1,13 @@
+geoclue-2.0 (2.1.10-1) unstable; urgency=medium
+
+  * [9c3fbdfe] Only recommends modemmanger and wpasupplicant where the pkg
+               is built
+  * [0915c031] d/p/01-debianize-desktop-name.patch: Readd support for epiphany
+  * [fc709078] Imported Upstream version 2.1.10
+  * [3e48e5fa] Explicitly disable CMDA source on non linux architectures
+
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 21 Oct 2014 23:38:10 +0200
+
 geoclue-2.0 (2.1.9-1) unstable; urgency=medium
 
   * [99a40345] debian/rules: Drop --enable-geoip-server=no, removed upstream

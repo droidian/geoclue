@@ -37,7 +37,7 @@ G_DEFINE_TYPE_WITH_CODE (GClueClientInfo,
 
 struct _GClueClientInfoPrivate
 {
-        const char *bus_name;
+        char *bus_name;
         GDBusConnection *connection;
         GDBusProxy *dbus_proxy;
         guint watch_id;

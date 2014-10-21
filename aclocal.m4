@@ -1,4 +1,4 @@
-# generated automatically by aclocal 1.13.4 -*- Autoconf -*-
+# generated automatically by aclocal 1.14.1 -*- Autoconf -*-
 
 # Copyright (C) 1996-2013 Free Software Foundation, Inc.
 
@@ -20,8 +20,223 @@ You have another version of autoconf.  It may work, but is not guaranteed to.
 If you have problems, you may need to regenerate the build system entirely.
 To do so, use the procedure documented by the package, typically 'autoreconf'.])])
 
+
+dnl IT_PROG_INTLTOOL([MINIMUM-VERSION], [no-xml])
+# serial 42 IT_PROG_INTLTOOL
+AC_DEFUN([IT_PROG_INTLTOOL], [
+AC_PREREQ([2.50])dnl
+AC_REQUIRE([AM_NLS])dnl
+
+case "$am__api_version" in
+    1.[01234])
+	AC_MSG_ERROR([Automake 1.5 or newer is required to use intltool])
+    ;;
+    *)
+    ;;
+esac
+
+INTLTOOL_REQUIRED_VERSION_AS_INT=`echo $1 | awk -F. '{ print $ 1 * 1000 + $ 2 * 100 + $ 3; }'`
+INTLTOOL_APPLIED_VERSION=`intltool-update --version | head -1 | cut -d" " -f3`
+INTLTOOL_APPLIED_VERSION_AS_INT=`echo $INTLTOOL_APPLIED_VERSION | awk -F. '{ print $ 1 * 1000 + $ 2 * 100 + $ 3; }'`
+if test -n "$1"; then
+    AC_MSG_CHECKING([for intltool >= $1])
+    AC_MSG_RESULT([$INTLTOOL_APPLIED_VERSION found])
+    test "$INTLTOOL_APPLIED_VERSION_AS_INT" -ge "$INTLTOOL_REQUIRED_VERSION_AS_INT" ||
+	AC_MSG_ERROR([Your intltool is too old.  You need intltool $1 or later.])
+fi
+
+AC_PATH_PROG(INTLTOOL_UPDATE, [intltool-update])
+AC_PATH_PROG(INTLTOOL_MERGE, [intltool-merge])
+AC_PATH_PROG(INTLTOOL_EXTRACT, [intltool-extract])
+if test -z "$INTLTOOL_UPDATE" -o -z "$INTLTOOL_MERGE" -o -z "$INTLTOOL_EXTRACT"; then
+    AC_MSG_ERROR([The intltool scripts were not found. Please install intltool.])
+fi
+
+if test -z "$AM_DEFAULT_VERBOSITY"; then
+  AM_DEFAULT_VERBOSITY=1
+fi
+AC_SUBST([AM_DEFAULT_VERBOSITY])
+
+INTLTOOL_V_MERGE='$(INTLTOOL__v_MERGE_$(V))'
+INTLTOOL__v_MERGE_='$(INTLTOOL__v_MERGE_$(AM_DEFAULT_VERBOSITY))'
+INTLTOOL__v_MERGE_0='@echo "  ITMRG " [$]@;'
+AC_SUBST(INTLTOOL_V_MERGE)
+AC_SUBST(INTLTOOL__v_MERGE_)
+AC_SUBST(INTLTOOL__v_MERGE_0)
+
+INTLTOOL_V_MERGE_OPTIONS='$(intltool__v_merge_options_$(V))'
+intltool__v_merge_options_='$(intltool__v_merge_options_$(AM_DEFAULT_VERBOSITY))'
+intltool__v_merge_options_0='-q'
+AC_SUBST(INTLTOOL_V_MERGE_OPTIONS)
+AC_SUBST(intltool__v_merge_options_)
+AC_SUBST(intltool__v_merge_options_0)
+
+  INTLTOOL_DESKTOP_RULE='%.desktop:   %.desktop.in   $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+INTLTOOL_DIRECTORY_RULE='%.directory: %.directory.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+     INTLTOOL_KEYS_RULE='%.keys:      %.keys.in      $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -k -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+     INTLTOOL_PROP_RULE='%.prop:      %.prop.in      $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+      INTLTOOL_OAF_RULE='%.oaf:       %.oaf.in       $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -o -p $(top_srcdir)/po $< [$]@'
+     INTLTOOL_PONG_RULE='%.pong:      %.pong.in      $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+   INTLTOOL_SERVER_RULE='%.server:    %.server.in    $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -o -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+    INTLTOOL_SHEET_RULE='%.sheet:     %.sheet.in     $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+INTLTOOL_SOUNDLIST_RULE='%.soundlist: %.soundlist.in $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+       INTLTOOL_UI_RULE='%.ui:        %.ui.in        $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+      INTLTOOL_XML_RULE='%.xml:       %.xml.in       $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+if test "$INTLTOOL_APPLIED_VERSION_AS_INT" -ge 5000; then
+      INTLTOOL_XML_NOMERGE_RULE='%.xml:       %.xml.in       $(INTLTOOL_MERGE) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u --no-translations $< [$]@'
+else
+      INTLTOOL_XML_NOMERGE_RULE='%.xml:       %.xml.in       $(INTLTOOL_MERGE) ; $(INTLTOOL_V_MERGE)_it_tmp_dir=tmp.intltool.[$][$]RANDOM && mkdir [$][$]_it_tmp_dir && LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u [$][$]_it_tmp_dir $< [$]@ && rmdir [$][$]_it_tmp_dir'
+fi
+      INTLTOOL_XAM_RULE='%.xam:       %.xml.in       $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+      INTLTOOL_KBD_RULE='%.kbd:       %.kbd.in       $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -m -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+    INTLTOOL_CAVES_RULE='%.caves:     %.caves.in     $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+  INTLTOOL_SCHEMAS_RULE='%.schemas:   %.schemas.in   $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -s -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+    INTLTOOL_THEME_RULE='%.theme:     %.theme.in     $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@' 
+    INTLTOOL_SERVICE_RULE='%.service: %.service.in   $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -d -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
+   INTLTOOL_POLICY_RULE='%.policy:    %.policy.in    $(INTLTOOL_MERGE) $(wildcard $(top_srcdir)/po/*.po) ; $(INTLTOOL_V_MERGE)LC_ALL=C $(INTLTOOL_MERGE) $(INTLTOOL_V_MERGE_OPTIONS) -x -u -c $(top_builddir)/po/.intltool-merge-cache $(top_srcdir)/po $< [$]@'
+
+_IT_SUBST(INTLTOOL_DESKTOP_RULE)
+_IT_SUBST(INTLTOOL_DIRECTORY_RULE)
+_IT_SUBST(INTLTOOL_KEYS_RULE)
+_IT_SUBST(INTLTOOL_PROP_RULE)
+_IT_SUBST(INTLTOOL_OAF_RULE)
+_IT_SUBST(INTLTOOL_PONG_RULE)
+_IT_SUBST(INTLTOOL_SERVER_RULE)
+_IT_SUBST(INTLTOOL_SHEET_RULE)
+_IT_SUBST(INTLTOOL_SOUNDLIST_RULE)
+_IT_SUBST(INTLTOOL_UI_RULE)
+_IT_SUBST(INTLTOOL_XAM_RULE)
+_IT_SUBST(INTLTOOL_KBD_RULE)
+_IT_SUBST(INTLTOOL_XML_RULE)
+_IT_SUBST(INTLTOOL_XML_NOMERGE_RULE)
+_IT_SUBST(INTLTOOL_CAVES_RULE)
+_IT_SUBST(INTLTOOL_SCHEMAS_RULE)
+_IT_SUBST(INTLTOOL_THEME_RULE)
+_IT_SUBST(INTLTOOL_SERVICE_RULE)
+_IT_SUBST(INTLTOOL_POLICY_RULE)
+
+# Check the gettext tools to make sure they are GNU
+AC_PATH_PROG(XGETTEXT, xgettext)
+AC_PATH_PROG(MSGMERGE, msgmerge)
+AC_PATH_PROG(MSGFMT, msgfmt)
+AC_PATH_PROG(GMSGFMT, gmsgfmt, $MSGFMT)
+if test -z "$XGETTEXT" -o -z "$MSGMERGE" -o -z "$MSGFMT"; then
+    AC_MSG_ERROR([GNU gettext tools not found; required for intltool])
+fi
+xgversion="`$XGETTEXT --version|grep '(GNU ' 2> /dev/null`"
+mmversion="`$MSGMERGE --version|grep '(GNU ' 2> /dev/null`"
+mfversion="`$MSGFMT --version|grep '(GNU ' 2> /dev/null`"
+if test -z "$xgversion" -o -z "$mmversion" -o -z "$mfversion"; then
+    AC_MSG_ERROR([GNU gettext tools not found; required for intltool])
+fi
+
+AC_PATH_PROG(INTLTOOL_PERL, perl)
+if test -z "$INTLTOOL_PERL"; then
+   AC_MSG_ERROR([perl not found])
+fi
+AC_MSG_CHECKING([for perl >= 5.8.1])
+$INTLTOOL_PERL -e "use 5.8.1;" > /dev/null 2>&1
+if test $? -ne 0; then
+   AC_MSG_ERROR([perl 5.8.1 is required for intltool])
+else
+   IT_PERL_VERSION=`$INTLTOOL_PERL -e "printf '%vd', $^V"`
+   AC_MSG_RESULT([$IT_PERL_VERSION])
+fi
+if test "x$2" != "xno-xml"; then
+   AC_MSG_CHECKING([for XML::Parser])
+   if `$INTLTOOL_PERL -e "require XML::Parser" 2>/dev/null`; then
+       AC_MSG_RESULT([ok])
+   else
+       AC_MSG_ERROR([XML::Parser perl module is required for intltool])
+   fi
+fi
+
+# Substitute ALL_LINGUAS so we can use it in po/Makefile
+AC_SUBST(ALL_LINGUAS)
+
+# Set DATADIRNAME correctly if it is not set yet
+# (copied from glib-gettext.m4)
+if test -z "$DATADIRNAME"; then
+  AC_LINK_IFELSE(
+    [AC_LANG_PROGRAM([[]],
+                     [[extern int _nl_msg_cat_cntr;
+                       return _nl_msg_cat_cntr]])],
+    [DATADIRNAME=share],
+    [case $host in
+    *-*-solaris*)
+    dnl On Solaris, if bind_textdomain_codeset is in libc,
+    dnl GNU format message catalog is always supported,
+    dnl since both are added to the libc all together.
+    dnl Hence, we'd like to go with DATADIRNAME=share
+    dnl in this case.
+    AC_CHECK_FUNC(bind_textdomain_codeset,
+      [DATADIRNAME=share], [DATADIRNAME=lib])
+    ;;
+    *)
+    [DATADIRNAME=lib]
+    ;;
+    esac])
+fi
+AC_SUBST(DATADIRNAME)
+
+IT_PO_SUBDIR([po])
+
+])
+
+
+# IT_PO_SUBDIR(DIRNAME)
+# ---------------------
+# All po subdirs have to be declared with this macro; the subdir "po" is
+# declared by IT_PROG_INTLTOOL.
+#
+AC_DEFUN([IT_PO_SUBDIR],
+[AC_PREREQ([2.53])dnl We use ac_top_srcdir inside AC_CONFIG_COMMANDS.
+dnl
+dnl The following CONFIG_COMMANDS should be executed at the very end
+dnl of config.status.
+AC_CONFIG_COMMANDS_PRE([
+  AC_CONFIG_COMMANDS([$1/stamp-it], [
+    if [ ! grep "^# INTLTOOL_MAKEFILE$" "$1/Makefile.in" > /dev/null ]; then
+       AC_MSG_ERROR([$1/Makefile.in.in was not created by intltoolize.])
+    fi
+    rm -f "$1/stamp-it" "$1/stamp-it.tmp" "$1/POTFILES" "$1/Makefile.tmp"
+    >"$1/stamp-it.tmp"
+    [sed '/^#/d
+	 s/^[[].*] *//
+	 /^[ 	]*$/d
+	'"s|^|	$ac_top_srcdir/|" \
+      "$srcdir/$1/POTFILES.in" | sed '$!s/$/ \\/' >"$1/POTFILES"
+    ]
+    [sed '/^POTFILES =/,/[^\\]$/ {
+		/^POTFILES =/!d
+		r $1/POTFILES
+	  }
+	 ' "$1/Makefile.in" >"$1/Makefile"]
+    rm -f "$1/Makefile.tmp"
+    mv "$1/stamp-it.tmp" "$1/stamp-it"
+  ])
+])dnl
+])
+
+# _IT_SUBST(VARIABLE)
+# -------------------
+# Abstract macro to do either _AM_SUBST_NOTMAKE or AC_SUBST
+#
+AC_DEFUN([_IT_SUBST],
+[
+AC_SUBST([$1])
+m4_ifdef([_AM_SUBST_NOTMAKE], [_AM_SUBST_NOTMAKE([$1])])
+]
+)
+
+# deprecated macros
+AU_ALIAS([AC_PROG_INTLTOOL], [IT_PROG_INTLTOOL])
+# A hint is needed for aclocal from Automake <= 1.9.4:
+# AC_DEFUN([AC_PROG_INTLTOOL], ...)
+
+
 # nls.m4 serial 5 (gettext-0.18)
-dnl Copyright (C) 1995-2003, 2005-2006, 2008-2013 Free Software Foundation,
+dnl Copyright (C) 1995-2003, 2005-2006, 2008-2014 Free Software Foundation,
 dnl Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -280,10 +495,10 @@ AS_VAR_IF([$1], [""], [$5], [$4])dnl
 # generated from the m4 files accompanying Automake X.Y.
 # (This private macro should not be called outside this file.)
 AC_DEFUN([AM_AUTOMAKE_VERSION],
-[am__api_version='1.13'
+[am__api_version='1.14'
 dnl Some users find AM_AUTOMAKE_VERSION and mistake it for a way to
 dnl require some minimum version.  Point them to the right macro.
-m4_if([$1], [1.13.4], [],
+m4_if([$1], [1.14.1], [],
       [AC_FATAL([Do not call $0, use AM_INIT_AUTOMAKE([$1]).])])dnl
 ])
 
@@ -299,7 +514,7 @@ m4_define([_AM_AUTOCONF_VERSION], [])
 # Call AM_AUTOMAKE_VERSION and AM_AUTOMAKE_VERSION so they can be traced.
 # This function is AC_REQUIREd by AM_INIT_AUTOMAKE.
 AC_DEFUN([AM_SET_CURRENT_AUTOMAKE_VERSION],
-[AM_AUTOMAKE_VERSION([1.13.4])dnl
+[AM_AUTOMAKE_VERSION([1.14.1])dnl
 m4_ifndef([AC_AUTOCONF_VERSION],
   [m4_copy([m4_PACKAGE_VERSION], [AC_AUTOCONF_VERSION])])dnl
 _AM_AUTOCONF_VERSION(m4_defn([AC_AUTOCONF_VERSION]))])
@@ -324,7 +539,8 @@ AC_CHECK_TOOLS([AR], [ar lib "link -lib"], [false])
 : ${AR=ar}
 
 AC_CACHE_CHECK([the archiver ($AR) interface], [am_cv_ar_interface],
-  [am_cv_ar_interface=ar
+  [AC_LANG_PUSH([C])
+   am_cv_ar_interface=ar
    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[int some_variable = 0;]])],
      [am_ar_try='$AR cru libconftest.a conftest.$ac_objext >&AS_MESSAGE_LOG_FD'
       AC_TRY_EVAL([am_ar_try])
@@ -341,7 +557,7 @@ AC_CACHE_CHECK([the archiver ($AR) interface], [am_cv_ar_interface],
       fi
       rm -f conftest.lib libconftest.a
      ])
-   ])
+   AC_LANG_POP([C])])
 
 case $am_cv_ar_interface in
 ar)
@@ -725,6 +941,12 @@ AC_DEFUN([AM_OUTPUT_DEPENDENCY_COMMANDS],
 # This macro actually does too much.  Some checks are only needed if
 # your package does certain things.  But this isn't really a big deal.
 
+dnl Redefine AC_PROG_CC to automatically invoke _AM_PROG_CC_C_O.
+m4_define([AC_PROG_CC],
+m4_defn([AC_PROG_CC])
+[_AM_PROG_CC_C_O
+])
+
 # AM_INIT_AUTOMAKE(PACKAGE, VERSION, [NO-DEFINE])
 # AM_INIT_AUTOMAKE([OPTIONS])
 # -----------------------------------------------
@@ -833,14 +1055,54 @@ dnl macro is hooked onto _AC_COMPILER_EXEEXT early, see below.
 AC_CONFIG_COMMANDS_PRE(dnl
 [m4_provide_if([_AM_COMPILER_EXEEXT],
   [AM_CONDITIONAL([am__EXEEXT], [test -n "$EXEEXT"])])])dnl
-])
+
+# POSIX will say in a future version that running "rm -f" with no argument
+# is OK; and we want to be able to make that assumption in our Makefile
+# recipes.  So use an aggressive probe to check that the usage we want is
+# actually supported "in the wild" to an acceptable degree.
+# See automake bug#10828.
+# To make any issue more visible, cause the running configure to be aborted
+# by default if the 'rm' program in use doesn't match our expectations; the
+# user can still override this though.
+if rm -f && rm -fr && rm -rf; then : OK; else
+  cat >&2 <<'END'
+Oops!
+
+Your 'rm' program seems unable to run without file operands specified
+on the command line, even when the '-f' option is present.  This is contrary
+to the behaviour of most rm programs out there, and not conforming with
+the upcoming POSIX standard: <http://austingroupbugs.net/view.php?id=542>
+
+Please tell bug-automake@gnu.org about your system, including the value
+of your $PATH and any error possibly output before this message.  This
+can help us improve future automake versions.
+
+END
+  if test x"$ACCEPT_INFERIOR_RM_PROGRAM" = x"yes"; then
+    echo 'Configuration will proceed anyway, since you have set the' >&2
+    echo 'ACCEPT_INFERIOR_RM_PROGRAM variable to "yes"' >&2
+    echo >&2
+  else
+    cat >&2 <<'END'
+Aborting the configuration process, to ensure you take notice of the issue.
+
+You can download and install GNU coreutils to get an 'rm' implementation
+that behaves properly: <http://www.gnu.org/software/coreutils/>.
+
+If you want to complete the configuration process using your problematic
+'rm' anyway, export the environment variable ACCEPT_INFERIOR_RM_PROGRAM
+to "yes", and re-run configure.
+
+END
+    AC_MSG_ERROR([Your 'rm' program is bad, sorry.])
+  fi
+fi])
 
 dnl Hook into '_AC_COMPILER_EXEEXT' early to learn its expansion.  Do not
 dnl add the conditional right here, as _AC_COMPILER_EXEEXT may be further
 dnl mangled by Autoconf and run in a shell conditional statement.
 m4_define([_AC_COMPILER_EXEEXT],
 m4_defn([_AC_COMPILER_EXEEXT])[m4_provide([_AM_COMPILER_EXEEXT])])
-
 
 # When config.status generates a header, we must update the stamp-h file.
 # This file resides in the same directory as the config header
@@ -989,38 +1251,6 @@ AC_MSG_RESULT([$_am_result])
 rm -f confinc confmf
 ])
 
-# Copyright (C) 1999-2013 Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# AM_PROG_CC_C_O
-# --------------
-# Like AC_PROG_CC_C_O, but changed for automake.
-AC_DEFUN([AM_PROG_CC_C_O],
-[AC_REQUIRE([AC_PROG_CC_C_O])dnl
-AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
-AC_REQUIRE_AUX_FILE([compile])dnl
-# FIXME: we rely on the cache variable name because
-# there is no other way.
-set dummy $CC
-am_cc=`echo $[2] | sed ['s/[^a-zA-Z0-9_]/_/g;s/^[0-9]/_/']`
-eval am_t=\$ac_cv_prog_cc_${am_cc}_c_o
-if test "$am_t" != yes; then
-   # Losing compiler, so override with the script.
-   # FIXME: It is wrong to rewrite CC.
-   # But if we don't then we get into trouble of one sort or another.
-   # A longer-term fix would be to have automake use am__CC in this case,
-   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
-   CC="$am_aux_dir/compile $CC"
-fi
-dnl Make sure AC_PROG_CC is never called again, or it will override our
-dnl setting of CC.
-m4_define([AC_PROG_CC],
-          [m4_fatal([AC_PROG_CC cannot be called after AM_PROG_CC_C_O])])
-])
-
 # Fake the existence of programs that GNU maintainers use.  -*- Autoconf -*-
 
 # Copyright (C) 1997-2013 Free Software Foundation, Inc.
@@ -1090,6 +1320,53 @@ AC_DEFUN([_AM_SET_OPTIONS],
 # Execute IF-SET if OPTION is set, IF-NOT-SET otherwise.
 AC_DEFUN([_AM_IF_OPTION],
 [m4_ifset(_AM_MANGLE_OPTION([$1]), [$2], [$3])])
+
+# Copyright (C) 1999-2013 Free Software Foundation, Inc.
+#
+# This file is free software; the Free Software Foundation
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# _AM_PROG_CC_C_O
+# ---------------
+# Like AC_PROG_CC_C_O, but changed for automake.  We rewrite AC_PROG_CC
+# to automatically call this.
+AC_DEFUN([_AM_PROG_CC_C_O],
+[AC_REQUIRE([AM_AUX_DIR_EXPAND])dnl
+AC_REQUIRE_AUX_FILE([compile])dnl
+AC_LANG_PUSH([C])dnl
+AC_CACHE_CHECK(
+  [whether $CC understands -c and -o together],
+  [am_cv_prog_cc_c_o],
+  [AC_LANG_CONFTEST([AC_LANG_PROGRAM([])])
+  # Make sure it works both with $CC and with simple cc.
+  # Following AC_PROG_CC_C_O, we do the test twice because some
+  # compilers refuse to overwrite an existing .o file with -o,
+  # though they will create one.
+  am_cv_prog_cc_c_o=yes
+  for am_i in 1 2; do
+    if AM_RUN_LOG([$CC -c conftest.$ac_ext -o conftest2.$ac_objext]) \
+         && test -f conftest2.$ac_objext; then
+      : OK
+    else
+      am_cv_prog_cc_c_o=no
+      break
+    fi
+  done
+  rm -f core conftest*
+  unset am_i])
+if test "$am_cv_prog_cc_c_o" != yes; then
+   # Losing compiler, so override with the script.
+   # FIXME: It is wrong to rewrite CC.
+   # But if we don't then we get into trouble of one sort or another.
+   # A longer-term fix would be to have automake use am__CC in this case,
+   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
+   CC="$am_aux_dir/compile $CC"
+fi
+AC_LANG_POP([C])])
+
+# For backward compatibility.
+AC_DEFUN_ONCE([AM_PROG_CC_C_O], [AC_REQUIRE([AC_PROG_CC])])
 
 # Copyright (C) 2001-2013 Free Software Foundation, Inc.
 #
@@ -1431,7 +1708,6 @@ AC_SUBST([am__untar])
 
 m4_include([m4/gnome-compiler-flags.m4])
 m4_include([m4/gtk-doc.m4])
-m4_include([m4/intltool.m4])
 m4_include([m4/libtool.m4])
 m4_include([m4/ltoptions.m4])
 m4_include([m4/ltsugar.m4])

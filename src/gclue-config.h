@@ -38,6 +38,12 @@ G_BEGIN_DECLS
 #define GCLUE_IS_CONFIG_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCLUE_TYPE_CONFIG))
 #define GCLUE_CONFIG_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  GCLUE_TYPE_CONFIG, GClueConfigClass))
 
+typedef enum {
+        GCLUE_APP_PERM_ALLOWED,
+        GCLUE_APP_PERM_DISALLOWED,
+        GCLUE_APP_PERM_ASK_AGENT
+} GClueAppPerm;
+
 typedef struct _GClueConfig        GClueConfig;
 typedef struct _GClueConfigClass   GClueConfigClass;
 typedef struct _GClueConfigPrivate GClueConfigPrivate;
@@ -61,7 +67,7 @@ GClueConfig *       gclue_config_get_singleton        (void);
 gboolean            gclue_config_is_agent_allowed     (GClueConfig     *config,
                                                        const char      *desktop_id,
                                                        GClueClientInfo *agent_info);
-gboolean            gclue_config_is_app_allowed       (GClueConfig     *config,
+GClueAppPerm        gclue_config_get_app_perm         (GClueConfig     *config,
                                                        const char      *desktop_id,
                                                        GClueClientInfo *app_info);
 gboolean            gclue_config_is_system_component  (GClueConfig     *config,

@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.9],
+        [2.1.10],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -69,6 +69,18 @@ else
 fi
 AM_CONDITIONAL([BUILD_3G_SOURCE], [test "$build_3g_source" = "yes"])
 
+# CDMA source
+AC_ARG_ENABLE(cdma-source,
+              AS_HELP_STRING([--disable-cdma-source], [Disable CDMA backend (requires ModemManager)]),
+              [build_cdma_source=$enableval], [build_cdma_source=yes])
+if test "$build_cdma_source" = "yes"; then
+  build_modem_source=yes
+  AC_DEFINE([GCLUE_USE_CDMA_SOURCE], [1], [Build CDMA source?])
+else
+  AC_DEFINE([GCLUE_USE_CDMA_SOURCE], [0], [Build CDMA source?])
+fi
+AM_CONDITIONAL([BUILD_CDMA_SOURCE], [test "$build_cdma_source" = "yes"])
+
 # GPS source
 AC_ARG_ENABLE(modem-gps-source,
               AS_HELP_STRING([--disable-modem-gps-source], [Disable modem GPS backend (requires ModemManager)]),
@@ -81,7 +93,7 @@ else
 fi
 AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "$build_modem_gps_source" = "yes"])
 
-# Modem source is used in common by GPS and 3G sources
+# Modem source is used in common by GPS, 3G and CDMA sources
 if test "$build_modem_source" = "yes"; then
   require_modemmanager=yes
 fi
@@ -194,5 +206,6 @@ AC_MSG_NOTICE([
         systemdsystemunitdir:     ${systemdsystemunitdir}
 
         3G source:                ${build_3g_source}
+        CDMA source:              ${build_cdma_source}
         Modem GPS source:         ${build_modem_gps_source}
 ])

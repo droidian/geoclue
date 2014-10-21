@@ -33,6 +33,10 @@
 #include "gclue-3g.h"
 #endif
 
+#if GCLUE_USE_CDMA_SOURCE
+#include "gclue-cdma.h"
+#endif
+
 #if GCLUE_USE_MODEM_GPS_SOURCE
 #include "gclue-modem-gps.h"
 #endif
@@ -266,12 +270,13 @@ gclue_locator_constructed (GObject *object)
         GClue3G *source = gclue_3g_get_singleton ();
         locator->priv->sources = g_list_append (locator->priv->sources, source);
 #endif
-        if (locator->priv->accuracy_level >= GCLUE_ACCURACY_LEVEL_CITY) {
-                GClueWifi *wifi = gclue_wifi_get_singleton
-                        (locator->priv->accuracy_level);
-                locator->priv->sources = g_list_append (locator->priv->sources,
-                                                        wifi);
-        }
+#if GCLUE_USE_CDMA_SOURCE
+        GClueCDMA *cdma = gclue_cdma_get_singleton ();
+        locator->priv->sources = g_list_append (locator->priv->sources, cdma);
+#endif
+        GClueWifi *wifi = gclue_wifi_get_singleton (locator->priv->accuracy_level);
+        locator->priv->sources = g_list_append (locator->priv->sources,
+                                                wifi);
 #if GCLUE_USE_MODEM_GPS_SOURCE
         GClueModemGPS *gps = gclue_modem_gps_get_singleton ();
         locator->priv->sources = g_list_append (locator->priv->sources, gps);
@@ -348,8 +353,14 @@ gclue_locator_start (GClueLocationSource *source)
 
                 level = gclue_location_source_get_available_accuracy_level (src);
                 if (level > locator->priv->accuracy_level ||
-                    level == GCLUE_ACCURACY_LEVEL_NONE)
+                    level == GCLUE_ACCURACY_LEVEL_NONE) {
+                        g_debug ("Not starting %s (accuracy level: %u). "
+                                 "Requested accuracy level: %u.",
+                                 G_OBJECT_TYPE_NAME (src),
+                                 level,
+                                 locator->priv->accuracy_level);
                         continue;
+                }
 
                 locator->priv->active_sources = g_list_append (locator->priv->active_sources,
                                                                src);
@@ -392,8 +403,19 @@ gclue_locator_stop (GClueLocationSource *source)
 GClueLocator *
 gclue_locator_new (GClueAccuracyLevel level)
 {
+        GClueAccuracyLevel accuracy_level = level;
+
+        if (accuracy_level == GCLUE_ACCURACY_LEVEL_COUNTRY)
+                /* There is no source that provides country-level accuracy.
+                 * Since Wifi (as geoip) source is the best we can do, accuracy
+                 * really is country-level many times from this source and its
+                 * doubtful app (or user) will mind being given slighly more
+                 * accurate location, lets just map this to city-level accuracy.
+                 */
+                accuracy_level = GCLUE_ACCURACY_LEVEL_CITY;
+
         return g_object_new (GCLUE_TYPE_LOCATOR,
-                             "accuracy-level", level,
+                             "accuracy-level", accuracy_level,
                              NULL);
 }
 

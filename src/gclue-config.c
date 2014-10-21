@@ -284,10 +284,10 @@ gclue_config_is_agent_allowed (GClueConfig     *config,
         return FALSE;
 }
 
-gboolean
-gclue_config_is_app_allowed (GClueConfig     *config,
-                             const char      *desktop_id,
-                             GClueClientInfo *app_info)
+GClueAppPerm
+gclue_config_get_app_perm (GClueConfig     *config,
+                           const char      *desktop_id,
+                           GClueClientInfo *app_info)
 {
         GClueConfigPrivate *priv = config->priv;
         GList *node;
@@ -305,23 +305,29 @@ gclue_config_is_app_allowed (GClueConfig     *config,
                 }
         }
 
-        if (app_config == NULL || !app_config->allowed) {
-                g_debug ("'%s' not in configuration or not allowed", desktop_id);
+        if (app_config == NULL) {
+                g_debug ("'%s' not in configuration", desktop_id);
 
-                return FALSE;
+                return GCLUE_APP_PERM_ASK_AGENT;
+        }
+
+        if (!app_config->allowed) {
+                g_debug ("'%s' disallowed by configuration", desktop_id);
+
+                return GCLUE_APP_PERM_DISALLOWED;
         }
 
         if (app_config->num_users == 0)
-                return TRUE;
+                return GCLUE_APP_PERM_ALLOWED;
 
         uid = gclue_client_info_get_user_id (app_info);
 
         for (i = 0; i < app_config->num_users; i++) {
                 if (app_config->users[i] == uid)
-                        return TRUE;
+                        return GCLUE_APP_PERM_ALLOWED;
         }
 
-        return FALSE;
+        return GCLUE_APP_PERM_DISALLOWED;
 }
 
 gboolean

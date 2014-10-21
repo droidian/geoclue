@@ -2,18 +2,18 @@ Description: Use the debian names for the browsers .desktop files
 Author: Laurent Bigonville <bigon@debian.org>
 Forwarded: not-needed
 
---- geoclue-2.0.orig/data/geoclue.conf.in
-+++ geoclue-2.0/data/geoclue.conf.in
-@@ -56,7 +56,7 @@ allowed=true
- system=true
- users=
- 
--[epiphany]
-+[epiphany-browser]
- allowed=true
+--- a/data/geoclue.conf.in
++++ b/data/geoclue.conf.in
+@@ -61,7 +61,17 @@ allowed=true
  system=false
  users=
-@@ -65,3 +65,8 @@ users=
+ 
++[epiphany-browser]
++allowed=true
++system=false
++users=
++
+ [firefox]
  allowed=true
  system=false
  users=

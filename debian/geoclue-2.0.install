@@ -1,0 +1,2 @@
+debian/local/geoclue-2.0.pkla var/lib/polkit-1/localauthority/10-vendor.d/
+debian/local/geoclue-2.0.rules usr/share/polkit-1/rules.d/

@@ -31,6 +31,8 @@
     <keyword type="property" name="The &quot;Longitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude"/>
     <keyword type="property" name="The &quot;Accuracy&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy"/>
     <keyword type="property" name="The &quot;Altitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Altitude"/>
+    <keyword type="property" name="The &quot;Speed&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Speed"/>
+    <keyword type="property" name="The &quot;Heading&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Heading"/>
     <keyword type="property" name="The &quot;Description&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description"/>
     <keyword type="enum" name="enum GClueAccuracyLevel" link="geoclue-gclue-enums.html#GClueAccuracyLevel"/>
     <keyword type="method" name="The AuthorizeApp() method" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"/>

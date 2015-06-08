@@ -39,6 +39,8 @@
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude" title='The "Longitude" property'>Longitude</a>    readable   d
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy" title='The "Accuracy" property'>Accuracy</a>     readable   d
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Altitude" title='The "Altitude" property'>Altitude</a>     readable   d
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Speed" title='The "Speed" property'>Speed</a>        readable   d
+<a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Heading" title='The "Heading" property'>Heading</a>      readable   d
 <a class="link" href="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description" title='The "Description" property'>Description</a>  readable   s
 </pre>
 </div>
@@ -83,6 +85,27 @@ Altitude  readable   d
 </pre>
 <p>        The altitude of the location fix, in meters. When unknown, its set to
         minimum double value, -1.7976931348623157e+308.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Location.Speed"></a><h3>The "Speed" property</h3>
+<pre class="programlisting">
+Speed  readable   d
+</pre>
+<p>        The speed in meters per second. When unknown, it's set to -1.0.
+</p>
+</div>
+<hr>
+<div class="refsect2">
+<a name="gdbus-property-org-freedesktop-GeoClue2-Location.Heading"></a><h3>The "Heading" property</h3>
+<pre class="programlisting">
+Heading  readable   d
+</pre>
+<p>        The heading direction in degrees with respect to North direction, in
+        clockwise order. That means North becomes 0 degree, East: 90 degrees,
+        South: 180 degrees, West: 270 degrees and so on. When unknown,
+        it's set to -1.0.
 </p>
 </div>
 <hr>

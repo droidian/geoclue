@@ -12,6 +12,8 @@
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">Longitude</link>    readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">Accuracy</link>     readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">Altitude</link>     readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Speed">Speed</link>        readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Heading">Heading</link>      readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Description">Description</link>  readable   s
 </synopsis>
   </refsect1>
@@ -57,6 +59,27 @@ Altitude  readable   d
 </programlisting>
 <para>        The altitude of the location fix, in meters. When unknown, its set to
         minimum double value, -1.7976931348623157e+308.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Speed">
+  <title>The "Speed" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Speed"><primary sortas="Location:Speed">org.freedesktop.GeoClue2.Location:Speed</primary></indexterm>
+<programlisting>
+Speed  readable   d
+</programlisting>
+<para>        The speed in meters per second. When unknown, it's set to -1.0.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Heading">
+  <title>The "Heading" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Heading"><primary sortas="Location:Heading">org.freedesktop.GeoClue2.Location:Heading</primary></indexterm>
+<programlisting>
+Heading  readable   d
+</programlisting>
+<para>        The heading direction in degrees with respect to North direction, in
+        clockwise order. That means North becomes 0 degree, East: 90 degrees,
+        South: 180 degrees, West: 270 degrees and so on. When unknown,
+        it's set to -1.0.
 </para>
 </refsect2>
 <refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Description">

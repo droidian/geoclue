@@ -25,7 +25,7 @@
 #include <glib.h>
 #include <libsoup/soup.h>
 #include "wpa_supplicant-interface.h"
-#include "geocode-glib/geocode-location.h"
+#include "gclue-location.h"
 #include "gclue-3g-tower.h"
 
 G_BEGIN_DECLS
@@ -34,11 +34,11 @@ SoupMessage *
 gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
                             GClue3GTower *tower,
                             GError      **error);
-GeocodeLocation *
+GClueLocation *
 gclue_mozilla_parse_response (const char *json,
                               GError    **error);
 SoupMessage *
-gclue_mozilla_create_submit_query (GeocodeLocation *location,
+gclue_mozilla_create_submit_query (GClueLocation   *location,
                                    GList           *bss_list, /* As in Access Points */
                                    GClue3GTower    *tower,
                                    GError         **error);

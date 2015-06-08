@@ -44,7 +44,7 @@ typedef struct _GClueServiceClientPrivate GClueServiceClientPrivate;
 
 struct _GClueServiceClient
 {
-        GClueClientSkeleton parent;
+        GClueDBusClientSkeleton parent;
 
         /*< private >*/
         GClueServiceClientPrivate *priv;
@@ -52,7 +52,7 @@ struct _GClueServiceClient
 
 struct _GClueServiceClientClass
 {
-        GClueClientSkeletonClass parent_class;
+        GClueDBusClientSkeletonClass parent_class;
 };
 
 GType gclue_service_client_get_type (void) G_GNUC_CONST;

@@ -120,9 +120,10 @@ am__libgeoclue_la_SOURCES_DIST = geoclue-interface.c \
 	gclue-service-client.c gclue-service-location.h \
 	gclue-service-location.c gclue-web-source.c gclue-web-source.h \
 	gclue-wifi.h gclue-wifi.c gclue-mozilla.h gclue-mozilla.c \
-	gclue-modem.c gclue-modem.h gclue-modem-manager.c \
-	gclue-modem-manager.h gclue-3g.c gclue-3g.h gclue-cdma.c \
-	gclue-cdma.h gclue-modem-gps.c gclue-modem-gps.h
+	gclue-location.h gclue-location.c gclue-modem.c gclue-modem.h \
+	gclue-modem-manager.c gclue-modem-manager.h gclue-3g.c \
+	gclue-3g.h gclue-cdma.c gclue-cdma.h gclue-modem-gps.c \
+	gclue-modem-gps.h
 am__objects_1 = geoclue-interface.lo wpa_supplicant-interface.lo
 am__objects_2 = $(am__objects_1) gclue-marshal.lo
 @BUILD_MODEM_SOURCE_TRUE@am__objects_3 = gclue-modem.lo \
@@ -135,8 +136,8 @@ am_libgeoclue_la_OBJECTS = $(am__objects_2) gclue-client-info.lo \
 	gclue-locator.lo gclue-service-manager.lo \
 	gclue-service-client.lo gclue-service-location.lo \
 	gclue-web-source.lo gclue-wifi.lo gclue-mozilla.lo \
-	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6)
+	gclue-location.lo $(am__objects_3) $(am__objects_4) \
+	$(am__objects_5) $(am__objects_6)
 libgeoclue_la_OBJECTS = $(am_libgeoclue_la_OBJECTS)
 AM_V_lt = $(am__v_lt_@AM_V@)
 am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
@@ -482,8 +483,8 @@ libgeoclue_la_SOURCES = $(BUILT_SOURCES) gclue-3g-tower.h \
 	gclue-service-client.c gclue-service-location.h \
 	gclue-service-location.c gclue-web-source.c gclue-web-source.h \
 	gclue-wifi.h gclue-wifi.c gclue-mozilla.h gclue-mozilla.c \
-	$(NULL) $(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4)
+	gclue-location.h gclue-location.c $(NULL) $(am__append_1) \
+	$(am__append_2) $(am__append_3) $(am__append_4)
 libgeoclue_la_LIBADD = \
 	$(GEOCLUE_LIBS)			\
 	$(ModemManager_LIBS)		\
@@ -625,6 +626,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-config.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-location-source.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-location.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-locator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gclue-marshal.Plo@am__quote@
@@ -1051,7 +1053,7 @@ geoclue-interface.c: geoclue-interface.h
 geoclue-interface.h: Makefile.am $(interface_DATA)
 	$(AM_V_GEN)$(GDBUS_CODEGEN) \
 		--interface-prefix org.freedesktop.GeoClue2.	\
-		--c-namespace GClue				\
+		--c-namespace GClueDBus				\
 		--generate-c-code geoclue-interface		\
     		--generate-docbook=docs				\
 		$(srcdir)/$(interface_DATA)

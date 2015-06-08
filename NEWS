@@ -1,3 +1,37 @@
+2.2.0
+=====
+
+- Report 'Speed' and 'Heading' on location updates.
+- Try to provide the most accurate location first.
+- Avoid a crash by ensuring requested max accuracy is within bounds.
+- Fix GPS coordinates parsing.
+- Fix GeoIP on machines without WiFi hardware.
+- Gracefully handle inexistent agent.
+- Stop sources whose accuracy level becomes higher, rather than lower, than the
+  requested level.
+- Keep old location object alive on D-Bus for a bit longer to ensure
+  applications are not accessing it still after it is destroyed.
+- Don't enable the modem. Seems at least GNOME takes care of modem enabling for
+  us and besides this shouldn't be done by geoclue anyway (see bug#85040).
+- Wait for modem to be enabled before checking availability of location
+  capabilities and using them. This is particularly important for pin-enabled
+  modems.
+- Ignore redundant GPS location updates.
+- Fix some potential crashes.
+- Some improvements to output of where-am-i demo application.
+
+Dependency-related changes:
+
+Explicitly require libsoup >= 2.42
+
+All contributors to this release:
+
+Ankit <ankitstarski@gmail.com>
+Bastien Nocera <hadess@hadess.net>
+Fabrice Bellet <fabrice@bellet.info>
+Pawel Golinski <pg359186@students.mimuw.edu.pl>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.1.10
 ======
 

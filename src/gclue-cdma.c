@@ -24,7 +24,7 @@
 #include <string.h>
 #include "gclue-cdma.h"
 #include "gclue-modem-manager.h"
-#include "geocode-glib/geocode-location.h"
+#include "gclue-location.h"
 
 /**
  * SECTION:gclue-cdma
@@ -193,11 +193,11 @@ on_fix_cdma (GClueModem *modem,
              gdouble     longitude,
              gpointer    user_data)
 {
-        GeocodeLocation *location;
+        GClueLocation *location;
 
-        location = geocode_location_new (latitude,
-                                         longitude,
-                                         1000);     /* Assume 1 km accuracy */
+        location = gclue_location_new (latitude,
+                                       longitude,
+                                       1000);     /* Assume 1 km accuracy */
 
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (user_data),
                                             location);

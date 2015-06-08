@@ -35,14 +35,14 @@
 #define AGENT_WAIT_TIMEOUT_USEC 100000 /* microseconds */
 
 static void
-gclue_service_manager_manager_iface_init (GClueManagerIface *iface);
+gclue_service_manager_manager_iface_init (GClueDBusManagerIface *iface);
 static void
 gclue_service_manager_initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (GClueServiceManager,
                          gclue_service_manager,
-                         GCLUE_TYPE_MANAGER_SKELETON,
-                         G_IMPLEMENT_INTERFACE (GCLUE_TYPE_MANAGER,
+                         GCLUE_DBUS_TYPE_MANAGER_SKELETON,
+                         G_IMPLEMENT_INTERFACE (GCLUE_DBUS_TYPE_MANAGER,
                                                 gclue_service_manager_manager_iface_init)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gclue_service_manager_initable_iface_init))
@@ -76,18 +76,19 @@ sync_in_use_property (GClueServiceManager *manager)
 {
         gboolean in_use = FALSE, active = FALSE;
         GList *clients, *l;
+        GClueDBusManager *gdbus_manager;
 
         clients = g_hash_table_get_values (manager->priv->clients);
         for (l = clients; l != NULL; l = l->next) {
-                GClueClient *client = GCLUE_CLIENT (l->data);
+                GClueDBusClient *client = GCLUE_DBUS_CLIENT (l->data);
                 GClueConfig *config;
                 const char *id;
 
-                id = gclue_client_get_desktop_id (client);
+                id = gclue_dbus_client_get_desktop_id (client);
                 config = gclue_config_get_singleton ();
 
-                active |= gclue_client_get_active (client);
-                if (gclue_client_get_active (client) &&
+                active |= gclue_dbus_client_get_active (client);
+                if (gclue_dbus_client_get_active (client) &&
                     !gclue_config_is_system_component (config, id)) {
                         in_use = TRUE;
 
@@ -100,8 +101,9 @@ sync_in_use_property (GClueServiceManager *manager)
                 manager->priv->active = active;
                 g_object_notify (G_OBJECT (manager), "active");
         }
-        if (in_use != gclue_manager_get_in_use (GCLUE_MANAGER (manager)))
-                gclue_manager_set_in_use (GCLUE_MANAGER (manager), in_use);
+        gdbus_manager = GCLUE_DBUS_MANAGER (manager);
+        if (in_use != gclue_dbus_manager_get_in_use (gdbus_manager))
+                gclue_dbus_manager_set_in_use (gdbus_manager, in_use);
 }
 
 static void
@@ -119,7 +121,7 @@ on_peer_vanished (GClueClientInfo *info,
 
 typedef struct
 {
-        GClueManager *manager;
+        GClueDBusManager *manager;
         GDBusMethodInvocation *invocation;
         GClueClientInfo *client_info;
 } OnClientInfoNewReadyData;
@@ -165,7 +167,9 @@ complete_get_client (OnClientInfoNewReadyData *data)
                                   G_CALLBACK (sync_in_use_property),
                                   data->manager);
 
-        gclue_manager_complete_get_client (data->manager, data->invocation, path);
+        gclue_dbus_manager_complete_get_client (data->manager,
+                                                data->invocation,
+                                                path);
         goto out;
 
 error_out:
@@ -229,7 +233,7 @@ on_client_info_new_ready (GObject      *source_object,
 }
 
 static gboolean
-gclue_service_manager_handle_get_client (GClueManager          *manager,
+gclue_service_manager_handle_get_client (GClueDBusManager      *manager,
                                          GDBusMethodInvocation *invocation)
 {
         GClueServiceManager *self = GCLUE_SERVICE_MANAGER (manager);
@@ -244,9 +248,9 @@ gclue_service_manager_handle_get_client (GClueManager          *manager,
                 const gchar *existing_path;
 
                 existing_path = gclue_service_client_get_path (client);
-                gclue_manager_complete_get_client (manager,
-                                                   invocation,
-                                                   existing_path);
+                gclue_dbus_manager_complete_get_client (manager,
+                                                        invocation,
+                                                        existing_path);
                 return TRUE;
         }
 
@@ -263,7 +267,7 @@ gclue_service_manager_handle_get_client (GClueManager          *manager,
 
 typedef struct
 {
-        GClueManager *manager;
+        GClueDBusManager *manager;
         GDBusMethodInvocation *invocation;
         GClueClientInfo *info;
         char *desktop_id;
@@ -313,7 +317,7 @@ on_agent_proxy_ready (GObject      *source_object,
                           G_CALLBACK (on_agent_vanished),
                           data->manager);
 
-        gclue_manager_complete_add_agent (data->manager, data->invocation);
+        gclue_dbus_manager_complete_add_agent (data->manager, data->invocation);
 
         goto out;
 
@@ -373,7 +377,7 @@ on_agent_info_new_ready (GObject      *source_object,
 }
 
 static gboolean
-gclue_service_manager_handle_add_agent (GClueManager          *manager,
+gclue_service_manager_handle_add_agent (GClueDBusManager      *manager,
                                         GDBusMethodInvocation *invocation,
                                         const char            *id)
 {
@@ -460,8 +464,8 @@ on_avail_accuracy_level_changed (GObject    *object,
 
         level = gclue_location_source_get_available_accuracy_level
                         (GCLUE_LOCATION_SOURCE (priv->locator));
-        gclue_manager_set_available_accuracy_level (GCLUE_MANAGER (user_data),
-                                                    level);
+        gclue_dbus_manager_set_available_accuracy_level
+                (GCLUE_DBUS_MANAGER (user_data), level);
 }
 
 static void
@@ -551,7 +555,7 @@ gclue_service_manager_initable_init (GInitable    *initable,
 }
 
 static void
-gclue_service_manager_manager_iface_init (GClueManagerIface *iface)
+gclue_service_manager_manager_iface_init (GClueDBusManagerIface *iface)
 {
         iface->handle_get_client = gclue_service_manager_handle_get_client;
         iface->handle_add_agent = gclue_service_manager_handle_add_agent;

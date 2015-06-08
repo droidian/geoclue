@@ -42,7 +42,7 @@ typedef struct _GClueServiceManagerPrivate GClueServiceManagerPrivate;
 
 struct _GClueServiceManager
 {
-        GClueManagerSkeleton parent;
+        GClueDBusManagerSkeleton parent;
 
         /*< private >*/
         GClueServiceManagerPrivate *priv;
@@ -50,7 +50,7 @@ struct _GClueServiceManager
 
 struct _GClueServiceManagerClass
 {
-        GClueManagerSkeletonClass parent_class;
+        GClueDBusManagerSkeletonClass parent_class;
 };
 
 GType gclue_service_manager_get_type (void) G_GNUC_CONST;

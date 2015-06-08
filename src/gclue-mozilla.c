@@ -216,14 +216,14 @@ parse_server_error (JsonObject *object, GError **error)
         return TRUE;
 }
 
-GeocodeLocation *
+GClueLocation *
 gclue_mozilla_parse_response (const char *json,
                               GError    **error)
 {
         JsonParser *parser;
         JsonNode *node;
         JsonObject *object, *loc_object;
-        GeocodeLocation *location;
+        GClueLocation *location;
         gdouble latitude, longitude, accuracy;
 
         parser = json_parser_new ();
@@ -243,7 +243,7 @@ gclue_mozilla_parse_response (const char *json,
 
         accuracy = json_object_get_double_member (object, "accuracy");
 
-        location = geocode_location_new (latitude, longitude, accuracy);
+        location = gclue_location_new (latitude, longitude, accuracy);
 
         g_object_unref (parser);
 
@@ -265,7 +265,7 @@ get_submit_config (const char **nick)
 }
 
 SoupMessage *
-gclue_mozilla_create_submit_query (GeocodeLocation *location,
+gclue_mozilla_create_submit_query (GClueLocation   *location,
                                    GList           *bss_list, /* As in Access Points */
                                    GClue3GTower    *tower,
                                    GError         **error)
@@ -293,27 +293,27 @@ gclue_mozilla_create_submit_query (GeocodeLocation *location,
 
         json_builder_begin_object (builder);
 
-        lat = geocode_location_get_latitude (location);
+        lat = geocode_location_get_latitude (GEOCODE_LOCATION (location));
         json_builder_set_member_name (builder, "lat");
         json_builder_add_double_value (builder, lat);
 
-        lon = geocode_location_get_longitude (location);
+        lon = geocode_location_get_longitude (GEOCODE_LOCATION (location));
         json_builder_set_member_name (builder, "lon");
         json_builder_add_double_value (builder, lon);
 
-        accuracy = geocode_location_get_accuracy (location);
+        accuracy = geocode_location_get_accuracy (GEOCODE_LOCATION (location));
         if (accuracy != GEOCODE_LOCATION_ACCURACY_UNKNOWN) {
                 json_builder_set_member_name (builder, "accuracy");
                 json_builder_add_double_value (builder, accuracy);
         }
 
-        altitude = geocode_location_get_altitude (location);
+        altitude = geocode_location_get_altitude (GEOCODE_LOCATION (location));
         if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN) {
                 json_builder_set_member_name (builder, "altitude");
                 json_builder_add_double_value (builder, altitude);
         }
 
-        tv.tv_sec = geocode_location_get_timestamp (location);
+        tv.tv_sec = geocode_location_get_timestamp (GEOCODE_LOCATION (location));
         tv.tv_usec = 0;
         timestamp = g_time_val_to_iso8601 (&tv);
         json_builder_set_member_name (builder, "time");

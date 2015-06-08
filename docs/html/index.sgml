@@ -26,6 +26,8 @@
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">
+<ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Speed" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Speed">
+<ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Heading" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Heading">
 <ANCHOR id="gdbus-property-org-freedesktop-GeoClue2-Location.Description" href="geoclue/gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description">
 <ANCHOR id="geoclue-gclue-enums" href="geoclue/geoclue-gclue-enums.html">
 <ANCHOR id="geoclue-gclue-enums.other" href="geoclue/geoclue-gclue-enums.html#geoclue-gclue-enums.other">

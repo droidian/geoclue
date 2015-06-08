@@ -24,7 +24,7 @@
 #define GCLUE_LOCATOR_H
 
 #include <gio/gio.h>
-#include "geocode-glib/geocode-location.h"
+#include "gclue-location.h"
 #include "public-api/gclue-enum-types.h"
 #include "gclue-location-source.h"
 

@@ -25,7 +25,7 @@
 #include <string.h>
 #include "gclue-3g.h"
 #include "gclue-modem-manager.h"
-#include "geocode-glib/geocode-location.h"
+#include "gclue-location.h"
 #include "gclue-mozilla.h"
 
 /**
@@ -56,12 +56,12 @@ gclue_3g_create_query (GClueWebSource *web,
                        GError        **error);
 static SoupMessage *
 gclue_3g_create_submit_query (GClueWebSource  *web,
-                              GeocodeLocation *location,
+                              GClueLocation   *location,
                               GError         **error);
 static GClueAccuracyLevel
 gclue_3g_get_available_accuracy_level (GClueWebSource *web,
                                        gboolean available);
-static GeocodeLocation *
+static GClueLocation *
 gclue_3g_parse_response (GClueWebSource *web,
                          const char     *xml,
                          GError        **error);
@@ -100,7 +100,7 @@ on_is_3g_available_notify (GObject    *gobject,
                                        source);
 }
 
-static GeocodeLocation *
+static GClueLocation *
 gclue_3g_parse_response (GClueWebSource *web,
                          const char     *content,
                          GError        **error)
@@ -216,7 +216,7 @@ gclue_3g_create_query (GClueWebSource *web,
 
 static SoupMessage *
 gclue_3g_create_submit_query (GClueWebSource  *web,
-                              GeocodeLocation *location,
+                              GClueLocation   *location,
                               GError         **error)
 {
         GClue3GPrivate *priv = GCLUE_3G (web)->priv;

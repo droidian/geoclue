@@ -15,7 +15,7 @@ geoclue-interface.c: geoclue-interface.h
 geoclue-interface.h: Makefile.am $(interface_DATA)
 	$(AM_V_GEN)$(GDBUS_CODEGEN) \
 		--interface-prefix org.freedesktop.GeoClue2.	\
-		--c-namespace GClue				\
+		--c-namespace GClueDBus				\
 		--generate-c-code geoclue-interface		\
     		--generate-docbook=docs				\
 		$(srcdir)/$(interface_DATA)
@@ -92,6 +92,8 @@ libgeoclue_la_SOURCES =	 	 \
 	gclue-wifi.c		 \
 	gclue-mozilla.h		 \
 	gclue-mozilla.c		 \
+	gclue-location.h	 \
+	gclue-location.c	 \
 	$(NULL)
 
 if BUILD_MODEM_SOURCE

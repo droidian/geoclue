@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.1.10],
+        [2.2.0],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -41,6 +41,7 @@ GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
 GEOIP_MIN_VERSION=1.5.1
 LIBMM_GLIB_MIN_VERSION=1.0
+LIBSOUP_MIN_VERSION=2.42
 
 AC_CHECK_LIB([m],[sin])
 
@@ -54,7 +55,7 @@ PKG_CHECK_MODULES(GEOCLUE, [
   gio-2.0 >= $GLIB_MIN_VERSION
   gio-unix-2.0 >= $GLIB_MIN_VERSION
   json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
-  libsoup-2.4
+  libsoup-2.4 >= $LIBSOUP_MIN_VERSION
 ])
 
 # 3G source

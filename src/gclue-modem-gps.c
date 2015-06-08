@@ -24,7 +24,7 @@
 #include <string.h>
 #include "gclue-modem-gps.h"
 #include "gclue-modem-manager.h"
-#include "geocode-glib/geocode-location.h"
+#include "gclue-location.h"
 
 /**
  * SECTION:gclue-modem-gps
@@ -215,6 +215,8 @@ parse_coordinate_string (const char *coordinate,
 {
         gdouble minutes, degrees, out;
         gchar *degrees_str;
+        gchar *dot_str;
+        gint dot_offset;
 
         if (coordinate[0] == '\0' ||
             direction[0] == '\0' ||
@@ -230,11 +232,16 @@ parse_coordinate_string (const char *coordinate,
                 return INVALID_COORDINATE;
         }
 
-        degrees_str = g_strndup (coordinate, 2);
+        dot_str = g_strstr_len (coordinate, 6, ".");
+        if (dot_str == NULL)
+                return INVALID_COORDINATE;
+        dot_offset = dot_str - coordinate;
+
+        degrees_str = g_strndup (coordinate, dot_offset - 2);
         degrees = g_ascii_strtod (degrees_str, NULL);
         g_free (degrees_str);
 
-        minutes = g_ascii_strtod (coordinate + 2, NULL);
+        minutes = g_ascii_strtod (coordinate + dot_offset - 2, NULL);
 
         /* Include the minutes as part of the degrees */
         out = degrees + (minutes / 60.0);
@@ -268,7 +275,7 @@ on_fix_gps (GClueModem *modem,
             gpointer    user_data)
 {
         GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
-        GeocodeLocation *location;
+        GClueLocation *location;
         gdouble latitude, longitude, accuracy, altitude;
         gdouble hdop; /* Horizontal Dilution Of Precision */
         char **parts;
@@ -295,7 +302,7 @@ on_fix_gps (GClueModem *modem,
         hdop = g_ascii_strtod (parts[8], NULL);
         accuracy = get_accuracy_from_hdop (hdop);
 
-        location = geocode_location_new (latitude, longitude, accuracy);
+        location = gclue_location_new (latitude, longitude, accuracy);
         if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
                 g_object_set (location, "altitude", altitude, NULL);
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (source),

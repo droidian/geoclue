@@ -185,6 +185,23 @@
     <property name="Altitude" type="d" access="read"/>
 
     <!--
+        Speed:
+
+        The speed in meters per second. When unknown, it's set to -1.0.
+    -->
+    <property name="Speed" type="d" access="read"/>
+
+    <!--
+        Heading:
+
+        The heading direction in degrees with respect to North direction, in
+        clockwise order. That means North becomes 0 degree, East: 90 degrees,
+        South: 180 degrees, West: 270 degrees and so on. When unknown,
+        it's set to -1.0.
+    -->
+    <property name="Heading" type="d" access="read"/>
+
+    <!--
         Description:
 
         A human-readable description of the location, if available.

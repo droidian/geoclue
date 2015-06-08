@@ -31,14 +31,14 @@
 #define DEFAULT_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_CITY
 
 static void
-gclue_service_client_client_iface_init (GClueClientIface *iface);
+gclue_service_client_client_iface_init (GClueDBusClientIface *iface);
 static void
 gclue_service_client_initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (GClueServiceClient,
                          gclue_service_client,
-                         GCLUE_TYPE_CLIENT_SKELETON,
-                         G_IMPLEMENT_INTERFACE (GCLUE_TYPE_CLIENT,
+                         GCLUE_DBUS_TYPE_CLIENT_SKELETON,
+                         G_IMPLEMENT_INTERFACE (GCLUE_DBUS_TYPE_CLIENT,
                                                 gclue_service_client_client_iface_init)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gclue_service_client_initable_iface_init));
@@ -114,10 +114,10 @@ emit_location_updated (GClueServiceClient *client,
 
 static gboolean
 below_threshold (GClueServiceClient *client,
-                 GeocodeLocation    *location)
+                 GClueLocation      *location)
 {
         GClueServiceClientPrivate *priv = client->priv;
-        GeocodeLocation *cur_location;
+        GClueLocation *cur_location;
         gdouble distance;
         gdouble threshold_km;
 
@@ -127,13 +127,21 @@ below_threshold (GClueServiceClient *client,
         g_object_get (priv->location,
                       "location", &cur_location,
                       NULL);
-        distance = geocode_location_get_distance_from (cur_location,
-                                                       location);
+        distance = geocode_location_get_distance_from
+                (GEOCODE_LOCATION (cur_location), GEOCODE_LOCATION (location));
         g_object_unref (cur_location);
 
         threshold_km = priv->threshold / 1000.0;
         if (distance < threshold_km)
                 return TRUE;
+
+        return FALSE;
+}
+
+static gboolean
+on_prev_location_timeout (gpointer user_data)
+{
+        g_object_unref (user_data);
 
         return FALSE;
 }
@@ -146,7 +154,7 @@ on_locator_location_changed (GObject    *gobject,
         GClueServiceClient *client = GCLUE_SERVICE_CLIENT (user_data);
         GClueServiceClientPrivate *priv = client->priv;
         GClueLocationSource *locator = GCLUE_LOCATION_SOURCE (gobject);
-        GeocodeLocation *location_info;
+        GClueLocation *location_info;
         char *path = NULL;
         const char *prev_path;
         GError *error = NULL;
@@ -163,7 +171,10 @@ on_locator_location_changed (GObject    *gobject,
                 return;
         }
 
-        g_clear_object (&priv->prev_location);
+        if (priv->prev_location != NULL)
+                // Lets try to ensure that apps are not still accessing the
+                // last location before unrefing (and therefore destroying) it.
+                g_timeout_add_seconds (5, on_prev_location_timeout, priv->prev_location);
         priv->prev_location = priv->location;
 
         path = next_location_path (client);
@@ -180,7 +191,7 @@ on_locator_location_changed (GObject    *gobject,
         else
                 prev_path = "/";
 
-        gclue_client_set_location (GCLUE_CLIENT (client), path);
+        gclue_dbus_client_set_location (GCLUE_DBUS_CLIENT (client), path);
 
         if (!emit_location_updated (client, prev_path, path, &error))
                 goto error_out;
@@ -198,7 +209,7 @@ start_client (GClueServiceClient *client, GClueAccuracyLevel accuracy_level)
 {
         GClueServiceClientPrivate *priv = client->priv;
 
-        gclue_client_set_active (GCLUE_CLIENT (client), TRUE);
+        gclue_dbus_client_set_active (GCLUE_DBUS_CLIENT (client), TRUE);
         priv->locator = gclue_locator_new (accuracy_level);
         g_signal_connect (priv->locator,
                           "notify::location",
@@ -212,7 +223,7 @@ static void
 stop_client (GClueServiceClient *client)
 {
         g_clear_object (&client->priv->locator);
-        gclue_client_set_active (GCLUE_CLIENT (client), FALSE);
+        gclue_dbus_client_set_active (GCLUE_DBUS_CLIENT (client), FALSE);
 }
 
 static void
@@ -222,6 +233,7 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
                         gpointer    user_data)
 {
         GClueServiceClient *client = GCLUE_SERVICE_CLIENT (user_data);
+        GClueDBusClient *gdbus_client;
         GVariantIter *iter;
         GVariant *value;
         gchar *key;
@@ -238,8 +250,9 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
                 if (strcmp (key, "MaxAccuracyLevel") != 0)
                         continue;
 
+                gdbus_client = GCLUE_DBUS_CLIENT (client);
                 config = gclue_config_get_singleton ();
-                id = gclue_client_get_desktop_id (GCLUE_CLIENT (client));
+                id = gclue_dbus_client_get_desktop_id (gdbus_client);
                 max_accuracy = g_variant_get_uint32 (value);
                 /* FIXME: We should be handling all values of max accuracy
                  *        level here, not just 0 and non-0.
@@ -248,14 +261,14 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
                         GClueAccuracyLevel accuracy;
 
                         client->priv->agent_stopped = FALSE;
-                        accuracy = gclue_client_get_requested_accuracy_level
-                                (GCLUE_CLIENT (client));
+                        accuracy = gclue_dbus_client_get_requested_accuracy_level
+                                (gdbus_client);
                         accuracy = CLAMP (accuracy, 0, max_accuracy);
 
                         start_client (client, accuracy);
                         g_debug ("Re-started '%s'.", id);
                 } else if (max_accuracy == 0 &&
-                           gclue_client_get_active (GCLUE_CLIENT (client)) &&
+                           gclue_dbus_client_get_active (gdbus_client) &&
                            !gclue_config_is_system_component (config, id)) {
                         stop_client (client);
                         client->priv->agent_stopped = TRUE;
@@ -284,12 +297,13 @@ start_data_free (StartData *data)
 static void
 complete_start (StartData *data, GClueAccuracyLevel accuracy_level)
 {
+        GClueDBusClient *gdbus_client = GCLUE_DBUS_CLIENT (data->client);
         start_client (data->client, accuracy_level);
 
-        gclue_client_complete_start (GCLUE_CLIENT (data->client),
-                                     data->invocation);
+        gclue_dbus_client_complete_start (gdbus_client,
+                                          data->invocation);
         g_debug ("'%s' started.",
-                 gclue_client_get_desktop_id (GCLUE_CLIENT (data->client)));
+                 gclue_dbus_client_get_desktop_id (gdbus_client));
         start_data_free (data);
 }
 
@@ -303,8 +317,8 @@ on_authorize_app_ready (GObject      *source_object,
         gboolean authorized = FALSE;
         GClueAccuracyLevel accuracy_level;
 
-        accuracy_level = gclue_client_get_requested_accuracy_level
-                                (GCLUE_CLIENT (data->client));
+        accuracy_level = gclue_dbus_client_get_requested_accuracy_level
+                                (GCLUE_DBUS_CLIENT (data->client));
         if (!gclue_agent_call_authorize_app_finish (GCLUE_AGENT (source_object),
                                                     &authorized,
                                                     &accuracy_level,
@@ -330,7 +344,7 @@ error_out:
 }
 
 static gboolean
-gclue_service_client_handle_start (GClueClient           *client,
+gclue_service_client_handle_start (GClueDBusClient       *client,
                                    GDBusMethodInvocation *invocation)
 {
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
@@ -345,7 +359,7 @@ gclue_service_client_handle_start (GClueClient           *client,
                 /* Already started */
                 return TRUE;
 
-        desktop_id = gclue_client_get_desktop_id (client);
+        desktop_id = gclue_dbus_client_get_desktop_id (client);
         if (desktop_id == NULL) {
                 g_dbus_method_invocation_return_error (invocation,
                                                        G_DBUS_ERROR,
@@ -374,7 +388,10 @@ gclue_service_client_handle_start (GClueClient           *client,
         data->client = g_object_ref (client);
         data->invocation =  g_object_ref (invocation);
 
-        accuracy_level = gclue_client_get_requested_accuracy_level (client);
+        accuracy_level = gclue_dbus_client_get_requested_accuracy_level (client);
+        accuracy_level = CLAMP (accuracy_level,
+                                GCLUE_ACCURACY_LEVEL_COUNTRY,
+                                GCLUE_ACCURACY_LEVEL_EXACT);
 
         /* No agent == No authorization needed */
         if (priv->agent_proxy == NULL ||
@@ -385,7 +402,11 @@ gclue_service_client_handle_start (GClueClient           *client,
                 return TRUE;
         }
 
-        max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
+        if (priv->agent_proxy != NULL)
+                max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
+        else
+                max_accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
+
         if (max_accuracy == 0) {
                 g_dbus_method_invocation_return_error (invocation,
                                                        G_DBUS_ERROR,
@@ -412,12 +433,12 @@ gclue_service_client_handle_start (GClueClient           *client,
 }
 
 static gboolean
-gclue_service_client_handle_stop (GClueClient           *client,
+gclue_service_client_handle_stop (GClueDBusClient       *client,
                                   GDBusMethodInvocation *invocation)
 {
         stop_client (GCLUE_SERVICE_CLIENT (client));
-        gclue_client_complete_stop (client, invocation);
-        g_debug ("'%s' stopped.", gclue_client_get_desktop_id (client));
+        gclue_dbus_client_complete_stop (client, invocation);
+        g_debug ("'%s' stopped.", gclue_dbus_client_get_desktop_id (client));
 
         return TRUE;
 }
@@ -429,9 +450,11 @@ gclue_service_client_finalize (GObject *object)
 
         g_clear_pointer (&priv->path, g_free);
         g_clear_object (&priv->connection);
-        g_signal_handlers_disconnect_by_func (priv->agent_proxy,
-                                              G_CALLBACK (on_agent_props_changed),
-                                              object);
+        if (priv->agent_proxy != NULL)
+                g_signal_handlers_disconnect_by_func
+                                (priv->agent_proxy,
+                                 G_CALLBACK (on_agent_props_changed),
+                                 object);
         g_clear_object (&priv->agent_proxy);
         g_clear_object (&priv->locator);
         g_clear_object (&priv->location);
@@ -495,10 +518,11 @@ gclue_service_client_set_property (GObject      *object,
 
         case PROP_AGENT_PROXY:
                 client->priv->agent_proxy = g_value_dup_object (value);
-                g_signal_connect (client->priv->agent_proxy,
-                                  "g-properties-changed",
-                                  G_CALLBACK (on_agent_props_changed),
-                                  object);
+                if (client->priv->agent_proxy != NULL)
+                        g_signal_connect (client->priv->agent_proxy,
+                                          "g-properties-changed",
+                                          G_CALLBACK (on_agent_props_changed),
+                                          object);
                 break;
 
         default:
@@ -582,7 +606,7 @@ gclue_service_client_handle_set_property (GDBusConnection *connection,
                                           GError         **error,
                                           gpointer        user_data)
 {
-        GClueClient *client = GCLUE_CLIENT (user_data);
+        GClueDBusClient *client = GCLUE_DBUS_CLIENT (user_data);
         GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
         GDBusInterfaceSkeletonClass *skeleton_class;
         GDBusInterfaceVTable *skeleton_vtable;
@@ -607,7 +631,8 @@ gclue_service_client_handle_set_property (GDBusConnection *connection,
                                              error,
                                              user_data);
         if (ret && strcmp (property_name, "DistanceThreshold") == 0) {
-                priv->threshold = gclue_client_get_distance_threshold (client);
+                priv->threshold = gclue_dbus_client_get_distance_threshold
+                        (client);
                 g_debug ("New distance threshold: %u", priv->threshold);
         }
 
@@ -686,7 +711,7 @@ gclue_service_client_class_init (GClueServiceClientClass *klass)
 }
 
 static void
-gclue_service_client_client_iface_init (GClueClientIface *iface)
+gclue_service_client_client_iface_init (GClueDBusClientIface *iface)
 {
         iface->handle_start = gclue_service_client_handle_start;
         iface->handle_stop = gclue_service_client_handle_stop;
@@ -719,8 +744,8 @@ gclue_service_client_init (GClueServiceClient *client)
         client->priv = G_TYPE_INSTANCE_GET_PRIVATE (client,
                                                     GCLUE_TYPE_SERVICE_CLIENT,
                                                     GClueServiceClientPrivate);
-        gclue_client_set_requested_accuracy_level (GCLUE_CLIENT (client),
-                                                   DEFAULT_ACCURACY_LEVEL);
+        gclue_dbus_client_set_requested_accuracy_level
+                (GCLUE_DBUS_CLIENT (client), DEFAULT_ACCURACY_LEVEL);
 }
 
 GClueServiceClient *

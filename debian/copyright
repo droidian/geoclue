@@ -27,8 +27,9 @@ License: GPL-2+
  License version 2 can be found in the file
  `/usr/share/common-licenses/GPL-2'.
 
-Files: src/geocode-location.[ch]
-Copyright: Copyright (C) 2012 Bastien Nocera
+Files: src/geocode-glib/*
+Copyright: Copyright (C) 2011-2012 Bastien Nocera
+           Copyright (C) 2013 Jonas Danielsson
 License: LGPL-2+
 
 Files: docs/geoclue-docs.xml

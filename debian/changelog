@@ -1,3 +1,12 @@
+geoclue-2.0 (2.2.0-1) unstable; urgency=medium
+
+  * [128e902f] Imported Upstream version 2.2.0
+  * [c1d01fc4] debian/control: Explicitly require libsoup >= 2.42
+  * [2871cbe5] Update debian/copyright file
+  * [3fbfdc1e] Only allows the geoclue user to call methods from of the Agent's
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 26 Aug 2015 22:02:01 +0200
+
 geoclue-2.0 (2.1.10-2) unstable; urgency=medium
 
   * [8d8c2fe3] Add polkit rules and pkla files to allow geoclue to query

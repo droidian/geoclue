@@ -1,0 +1,75 @@
+From a5b7bbb595be04899084e39e7ddf806d5b524e28 Mon Sep 17 00:00:00 2001
+From: Laurent Bigonville <bigon@bigon.be>
+Date: Sat, 11 Jul 2015 11:00:04 +0200
+Subject: agent: Only allow the geoclue user to call methods
+
+The policy applies only to the process sending a message, not the one
+receiving it. We need to be sure only the geoclue user can call the
+Agent's methods.
+
+Explanation by smvc from the bugreport:
+
+  [...]
+  The issue here is that every file in /etc/dbus-1/system.d applies to
+  everything on the system bus - there is no way to limit policies to
+  particular packages. So Geoclue2's policy allows any uid to call any
+  method on the Properties interface at the path
+  /org/freedesktop/GeoClue2/Agent, in *any* destination.
+
+  You might think "why would any other service have an object at
+  /org/freedesktop/GeoClue2/Agent?", but not all services distinguish
+  between object paths: those that are implemented in terms of simplistic
+  libdbus filters[1] typically do not.
+  [...]
+
+https://bugs.freedesktop.org/show_bug.cgi?id=91214
+
+diff --git a/configure.ac b/configure.ac
+index e39da8b..cf0459e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -208,6 +208,7 @@ AC_CONFIG_FILES([
+   src/public-api/Makefile
+   po/Makefile.in
+   data/org.freedesktop.GeoClue2.conf
++  data/org.freedesktop.GeoClue2.Agent.conf
+   data/Makefile
+   demo/Makefile
+   docs/Makefile
+diff --git a/data/org.freedesktop.GeoClue2.Agent.conf b/data/org.freedesktop.GeoClue2.Agent.conf
+deleted file mode 100644
+index b9824dc..0000000
+--- a/data/org.freedesktop.GeoClue2.Agent.conf
++++ /dev/null
+@@ -1,11 +0,0 @@
+-<!DOCTYPE busconfig PUBLIC
+- "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
+- "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
+-<busconfig>
+-  <policy context="default">
+-    <allow send_interface="org.freedesktop.GeoClue2.Agent"
+-           send_path="/org/freedesktop/GeoClue2/Agent"/>
+-    <allow send_interface="org.freedesktop.DBus.Properties"
+-           send_path="/org/freedesktop/GeoClue2/Agent"/>
+-  </policy>
+-</busconfig>
+diff --git a/data/org.freedesktop.GeoClue2.Agent.conf.in b/data/org.freedesktop.GeoClue2.Agent.conf.in
+new file mode 100644
+index 0000000..5a4ec77
+--- /dev/null
++++ b/data/org.freedesktop.GeoClue2.Agent.conf.in
+@@ -0,0 +1,11 @@
++<!DOCTYPE busconfig PUBLIC
++ "-//freedesktop//DTD D-BUS Bus Configuration 1.0//EN"
++ "http://www.freedesktop.org/standards/dbus/1.0/busconfig.dtd">
++<busconfig>
++  <policy user="@dbus_srv_user@">
++    <allow send_interface="org.freedesktop.GeoClue2.Agent"
++           send_path="/org/freedesktop/GeoClue2/Agent"/>
++    <allow send_interface="org.freedesktop.DBus.Properties"
++           send_path="/org/freedesktop/GeoClue2/Agent"/>
++  </policy>
++</busconfig>
+-- 
+cgit v0.10.2
+

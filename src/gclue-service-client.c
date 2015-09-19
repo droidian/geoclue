@@ -313,12 +313,14 @@ on_authorize_app_ready (GObject      *source_object,
                         gpointer      user_data)
 {
         StartData *data = (StartData *) user_data;
+        GClueDBusClient *client = GCLUE_DBUS_CLIENT (data->client);
+        GClueServiceClientPrivate *priv = data->client->priv;
         GError *error = NULL;
         gboolean authorized = FALSE;
         GClueAccuracyLevel accuracy_level;
 
         accuracy_level = gclue_dbus_client_get_requested_accuracy_level
-                                (GCLUE_DBUS_CLIENT (data->client));
+                                (client);
         if (!gclue_agent_call_authorize_app_finish (GCLUE_AGENT (source_object),
                                                     &authorized,
                                                     &accuracy_level,
@@ -327,10 +329,21 @@ on_authorize_app_ready (GObject      *source_object,
                 goto error_out;
 
         if (!authorized) {
-                g_set_error_literal (&error,
-                                     G_DBUS_ERROR,
-                                     G_DBUS_ERROR_ACCESS_DENIED,
-                                     "Access denied");
+                const char *desktop_id;
+                guint32 uid;
+
+                desktop_id = gclue_dbus_client_get_desktop_id (client);
+                uid = gclue_client_info_get_user_id (priv->client_info);
+
+                g_set_error (&error,
+                             G_DBUS_ERROR,
+                             G_DBUS_ERROR_ACCESS_DENIED,
+                             "Agent rejected '%s' for user '%u'. Please ensure "
+                             "that '%s' has installed a valid %s.desktop file.",
+                             desktop_id,
+                             uid,
+                             desktop_id,
+                             desktop_id);
                 goto error_out;
         }
 
@@ -355,16 +368,19 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         GClueAppPerm app_perm;
         guint32 uid;
 
-        if (priv->locator != NULL)
+        if (priv->locator != NULL) {
                 /* Already started */
+                gclue_dbus_client_complete_start (client, invocation);
+
                 return TRUE;
+        }
 
         desktop_id = gclue_dbus_client_get_desktop_id (client);
         if (desktop_id == NULL) {
-                g_dbus_method_invocation_return_error (invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_ACCESS_DENIED,
-                                                       "'DesktopId' property must be set");
+                g_dbus_method_invocation_return_error_literal (invocation,
+                                                               G_DBUS_ERROR,
+                                                               G_DBUS_ERROR_ACCESS_DENIED,
+                                                               "'DesktopId' property must be set");
                 return TRUE;
         }
 
@@ -545,10 +561,10 @@ gclue_service_client_handle_method_call (GDBusConnection       *connection,
         GDBusInterfaceVTable *skeleton_vtable;
 
         if (!gclue_client_info_check_bus_name (priv->client_info, sender)) {
-                g_dbus_method_invocation_return_error (invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_ACCESS_DENIED,
-                                                       "Access denied");
+                g_dbus_method_invocation_return_error_literal (invocation,
+                                                               G_DBUS_ERROR,
+                                                               G_DBUS_ERROR_ACCESS_DENIED,
+                                                               "Access denied");
                 return;
         }
 

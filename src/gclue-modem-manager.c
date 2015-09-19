@@ -368,7 +368,7 @@ on_get_gps_nmea_ready (GObject      *source_object,
         }
 
         if (is_location_gga_same (manager, gga)) {
-                g_debug ("New GGA trace is same as last one");
+                g_debug ("New GGA trace is same as last one: %s", gga);
                 return;
         }
         g_clear_object (&priv->location_nmea);

@@ -24,10 +24,8 @@
 #include <errno.h>
 #include <locale.h>
 #include <gio/gio.h>
-#include <json-glib/json-glib.h>
 #include <libsoup/soup.h>
-#include <geocode-glib/geocode-glib.h>
-#include <geocode-glib/geocode-error.h>
+#include <langinfo.h>
 #include <geocode-glib/geocode-glib-private.h>
 
 /**
@@ -190,4 +188,47 @@ char *
 _geocode_object_get_lang (void)
 {
 	return geocode_object_get_lang_for_locale (setlocale (LC_MESSAGES, NULL));
+}
+
+#ifdef __GLIBC__
+static gpointer
+is_number_after_street (gpointer data)
+{
+	gboolean retval;
+	gchar *addr_format;
+	gchar *s;
+	gchar *h;
+
+	addr_format = nl_langinfo (_NL_ADDRESS_POSTAL_FMT);
+	if (addr_format == NULL) {
+		retval = FALSE;
+		goto out;
+	}
+
+	/* %s denotes street or block and %h denotes house number.
+	 * See: http://lh.2xlibre.net/values/postal_fmt */
+	s = g_strstr_len (addr_format, -1, "%s");
+	h = g_strstr_len (addr_format, -1, "%h");
+
+	if (s != NULL && h != NULL)
+		retval = (h > s);
+	else
+		retval = FALSE;
+
+ out:
+	return GINT_TO_POINTER (retval);
+}
+#endif
+
+gboolean
+_geocode_object_is_number_after_street (void)
+{
+#ifndef __GLIBC__
+	return FALSE;
+#else
+	static GOnce once = G_ONCE_INIT;
+
+	g_once (&once, is_number_after_street, NULL);
+	return GPOINTER_TO_INT (once.retval);
+#endif
 }

@@ -469,7 +469,7 @@ get_search_query_for_params (GeocodeForward *forward,
 
 	/* Prepare the query parameters */
 	ht = _geocode_glib_dup_hash_table (forward->priv->ht);
-	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "json");
+	g_hash_table_insert (ht, (gpointer) "format", (gpointer) "jsonv2");
 	g_hash_table_insert (ht, (gpointer) "email", (gpointer) "zeeshanak@gnome.org");
 	g_hash_table_insert (ht, (gpointer) "addressdetails", (gpointer) "1");
 
@@ -490,7 +490,7 @@ get_search_query_for_params (GeocodeForward *forward,
         if (location != NULL) {
 	        /* Prepare the search term */
                 search_term = soup_uri_encode (location, NULL);
-                uri = g_strdup_printf ("http://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
+                uri = g_strdup_printf ("https://nominatim.gnome.org/search?q=%s&limit=%u&bounded=%d&%s",
                                        search_term,
                                        forward->priv->answer_count,
                                        !!forward->priv->bounded,
@@ -498,7 +498,7 @@ get_search_query_for_params (GeocodeForward *forward,
                 g_free (search_term);
                 g_free (location);
         } else {
-                uri = g_strdup_printf ("http://nominatim.gnome.org/search?limit=1&%s",
+                uri = g_strdup_printf ("https://nominatim.gnome.org/search?limit=1&%s",
                                        params);
         }
 	g_free (params);
@@ -540,6 +540,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    callback,
 					    user_data,
 					    geocode_forward_search_async);
+	g_simple_async_result_set_check_cancellable (simple, cancellable);
 
         query = get_search_query_for_params (forward, &error);
 	if (!query) {
@@ -602,8 +603,7 @@ static struct {
         const char *place_prop; /* NULL to ignore */
 } nominatim_to_place_map[] = {
         { "license", NULL },
-        { "osm_type", NULL },
-        { "osm_id", NULL },
+        { "osm_id", "osm-id" },
         { "lat", NULL },
         { "lon", NULL },
         { "display_name", NULL },
@@ -638,6 +638,19 @@ fill_place_from_entry (const char   *key,
                         break;
                 }
         }
+
+        if (g_str_equal (key, "osm_type")) {
+                gpointer ref = g_type_class_ref (geocode_place_osm_type_get_type ());
+                GEnumClass *class = G_ENUM_CLASS (ref);
+                GEnumValue *evalue = g_enum_get_value_by_nick (class, value);
+
+                if (evalue)
+                        g_object_set (G_OBJECT (place), "osm-type", evalue->value, NULL);
+                else
+                        g_warning ("Unsupported osm-type %s", value);
+
+                g_type_class_unref (ref);
+        }
 }
 
 static gboolean
@@ -657,7 +670,7 @@ static const char const *attributes[] = {
 	"state",
 	"county",
 	"state_district",
-	"postalcode",
+	"postcode",
 	"city",
 	"suburb",
 	"village",
@@ -666,13 +679,13 @@ static const char const *attributes[] = {
 static GeocodePlaceType
 get_place_type_from_attributes (GHashTable *ht)
 {
-        char *class, *type;
+        char *category, *type;
         GeocodePlaceType place_type = GEOCODE_PLACE_TYPE_UNKNOWN;
 
-        class = g_hash_table_lookup (ht, "class");
+        category = g_hash_table_lookup (ht, "category");
         type = g_hash_table_lookup (ht, "type");
 
-        if (g_strcmp0 (class, "place") == 0) {
+        if (g_strcmp0 (category, "place") == 0) {
                 if (g_strcmp0 (type, "house") == 0 ||
                     g_strcmp0 (type, "building") == 0 ||
                     g_strcmp0 (type, "residential") == 0 ||
@@ -714,19 +727,19 @@ get_place_type_from_attributes (GHashTable *ht)
                         place_type =  GEOCODE_PLACE_TYPE_SEA;
                 else if (g_strcmp0 (type, "ocean") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_OCEAN;
-        } else if (g_strcmp0 (class, "highway") == 0) {
+        } else if (g_strcmp0 (category, "highway") == 0) {
                 if (g_strcmp0 (type, "motorway") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_MOTORWAY;
                 else if (g_strcmp0 (type, "bus_stop") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_BUS_STOP;
                 else
                         place_type =  GEOCODE_PLACE_TYPE_STREET;
-        } else if (g_strcmp0 (class, "railway") == 0) {
+        } else if (g_strcmp0 (category, "railway") == 0) {
                 if (g_strcmp0 (type, "station") == 0)
                         place_type =  GEOCODE_PLACE_TYPE_RAILWAY_STATION;
-        } else if (g_strcmp0 (class, "waterway") == 0) {
+        } else if (g_strcmp0 (category, "waterway") == 0) {
                 place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
-        } else if (g_strcmp0 (class, "boundry") == 0) {
+        } else if (g_strcmp0 (category, "boundary") == 0) {
                 if (g_strcmp0 (type, "administrative") == 0) {
                         int rank;
 
@@ -745,6 +758,19 @@ get_place_type_from_attributes (GHashTable *ht)
                         else if (rank == 4)
                                 place_type =  GEOCODE_PLACE_TYPE_COUNTRY;
                 }
+        } else if (g_strcmp0 (category, "amenity") == 0) {
+                if (g_strcmp0 (type, "school") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_SCHOOL;
+                else if (g_strcmp0 (type, "place_of_worship") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP;
+                else if (g_strcmp0 (type, "restaurant") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_RESTAURANT;
+                else if (g_strcmp0 (type, "bar") == 0 ||
+                         g_strcmp0 (type, "pub") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_BAR;
+        } else if (g_strcmp0 (category, "aeroway") == 0) {
+                if (g_strcmp0 (type, "aerodrome") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_AIRPORT;
         }
 
         return place_type;
@@ -755,7 +781,7 @@ _geocode_create_place_from_attributes (GHashTable *ht)
 {
         GeocodePlace *place;
         GeocodeLocation *loc = NULL;
-        const char *name, *street, *building;
+        const char *name, *street, *building, *bbox_corner;
         GeocodePlaceType place_type;
         gdouble longitude, latitude;
 
@@ -767,13 +793,39 @@ _geocode_create_place_from_attributes (GHashTable *ht)
 
         place = geocode_place_new (name, place_type);
 
+        /* If one corner exists, then all exists */
+        bbox_corner = g_hash_table_lookup (ht, "boundingbox-top");
+        if (bbox_corner != NULL) {
+            GeocodeBoundingBox *bbox;
+            gdouble top, bottom, left, right;
+
+            top = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-bottom");
+            bottom = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-left");
+            left = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox_corner = g_hash_table_lookup (ht, "boundingbox-right");
+            right = g_ascii_strtod (bbox_corner, NULL);
+
+            bbox = geocode_bounding_box_new (top, bottom, left, right);
+            geocode_place_set_bounding_box (place, bbox);
+            g_object_unref (bbox);
+        }
+
         /* Nominatim doesn't give us street addresses as such */
         street = g_hash_table_lookup (ht, "road");
         building = g_hash_table_lookup (ht, "house_number");
         if (street != NULL && building != NULL) {
             char *address;
+            gboolean number_after;
 
-            address = g_strjoin (" ", street, building, NULL);
+            number_after = _geocode_object_is_number_after_street ();
+            address = g_strdup_printf ("%s %s",
+                                       number_after ? street : building,
+                                       number_after ? building : street);
             geocode_place_set_street_address (place, address);
             g_free (address);
         }
@@ -798,12 +850,14 @@ _geocode_create_place_from_attributes (GHashTable *ht)
 static void
 insert_place_into_tree (GNode *place_tree, GHashTable *ht)
 {
-	GNode *start = place_tree, *child = NULL;
+	GNode *start = place_tree;
         GeocodePlace *place = NULL;
 	char *attr_val = NULL;
 	guint i;
 
 	for (i = 0; i < G_N_ELEMENTS(attributes); i++) {
+		GNode *child = NULL;
+
 		attr_val = g_hash_table_lookup (ht, attributes[i]);
 		if (!attr_val) {
 			/* Add a dummy node if the attribute value is not

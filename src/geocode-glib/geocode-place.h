@@ -27,6 +27,7 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 #include <geocode-glib/geocode-location.h>
+#include <geocode-glib/geocode-bounding-box.h>
 
 G_BEGIN_DECLS
 
@@ -96,6 +97,10 @@ struct _GeocodePlaceClass {
  * @GEOCODE_PLACE_TYPE_HISTORICAL_TOWN: A historical populated settlement that is no longer known by its original name.
  * @GEOCODE_PLACE_TYPE_OCEAN: One of the five major bodies of water on the Earth.
  * @GEOCODE_PLACE_TYPE_SEA: An area of open water smaller than an ocean.
+ * @GEOCODE_PLACE_TYPE_SCHOOL: Institution designed for learning under the supervision of teachers.
+ * @GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP: All places of worship independently of the religion or denomination.
+ * @GEOCODE_PLACE_TYPE_RESTAURANT: Generally formal place with sit-down facilities selling full meals served by waiters.
+ * @GEOCODE_PLACE_TYPE_BAR: A bar or pub.
  *
  * Type of the place.
  */
@@ -129,76 +134,105 @@ typedef enum {
         GEOCODE_PLACE_TYPE_ESTATE,
         GEOCODE_PLACE_TYPE_HISTORICAL_TOWN,
         GEOCODE_PLACE_TYPE_OCEAN,
-        GEOCODE_PLACE_TYPE_SEA
+        GEOCODE_PLACE_TYPE_SEA,
+        GEOCODE_PLACE_TYPE_SCHOOL,
+        GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP,
+        GEOCODE_PLACE_TYPE_RESTAURANT,
+        GEOCODE_PLACE_TYPE_BAR
 } GeocodePlaceType;
+
+
+/**
+ * GeocodePlaceOsmType:
+ * @GEOCODE_PLACE_OSM_TYPE_UNKNOWN: Unknown type
+ * @GEOCODE_PLACE_OSM_TYPE_NODE: Defines a point in space.
+ * @GEOCODE_PLACE_OSM_TYPE_RELATION: Used to explain how other elements work together.
+ * @GEOCODE_PLACE_OSM_TYPE_WAY: Defines a linear feature and area boundaries.
+ *
+ * Osm type of the place.
+ */
+typedef enum {
+  GEOCODE_PLACE_OSM_TYPE_UNKNOWN,
+  GEOCODE_PLACE_OSM_TYPE_NODE,
+  GEOCODE_PLACE_OSM_TYPE_RELATION,
+  GEOCODE_PLACE_OSM_TYPE_WAY
+} GeocodePlaceOsmType;
 
 #define GEOCODE_TYPE_PLACE (geocode_place_get_type ())
 
-GeocodePlace *geocode_place_new                   (const char      *name,
-                                                   GeocodePlaceType place_type);
-GeocodePlace *geocode_place_new_with_location     (const char      *name,
-                                                   GeocodePlaceType place_type,
-                                                   GeocodeLocation *location);
+GeocodePlace *geocode_place_new                    (const char      *name,
+                                                    GeocodePlaceType place_type);
+GeocodePlace *geocode_place_new_with_location      (const char      *name,
+                                                    GeocodePlaceType place_type,
+                                                    GeocodeLocation *location);
 
-void geocode_place_set_name                       (GeocodePlace *place,
-                                                   const char   *name);
-const char *geocode_place_get_name                (GeocodePlace *place);
+void geocode_place_set_name                        (GeocodePlace *place,
+                                                    const char   *name);
+const char *geocode_place_get_name                 (GeocodePlace *place);
 
-GeocodePlaceType geocode_place_get_place_type     (GeocodePlace *place);
+GeocodePlaceType geocode_place_get_place_type      (GeocodePlace *place);
 
-void geocode_place_set_location                   (GeocodePlace    *place,
-                                                   GeocodeLocation *location);
-GeocodeLocation *geocode_place_get_location       (GeocodePlace *place);
+GeocodeBoundingBox *geocode_place_get_bounding_box (GeocodePlace *place);
 
-void geocode_place_set_street_address             (GeocodePlace *place,
-                                                   const char   *street_address);
-const char *geocode_place_get_street_address      (GeocodePlace *place);
+void geocode_place_set_bounding_box                (GeocodePlace *place,
+                                                    GeocodeBoundingBox *bbox);
 
-void geocode_place_set_street                     (GeocodePlace *place,
-                                                   const char   *street);
-const char *geocode_place_get_street              (GeocodePlace *place);
+void geocode_place_set_location                    (GeocodePlace    *place,
+                                                    GeocodeLocation *location);
+GeocodeLocation *geocode_place_get_location        (GeocodePlace *place);
 
-void geocode_place_set_building                   (GeocodePlace *place,
-                                                   const char   *building);
-const char *geocode_place_get_building            (GeocodePlace *place);
+void geocode_place_set_street_address              (GeocodePlace *place,
+                                                    const char   *street_address);
+const char *geocode_place_get_street_address       (GeocodePlace *place);
 
-void geocode_place_set_postal_code                (GeocodePlace *place,
-                                                   const char   *postal_code);
-const char *geocode_place_get_postal_code         (GeocodePlace *place);
+void geocode_place_set_street                      (GeocodePlace *place,
+                                                    const char   *street);
+const char *geocode_place_get_street               (GeocodePlace *place);
 
-void geocode_place_set_area                       (GeocodePlace *place,
-                                                   const char   *area);
-const char *geocode_place_get_area                (GeocodePlace *place);
+void geocode_place_set_building                    (GeocodePlace *place,
+                                                    const char   *building);
+const char *geocode_place_get_building             (GeocodePlace *place);
 
-void geocode_place_set_town                       (GeocodePlace *place,
-                                                   const char   *town);
-const char *geocode_place_get_town                (GeocodePlace *place);
+void geocode_place_set_postal_code                 (GeocodePlace *place,
+                                                    const char   *postal_code);
+const char *geocode_place_get_postal_code          (GeocodePlace *place);
 
-void geocode_place_set_county                     (GeocodePlace *place,
-                                                   const char   *county);
-const char *geocode_place_get_county              (GeocodePlace *place);
+void geocode_place_set_area                        (GeocodePlace *place,
+                                                    const char   *area);
+const char *geocode_place_get_area                 (GeocodePlace *place);
 
-void geocode_place_set_state                      (GeocodePlace *place,
-                                                   const char   *state);
-const char *geocode_place_get_state               (GeocodePlace *place);
+void geocode_place_set_town                        (GeocodePlace *place,
+                                                    const char   *town);
+const char *geocode_place_get_town                 (GeocodePlace *place);
 
-void geocode_place_set_administrative_area        (GeocodePlace *place,
-                                                   const char   *admin_area);
-const char *geocode_place_get_administrative_area (GeocodePlace *place);
+void geocode_place_set_county                      (GeocodePlace *place,
+                                                    const char   *county);
+const char *geocode_place_get_county               (GeocodePlace *place);
 
-void geocode_place_set_country_code               (GeocodePlace *place,
-                                                   const char   *country_code);
-const char *geocode_place_get_country_code        (GeocodePlace *place);
+void geocode_place_set_state                       (GeocodePlace *place,
+                                                    const char   *state);
+const char *geocode_place_get_state                (GeocodePlace *place);
 
-void geocode_place_set_country                    (GeocodePlace *place,
-                                                   const char   *country);
-const char *geocode_place_get_country             (GeocodePlace *place);
+void geocode_place_set_administrative_area         (GeocodePlace *place,
+                                                    const char   *admin_area);
+const char *geocode_place_get_administrative_area  (GeocodePlace *place);
 
-void geocode_place_set_continent                  (GeocodePlace *place,
-                                                   const char   *continent);
-const char *geocode_place_get_continent           (GeocodePlace *place);
+void geocode_place_set_country_code                (GeocodePlace *place,
+                                                    const char   *country_code);
+const char *geocode_place_get_country_code         (GeocodePlace *place);
 
-GIcon *geocode_place_get_icon                     (GeocodePlace *place);
+void geocode_place_set_country                     (GeocodePlace *place,
+                                                    const char   *country);
+const char *geocode_place_get_country              (GeocodePlace *place);
+
+void geocode_place_set_continent                   (GeocodePlace *place,
+                                                    const char   *continent);
+const char *geocode_place_get_continent            (GeocodePlace *place);
+
+GIcon *geocode_place_get_icon                      (GeocodePlace *place);
+
+const char *geocode_place_get_osm_id               (GeocodePlace *place);
+GeocodePlaceOsmType geocode_place_get_osm_type     (GeocodePlace *place);
 
 G_END_DECLS
 

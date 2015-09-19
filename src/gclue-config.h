@@ -63,23 +63,24 @@ struct _GClueConfigClass
 
 GType gclue_config_get_type (void) G_GNUC_CONST;
 
-GClueConfig *       gclue_config_get_singleton        (void);
-gboolean            gclue_config_is_agent_allowed     (GClueConfig     *config,
-                                                       const char      *desktop_id,
-                                                       GClueClientInfo *agent_info);
-GClueAppPerm        gclue_config_get_app_perm         (GClueConfig     *config,
-                                                       const char      *desktop_id,
-                                                       GClueClientInfo *app_info);
-gboolean            gclue_config_is_system_component  (GClueConfig     *config,
-                                                       const char      *desktop_id);
-const char *        gclue_config_get_wifi_url         (GClueConfig     *config);
-const char *        gclue_config_get_wifi_submit_url  (GClueConfig     *config);
-const char *        gclue_config_get_wifi_submit_nick (GClueConfig     *config);
-void                gclue_config_set_wifi_submit_nick (GClueConfig     *config,
-                                                       const char      *nick);
-gboolean            gclue_config_get_wifi_submit_data (GClueConfig     *config);
-void                gclue_config_set_wifi_submit_data (GClueConfig     *config,
-                                                       gboolean         submit);
+GClueConfig *       gclue_config_get_singleton          (void);
+gboolean            gclue_config_is_agent_allowed       (GClueConfig     *config,
+                                                         const char      *desktop_id,
+                                                         GClueClientInfo *agent_info);
+GClueAppPerm        gclue_config_get_app_perm           (GClueConfig     *config,
+                                                         const char      *desktop_id,
+                                                         GClueClientInfo *app_info);
+gboolean            gclue_config_is_system_component    (GClueConfig     *config,
+                                                         const char      *desktop_id);
+const char *        gclue_config_get_wifi_url           (GClueConfig     *config);
+const char *        gclue_config_get_wifi_submit_url    (GClueConfig     *config);
+const char *        gclue_config_get_wifi_submit_nick   (GClueConfig     *config);
+void                gclue_config_set_wifi_submit_nick   (GClueConfig     *config,
+                                                         const char      *nick);
+gboolean            gclue_config_get_wifi_submit_data   (GClueConfig     *config);
+gboolean            gclue_config_get_enable_nmea_source (GClueConfig     *config);
+void                gclue_config_set_wifi_submit_data   (GClueConfig     *config,
+                                                         gboolean         submit);
 
 G_END_DECLS
 

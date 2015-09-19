@@ -31,7 +31,6 @@
 
 G_BEGIN_DECLS
 
-#define YAHOO_APPID "zznSbDjV34HRU5CXQc4D3qE1DzCsJTaKvWTLhNJxbvI_JTp1hIncJ4xTSJFRgjE-"
 #define DEFAULT_ANSWER_COUNT 10
 
 typedef enum {
@@ -41,8 +40,6 @@ typedef enum {
 
 GList      *_geocode_parse_search_json  (const char *contents,
 					 GError    **error);
-GeocodeLocation *_geocode_ip_json_to_location (const char  *json,
-					       GError     **error);
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht);
@@ -57,6 +54,7 @@ gboolean _geocode_glib_cache_save (SoupMessage *query,
 gboolean _geocode_glib_cache_load (SoupMessage *query,
                                    char       **contents);
 GHashTable *_geocode_glib_dup_hash_table (GHashTable *ht);
+gboolean _geocode_object_is_number_after_street (void);
 
 G_END_DECLS
 

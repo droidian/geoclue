@@ -173,10 +173,10 @@ complete_get_client (OnClientInfoNewReadyData *data)
         goto out;
 
 error_out:
-        g_dbus_method_invocation_return_error (data->invocation,
-                                               G_DBUS_ERROR,
-                                               G_DBUS_ERROR_FAILED,
-                                               "%s", error->message);
+        g_dbus_method_invocation_return_error_literal (data->invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_FAILED,
+                                                       error->message);
 out:
         g_clear_error (&error);
         g_clear_object (&info);
@@ -201,10 +201,10 @@ on_client_info_new_ready (GObject      *source_object,
 
         info = gclue_client_info_new_finish (res, &error);
         if (info == NULL) {
-                g_dbus_method_invocation_return_error (data->invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_FAILED,
-                                                       "%s", error->message);
+                g_dbus_method_invocation_return_error_literal (data->invocation,
+                                                               G_DBUS_ERROR,
+                                                               G_DBUS_ERROR_FAILED,
+                                                               error->message);
                 g_error_free (error);
                 g_slice_free (OnClientInfoNewReadyData, data);
 
@@ -322,10 +322,10 @@ on_agent_proxy_ready (GObject      *source_object,
         goto out;
 
 error_out:
-        g_dbus_method_invocation_return_error (data->invocation,
-                                               G_DBUS_ERROR,
-                                               G_DBUS_ERROR_FAILED,
-                                               "%s", error->message);
+        g_dbus_method_invocation_return_error_literal (data->invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_FAILED,
+                                                       error->message);
 out:
         g_clear_error (&error);
         add_agent_data_free (data);
@@ -344,10 +344,10 @@ on_agent_info_new_ready (GObject      *source_object,
 
         data->info = gclue_client_info_new_finish (res, &error);
         if (data->info == NULL) {
-                g_dbus_method_invocation_return_error (data->invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_FAILED,
-                                                       "%s", error->message);
+                g_dbus_method_invocation_return_error_literal (data->invocation,
+                                                               G_DBUS_ERROR,
+                                                               G_DBUS_ERROR_FAILED,
+                                                               error->message);
                 g_error_free (error);
                 add_agent_data_free (data);
 
@@ -358,10 +358,10 @@ on_agent_info_new_ready (GObject      *source_object,
         if (!gclue_config_is_agent_allowed (config,
                                             data->desktop_id,
                                             data->info)) {
-                g_dbus_method_invocation_return_error (data->invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_ACCESS_DENIED,
-                                                       "Not whitelisted");
+                g_dbus_method_invocation_return_error_literal (data->invocation,
+                                                               G_DBUS_ERROR,
+                                                               G_DBUS_ERROR_ACCESS_DENIED,
+                                                               "Not whitelisted");
                 add_agent_data_free (data);
 
                 return;

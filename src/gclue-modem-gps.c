@@ -187,128 +187,26 @@ gclue_modem_gps_get_singleton (void)
         return source;
 }
 
-static gdouble
-get_accuracy_from_hdop (gdouble hdop)
-{
-        /* FIXME: These are really just rough estimates based on:
-         *        http://en.wikipedia.org/wiki/Dilution_of_precision_%28GPS%29#Meaning_of_DOP_Values
-         */
-        if (hdop <= 1)
-                return 0;
-        else if (hdop <= 2)
-                return 1;
-        else if (hdop <= 5)
-                return 3;
-        else if (hdop <= 10)
-                return 50;
-        else if (hdop <= 20)
-                return 100;
-        else
-                return 300;
-}
-
-#define INVALID_COORDINATE -G_MAXDOUBLE
-
-static gdouble
-parse_coordinate_string (const char *coordinate,
-                         const char *direction)
-{
-        gdouble minutes, degrees, out;
-        gchar *degrees_str;
-        gchar *dot_str;
-        gint dot_offset;
-
-        if (coordinate[0] == '\0' ||
-            direction[0] == '\0' ||
-            direction[0] == '\0')
-                return INVALID_COORDINATE;
-
-        if (direction[0] != 'N' &&
-            direction[0] != 'S' &&
-            direction[0] != 'E' &&
-            direction[0] != 'W') {
-                g_warning ("Unknown direction '%s' for coordinates, ignoring..",
-                           direction);
-                return INVALID_COORDINATE;
-        }
-
-        dot_str = g_strstr_len (coordinate, 6, ".");
-        if (dot_str == NULL)
-                return INVALID_COORDINATE;
-        dot_offset = dot_str - coordinate;
-
-        degrees_str = g_strndup (coordinate, dot_offset - 2);
-        degrees = g_ascii_strtod (degrees_str, NULL);
-        g_free (degrees_str);
-
-        minutes = g_ascii_strtod (coordinate + dot_offset - 2, NULL);
-
-        /* Include the minutes as part of the degrees */
-        out = degrees + (minutes / 60.0);
-
-        if (direction[0] == 'S' || direction[0] == 'W')
-                out = 0 - out;
-
-        return out;
-}
-
-static gdouble
-parse_altitude_string (const char *altitude,
-                       const char *unit)
-{
-        if (altitude[0] == '\0' || unit[0] == '\0')
-                return GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
-
-        if (unit[0] != 'M') {
-                g_warning ("Unknown unit '%s' for altitude, ignoring..",
-                           unit);
-
-                return GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
-        }
-
-        return g_ascii_strtod (altitude, NULL);
-}
-
 static void
 on_fix_gps (GClueModem *modem,
             const char *gga,
             gpointer    user_data)
 {
-        GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
+        GClueLocationSource *source = GCLUE_LOCATION_SOURCE (user_data);
         GClueLocation *location;
-        gdouble latitude, longitude, accuracy, altitude;
-        gdouble hdop; /* Horizontal Dilution Of Precision */
-        char **parts;
+        GError *error = NULL;
 
-        parts = g_strsplit (gga, ",", -1);
-        if (g_strv_length (parts) < 14 ) {
-                g_warning ("Failed to parse NMEA GGA sentence:\n%s", gga);
+        location = gclue_location_create_from_gga (gga, &error);
 
-                goto out;
+        if (error != NULL) {
+            g_warning ("Error: %s", error->message);
+            g_clear_error (&error);
+
+            return;
         }
 
-        /* For sentax of GGA senentences:
-         * http://www.gpsinformation.org/dale/nmea.htm#GGA
-         */
-        latitude = parse_coordinate_string (parts[2], parts[3]);
-        longitude = parse_coordinate_string (parts[4], parts[5]);
-        if (latitude == INVALID_COORDINATE || longitude == INVALID_COORDINATE)
-                goto out;
-
-        altitude = parse_altitude_string (parts[9], parts[10]);
-        if (altitude == GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
-                goto out;
-
-        hdop = g_ascii_strtod (parts[8], NULL);
-        accuracy = get_accuracy_from_hdop (hdop);
-
-        location = gclue_location_new (latitude, longitude, accuracy);
-        if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
-                g_object_set (location, "altitude", altitude, NULL);
-        gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (source),
+        gclue_location_source_set_location (source,
                                             location);
-out:
-        g_strfreev (parts);
 }
 
 static gboolean

@@ -1,3 +1,14 @@
+geoclue-2.0 (2.3.0-1) unstable; urgency=medium
+
+  * [3ddfc9c3] Imported Upstream version 2.3.0
+  * [c6fb8dbf] Drop libgeoip-dev and geoip-database build-dependencies
+  * [dcd9f66b] Drop 03-Only-allow-the-geoclue-user-to-call-methods.patch merged
+               upstream
+  * [78dbddd3] Add libavahi-{client,glib}-dev to the build-dep per configure
+  * [327caf3d] Add avahi-daemon to the Recommends
+
+ -- Laurent Bigonville <bigon@debian.org>  Sat, 19 Sep 2015 12:37:33 +0200
+
 geoclue-2.0 (2.2.0-1) unstable; urgency=medium
 
   * [128e902f] Imported Upstream version 2.2.0

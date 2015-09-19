@@ -28,6 +28,7 @@
 #include "public-api/gclue-enum-types.h"
 
 #include "gclue-wifi.h"
+#include "gclue-config.h"
 
 #if GCLUE_USE_3G_SOURCE
 #include "gclue-3g.h"
@@ -39,6 +40,10 @@
 
 #if GCLUE_USE_MODEM_GPS_SOURCE
 #include "gclue-modem-gps.h"
+#endif
+
+#if GCLUE_USE_NMEA_SOURCE
+#include "gclue-nmea-source.h"
 #endif
 
 /* This class is like a master location source that hides all individual
@@ -83,17 +88,24 @@ set_location (GClueLocator  *locator,
 
         g_debug ("New location available");
 
-        if (cur_location != NULL &&
-            geocode_location_get_distance_from (gloc, cur_gloc) <
-            geocode_location_get_accuracy (gloc) &&
-            geocode_location_get_accuracy (gloc) >
-            geocode_location_get_accuracy (cur_gloc)) {
-                /* We only take the new location if either the previous one
-                 * lies outside its accuracy circle or its more or as
-                 * accurate as previous one.
-                 */
-                g_debug ("Ignoring less accurate new location");
-                return;
+        if (cur_location != NULL) {
+            if (geocode_location_get_timestamp (gloc) <
+                geocode_location_get_timestamp (cur_gloc)) {
+                    g_debug ("New location older than current, ignoring.");
+                    return;
+            }
+
+            if (geocode_location_get_distance_from (gloc, cur_gloc) * 1000 <
+                geocode_location_get_accuracy (gloc) &&
+                geocode_location_get_accuracy (gloc) >
+                geocode_location_get_accuracy (cur_gloc)) {
+                    /* We only take the new location if either the previous one
+                     * lies outside its accuracy circle or its more or as
+                     * accurate as previous one.
+                     */
+                    g_debug ("Ignoring less accurate new location");
+                    return;
+            }
         }
 
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (locator),
@@ -199,6 +211,9 @@ on_avail_accuracy_level_changed (GObject    *gobject,
             priv->accuracy_level >= level &&
             !is_source_active (locator, src)) {
                 start_source (locator, src);
+
+                priv->active_sources =
+                        g_list_append (locator->priv->active_sources, src);
         } else if ((level == GCLUE_ACCURACY_LEVEL_NONE ||
                     priv->accuracy_level < level) &&
                    is_source_active (locator, src)) {
@@ -278,6 +293,7 @@ gclue_locator_constructed (GObject *object)
 {
         GClueLocator *locator = GCLUE_LOCATOR (object);
         GClueLocationSource *submit_source = NULL;
+        GClueConfig *gconfig = gclue_config_get_singleton ();
         GList *node;
 
         G_OBJECT_CLASS (gclue_locator_parent_class)->constructed (object);
@@ -297,6 +313,13 @@ gclue_locator_constructed (GObject *object)
         GClueModemGPS *gps = gclue_modem_gps_get_singleton ();
         locator->priv->sources = g_list_append (locator->priv->sources, gps);
         submit_source = GCLUE_LOCATION_SOURCE (gps);
+#endif
+#if GCLUE_USE_NMEA_SOURCE
+        if (gclue_config_get_enable_nmea_source (gconfig)) {
+                GClueNMEASource *nmea = gclue_nmea_source_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        nmea);
+        }
 #endif
 
         for (node = locator->priv->sources; node != NULL; node = node->next) {

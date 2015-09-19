@@ -114,6 +114,32 @@ geocode_reverse_new_for_location (GeocodeLocation *location)
 	return object;
 }
 
+static void
+insert_bounding_box_element (GHashTable *ht,
+			     GType       value_type,
+			     const char *name,
+			     JsonReader *reader)
+{
+	if (value_type == G_TYPE_STRING) {
+		const char *bbox_val;
+
+		bbox_val = json_reader_get_string_value (reader);
+		g_hash_table_insert (ht, g_strdup (name), g_strdup (bbox_val));
+	} else if (value_type == G_TYPE_DOUBLE) {
+		gdouble bbox_val;
+
+		bbox_val = json_reader_get_double_value (reader);
+		g_hash_table_insert(ht, g_strdup (name), g_strdup_printf ("%lf", bbox_val));
+	} else if (value_type == G_TYPE_INT64) {
+		gint64 bbox_val;
+
+		bbox_val = json_reader_get_double_value (reader);
+		g_hash_table_insert(ht, g_strdup (name), g_strdup_printf ("%"G_GINT64_FORMAT, bbox_val));
+	} else {
+		g_debug ("Unhandled node type %s for %s", g_type_name (value_type), name);
+	}
+}
+
 void
 _geocode_read_nominatim_attributes (JsonReader *reader,
                                     GHashTable *ht)
@@ -126,15 +152,24 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
 	is_address = (g_strcmp0 (json_reader_get_member_name (reader), "address") == 0);
 
 	members = json_reader_list_members (reader);
+        if (members == NULL) {
+                json_reader_end_member (reader);
+                return;
+        }
 
 	for (i = 0; members[i] != NULL; i++) {
-                const char *value;
+                const char *value = NULL;
 
                 json_reader_read_member (reader, members[i]);
 
-                value = json_reader_get_string_value (reader);
-                if (value && *value == '\0')
-                        value = NULL;
+                if (json_reader_is_value (reader)) {
+                        JsonNode *node = json_reader_get_value (reader);
+                        if (json_node_get_value_type (node) == G_TYPE_STRING) {
+                                value = json_node_get_string (node);
+                                if (value && *value == '\0')
+                                        value = NULL;
+                        }
+                }
 
                 if (value != NULL) {
                         g_hash_table_insert (ht, g_strdup (members[i]), g_strdup (value));
@@ -148,21 +183,46 @@ _geocode_read_nominatim_attributes (JsonReader *reader,
                                 else
                                         house_number = value;
                         } else if (house_number != NULL && g_strcmp0 (members[i], "road") == 0) {
-                                /* Translators comment: number + street (e.g 221 Baker Street) */
-                                char *name = g_strdup_printf (_("%s %s"), house_number, value);
+                                gboolean number_after;
+                                char *name;
+
+                                number_after = _geocode_object_is_number_after_street ();
+                                name = g_strdup_printf ("%s %s",
+                                                        number_after ? value : house_number,
+                                                        number_after ? house_number : value);
                                 g_hash_table_insert (ht, g_strdup ("name"), name);
                         }
-                }
+                } else if (g_strcmp0 (members[i], "boundingbox") == 0) {
+                        JsonNode *node;
+                        GType value_type;
 
+                        json_reader_read_element (reader, 0);
+                        node = json_reader_get_value (reader);
+                        value_type = json_node_get_value_type (node);
+
+                        insert_bounding_box_element (ht, value_type, "boundingbox-bottom", reader);
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 1);
+                        insert_bounding_box_element (ht, value_type, "boundingbox-top", reader);
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 2);
+                        insert_bounding_box_element (ht, value_type, "boundingbox-left", reader);
+                        json_reader_end_element (reader);
+
+                        json_reader_read_element (reader, 3);
+                        insert_bounding_box_element (ht, value_type, "boundingbox-right", reader);
+                        json_reader_end_element (reader);
+                }
                 json_reader_end_member (reader);
         }
 
 	g_strfreev (members);
 
-	if (json_reader_read_member (reader, "address")) {
+        if (json_reader_read_member (reader, "address"))
                 _geocode_read_nominatim_attributes (reader, ht);
-                json_reader_end_member (reader);
-        }
+        json_reader_end_member (reader);
 }
 
 static GHashTable *
@@ -348,7 +408,7 @@ get_resolve_query_for_params (GHashTable  *orig_ht)
 	g_hash_table_destroy (ht);
 	g_free (locale);
 
-	uri = g_strdup_printf ("http://nominatim.gnome.org/reverse?%s", params);
+	uri = g_strdup_printf ("https://nominatim.gnome.org/reverse?%s", params);
 	g_free (params);
 
 	ret = soup_message_new ("GET", uri);
@@ -387,6 +447,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
 					    callback,
 					    user_data,
 					    geocode_reverse_resolve_async);
+	g_simple_async_result_set_check_cancellable (simple, cancellable);
 
 	query = get_resolve_query_for_params (object->priv->ht);
 
@@ -482,8 +543,11 @@ geocode_reverse_resolve (GeocodeReverse *object,
 	g_free (contents);
 	g_object_unref (query);
 
-        place = _geocode_create_place_from_attributes (result);
-        g_hash_table_destroy (result);
+	if (result == NULL)
+		return NULL;
+
+	place = _geocode_create_place_from_attributes (result);
+	g_hash_table_destroy (result);
 
 	return place;
 }

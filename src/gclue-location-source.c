@@ -21,6 +21,7 @@
 
 #include <glib.h>
 #include "gclue-location-source.h"
+#include "gclue-compass.h"
 
 /**
  * SECTION:gclue-location-source
@@ -46,6 +47,10 @@ struct _GClueLocationSourcePrivate
         GClueAccuracyLevel avail_accuracy_level;
 
         gboolean compute_movement;
+
+        GClueCompass *compass;
+
+        guint heading_changed_id;
 };
 
 enum
@@ -59,6 +64,46 @@ enum
 };
 
 static GParamSpec *gParamSpecs[LAST_PROP];
+
+static gboolean
+set_heading_from_compass (GClueLocationSource *source,
+                          GClueLocation       *location)
+{
+        GClueLocationSourcePrivate *priv = source->priv;
+        gdouble heading, curr_heading;
+
+        if (priv->compass == NULL)
+                return FALSE;
+
+        heading = gclue_compass_get_heading (priv->compass);
+        curr_heading = gclue_location_get_heading (location);
+
+        if (heading == GCLUE_LOCATION_HEADING_UNKNOWN  ||
+            heading == curr_heading)
+                return FALSE;
+
+        g_debug ("%s got new heading %f", G_OBJECT_TYPE_NAME (source), heading);
+        /* We trust heading from compass more than any other source so we always
+         * override existing heading
+         */
+        gclue_location_set_heading (location, heading);
+
+        return TRUE;
+}
+
+static void
+on_compass_heading_changed (GObject    *gobject,
+                            GParamSpec *pspec,
+                            gpointer    user_data)
+{
+        GClueLocationSource* source = GCLUE_LOCATION_SOURCE (user_data);
+
+        if (source->priv->location == NULL)
+                return;
+
+        if (set_heading_from_compass (source, source->priv->location))
+                g_object_notify (G_OBJECT (source), "location");
+}
 
 static void
 gclue_location_source_get_property (GObject    *object,
@@ -179,8 +224,8 @@ gclue_location_source_class_init (GClueLocationSourceClass *klass)
                 g_param_spec_boolean ("compute-movement",
                                       "ComputeMovement",
                                       "Whether or not, speed and heading should "
-                                      "be automatically computed and set on new "
-                                      "locations.",
+                                      "be automatically computed (or fetched "
+                                      "from hardware) and set on new locations.",
                                       TRUE,
                                       G_PARAM_READWRITE);
         g_object_class_install_property (object_class,
@@ -208,6 +253,15 @@ start_source (GClueLocationSource *source)
                 return FALSE;
         }
 
+        if (source->priv->compute_movement) {
+                source->priv->compass = gclue_compass_get_singleton ();
+                source->priv->heading_changed_id = g_signal_connect
+                        (G_OBJECT (source->priv->compass),
+                         "notify::heading",
+                         G_CALLBACK (on_compass_heading_changed),
+                         source);
+        }
+
         g_object_notify (G_OBJECT (source), "active");
         g_debug ("%s now active", G_OBJECT_TYPE_NAME (source));
         return TRUE;
@@ -227,6 +281,12 @@ stop_source (GClueLocationSource *source)
                 g_debug ("%s still in use, not stopping.",
                          G_OBJECT_TYPE_NAME (source));
                 return FALSE;
+        }
+
+        if (source->priv->compass) {
+                g_signal_handler_disconnect (source->priv->compass,
+                                             source->priv->heading_changed_id);
+                g_clear_object (&source->priv->compass);
         }
 
         g_object_notify (G_OBJECT (source), "active");
@@ -291,23 +351,18 @@ gclue_location_source_set_location (GClueLocationSource *source,
 {
         GClueLocationSourcePrivate *priv = source->priv;
         GClueLocation *cur_location;
-        GeocodeLocation *gloc;
         gdouble speed, heading;
 
-        gloc = GEOCODE_LOCATION (location);
         cur_location = priv->location;
-        priv->location = gclue_location_new_with_description
-                                (geocode_location_get_latitude (gloc),
-                                 geocode_location_get_longitude (gloc),
-                                 geocode_location_get_accuracy (gloc),
-                                 geocode_location_get_description (gloc));
+        priv->location = gclue_location_duplicate (location);
 
         speed = gclue_location_get_speed (location);
         if (speed == GCLUE_LOCATION_SPEED_UNKNOWN) {
                 if (cur_location != NULL && priv->compute_movement) {
                         guint64 cur_timestamp, timestamp;
 
-                        timestamp = geocode_location_get_timestamp (gloc);
+                        timestamp = geocode_location_get_timestamp
+                                        (GEOCODE_LOCATION (location));
                         cur_timestamp = geocode_location_get_timestamp
                                         (GEOCODE_LOCATION (cur_location));
 
@@ -319,6 +374,7 @@ gclue_location_source_set_location (GClueLocationSource *source,
                 gclue_location_set_speed (priv->location, speed);
         }
 
+        set_heading_from_compass (source, location);
         heading = gclue_location_get_heading (location);
         if (heading == GCLUE_LOCATION_HEADING_UNKNOWN) {
                 if (cur_location != NULL && priv->compute_movement)
@@ -364,8 +420,8 @@ gclue_location_source_get_available_accuracy_level (GClueLocationSource *source)
  * gclue_location_source_get_compute_movement
  * @source: a #GClueLocationSource
  *
- * Returns: %TRUE if speed and heading will be automatically computed and set
- * on new locations, %FALSE otherwise.
+ * Returns: %TRUE if speed and heading will be automatically computed (or
+ * fetched from hardware) and set on new locations, %FALSE otherwise.
  **/
 gboolean
 gclue_location_source_get_compute_movement (GClueLocationSource *source)
@@ -381,7 +437,7 @@ gclue_location_source_get_compute_movement (GClueLocationSource *source)
  * @compute: a #gboolean
  *
  * Use this to specify whether or not you want @source to automatically compute
- * and set speed and heading on new locations.
+ * (or fetch from hardware) and set speed and heading on new locations.
  **/
 void
 gclue_location_source_set_compute_movement (GClueLocationSource *source,

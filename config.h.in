@@ -12,6 +12,9 @@
 /* Build modem GPS source? */
 #undef GCLUE_USE_MODEM_GPS_SOURCE
 
+/* Build network NMEA source? */
+#undef GCLUE_USE_NMEA_SOURCE
+
 /* The name of the gettext domain */
 #undef GETTEXT_PACKAGE
 

@@ -72,6 +72,11 @@
         Location:
 
         Current location as path to a #org.freedesktop.GeoClue2.Location object.
+        Please note that this property will be set to "/" (D-Bus equivalent of
+        null) initially, until Geoclue finds user's location. You want to delay
+        reading this property until your callback to
+        #org.freedesktop.GeoClue2.Client::LocationUpdated signal is called for
+        the first time after starting the client.
     -->
     <property name="Location" type="o" access="read"/>
 

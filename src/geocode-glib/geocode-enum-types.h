@@ -50,6 +50,16 @@ GType geocode_place_type_get_type (void) G_GNUC_CONST;
  *
  * The enumerated types defined and used by geocode-glib.
  **/
+GType geocode_place_osm_type_get_type (void) G_GNUC_CONST;
+#define GEOCODE_TYPE_PLACE_OSM_TYPE (geocode_place_osm_type_get_type())
+
+/**
+ * SECTION:geocode-enum-types
+ * @short_description: Geocode enumerated types
+ * @include: geocode-glib/geocode-glib.h
+ *
+ * The enumerated types defined and used by geocode-glib.
+ **/
 G_END_DECLS
 
 #endif /* __GEOCODE_ENUM_TYPES_H__ */

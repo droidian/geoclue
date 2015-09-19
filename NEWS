@@ -1,3 +1,33 @@
+2.3.0
+=====
+
+- Add a network NMEA source, which together with this application:
+  https://wiki.gnome.org/Apps/GeoclueShare
+  allows you to use the GPS of your Android device on your geoclue-enabled machine.
+- Allow root to own the name on the bus, i-e run the service.
+- Make use of compass device if available, through iio-proxy.
+- Fix a hang on client starting twice.
+- More helpful error on agent rejection.
+- Improved documentation.
+- Do not ship generated D-Bus service files in the tarball.
+- Only allow the geoclue user and root to call methods on agents.
+- Fix ignoring of valid location updates due to comparison of distances in
+  different units.
+- Correctly handle two consecutive location updates with same timestamp on them.
+- Correctly handle late location update.
+- Build system fixes:
+  - Fix detection of gdbus-codegen tool.
+  - Workaround an intltool issue.
+
+All contributors to this release:
+
+Ankit <ankitstarski@gmail.com>
+Bastien Nocera <hadess@hadess.net>
+Fabrice Bellet <fabrice@bellet.info>
+Laurent Bigonville <bigon@bigon.be>
+Philip Withnall <philip.withnall@collabora.co.uk>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.2.0
 =====
 

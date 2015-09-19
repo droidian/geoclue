@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.2.0],
+        [2.3.0],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -39,9 +39,9 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext d
 
 GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
-GEOIP_MIN_VERSION=1.5.1
 LIBMM_GLIB_MIN_VERSION=1.0
 LIBSOUP_MIN_VERSION=2.42
+AVAHI_MIN_VERSION=0.6.10
 
 AC_CHECK_LIB([m],[sin])
 
@@ -62,47 +62,67 @@ PKG_CHECK_MODULES(GEOCLUE, [
 AC_ARG_ENABLE(3g-source,
               AS_HELP_STRING([--disable-3g-source], [Disable 3G backend (requires ModemManager)]),
               [build_3g_source=$enableval], [build_3g_source=yes])
-if test "$build_3g_source" = "yes"; then
+if test "x$build_3g_source" = "xyes"; then
   build_modem_source=yes
   AC_DEFINE([GCLUE_USE_3G_SOURCE], [1], [Build 3G source?])
 else
   AC_DEFINE([GCLUE_USE_3G_SOURCE], [0], [Build 3G source?])
 fi
-AM_CONDITIONAL([BUILD_3G_SOURCE], [test "$build_3g_source" = "yes"])
+AM_CONDITIONAL([BUILD_3G_SOURCE], [test "x$build_3g_source" = "xyes"])
 
 # CDMA source
 AC_ARG_ENABLE(cdma-source,
               AS_HELP_STRING([--disable-cdma-source], [Disable CDMA backend (requires ModemManager)]),
               [build_cdma_source=$enableval], [build_cdma_source=yes])
-if test "$build_cdma_source" = "yes"; then
+if test "x$build_cdma_source" = "xyes"; then
   build_modem_source=yes
   AC_DEFINE([GCLUE_USE_CDMA_SOURCE], [1], [Build CDMA source?])
 else
   AC_DEFINE([GCLUE_USE_CDMA_SOURCE], [0], [Build CDMA source?])
 fi
-AM_CONDITIONAL([BUILD_CDMA_SOURCE], [test "$build_cdma_source" = "yes"])
+AM_CONDITIONAL([BUILD_CDMA_SOURCE], [test "x$build_cdma_source" = "xyes"])
 
 # GPS source
 AC_ARG_ENABLE(modem-gps-source,
               AS_HELP_STRING([--disable-modem-gps-source], [Disable modem GPS backend (requires ModemManager)]),
               [build_modem_gps_source=$enableval], [build_modem_gps_source=yes])
-if test "$build_modem_gps_source" = "yes"; then
+if test "x$build_modem_gps_source" = "xyes"; then
   build_modem_source=yes
   AC_DEFINE([GCLUE_USE_MODEM_GPS_SOURCE], [1], [Build modem GPS source?])
 else
   AC_DEFINE([GCLUE_USE_MODEM_GPS_SOURCE], [0], [Build modem GPS source?])
 fi
-AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "$build_modem_gps_source" = "yes"])
+AM_CONDITIONAL([BUILD_MODEM_GPS_SOURCE], [test "x$build_modem_gps_source" = "xyes"])
 
 # Modem source is used in common by GPS, 3G and CDMA sources
-if test "$build_modem_source" = "yes"; then
+if test "x$build_modem_source" = "xyes"; then
   require_modemmanager=yes
 fi
-AM_CONDITIONAL([BUILD_MODEM_SOURCE], [test "$build_modem_source" = "yes"])
+AM_CONDITIONAL([BUILD_MODEM_SOURCE], [test "x$build_modem_source" = "xyes"])
 
 # Check for ModemManager if one of the sources requires it
-if test "$require_modemmanager" = "yes"; then
+if test "x$require_modemmanager" = "xyes"; then
   PKG_CHECK_MODULES(ModemManager, mm-glib >= $LIBMM_GLIB_MIN_VERSION)
+fi
+
+# Network NMEA Source
+AC_ARG_ENABLE(nmea-source,
+              AS_HELP_STRING([--disable-nmea-source],
+                             [Disable network NMEA source (requires avahi-client and avahi-glib)]),
+              [build_nmea_source=$enableval], [build_nmea_source=yes])
+
+if test "x$build_nmea_source" = "xyes"; then
+  AC_DEFINE([GCLUE_USE_NMEA_SOURCE], [1], [Build network NMEA source?])
+else
+  AC_DEFINE([GCLUE_USE_NMEA_SOURCE], [0], [Build network NMEA source?])
+fi
+AM_CONDITIONAL([BUILD_NMEA_SOURCE], [test "x$build_nmea_source" = "xyes"])
+
+if test "x$build_nmea_source" = "xyes"; then
+    # Check for avahi-client and avahi-glib
+    PKG_CHECK_MODULES(NMEA_SOURCE, [
+                      avahi-client >= $AVAHI_MIN_VERSION
+                      avahi-glib >= $AVAHI_MIN_VERSION])
 fi
 
 # Demo agent
@@ -154,13 +174,10 @@ if test x$cross_compiling != xyes; then
 else
 	AC_PATH_PROG([GDBUS_CODEGEN],[gdbus-codegen])
 fi
-AC_SUBST([GDBUS_CODEGEN])
 
-if test "x$GDBUS_CODEGEN" = "x"; then
-	ifelse([$2],,[AC_MSG_ERROR([gdbus-codegen not found.])],[$2])
-else
-	ifelse([$1],,[:],[$1])
-fi
+AS_IF([test "$GDBUS_CODEGEN" = ""],[
+	AC_MSG_ERROR([gdbus-codegen not found])
+])
 
 # systemd
 AC_ARG_WITH([systemdsystemunitdir],
@@ -188,6 +205,7 @@ AC_CONFIG_FILES([
   src/public-api/Makefile
   po/Makefile.in
   data/org.freedesktop.GeoClue2.conf
+  data/org.freedesktop.GeoClue2.Agent.conf
   data/Makefile
   demo/Makefile
   docs/Makefile
@@ -209,4 +227,5 @@ AC_MSG_NOTICE([
         3G source:                ${build_3g_source}
         CDMA source:              ${build_cdma_source}
         Modem GPS source:         ${build_modem_gps_source}
+        Network NMEA source:      ${build_nmea_source}
 ])

@@ -27,6 +27,7 @@
 #define GCLUE_LOCATION_H
 
 #include <glib-object.h>
+#include <gio/gio.h>
 #include "geocode-glib/geocode-location.h"
 
 G_BEGIN_DECLS
@@ -37,6 +38,8 @@ G_BEGIN_DECLS
 #define GCLUE_LOCATION_CLASS(klass)    (G_TYPE_CHECK_CLASS_CAST ((klass),  GCLUE_TYPE_LOCATION, GClueLocationClass))
 #define GCLUE_IS_LOCATION_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCLUE_TYPE_LOCATION))
 #define GCLUE_LOCATION_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  GCLUE_TYPE_LOCATION, GClueLocationClass))
+
+#define INVALID_COORDINATE -G_MAXDOUBLE
 
 typedef struct _GClueLocation        GClueLocation;
 typedef struct _GClueLocationClass   GClueLocationClass;
@@ -81,6 +84,13 @@ GClueLocation *gclue_location_new_with_description
                                    gdouble     longitude,
                                    gdouble     accuracy,
                                    const char *description);
+
+GClueLocation *gclue_location_create_from_gga
+                                  (const char *gga,
+                                   GError    **error);
+
+GClueLocation *gclue_location_duplicate
+                                  (GClueLocation *location);
 
 void gclue_location_set_speed     (GClueLocation *loc,
                                    gdouble        speed);

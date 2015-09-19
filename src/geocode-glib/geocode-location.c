@@ -157,6 +157,28 @@ geocode_location_set_crs(GeocodeLocation   *loc,
 }
 
 static void
+geocode_location_set_timestamp (GeocodeLocation *loc,
+                                guint64          timestamp)
+{
+        g_return_if_fail (GEOCODE_IS_LOCATION (loc));
+
+        loc->priv->timestamp = timestamp;
+}
+
+static void
+geocode_location_constructed (GObject *object)
+{
+        GeocodeLocation *location = GEOCODE_LOCATION (object);
+        GTimeVal tv;
+
+        if (location->priv->timestamp != 0)
+                return;
+
+        g_get_current_time (&tv);
+        geocode_location_set_timestamp (location, tv.tv_sec);
+}
+
+static void
 geocode_location_set_property(GObject      *object,
                               guint         property_id,
                               const GValue *value,
@@ -195,11 +217,70 @@ geocode_location_set_property(GObject      *object,
                                           g_value_get_enum (value));
                 break;
 
+        case PROP_TIMESTAMP:
+                geocode_location_set_timestamp (location,
+                                                g_value_get_uint64 (value));
+                break;
+
         default:
                 /* We don't have any other property... */
                 G_OBJECT_WARN_INVALID_PROPERTY_ID (object, property_id, pspec);
                 break;
         }
+}
+
+static gboolean
+parse_geo_uri_special_parameters (GeocodeLocation *loc,
+                                  const char      *params,
+                                  GError         **error)
+{
+        char *end_ptr;
+        char *next_token;
+        char *description;
+        char *token_end;
+        int description_len;
+
+        if (loc->priv->latitude != 0 || loc->priv->longitude != 0)
+            goto err;
+
+        if (strncmp (params, "q=", 2) != 0)
+                goto err;
+
+        next_token = ((char *)params) + 2;
+
+        loc->priv->latitude = g_ascii_strtod (next_token, &end_ptr);
+        if (*end_ptr != ',' || *end_ptr == *params)
+                goto err;
+        next_token = end_ptr + 1;
+
+        loc->priv->longitude = g_ascii_strtod (next_token, &end_ptr);
+        if (*end_ptr == *next_token)
+                goto err;
+
+        if (*end_ptr != '(' || *end_ptr == *next_token)
+                goto err;
+        next_token = end_ptr + 1;
+
+        if ((token_end = strchr (next_token, ')')) == NULL)
+                goto err;
+
+        description_len = token_end - next_token;
+        if (description_len <= 0)
+            goto err;
+
+        description = g_uri_unescape_segment (next_token,
+                                              next_token + description_len,
+                                              NULL);
+        geocode_location_set_description (loc, description);
+        g_free (description);
+        return TRUE;
+
+ err:
+        g_set_error_literal (error,
+                             GEOCODE_ERROR,
+                             GEOCODE_ERROR_PARSE,
+                             "Failed to parse geo URI parameters");
+        return FALSE;
 }
 
 /*
@@ -209,7 +290,7 @@ geocode_location_set_property(GObject      *object,
       parameters that may be defined in future extensions.  The 'crs'
       parameter MUST be given first if both 'crs' and 'u' are used.
  */
-static void
+static gboolean
 parse_geo_uri_parameters (GeocodeLocation *loc,
                           const char      *params,
                           GError         **error)
@@ -219,6 +300,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
         char *val;
         char *u = NULL;
         char *crs = NULL;
+        int ret = TRUE;
 
         parameters = g_strsplit (params, ";", 2);
         if (parameters[0] == NULL)
@@ -262,13 +344,17 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
                 if (g_strcmp0 (val, "wgs84"))
                         goto err;
         }
-        return;
+        goto out;
 
  err:
-       g_set_error_literal (error,
-                            GEOCODE_ERROR,
-                            GEOCODE_ERROR_PARSE,
-                            "Failed to parse geo URI parameters");
+        ret = FALSE;
+        g_set_error_literal (error,
+                             GEOCODE_ERROR,
+                             GEOCODE_ERROR_PARSE,
+                             "Failed to parse geo URI parameters");
+ out:
+       g_strfreev (parameters);
+       return ret;
 }
 
 /*
@@ -312,7 +398,7 @@ parse_geo_uri_parameters (GeocodeLocation *loc,
                         "'" / "(" / ")"
        pct-encoded   = "%" HEXDIG HEXDIG
 */
-static void
+static gboolean
 parse_geo_uri (GeocodeLocation *loc,
                const char      *uri,
                GError         **error)
@@ -351,41 +437,56 @@ parse_geo_uri (GeocodeLocation *loc,
         }
         if (*end_ptr == ';') {
                 next_token = end_ptr + 1;
-                parse_geo_uri_parameters (loc, next_token, error);
-                return;
+                return parse_geo_uri_parameters (loc, next_token, error);
+        } else if (*end_ptr == '?') {
+                next_token = end_ptr + 1;
+                return parse_geo_uri_special_parameters (loc,
+                                                         next_token,
+                                                         error);
         } else if (*end_ptr == '\0') {
-                return;
+                return TRUE;
         }
  err:
         g_set_error_literal (error,
                              GEOCODE_ERROR,
                              GEOCODE_ERROR_PARSE,
                              "Failed to parse geo URI");
+        return FALSE;
 }
 
-static void
+static gboolean
 parse_uri (GeocodeLocation *location,
            const char      *uri,
            GError         **error)
 {
         char *scheme;
+        int ret = TRUE;
 
         scheme = g_uri_parse_scheme (uri);
-        if (scheme == NULL)
+        if (scheme == NULL) {
+                ret = FALSE;
                 goto err;
+        }
 
-        if (g_strcmp0 (scheme, "geo") == 0)
-                parse_geo_uri (location, uri, error);
-        else
+        if (g_strcmp0 (scheme, "geo") == 0) {
+                if (!parse_geo_uri (location, uri, error))
+                        ret = FALSE;
+                goto out;
+        } else {
+                ret = FALSE;
                 goto err;
-
-        return;
+        }
 
  err:
-        g_set_error_literal (error,
-                             GEOCODE_ERROR,
-                             GEOCODE_ERROR_NOT_SUPPORTED,
-                             "Unsupported or invalid URI scheme");
+        if (error) {
+                g_set_error_literal (error,
+                                     GEOCODE_ERROR,
+                                     GEOCODE_ERROR_NOT_SUPPORTED,
+                                     "Unsupported or invalid URI scheme");
+        }
+ out:
+        g_free (scheme);
+        return ret;
 }
 
 static void
@@ -407,6 +508,7 @@ geocode_location_class_init (GeocodeLocationClass *klass)
         glocation_class->finalize = geocode_location_finalize;
         glocation_class->get_property = geocode_location_get_property;
         glocation_class->set_property = geocode_location_set_property;
+        glocation_class->constructed = geocode_location_constructed;
 
         g_type_class_add_private (klass, sizeof (GeocodeLocationPrivate));
 
@@ -505,6 +607,8 @@ geocode_location_class_init (GeocodeLocationClass *klass)
          *
          * A timestamp in seconds since
          * <ulink url="http://en.wikipedia.org/wiki/Unix_epoch">Epoch</ulink>.
+         *
+         * A value of 0 (zero) will be interpreted as the current time.
          */
         pspec = g_param_spec_uint64 ("timestamp",
                                      "Timestamp",
@@ -513,7 +617,8 @@ geocode_location_class_init (GeocodeLocationClass *klass)
                                      0,
                                      G_MAXINT64,
                                      0,
-                                     G_PARAM_READABLE |
+                                     G_PARAM_READWRITE |
+                                     G_PARAM_CONSTRUCT_ONLY |
                                      G_PARAM_STATIC_STRINGS);
         g_object_class_install_property (glocation_class, PROP_TIMESTAMP, pspec);
 }
@@ -521,14 +626,10 @@ geocode_location_class_init (GeocodeLocationClass *klass)
 static void
 geocode_location_init (GeocodeLocation *location)
 {
-        GTimeVal tv;
-
         location->priv = G_TYPE_INSTANCE_GET_PRIVATE ((location),
                                                       GEOCODE_TYPE_LOCATION,
                                                       GeocodeLocationPrivate);
 
-        g_get_current_time (&tv);
-        location->priv->timestamp = tv.tv_sec;
         location->priv->altitude = GEOCODE_LOCATION_ALTITUDE_UNKNOWN;
         location->priv->accuracy = GEOCODE_LOCATION_ACCURACY_UNKNOWN;
         location->priv->crs = GEOCODE_LOCATION_CRS_WGS84;
@@ -589,6 +690,17 @@ geocode_location_new_with_description (gdouble     latitude,
  *
  * Initialize a #GeocodeLocation object with the given @uri.
  *
+ * The URI should be in the geo scheme (RFC 5870) which in its simplest form
+ * looks like:
+ *
+ * - geo:latitude,longitude
+ *
+ * An <ulink
+ * url="http://developer.android.com/guide/components/intents-common.html#Maps">
+ * Android extension</ulink> to set a description is also supported in the form of:
+ *
+ * - geo:0,0?q=latitude,longitude(description)
+ *
  * Returns: %TRUE on success and %FALSE on error.
  **/
 gboolean
@@ -596,11 +708,7 @@ geocode_location_set_from_uri (GeocodeLocation *loc,
                                const char      *uri,
                                GError         **error)
 {
-        parse_uri (loc, uri, error);
-        if (*error != NULL)
-                return FALSE;
-
-        return TRUE;
+        return parse_uri (loc, uri, error);
 }
 
 /**
@@ -735,9 +843,18 @@ geocode_location_get_timestamp (GeocodeLocation *loc)
         return loc->priv->timestamp;
 }
 
+static gdouble
+round_coord_n (gdouble coord, guint n)
+{
+  gdouble fac = pow (10, n);
+
+  return round (coord * fac) / fac;
+}
+
 static char *
 geo_uri_from_location (GeocodeLocation *loc)
 {
+        guint precision = 6; /* 0.1 meter precision */
         char *uri;
         char *coords;
         char *params;
@@ -749,8 +866,14 @@ geo_uri_from_location (GeocodeLocation *loc)
 
         g_return_val_if_fail (GEOCODE_IS_LOCATION (loc), NULL);
 
-        g_ascii_dtostr (lat, G_ASCII_DTOSTR_BUF_SIZE, loc->priv->latitude);
-        g_ascii_dtostr (lon, G_ASCII_DTOSTR_BUF_SIZE, loc->priv->longitude);
+        g_ascii_formatd (lat,
+                         G_ASCII_DTOSTR_BUF_SIZE,
+                         "%.6f",
+                         round_coord_n (loc->priv->latitude, precision));
+        g_ascii_formatd (lon,
+                         G_ASCII_DTOSTR_BUF_SIZE,
+                         "%.6f",
+                         round_coord_n (loc->priv->longitude, precision));
 
         if (loc->priv->altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN) {
                 g_ascii_dtostr (alt, G_ASCII_DTOSTR_BUF_SIZE,

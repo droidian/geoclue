@@ -88,9 +88,29 @@ geocode_place_type_get_type (void)
       { GEOCODE_PLACE_TYPE_HISTORICAL_TOWN, "GEOCODE_PLACE_TYPE_HISTORICAL_TOWN", "historical-town" },
       { GEOCODE_PLACE_TYPE_OCEAN, "GEOCODE_PLACE_TYPE_OCEAN", "ocean" },
       { GEOCODE_PLACE_TYPE_SEA, "GEOCODE_PLACE_TYPE_SEA", "sea" },
+      { GEOCODE_PLACE_TYPE_SCHOOL, "GEOCODE_PLACE_TYPE_SCHOOL", "school" },
+      { GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP, "GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP", "place-of-worship" },
+      { GEOCODE_PLACE_TYPE_RESTAURANT, "GEOCODE_PLACE_TYPE_RESTAURANT", "restaurant" },
+      { GEOCODE_PLACE_TYPE_BAR, "GEOCODE_PLACE_TYPE_BAR", "bar" },
       { 0, NULL, NULL }
     };
     etype = g_enum_register_static ("GeocodePlaceType", values);
+  }
+  return etype;
+}
+GType
+geocode_place_osm_type_get_type (void)
+{
+  static GType etype = 0;
+  if (etype == 0) {
+    static const GEnumValue values[] = {
+      { GEOCODE_PLACE_OSM_TYPE_UNKNOWN, "GEOCODE_PLACE_OSM_TYPE_UNKNOWN", "unknown" },
+      { GEOCODE_PLACE_OSM_TYPE_NODE, "GEOCODE_PLACE_OSM_TYPE_NODE", "node" },
+      { GEOCODE_PLACE_OSM_TYPE_RELATION, "GEOCODE_PLACE_OSM_TYPE_RELATION", "relation" },
+      { GEOCODE_PLACE_OSM_TYPE_WAY, "GEOCODE_PLACE_OSM_TYPE_WAY", "way" },
+      { 0, NULL, NULL }
+    };
+    etype = g_enum_register_static ("GeocodePlaceOsmType", values);
   }
   return etype;
 }

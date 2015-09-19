@@ -21,7 +21,7 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
 
 Package: geoclue-2.0
 Architecture: any
-Depends: ${misc:Depends}, ${shlibs:Depends}, adduser
+Depends: adduser, ${misc:Depends}, ${shlibs:Depends}
 Recommends: modemmanager [linux-any], wpasupplicant [!hurd-any]
 Breaks: geoclue (>= 2.0)
 Replaces: geoclue (>= 2.0)

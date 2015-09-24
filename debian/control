@@ -22,7 +22,10 @@ Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
 Package: geoclue-2.0
 Architecture: any
 Depends: adduser, ${misc:Depends}, ${shlibs:Depends}
-Recommends: avahi-daemon, modemmanager [linux-any], wpasupplicant [!hurd-any]
+Recommends: avahi-daemon,
+            iio-sensor-proxy [linux-any],
+            modemmanager [linux-any],
+            wpasupplicant [!hurd-any]
 Breaks: geoclue (>= 2.0)
 Replaces: geoclue (>= 2.0)
 Description: geoinformation service

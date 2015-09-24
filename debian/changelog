@@ -1,3 +1,9 @@
+geoclue-2.0 (2.3.0-2) unstable; urgency=medium
+
+  * [5d5632b7] Add iio-sensor-proxy to the Recommends
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 24 Sep 2015 13:18:04 +0200
+
 geoclue-2.0 (2.3.0-1) unstable; urgency=medium
 
   * [3ddfc9c3] Imported Upstream version 2.3.0

@@ -24,7 +24,7 @@
 #define GCLUE_SERVICE_CLIENT_H
 
 #include <glib-object.h>
-#include "geoclue-interface.h"
+#include "gclue-client-interface.h"
 #include "geoclue-agent-interface.h"
 #include "gclue-client-info.h"
 

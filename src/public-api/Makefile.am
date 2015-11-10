@@ -5,6 +5,11 @@ BUILT_SOURCES = 		\
 	gclue-enum-types.c	\
 	$(NULL)
 
+geoclue_includedir = $(includedir)/libgeoclue-$(GEOCLUE_API_VERSION)
+geoclue_include_HEADERS = gclue-enums.h	     \
+			  gclue-enum-types.h \
+			  $(NULL)
+
 AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		       \
 	      $(WARN_CFLAGS)			       \
 	      -DLOCALEDIR="\"$(datadir)/locale\""      \

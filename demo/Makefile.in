@@ -89,15 +89,17 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-demo_PROGRAMS = where-am-i$(EXEEXT) $(am__EXEEXT_1)
+@BUILD_LIBGEOCLUE_FALSE@demo_PROGRAMS = $(am__EXEEXT_1)
+@BUILD_LIBGEOCLUE_TRUE@demo_PROGRAMS = where-am-i$(EXEEXT) \
+@BUILD_LIBGEOCLUE_TRUE@	$(am__EXEEXT_1)
 @BUILD_DEMO_AGENT_TRUE@am__append_1 = agent
 subdir = demo
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
-	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
-	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
+	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
+	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
+	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -123,7 +125,8 @@ agent_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 am_where_am_i_OBJECTS = where_am_i-where-am-i.$(OBJEXT)
 where_am_i_OBJECTS = $(am_where_am_i_OBJECTS)
-where_am_i_DEPENDENCIES = $(am__DEPENDENCIES_1)
+where_am_i_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	../libgeoclue/libgeoclue-2.la
 where_am_i_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(where_am_i_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
@@ -277,14 +280,25 @@ INTLTOOL_V_MERGE = @INTLTOOL_V_MERGE@
 INTLTOOL_V_MERGE_OPTIONS = @INTLTOOL_V_MERGE_OPTIONS@
 INTLTOOL__v_MERGE_ = @INTLTOOL__v_MERGE_@
 INTLTOOL__v_MERGE_0 = @INTLTOOL__v_MERGE_0@
+INTROSPECTION_CFLAGS = @INTROSPECTION_CFLAGS@
+INTROSPECTION_COMPILER = @INTROSPECTION_COMPILER@
+INTROSPECTION_GENERATE = @INTROSPECTION_GENERATE@
+INTROSPECTION_GIRDIR = @INTROSPECTION_GIRDIR@
+INTROSPECTION_LIBS = @INTROSPECTION_LIBS@
+INTROSPECTION_MAKEFILE = @INTROSPECTION_MAKEFILE@
+INTROSPECTION_SCANNER = @INTROSPECTION_SCANNER@
+INTROSPECTION_TYPELIBDIR = @INTROSPECTION_TYPELIBDIR@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
+LIBGEOCLUE_CFLAGS = @LIBGEOCLUE_CFLAGS@
+LIBGEOCLUE_LIBS = @LIBGEOCLUE_LIBS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LT_SYS_LIBRARY_PATH = @LT_SYS_LIBRARY_PATH@
 MAINT = @MAINT@
 MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
@@ -381,9 +395,15 @@ demodir = $(libexecdir)/geoclue-2.0/demos
 where_am_i_SOURCES = where-am-i.c
 where_am_i_CFLAGS = $(GEOCLUE_CFLAGS)   		\
 		    $(WARN_CFLAGS)			\
-		    -DLOCALEDIR="\"$(datadir)/locale\""
+		    -DLOCALEDIR="\"$(datadir)/locale\"" \
+		    -I$(top_srcdir)/libgeoclue		\
+		    -I$(top_builddir)/libgeoclue	\
+		    -I$(top_srcdir)/src/public-api 	\
+		    -I$(top_builddir)/src/public-api
 
-where_am_i_LDADD = $(GEOCLUE_LIBS)
+where_am_i_LDADD = $(GEOCLUE_LIBS)			\
+		   ../libgeoclue/libgeoclue-2.la
+
 appsdir = $(datadir)/applications
 apps_DATA = geoclue-where-am-i.desktop \
 	    geoclue-demo-agent.desktop
@@ -399,8 +419,11 @@ agent_CFLAGS = $(DEMO_AGENT_CFLAGS)   		   \
  	       -DLOCALEDIR="\"$(datadir)/locale\"" \
 	       -DABS_SRCDIR=\""$(abs_srcdir)"\"	   \
 	       -I$(top_builddir)/src		   \
+	       -I$(top_srcdir)/src		   \
 	       -I$(top_builddir)/src/agent	   \
-	       -I$(top_builddir)/src/public-api
+	       -I$(top_srcdir)/src/agent	   \
+	       -I$(top_builddir)/src/public-api	   \
+	       -I$(top_srcdir)/src/public-api
 
 agent_LDADD = $(DEMO_AGENT_LIBS) \
 	      $(top_builddir)/src/agent/libgeoclue-agent.la

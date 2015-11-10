@@ -74,9 +74,9 @@ gclue_marshal_VOID__UINT_UINT_ULONG_ULONG (GClosure     *closure,
                                                             gulong       arg_3,
                                                             gulong       arg_4,
                                                             gpointer     data2);
-  register GMarshalFunc_VOID__UINT_UINT_ULONG_ULONG callback;
-  register GCClosure *cc = (GCClosure*) closure;
-  register gpointer data1, data2;
+  GMarshalFunc_VOID__UINT_UINT_ULONG_ULONG callback;
+  GCClosure *cc = (GCClosure*) closure;
+  gpointer data1, data2;
 
   g_return_if_fail (n_param_values == 5);
 
@@ -119,9 +119,9 @@ gclue_marshal_VOID__DOUBLE_DOUBLE (GClosure     *closure,
                                                     gdouble      arg_1,
                                                     gdouble      arg_2,
                                                     gpointer     data2);
-  register GMarshalFunc_VOID__DOUBLE_DOUBLE callback;
-  register GCClosure *cc = (GCClosure*) closure;
-  register gpointer data1, data2;
+  GMarshalFunc_VOID__DOUBLE_DOUBLE callback;
+  GCClosure *cc = (GCClosure*) closure;
+  gpointer data1, data2;
 
   g_return_if_fail (n_param_values == 3);
 

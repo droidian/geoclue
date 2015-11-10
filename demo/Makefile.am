@@ -1,12 +1,21 @@
 demodir = $(libexecdir)/geoclue-2.0/demos
 
+if BUILD_LIBGEOCLUE
 demo_PROGRAMS = where-am-i
+else
+demo_PROGRAMS =
+endif
 
 where_am_i_SOURCES = where-am-i.c
 where_am_i_CFLAGS = $(GEOCLUE_CFLAGS)   		\
 		    $(WARN_CFLAGS)			\
-		    -DLOCALEDIR="\"$(datadir)/locale\""
-where_am_i_LDADD = $(GEOCLUE_LIBS)
+		    -DLOCALEDIR="\"$(datadir)/locale\"" \
+		    -I$(top_srcdir)/libgeoclue		\
+		    -I$(top_builddir)/libgeoclue	\
+		    -I$(top_srcdir)/src/public-api 	\
+		    -I$(top_builddir)/src/public-api
+where_am_i_LDADD = $(GEOCLUE_LIBS)			\
+		   ../libgeoclue/libgeoclue-2.la
 
 appsdir = $(datadir)/applications
 apps_DATA = geoclue-where-am-i.desktop \
@@ -34,8 +43,11 @@ agent_CFLAGS = $(DEMO_AGENT_CFLAGS)   		   \
  	       -DLOCALEDIR="\"$(datadir)/locale\"" \
 	       -DABS_SRCDIR=\""$(abs_srcdir)"\"	   \
 	       -I$(top_builddir)/src		   \
+	       -I$(top_srcdir)/src		   \
 	       -I$(top_builddir)/src/agent	   \
-	       -I$(top_builddir)/src/public-api
+	       -I$(top_srcdir)/src/agent	   \
+	       -I$(top_builddir)/src/public-api	   \
+	       -I$(top_srcdir)/src/public-api
 agent_LDADD = $(DEMO_AGENT_LIBS) \
 	      $(top_builddir)/src/agent/libgeoclue-agent.la
 

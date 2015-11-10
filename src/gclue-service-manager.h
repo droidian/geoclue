@@ -24,7 +24,7 @@
 #define GCLUE_SERVICE_MANAGER_H
 
 #include <glib-object.h>
-#include "geoclue-interface.h"
+#include "gclue-manager-interface.h"
 
 G_BEGIN_DECLS
 

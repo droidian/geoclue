@@ -4,23 +4,67 @@ libexec_PROGRAMS = geoclue
 
 SUBDIRS = public-api agent geocode-glib
 
-interfacedir = $(datadir)/dbus-1/interfaces
-interface_DATA = org.freedesktop.GeoClue2.xml
+CLIENT_INTERFACE_XML = org.freedesktop.GeoClue2.Client.xml
+LOCATION_INTERFACE_XML = org.freedesktop.GeoClue2.Location.xml
+MANAGER_INTERFACE_XML = org.freedesktop.GeoClue2.Manager.xml
 
-dbus_built_sources = geoclue-interface.c 	\
-		     geoclue-interface.h 	\
+interfacedir = $(datadir)/dbus-1/interfaces
+interface_DATA = $(CLIENT_INTERFACE_XML)   \
+		 $(LOCATION_INTERFACE_XML) \
+		 $(MANAGER_INTERFACE_XML)
+
+# Provide a single interface file too for backwards compatiblity.
+# At least gnome-settings-daemon currently relies on that.
+install-data-hook:
+	{ (echo "<node>") && 						     \
+	  (tail -n +10 $(DESTDIR)$(interfacedir)/$(MANAGER_INTERFACE_XML) |  \
+	   grep -v node) &&  						     \
+	  (tail -n +10 $(DESTDIR)$(interfacedir)/$(CLIENT_INTERFACE_XML) |   \
+	   grep -v node) &&   						     \
+	  (tail -n +10 $(DESTDIR)$(interfacedir)/$(LOCATION_INTERFACE_XML) | \
+	   grep -v node) && 						     \
+	  (echo "</node>") } 						     \
+	> $(DESTDIR)$(interfacedir)/org.freedesktop.GeoClue2.xml
+uninstall-hook:
+	rm -r $(DESTDIR)$(interfacedir)/org.freedesktop.GeoClue2.xml
+
+dbus_built_sources = gclue-client-interface.c 	\
+		     gclue-client-interface.h 	\
+		     gclue-location-interface.c \
+		     gclue-location-interface.h \
+		     gclue-manager-interface.c 	\
+		     gclue-manager-interface.h 	\
 		     compass-interface.c 	\
 		     compass-interface.h	\
 		     wpa_supplicant-interface.c \
 		     wpa_supplicant-interface.h
-geoclue-interface.c: geoclue-interface.h
-geoclue-interface.h: Makefile.am $(interface_DATA)
+
+gclue-client-interface.c: gclue-client-interface.h
+gclue-client-interface.h: Makefile.am $(CLIENT_INTERFACE_XML)
 	$(AM_V_GEN)$(GDBUS_CODEGEN) \
 		--interface-prefix org.freedesktop.GeoClue2.	\
 		--c-namespace GClueDBus				\
-		--generate-c-code geoclue-interface		\
-    		--generate-docbook=docs				\
-		$(srcdir)/$(interface_DATA)
+		--generate-c-code gclue-client-interface	\
+		--generate-docbook=docs				\
+		$(srcdir)/$(CLIENT_INTERFACE_XML)
+
+gclue-location-interface.c: gclue-location-interface.h
+gclue-location-interface.h: Makefile.am $(LOCATION_INTERFACE_XML)
+	$(AM_V_GEN)$(GDBUS_CODEGEN) \
+		--interface-prefix org.freedesktop.GeoClue2.	\
+		--c-namespace GClueDBus				\
+		--generate-c-code gclue-location-interface	\
+		--generate-docbook=docs				\
+		$(srcdir)/$(LOCATION_INTERFACE_XML)
+
+gclue-manager-interface.c: gclue-manager-interface.h
+gclue-manager-interface.h: Makefile.am $(MANAGER_INTERFACE_XML)
+	$(AM_V_GEN)$(GDBUS_CODEGEN) \
+		--interface-prefix org.freedesktop.GeoClue2.	\
+		--c-namespace GClueDBus				\
+		--generate-c-code gclue-manager-interface	\
+		--generate-docbook=docs				\
+		$(srcdir)/$(MANAGER_INTERFACE_XML)
 
 wpa_supplicant-interface.c: wpa_supplicant-interface.h
 wpa_supplicant-interface.h: Makefile.am fi.w1.wpa_supplicant1.xml
@@ -62,7 +106,7 @@ BUILT_SOURCES = 		\
 	gclue-marshal.h		\
 	$(NULL)
 
-noinst_LTLIBRARIES = libgeoclue.la
+noinst_LTLIBRARIES = libgeoclue-internal.la
 
 AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      $(ModemManager_CFLAGS)			  \
@@ -77,7 +121,7 @@ AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      -I$(srcdir)/public-api			  \
 	      -I$(builddir)/public-api
 
-libgeoclue_la_SOURCES =	 	 \
+libgeoclue_internal_la_SOURCES = \
 	$(BUILT_SOURCES) 	 \
 	gclue-3g-tower.h 	 \
 	gclue-client-info.h 	 \
@@ -109,29 +153,29 @@ libgeoclue_la_SOURCES =	 	 \
 	$(NULL)
 
 if BUILD_MODEM_SOURCE
-libgeoclue_la_SOURCES += gclue-modem.c	       \
-			 gclue-modem.h	       \
-			 gclue-modem-manager.c \
-			 gclue-modem-manager.h
+libgeoclue_internal_la_SOURCES += gclue-modem.c	        \
+				  gclue-modem.h	       \
+				  gclue-modem-manager.c \
+				  gclue-modem-manager.h
 endif
 
 if BUILD_3G_SOURCE
-libgeoclue_la_SOURCES += gclue-3g.c gclue-3g.h
+libgeoclue_internal_la_SOURCES += gclue-3g.c gclue-3g.h
 endif
 
 if BUILD_CDMA_SOURCE
-libgeoclue_la_SOURCES += gclue-cdma.c gclue-cdma.h
+libgeoclue_internal_la_SOURCES += gclue-cdma.c gclue-cdma.h
 endif
 
 if BUILD_MODEM_GPS_SOURCE
-libgeoclue_la_SOURCES += gclue-modem-gps.c gclue-modem-gps.h
+libgeoclue_internal_la_SOURCES += gclue-modem-gps.c gclue-modem-gps.h
 endif
 
 if BUILD_NMEA_SOURCE
-libgeoclue_la_SOURCES += gclue-nmea-source.h gclue-nmea-source.c
+libgeoclue_internal_la_SOURCES += gclue-nmea-source.h gclue-nmea-source.c
 endif
 
-libgeoclue_la_LIBADD = \
+libgeoclue_internal_la_LIBADD = 	\
 	$(GEOCLUE_LIBS)			\
 	$(ModemManager_LIBS)		\
 	$(NMEA_SOURCE_LIBS)		\
@@ -143,7 +187,7 @@ geoclue_SOURCES =	 	  \
 	$(NULL)
 geoclue_LDADD = $(GEOCLUE_LIBS) 	  		    	\
 		$(LIBS) 		  		    	\
-		$(builddir)/libgeoclue.la		    	\
+		$(builddir)/libgeoclue-internal.la		    	\
 		$(builddir)/agent/libgeoclue-agent.la 		\
 		$(builddir)/geocode-glib/libgeocode-glib.la 	\
 		$(builddir)/public-api/libgeoclue-public-api.la

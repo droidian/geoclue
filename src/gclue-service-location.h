@@ -26,7 +26,7 @@
 #include <glib-object.h>
 #include "gclue-location.h"
 #include "gclue-client-info.h"
-#include "geoclue-interface.h"
+#include "gclue-location-interface.h"
 
 G_BEGIN_DECLS
 

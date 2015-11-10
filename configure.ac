@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.3.0],
+        [2.4.0],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -57,6 +57,31 @@ PKG_CHECK_MODULES(GEOCLUE, [
   json-glib-1.0 >= $JSON_GLIB_MIN_VERSION
   libsoup-2.4 >= $LIBSOUP_MIN_VERSION
 ])
+
+# GObject-introspection support
+GOBJECT_INTROSPECTION_CHECK([0.9.6])
+build_introspection=no
+
+# libgeoclue
+AC_ARG_ENABLE(libgeoclue,
+              AS_HELP_STRING([--disable-libgeoclue], [Disable convenience library]),
+              [build_libgeoclue=$enableval], [build_libgeoclue=yes])
+if test "x$build_libgeoclue" = "xyes"; then
+  PKG_CHECK_MODULES(LIBGEOCLUE, [
+    glib-2.0 >= $GLIB_MIN_VERSION
+    gio-2.0 >= $GLIB_MIN_VERSION
+    gio-unix-2.0 >= $GLIB_MIN_VERSION
+  ])
+  if test "x$found_introspection" == "xyes"; then
+     build_introspection=yes
+  fi
+  build_libgeoclue=yes
+
+  AC_DEFINE([BUILD_LIBGEOCLUE], [1], [Build convenience library?])
+else
+  AC_DEFINE([BUILD_LIBGEOCLUE], [0], [Build convenience library?])
+fi
+AM_CONDITIONAL([BUILD_LIBGEOCLUE], [test "x$build_libgeoclue" = "xyes"])
 
 # 3G source
 AC_ARG_ENABLE(3g-source,
@@ -207,9 +232,13 @@ AC_CONFIG_FILES([
   data/org.freedesktop.GeoClue2.conf
   data/org.freedesktop.GeoClue2.Agent.conf
   data/Makefile
+  libgeoclue/Makefile
+  libgeoclue/libgeoclue-$GEOCLUE_API_VERSION.pc:libgeoclue/libgeoclue.pc.in
   demo/Makefile
   docs/Makefile
+  docs/lib/Makefile
   docs/version.xml
+  docs/lib/version.xml
 ])
 
 AC_OUTPUT
@@ -224,6 +253,8 @@ AC_MSG_NOTICE([
         c compiler:               ${CC} ${CFLAGS}
         systemdsystemunitdir:     ${systemdsystemunitdir}
 
+        Convenience library:      ${build_libgeoclue}
+        Introspection:            ${build_introspection}
         3G source:                ${build_3g_source}
         CDMA source:              ${build_cdma_source}
         Modem GPS source:         ${build_modem_gps_source}

@@ -1,3 +1,10 @@
+geoclue-2.0 (2.4.0-1) unstable; urgency=medium
+
+  * [5ebae7fa] Imported Upstream version 2.4.0
+  * [11903739] Enable the convenience library and the gir support
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 20 Nov 2015 00:54:13 +0100
+
 geoclue-2.0 (2.3.0-2) unstable; urgency=medium
 
   * [5d5632b7] Add iio-sensor-proxy to the Recommends

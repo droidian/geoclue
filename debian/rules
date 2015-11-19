@@ -8,8 +8,7 @@ ifneq ($(DEB_BUILD_ARCH_OS),linux)
 endif
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libdir=/usr/lib \
-                             --libexec=/usr/lib/geoclue-2.0 \
+	dh_auto_configure -- --libexec=/usr/lib/geoclue-2.0 \
                              --with-dbus-service-user=geoclue \
                              --with-systemdsystemunitdir=/lib/systemd/system \
                              --disable-silent-rules \
@@ -24,10 +23,11 @@ override_dh_auto_test:
 
 override_dh_auto_install:
 	dh_auto_install
-	rm -f $(CURDIR)/debian/geoclue-2.0/usr/share/applications/geoclue-demo-agent.desktop
-	mv $(CURDIR)/debian/geoclue-2.0/usr/lib/geoclue-2.0/geoclue-2.0/demos \
-		$(CURDIR)/debian/geoclue-2.0/usr/lib/geoclue-2.0/demos
-	rm -rf $(CURDIR)/debian/geoclue-2.0/usr/lib/geoclue-2.0/geoclue-2.0/
+	mv $(CURDIR)/debian/tmp/usr/lib/geoclue-2.0/geoclue-2.0/demos \
+		$(CURDIR)/debian/tmp/usr/lib/geoclue-2.0/demos
 
 %:
-	dh $@ --with autotools-dev,autoreconf
+	dh $@ --with autotools-dev,autoreconf,gir
+
+override_dh_install:
+	dh_install --list-missing

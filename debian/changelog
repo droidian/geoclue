@@ -1,3 +1,11 @@
+geoclue-2.0 (2.4.0-2) unstable; urgency=medium
+
+  * [db9c32f0] debian/control: Fix a typo (interract → interact)
+    (Closes: 805744)
+  * [ebd72f04] Make the package for the convenience library Multi-arch: same
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 25 Nov 2015 18:26:49 +0100
+
 geoclue-2.0 (2.4.0-1) unstable; urgency=medium
 
   * [5ebae7fa] Imported Upstream version 2.4.0

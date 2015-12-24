@@ -352,9 +352,11 @@ client_callback (AvahiClient     *avahi_client,
 
         g_return_if_fail (avahi_client != NULL);
 
+        priv->avahi_client = avahi_client;
+
         if (state == AVAHI_CLIENT_FAILURE) {
                 const char *errorstr = avahi_strerror
-                        (avahi_client_errno (priv->avahi_client));
+                        (avahi_client_errno (avahi_client));
                 g_warning ("Avahi client failure: %s",
                            errorstr);
         }
@@ -593,7 +595,8 @@ gclue_nmea_source_finalize (GObject *gnmea)
         g_clear_object (&priv->connection);
         g_clear_object (&priv->client);
         g_clear_object (&priv->cancellable);
-        avahi_client_free (priv->avahi_client);
+        if (priv->avahi_client)
+                avahi_client_free (priv->avahi_client);
         g_list_free_full (priv->all_services,
                           avahi_service_free);
 }
@@ -631,11 +634,11 @@ gclue_nmea_source_init (GClueNMEASource *source)
 
         priv->cancellable = g_cancellable_new ();
 
-        priv->avahi_client = avahi_client_new (poll_api,
-                                               0,
-                                               client_callback,
-                                               source,
-                                               &error);
+        avahi_client_new (poll_api,
+                          0,
+                          client_callback,
+                          source,
+                          &error);
 
         if (priv->avahi_client == NULL) {
                 g_warning ("Failed to connect to avahi service: %s",

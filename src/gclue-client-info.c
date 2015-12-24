@@ -256,7 +256,7 @@ gclue_client_info_init_async (GAsyncInitable     *initable,
         task = g_task_new (initable, cancellable, callback, user_data);
 
         g_dbus_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,
-                                  G_DBUS_PROXY_FLAGS_NONE,
+                                  G_DBUS_PROXY_FLAGS_DO_NOT_LOAD_PROPERTIES,
                                   NULL,
                                   "org.freedesktop.DBus",
                                   "/org/freedesktop/DBus",

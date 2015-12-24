@@ -8,7 +8,7 @@
 <link rel="up" href="ch02.html" title="Convenience API">
 <link rel="prev" href="ch02.html" title="Convenience API">
 <link rel="next" href="ch03.html" title="The Manager object">
-<meta name="generator" content="GTK-Doc V1.24 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.24.1 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -106,7 +106,7 @@
 </tr>
 <tr>
 <td class="property_type">
-<a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
+<a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</td>
 <td class="property_name"><a class="link" href="GClueSimple.html#GClueSimple--desktop-id" title="The “desktop-id” property">desktop-id</a></td>
 <td class="property_flags">Write / Construct Only</td>
 </tr>
@@ -121,7 +121,7 @@
 </div>
 <div class="refsect1">
 <a name="GClueSimple.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="https://developer.gnome.org/gobject/unstable/gobject-The-Base-Object-Type.html#GObject">GObject</a>
+<pre class="screen">    <a href="../gobject/gobject-The-Base-Object-Type.html#GObject-struct">GObject</a>
     <span class="lineart">╰──</span> GClueSimple
 </pre>
 </div>
@@ -147,15 +147,15 @@ quickly as possible and do not care about accuracy (much).</p>
 <pre class="programlisting"><span class="returnvalue">void</span>
 gclue_simple_new (<em class="parameter"><code>const <span class="type">char</span> *desktop_id</code></em>,
                   <em class="parameter"><code><a class="link" href="libgeoclue-gclue-enums.html#GClueAccuracyLevel" title="enum GClueAccuracyLevel"><span class="type">GClueAccuracyLevel</span></a> accuracy_level</code></em>,
-                  <em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GCancellable.html"><span class="type">GCancellable</span></a> *cancellable</code></em>,
-                  <em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
-                  <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
+                  <em class="parameter"><code><a href="../gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                  <em class="parameter"><code><a href="../gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> callback</code></em>,
+                  <em class="parameter"><code><a href="../glib/glib-Basic-Types.html#gpointer"><span class="type">gpointer</span></a> user_data</code></em>);</pre>
 <p>Asynchronously creates a <a class="link" href="GClueSimple.html" title="GClueSimple"><span class="type">GClueSimple</span></a> instance. Use
 <a class="link" href="GClueSimple.html#gclue-simple-new-finish" title="gclue_simple_new_finish ()"><code class="function">gclue_simple_new_finish()</code></a> to get the created <a class="link" href="GClueSimple.html" title="GClueSimple"><span class="type">GClueSimple</span></a> instance.</p>
 <p>See <code class="function"><GTKDOCLINK HREF="gclue-fetch-location-sync"><code class="function">gclue_fetch_location_sync()</code></code></GTKDOCLINK> for the synchronous, blocking version
 of this function.</p>
 <div class="refsect3">
-<a name="id-1.3.2.7.2.6"></a><h4>Parameters</h4>
+<a name="gclue-simple-new.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -175,12 +175,12 @@ of this function.</p>
 </tr>
 <tr>
 <td class="parameter_name"><p>cancellable</p></td>
-<td class="parameter_description"><p> A <a href="https://developer.gnome.org/gio/unstable/GCancellable.html"><span class="type">GCancellable</span></a> or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_description"><p> A <a href="../gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>callback</p></td>
-<td class="parameter_description"><p>A <a href="https://developer.gnome.org/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> to call when the results are ready.</p></td>
+<td class="parameter_description"><p>A <a href="../gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> to call when the results are ready.</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
@@ -197,11 +197,11 @@ of this function.</p>
 <div class="refsect2">
 <a name="gclue-simple-new-finish"></a><h3>gclue_simple_new_finish ()</h3>
 <pre class="programlisting"><a class="link" href="GClueSimple.html" title="GClueSimple"><span class="returnvalue">GClueSimple</span></a> *
-gclue_simple_new_finish (<em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> *result</code></em>,
-                         <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+gclue_simple_new_finish (<em class="parameter"><code><a href="../gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a> *result</code></em>,
+                         <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>Finishes an operation started with <a class="link" href="GClueSimple.html#gclue-simple-new" title="gclue_simple_new ()"><code class="function">gclue_simple_new()</code></a>.</p>
 <div class="refsect3">
-<a name="id-1.3.2.7.3.5"></a><h4>Parameters</h4>
+<a name="gclue-simple-new-finish.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -211,22 +211,22 @@ gclue_simple_new_finish (<em class="parameter"><code><a href="https://developer.
 <tbody>
 <tr>
 <td class="parameter_name"><p>result</p></td>
-<td class="parameter_description"><p>The <a href="https://developer.gnome.org/gio/unstable/GAsyncResult.html"><span class="type">GAsyncResult</span></a> obtained from the <a href="https://developer.gnome.org/gio/unstable/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> passed to
+<td class="parameter_description"><p>The <a href="../gio/GAsyncResult.html#GAsyncResult-struct"><span class="type">GAsyncResult</span></a> obtained from the <a href="../gio/GAsyncResult.html#GAsyncReadyCallback"><span class="type">GAsyncReadyCallback</span></a> passed to
 <a class="link" href="GClueSimple.html#gclue-simple-new" title="gclue_simple_new ()"><code class="function">gclue_simple_new()</code></a>.</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>Return location for error or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
+<td class="parameter_description"><p>Return location for error or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.3.2.7.3.6"></a><h4>Returns</h4>
+<a name="gclue-simple-new-finish.returns"></a><h4>Returns</h4>
 <p> The constructed proxy
-object or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
+object or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
 is set. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GClueSimple]</span></p>
 </div>
@@ -237,11 +237,11 @@ is set. </p>
 <pre class="programlisting"><a class="link" href="GClueSimple.html" title="GClueSimple"><span class="returnvalue">GClueSimple</span></a> *
 gclue_simple_new_sync (<em class="parameter"><code>const <span class="type">char</span> *desktop_id</code></em>,
                        <em class="parameter"><code><a class="link" href="libgeoclue-gclue-enums.html#GClueAccuracyLevel" title="enum GClueAccuracyLevel"><span class="type">GClueAccuracyLevel</span></a> accuracy_level</code></em>,
-                       <em class="parameter"><code><a href="https://developer.gnome.org/gio/unstable/GCancellable.html"><span class="type">GCancellable</span></a> *cancellable</code></em>,
-                       <em class="parameter"><code><a href="https://developer.gnome.org/glib/unstable/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
+                       <em class="parameter"><code><a href="../gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> *cancellable</code></em>,
+                       <em class="parameter"><code><a href="../glib/glib-Error-Reporting.html#GError"><span class="type">GError</span></a> **error</code></em>);</pre>
 <p>The synchronous and blocking version of <a class="link" href="GClueSimple.html#gclue-simple-new" title="gclue_simple_new ()"><code class="function">gclue_simple_new()</code></a>.</p>
 <div class="refsect3">
-<a name="id-1.3.2.7.4.5"></a><h4>Parameters</h4>
+<a name="gclue-simple-new-sync.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -261,21 +261,21 @@ gclue_simple_new_sync (<em class="parameter"><code>const <span class="type">char
 </tr>
 <tr>
 <td class="parameter_name"><p>cancellable</p></td>
-<td class="parameter_description"><p> A <a href="https://developer.gnome.org/gio/unstable/GCancellable.html"><span class="type">GCancellable</span></a> or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
+<td class="parameter_description"><p> A <a href="../gio/GCancellable.html#GCancellable-struct"><span class="type">GCancellable</span></a> or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>. </p></td>
 <td class="parameter_annotations"><span class="annotation">[<acronym title="NULL is OK, both for passing and for returning."><span class="acronym">allow-none</span></acronym>]</span></td>
 </tr>
 <tr>
 <td class="parameter_name"><p>error</p></td>
-<td class="parameter_description"><p>Return location for error or <a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
+<td class="parameter_description"><p>Return location for error or <a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a>.</p></td>
 <td class="parameter_annotations"> </td>
 </tr>
 </tbody>
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.3.2.7.4.6"></a><h4>Returns</h4>
+<a name="gclue-simple-new-sync.returns"></a><h4>Returns</h4>
 <p> The new <a class="link" href="GClueSimple.html" title="GClueSimple"><span class="type">GClueSimple</span></a> object or
-<a href="https://developer.gnome.org/glib/unstable/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
+<a href="../glib/glib-Standard-Macros.html#NULL:CAPS"><code class="literal">NULL</code></a> if <em class="parameter"><code>error</code></em>
 is set. </p>
 <p><span class="annotation">[<acronym title="Free data after the code is done."><span class="acronym">transfer full</span></acronym>][<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GClueSimple]</span></p>
 </div>
@@ -287,7 +287,7 @@ is set. </p>
 gclue_simple_get_client (<em class="parameter"><code><a class="link" href="GClueSimple.html" title="GClueSimple"><span class="type">GClueSimple</span></a> *simple</code></em>);</pre>
 <p>Gets the client proxy.</p>
 <div class="refsect3">
-<a name="id-1.3.2.7.5.5"></a><h4>Parameters</h4>
+<a name="gclue-simple-get-client.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -302,7 +302,7 @@ gclue_simple_get_client (<em class="parameter"><code><a class="link" href="GClue
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.3.2.7.5.6"></a><h4>Returns</h4>
+<a name="gclue-simple-get-client.returns"></a><h4>Returns</h4>
 <p> The client object. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GClueClientProxy]</span></p>
 </div>
@@ -314,7 +314,7 @@ gclue_simple_get_client (<em class="parameter"><code><a class="link" href="GClue
 gclue_simple_get_location (<em class="parameter"><code><a class="link" href="GClueSimple.html" title="GClueSimple"><span class="type">GClueSimple</span></a> *simple</code></em>);</pre>
 <p>Gets the current location.</p>
 <div class="refsect3">
-<a name="id-1.3.2.7.6.5"></a><h4>Parameters</h4>
+<a name="gclue-simple-get-location.parameters"></a><h4>Parameters</h4>
 <div class="informaltable"><table width="100%" border="0">
 <colgroup>
 <col width="150px" class="parameters_name">
@@ -329,7 +329,7 @@ gclue_simple_get_location (<em class="parameter"><code><a class="link" href="GCl
 </table></div>
 </div>
 <div class="refsect3">
-<a name="id-1.3.2.7.6.6"></a><h4>Returns</h4>
+<a name="gclue-simple-get-location.returns"></a><h4>Returns</h4>
 <p> The last known location
 as <a class="link" href="GClueLocation.html" title="GClueLocation"><span class="type">GClueLocation</span></a>. </p>
 <p><span class="annotation">[<acronym title="Don't free data after the code is done."><span class="acronym">transfer none</span></acronym>][<acronym title="Override the parsed C type with given type."><span class="acronym">type</span></acronym> GClueLocationProxy]</span></p>
@@ -358,7 +358,7 @@ as <a class="link" href="GClueLocation.html" title="GClueLocation"><span class="
 <hr>
 <div class="refsect2">
 <a name="GClueSimple--desktop-id"></a><h3>The <code class="literal">“desktop-id”</code> property</h3>
-<pre class="programlisting">  “desktop-id”               <a href="https://developer.gnome.org/glib/unstable/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
+<pre class="programlisting">  “desktop-id”               <a href="../glib/glib-Basic-Types.html#gchar"><span class="type">gchar</span></a> *</pre>
 <p>The Desktop ID of the application.</p>
 <p>Flags: Write / Construct Only</p>
 <p>Default value: NULL</p>
@@ -373,6 +373,6 @@ as <a class="link" href="GClueLocation.html" title="GClueLocation"><span class="
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24</div>
+<hr>Generated by GTK-Doc V1.24.1</div>
 </body>
 </html>

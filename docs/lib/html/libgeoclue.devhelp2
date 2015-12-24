@@ -24,9 +24,9 @@
     <sub name="Annotation Glossary" link="annotation-glossary.html"/>
   </chapters>
   <functions>
-    <keyword type="macro" name="GCLUE_TYPE_ACCURACY_LEVEL" link="libgeoclue-gclue-enums.html#GCLUE-TYPE-ACCURACY-LEVEL:CAPS"/>
     <keyword type="function" name="gclue_accuracy_level_get_type ()" link="libgeoclue-gclue-enums.html#gclue-accuracy-level-get-type"/>
     <keyword type="enum" name="enum GClueAccuracyLevel" link="libgeoclue-gclue-enums.html#GClueAccuracyLevel"/>
+    <keyword type="macro" name="GCLUE_TYPE_ACCURACY_LEVEL" link="libgeoclue-gclue-enums.html#GCLUE-TYPE-ACCURACY-LEVEL:CAPS"/>
     <keyword type="function" name="gclue_simple_new ()" link="GClueSimple.html#gclue-simple-new"/>
     <keyword type="function" name="gclue_simple_new_finish ()" link="GClueSimple.html#gclue-simple-new-finish"/>
     <keyword type="function" name="gclue_simple_new_sync ()" link="GClueSimple.html#gclue-simple-new-sync"/>

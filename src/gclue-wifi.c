@@ -392,6 +392,9 @@ connect_bss_signals (GClueWifi *wifi)
                                                 wifi);
 
         bss_list = wpa_interface_get_bsss (WPA_INTERFACE (priv->interface));
+        if (bss_list == NULL)
+                return;
+
         for (i = 0; bss_list[i] != NULL; i++)
                 on_bss_added (WPA_INTERFACE (priv->interface),
                               bss_list[i],

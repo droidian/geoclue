@@ -96,10 +96,10 @@ host_triplet = @host@
 subdir = docs
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnome-compiler-flags.m4 \
-	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/intltool.m4 \
-	$(top_srcdir)/m4/libtool.m4 $(top_srcdir)/m4/ltoptions.m4 \
-	$(top_srcdir)/m4/ltsugar.m4 $(top_srcdir)/m4/ltversion.m4 \
-	$(top_srcdir)/m4/lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/gtk-doc.m4 $(top_srcdir)/m4/libtool.m4 \
+	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
+	$(top_srcdir)/m4/ltversion.m4 $(top_srcdir)/m4/lt~obsolete.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -738,11 +738,11 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-@ENABLE_GTK_DOC_FALSE@distclean-local:
+@ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
 @ENABLE_GTK_DOC_FALSE@install-data-local:
 @ENABLE_GTK_DOC_FALSE@uninstall-local:
 @ENABLE_GTK_DOC_FALSE@clean-local:
-@ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
+@ENABLE_GTK_DOC_FALSE@distclean-local:
 clean: clean-recursive
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -894,7 +894,7 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 @ENABLE_GTK_DOC_TRUE@$(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt: scan-build.stamp
 @ENABLE_GTK_DOC_TRUE@	@true
 
-@ENABLE_GTK_DOC_TRUE@sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files)
+@ENABLE_GTK_DOC_TRUE@sgml-build.stamp: setup-build.stamp $(DOC_MODULE)-decl.txt $(SCANOBJ_FILES) $(HFILE_GLOB) $(CFILE_GLOB) $(DOC_MODULE)-sections.txt $(DOC_MODULE)-overrides.txt $(expand_content_files) xml/gtkdocentities.ent
 @ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_XML)_source_dir='' ; \
 @ENABLE_GTK_DOC_TRUE@	for i in $(DOC_SOURCE_DIR) ; do \
 @ENABLE_GTK_DOC_TRUE@	    _source_dir="$${_source_dir} --source-dir=$$i" ; \
@@ -904,6 +904,17 @@ docs-org.freedesktop.GeoClue2.Agent.xml:
 
 @ENABLE_GTK_DOC_TRUE@sgml.stamp: sgml-build.stamp
 @ENABLE_GTK_DOC_TRUE@	@true
+
+@ENABLE_GTK_DOC_TRUE@xml/gtkdocentities.ent: Makefile
+@ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_XML)$(MKDIR_P) $(@D) && ( \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package \"$(PACKAGE)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_bugreport \"$(PACKAGE_BUGREPORT)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_name \"$(PACKAGE_NAME)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_string \"$(PACKAGE_STRING)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_tarname \"$(PACKAGE_TARNAME)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_url \"$(PACKAGE_URL)\">"; \
+@ENABLE_GTK_DOC_TRUE@		echo "<!ENTITY package_version \"$(PACKAGE_VERSION)\">"; \
+@ENABLE_GTK_DOC_TRUE@	) > $@
 
 @ENABLE_GTK_DOC_TRUE@html-build.stamp: sgml.stamp $(DOC_MAIN_SGML_FILE) $(content_files) $(expand_content_files)
 @ENABLE_GTK_DOC_TRUE@	$(GTK_DOC_V_HTML)rm -rf html && mkdir html && \

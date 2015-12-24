@@ -1,3 +1,14 @@
+2.4.1
+=====
+
+- Add some missing NULL checks to avoid some crashes.
+- More reliable method to connect to Avahi from network NMEA source.
+- Fix warnings on system log caused by geoclue trying to access D-Bus
+  properties it does not need.
+
+Ankit <ankitstarski@gmail.com>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.4.0
 =====
 

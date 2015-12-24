@@ -1,3 +1,9 @@
+geoclue-2.0 (2.4.1-1) unstable; urgency=medium
+
+  * [e6f8dec3] Imported Upstream version 2.4.1
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 25 Dec 2015 00:33:09 +0100
+
 geoclue-2.0 (2.4.0-2) unstable; urgency=medium
 
   * [db9c32f0] debian/control: Fix a typo (interract → interact)

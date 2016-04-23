@@ -2,7 +2,7 @@ include $(top_srcdir)/Makefile.decl
 
 libexec_PROGRAMS = geoclue
 
-SUBDIRS = public-api agent geocode-glib
+SUBDIRS = agent geocode-glib
 
 CLIENT_INTERFACE_XML = org.freedesktop.GeoClue2.Client.xml
 LOCATION_INTERFACE_XML = org.freedesktop.GeoClue2.Location.xml
@@ -118,8 +118,8 @@ AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      -DSYSCONFDIR=\""$(sysconfdir)"\"		  \
 	      -I$(srcdir)/agent				  \
 	      -I$(builddir)/agent			  \
-	      -I$(srcdir)/public-api			  \
-	      -I$(builddir)/public-api
+	      -I$(top_srcdir)/public-api		  \
+	      -I$(top_builddir)/public-api
 
 libgeoclue_internal_la_SOURCES = \
 	$(BUILT_SOURCES) 	 \
@@ -190,7 +190,7 @@ geoclue_LDADD = $(GEOCLUE_LIBS) 	  		    	\
 		$(builddir)/libgeoclue-internal.la		    	\
 		$(builddir)/agent/libgeoclue-agent.la 		\
 		$(builddir)/geocode-glib/libgeocode-glib.la 	\
-		$(builddir)/public-api/libgeoclue-public-api.la
+		$(top_builddir)/public-api/libgeoclue-public-api.la
 
 CLEANFILES = $(BUILT_SOURCES)
 EXTRA_DIST = $(interface_DATA) 	       \

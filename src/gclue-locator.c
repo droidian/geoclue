@@ -25,7 +25,6 @@
 #include <glib/gi18n.h>
 
 #include "gclue-locator.h"
-#include "public-api/gclue-enum-types.h"
 
 #include "gclue-wifi.h"
 #include "gclue-config.h"

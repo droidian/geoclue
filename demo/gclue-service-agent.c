@@ -337,11 +337,12 @@ gclue_service_agent_handle_authorize_app (GClueAgent            *agent,
         NotificationData *data;
         GError *error = NULL;
         char *desktop_file;
-        GAppInfo *app_info;
+        GDesktopAppInfo *app_info;
         char *msg;
+        const char *reason;
 
         desktop_file = g_strjoin (".", desktop_id, "desktop", NULL);
-        app_info = G_APP_INFO (g_desktop_app_info_new (desktop_file));
+        app_info = g_desktop_app_info_new (desktop_file);
         if (app_info == NULL) {
                 g_debug ("Failed to find %s", desktop_file);
                 gclue_agent_complete_authorize_app (agent,
@@ -354,14 +355,20 @@ gclue_service_agent_handle_authorize_app (GClueAgent            *agent,
         g_free (desktop_file);
 
         msg = g_strdup_printf (_("Allow '%s' to access your location information?"),
-                               g_app_info_get_display_name (app_info));
+                               g_app_info_get_display_name (G_APP_INFO (app_info)));
+        reason = g_desktop_app_info_get_string (app_info, "X-Geoclue-Reason");
+        if (reason != NULL) {
+                char *tmp = msg;
+                msg = g_strdup_printf ("%s\n\n%s", msg, reason);
+                g_free (tmp);
+        }
         notification = notify_notification_new (_("Geolocation"), msg, "dialog-question");
         g_free (msg);
 
         data = g_slice_new0 (NotificationData);
         data->invocation = invocation;
         data->notification = notification;
-        data->app_info = app_info;
+        data->app_info = G_APP_INFO (app_info);
         data->accuracy_level = accuracy_level;
 
         notify_notification_add_action (notification,
@@ -382,6 +389,7 @@ gclue_service_agent_handle_authorize_app (GClueAgent            *agent,
                           data);
 
         if (!notify_notification_show (notification, &error)) {
+                g_critical ("Failed to show notification: %s\n", error->message);
                 g_dbus_method_invocation_take_error (invocation, error);
                 notification_data_free (data);
 

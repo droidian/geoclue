@@ -341,6 +341,7 @@ on_agent_info_new_ready (GObject      *source_object,
         AddAgentData *data = (AddAgentData *) user_data;
         GError *error = NULL;
         GClueConfig *config;
+        const char *xdg_id;
 
         data->info = gclue_client_info_new_finish (res, &error);
         if (data->info == NULL) {
@@ -354,14 +355,17 @@ on_agent_info_new_ready (GObject      *source_object,
                 return;
         }
 
+        xdg_id = gclue_client_info_get_xdg_id (data->info);
         config = gclue_config_get_singleton ();
-        if (!gclue_config_is_agent_allowed (config,
+        if (xdg_id != NULL ||
+            !gclue_config_is_agent_allowed (config,
                                             data->desktop_id,
                                             data->info)) {
-                g_dbus_method_invocation_return_error_literal (data->invocation,
-                                                               G_DBUS_ERROR,
-                                                               G_DBUS_ERROR_ACCESS_DENIED,
-                                                               "Not whitelisted");
+                g_dbus_method_invocation_return_error (data->invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "%s not allowed to act as agent",
+                                                       data->desktop_id);
                 add_agent_data_free (data);
 
                 return;

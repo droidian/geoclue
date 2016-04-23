@@ -12,7 +12,7 @@ DOC_MAIN_SGML_FILE=libgeoclue-docs.xml
 SCAN_OPTIONS=--ignore-headers=config.h --rebuild-types
 
 # The directory containing the source code. Relative to $(srcdir)
-DOC_SOURCE_DIR=../../libgeoclue ../../src/public-api
+DOC_SOURCE_DIR=../../libgeoclue ../../public-api
 
 # Used for dependencies
 HFILE_GLOB=

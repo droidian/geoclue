@@ -43,6 +43,7 @@ struct _GClueClientInfoPrivate
         guint watch_id;
 
         guint32 user_id;
+        char *xdg_id;
 };
 
 enum
@@ -73,6 +74,7 @@ gclue_client_info_finalize (GObject *object)
         }
 
         g_clear_pointer (&priv->bus_name, g_free);
+        g_clear_pointer (&priv->xdg_id, g_free);
         g_clear_object (&priv->connection);
 
         /* Chain up to the parent class */
@@ -179,6 +181,92 @@ on_name_vanished (GDBusConnection *connection,
                        0);
 }
 
+/* Based on got_credentials_cb() from xdg-app source code */
+static char *
+get_xdg_id (guint32 pid)
+{
+        char *xdg_id = NULL;
+        g_autofree char *path = NULL;
+        g_autofree char *content = NULL;
+        gchar **lines;
+        int i;
+
+        path = g_strdup_printf ("/proc/%u/cgroup", pid);
+
+        if (!g_file_get_contents (path, &content, NULL, NULL))
+                return NULL;
+        lines =  g_strsplit (content, "\n", -1);
+
+        for (i = 0; lines[i] != NULL; i++) {
+                const char *unit = lines[i] + strlen ("1:name=systemd:");
+                g_autofree char *scope = NULL;
+                const char *name;
+                char *dash;
+
+                if (!g_str_has_prefix (lines[i], "1:name=systemd:"))
+                        continue;
+
+                scope = g_path_get_basename (unit);
+                if (!g_str_has_prefix (scope, "xdg-app-") ||
+                    !g_str_has_suffix (scope, ".scope"))
+                        break;
+
+                name = scope + strlen("xdg-app-");
+                dash = strchr (name, '-');
+
+                if (dash == NULL)
+                        break;
+
+                *dash = 0;
+                xdg_id = g_strdup (name);
+        }
+
+        g_strfreev (lines);
+
+        return xdg_id;
+}
+
+static void
+on_get_pid_ready (GObject      *source_object,
+                  GAsyncResult *res,
+                  gpointer      user_data)
+{
+        GTask *task = G_TASK (user_data);
+        gpointer *info = g_task_get_source_object (task);
+        GClueClientInfoPrivate *priv = GCLUE_CLIENT_INFO (info)->priv;
+        guint32 pid;
+        GError *error = NULL;
+        GVariant *results = NULL;
+
+        results = g_dbus_proxy_call_finish (G_DBUS_PROXY (source_object),
+                                            res,
+                                            &error);
+        if (results == NULL) {
+                g_task_return_error (task, error);
+                g_object_unref (task);
+
+                return;
+        }
+
+        g_assert (g_variant_n_children (results) > 0);
+        g_variant_get_child (results, 0, "u", &pid);
+        g_variant_unref (results);
+
+        priv->xdg_id = get_xdg_id (pid);
+
+        priv->watch_id = g_bus_watch_name_on_connection (priv->connection,
+                                                         priv->bus_name,
+                                                         G_BUS_NAME_WATCHER_FLAGS_NONE,
+                                                         NULL,
+                                                         on_name_vanished,
+                                                         info,
+                                                         NULL);
+
+        g_task_return_boolean (task, TRUE);
+
+        g_object_unref (task);
+}
+
 static void
 on_get_user_id_ready (GObject      *source_object,
                       GAsyncResult *res,
@@ -204,17 +292,14 @@ on_get_user_id_ready (GObject      *source_object,
         g_variant_get_child (results, 0, "u", &priv->user_id);
         g_variant_unref (results);
 
-        priv->watch_id = g_bus_watch_name_on_connection (priv->connection,
-                                                         priv->bus_name,
-                                                         G_BUS_NAME_WATCHER_FLAGS_NONE,
-                                                         NULL,
-                                                         on_name_vanished,
-                                                         info,
-                                                         NULL);
-
-        g_task_return_boolean (task, TRUE);
-
-        g_object_unref (task);
+        g_dbus_proxy_call (priv->dbus_proxy,
+                           "GetConnectionUnixProcessID",
+                           g_variant_new ("(s)", priv->bus_name),
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           g_task_get_cancellable (task),
+                           on_get_pid_ready,
+                           task);
 }
 
 static void
@@ -347,4 +432,12 @@ gclue_client_info_check_bus_name (GClueClientInfo *info,
         g_return_val_if_fail (GCLUE_IS_CLIENT_INFO(info), FALSE);
 
         return (strcmp (bus_name, info->priv->bus_name) == 0);
+}
+
+const char *
+gclue_client_info_get_xdg_id (GClueClientInfo *info)
+{
+        g_return_val_if_fail (GCLUE_IS_CLIENT_INFO(info), FALSE);
+
+        return info->priv->xdg_id;
 }

@@ -24,7 +24,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include "public-api/gclue-enum-types.h"
+#include "gclue-enum-types.h"
 #include "gclue-location.h"
 
 G_BEGIN_DECLS

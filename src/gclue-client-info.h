@@ -69,6 +69,7 @@ const char *      gclue_client_info_get_bus_name   (GClueClientInfo    *info);
 guint32           gclue_client_info_get_user_id    (GClueClientInfo    *info);
 gboolean          gclue_client_info_check_bus_name (GClueClientInfo    *info,
                                                     const char         *bus_name);
+const char *      gclue_client_info_get_xdg_id     (GClueClientInfo *info);
 
 G_END_DECLS
 

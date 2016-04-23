@@ -329,21 +329,21 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-systemconfdir = $(sysconfdir)/geoclue
-systemconf_in_files = geoclue.conf.in
-systemconf_DATA = $(systemconf_in_files:.conf.in=.conf)
-servicedir = $(datadir)/dbus-1/system-services
 service_in_files = org.freedesktop.GeoClue2.service.in
-service_DATA = $(service_in_files:.service.in=.service)
+systemconf_in_files = geoclue.conf.in
+systemdservice_in_files = geoclue.service.in
+@BUILD_BACKEND_TRUE@systemconfdir = $(sysconfdir)/geoclue
+@BUILD_BACKEND_TRUE@systemconf_DATA = $(systemconf_in_files:.conf.in=.conf)
+@BUILD_BACKEND_TRUE@servicedir = $(datadir)/dbus-1/system-services
+@BUILD_BACKEND_TRUE@service_DATA = $(service_in_files:.service.in=.service)
 
 # DBus Service policy file
-dbusservicedir = $(DBUS_SYS_DIR)
-dbusservice_DATA = org.freedesktop.GeoClue2.conf \
-		   org.freedesktop.GeoClue2.Agent.conf
+@BUILD_BACKEND_TRUE@dbusservicedir = $(DBUS_SYS_DIR)
+@BUILD_BACKEND_TRUE@dbusservice_DATA = org.freedesktop.GeoClue2.conf \
+@BUILD_BACKEND_TRUE@		   org.freedesktop.GeoClue2.Agent.conf
 
-systemdservice_in_files = geoclue.service.in
-@HAVE_SYSTEMD_TRUE@systemdservicedir = $(systemdsystemunitdir)
-@HAVE_SYSTEMD_TRUE@systemdservice_DATA = $(systemdservice_in_files:.service.in=.service)
+@BUILD_BACKEND_TRUE@@HAVE_SYSTEMD_TRUE@systemdservicedir = $(systemdsystemunitdir)
+@BUILD_BACKEND_TRUE@@HAVE_SYSTEMD_TRUE@systemdservice_DATA = $(systemdservice_in_files:.service.in=.service)
 DISTCLEANFILES = $(service_DATA) \
                  $(systemconf_DATA) \
                  $(dbusservice_DATA) \
@@ -643,20 +643,20 @@ uninstall-am: uninstall-dbusserviceDATA uninstall-serviceDATA \
 .PRECIOUS: Makefile
 
 
-@BUILD_DEMO_AGENT_TRUE@$(systemconf_DATA): $(systemconf_in_files) Makefile
-@BUILD_DEMO_AGENT_TRUE@	@sed -e \
-@BUILD_DEMO_AGENT_TRUE@	"s|\@demo_agent\@|geoclue-demo-agent;|" \
-@BUILD_DEMO_AGENT_TRUE@	$< > $@
-@BUILD_DEMO_AGENT_FALSE@$(systemconf_DATA): $(systemconf_in_files) Makefile
-@BUILD_DEMO_AGENT_FALSE@	@sed -e "s|\@demo_agent\@||" $< > $@
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_TRUE@$(systemconf_DATA): $(systemconf_in_files) Makefile
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_TRUE@	@sed -e \
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_TRUE@	"s|\@demo_agent\@|geoclue-demo-agent;|" \
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_TRUE@	$< > $@
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_FALSE@$(systemconf_DATA): $(systemconf_in_files) Makefile
+@BUILD_BACKEND_TRUE@@BUILD_DEMO_AGENT_FALSE@	@sed -e "s|\@demo_agent\@||" $< > $@
 
-$(service_DATA): $(service_in_files) Makefile
-	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
-	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
+@BUILD_BACKEND_TRUE@$(service_DATA): $(service_in_files) Makefile
+@BUILD_BACKEND_TRUE@	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
+@BUILD_BACKEND_TRUE@	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
 
-@HAVE_SYSTEMD_TRUE@$(systemdservice_DATA): $(systemdservice_in_files) Makefile
-@HAVE_SYSTEMD_TRUE@	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
-@HAVE_SYSTEMD_TRUE@	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
+@BUILD_BACKEND_TRUE@@HAVE_SYSTEMD_TRUE@$(systemdservice_DATA): $(systemdservice_in_files) Makefile
+@BUILD_BACKEND_TRUE@@HAVE_SYSTEMD_TRUE@	@sed -e "s|\@libexecdir\@|$(libexecdir)|" $< | \
+@BUILD_BACKEND_TRUE@@HAVE_SYSTEMD_TRUE@	sed -e "s|\@dbus_srv_user\@|$(dbus_srv_user)|" > $@
 
 -include $(top_srcdir)/git.mk
 

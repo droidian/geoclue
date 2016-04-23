@@ -1,3 +1,27 @@
+2.4.3
+=====
+
+Fix a crash in the helper library.
+
+2.4.2
+=====
+
+- Reliable desktop ID detection for xdg-app. This together with latest
+  gnome-shell and gnome-control-center, allows for per-application
+  geolocation access controls.
+- Don't require xdg-app applications to pass a valid desktop ID since Geoclue
+  can automatically detect it.
+- Don't allow xdg-app application to become user-authorization agents.
+- Correct introspection namespace version for libgeoclue.
+- Option to disable the backend build.
+- Demo: Provide reason to access location data.
+- Demo agent:
+  - Critical log message on failing to show notification.
+  - If app provides a reason string in it's desktop file, show that to the user.
+
+Cosimo Cecchi <cosimoc@gnome.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.4.1
 =====
 

@@ -26,7 +26,7 @@
 #include "gclue-nmea-source.h"
 #include "gclue-location.h"
 #include "config.h"
-#include "public-api/gclue-enum-types.h"
+#include "gclue-enum-types.h"
 
 #include <avahi-client/lookup.h>
 #include <avahi-common/simple-watch.h>

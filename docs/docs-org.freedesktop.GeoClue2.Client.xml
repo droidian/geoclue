@@ -119,7 +119,8 @@ DistanceThreshold  readwrite  u
 DesktopId  readwrite  s
 </programlisting>
 <para>        The desktop file id (the basename of the desktop file). This property
-        must be set by applications for authorization to work.
+        must be set by applications for authorization to work, unless your app
+        is an xdg-app bundle.
 </para>
 </refsect2>
 <refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">

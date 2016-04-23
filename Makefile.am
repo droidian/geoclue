@@ -7,7 +7,13 @@ else
 LIBGEOCLUE_DIR =
 endif
 
-SUBDIRS = build-aux src data $(LIBGEOCLUE_DIR) demo po docs
+if BUILD_BACKEND
+BACKEND_DIR = src
+else
+BACKEND_DIR =
+endif
+
+SUBDIRS = build-aux public-api $(BACKEND_DIR) data $(LIBGEOCLUE_DIR) demo po docs
 
 INTLTOOL_FILES =				\
 	intltool-extract.in			\

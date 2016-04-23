@@ -1,3 +1,11 @@
+geoclue-2.0 (2.4.3-1) unstable; urgency=medium
+
+  * [056c5e99] Imported Upstream version 2.4.3
+  * [d432a95f] Bump Standards-Version to 3.9.8 (no further changes)
+  * [67815126] debian/control: Update the Vcs-* URL to please lintian (again)
+
+ -- Laurent Bigonville <bigon@debian.org>  Sat, 23 Apr 2016 12:35:52 +0200
+
 geoclue-2.0 (2.4.1-1) unstable; urgency=medium
 
   * [e6f8dec3] Imported Upstream version 2.4.1

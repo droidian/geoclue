@@ -25,7 +25,7 @@
 #include "gclue-service-client.h"
 #include "gclue-service-location.h"
 #include "gclue-locator.h"
-#include "public-api/gclue-enum-types.h"
+#include "gclue-enum-types.h"
 #include "gclue-config.h"
 
 #define DEFAULT_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_CITY
@@ -284,6 +284,8 @@ typedef struct
 {
         GClueServiceClient *client;
         GDBusMethodInvocation *invocation;
+        char *desktop_id;
+        GClueAccuracyLevel accuracy_level;
 } StartData;
 
 static void
@@ -291,14 +293,15 @@ start_data_free (StartData *data)
 {
         g_object_unref (data->client);
         g_object_unref (data->invocation);
+        g_free(data->desktop_id);
         g_slice_free (StartData, data);
 }
 
 static void
-complete_start (StartData *data, GClueAccuracyLevel accuracy_level)
+complete_start (StartData *data)
 {
         GClueDBusClient *gdbus_client = GCLUE_DBUS_CLIENT (data->client);
-        start_client (data->client, accuracy_level);
+        start_client (data->client, data->accuracy_level);
 
         gclue_dbus_client_complete_start (gdbus_client,
                                           data->invocation);
@@ -313,26 +316,20 @@ on_authorize_app_ready (GObject      *source_object,
                         gpointer      user_data)
 {
         StartData *data = (StartData *) user_data;
-        GClueDBusClient *client = GCLUE_DBUS_CLIENT (data->client);
         GClueServiceClientPrivate *priv = data->client->priv;
         GError *error = NULL;
         gboolean authorized = FALSE;
-        GClueAccuracyLevel accuracy_level;
 
-        accuracy_level = gclue_dbus_client_get_requested_accuracy_level
-                                (client);
         if (!gclue_agent_call_authorize_app_finish (GCLUE_AGENT (source_object),
                                                     &authorized,
-                                                    &accuracy_level,
+                                                    &data->accuracy_level,
                                                     res,
                                                     &error))
                 goto error_out;
 
         if (!authorized) {
-                const char *desktop_id;
                 guint32 uid;
 
-                desktop_id = gclue_dbus_client_get_desktop_id (client);
                 uid = gclue_client_info_get_user_id (priv->client_info);
 
                 g_set_error (&error,
@@ -340,14 +337,14 @@ on_authorize_app_ready (GObject      *source_object,
                              G_DBUS_ERROR_ACCESS_DENIED,
                              "Agent rejected '%s' for user '%u'. Please ensure "
                              "that '%s' has installed a valid %s.desktop file.",
-                             desktop_id,
+                             data->desktop_id,
                              uid,
-                             desktop_id,
-                             desktop_id);
+                             data->desktop_id,
+                             data->desktop_id);
                 goto error_out;
         }
 
-        complete_start (data, accuracy_level);
+        complete_start (data);
 
         return;
 
@@ -364,7 +361,7 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         GClueConfig *config;
         StartData *data;
         const char *desktop_id;
-        GClueAccuracyLevel accuracy_level, max_accuracy;
+        GClueAccuracyLevel max_accuracy;
         GClueAppPerm app_perm;
         guint32 uid;
 
@@ -375,7 +372,11 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
                 return TRUE;
         }
 
-        desktop_id = gclue_dbus_client_get_desktop_id (client);
+        desktop_id = gclue_client_info_get_xdg_id (priv->client_info);
+        if (desktop_id == NULL)
+                /* Non-xdg app */
+                desktop_id = gclue_dbus_client_get_desktop_id (client);
+
         if (desktop_id == NULL) {
                 g_dbus_method_invocation_return_error_literal (invocation,
                                                                G_DBUS_ERROR,
@@ -403,17 +404,18 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         data = g_slice_new (StartData);
         data->client = g_object_ref (client);
         data->invocation =  g_object_ref (invocation);
+        data->desktop_id =  g_strdup (desktop_id);
 
-        accuracy_level = gclue_dbus_client_get_requested_accuracy_level (client);
-        accuracy_level = CLAMP (accuracy_level,
-                                GCLUE_ACCURACY_LEVEL_COUNTRY,
-                                GCLUE_ACCURACY_LEVEL_EXACT);
+        data->accuracy_level = gclue_dbus_client_get_requested_accuracy_level (client);
+        data->accuracy_level = CLAMP (data->accuracy_level,
+                                      GCLUE_ACCURACY_LEVEL_COUNTRY,
+                                      GCLUE_ACCURACY_LEVEL_EXACT);
 
         /* No agent == No authorization needed */
         if (priv->agent_proxy == NULL ||
             gclue_config_is_system_component (config, desktop_id) ||
             app_perm == GCLUE_APP_PERM_ALLOWED) {
-                complete_start (data, accuracy_level);
+                complete_start (data);
 
                 return TRUE;
         }
@@ -434,13 +436,13 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
                 return TRUE;
         }
         g_debug ("requested accuracy level: %u. "
-                 "Accuracy level allowed by agent: %u",
-                 accuracy_level, max_accuracy);
-        accuracy_level = CLAMP (accuracy_level, 0, max_accuracy);
+                 "Max accuracy level allowed by agent: %u",
+                 data->accuracy_level, max_accuracy);
+        data->accuracy_level = CLAMP (data->accuracy_level, 0, max_accuracy);
 
         gclue_agent_call_authorize_app (priv->agent_proxy,
                                         desktop_id,
-                                        accuracy_level,
+                                        data->accuracy_level,
                                         NULL,
                                         on_authorize_app_ready,
                                         data);

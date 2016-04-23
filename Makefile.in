@@ -160,7 +160,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = build-aux src data libgeoclue demo po docs
+DIST_SUBDIRS = build-aux public-api src data libgeoclue demo po docs
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/ar-lib $(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/config.guess \
@@ -385,7 +385,9 @@ ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 NULL = 
 @BUILD_LIBGEOCLUE_FALSE@LIBGEOCLUE_DIR = 
 @BUILD_LIBGEOCLUE_TRUE@LIBGEOCLUE_DIR = libgeoclue
-SUBDIRS = build-aux src data $(LIBGEOCLUE_DIR) demo po docs
+@BUILD_BACKEND_FALSE@BACKEND_DIR = 
+@BUILD_BACKEND_TRUE@BACKEND_DIR = src
+SUBDIRS = build-aux public-api $(BACKEND_DIR) data $(LIBGEOCLUE_DIR) demo po docs
 INTLTOOL_FILES = \
 	intltool-extract.in			\
 	intltool-merge.in			\

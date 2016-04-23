@@ -14,7 +14,7 @@ DOC_MAIN_SGML_FILE=geoclue-docs.xml
 SCAN_OPTIONS=--ignore-headers=config.h --rebuild-sections --rebuild-types
 
 # The directory containing the source code. Relative to $(srcdir)
-DOC_SOURCE_DIR=../src/public-api
+DOC_SOURCE_DIR=../public-api
 
 # Used for dependencies
 HFILE_GLOB=
@@ -24,7 +24,7 @@ CFILE_GLOB=
 IGNORE_HFILES= \
 	$(NULL)
 
-GTKDOC_LIBS = $(top_srcdir)/src/public-api/libgeoclue-public-api.la
+GTKDOC_LIBS = $(top_srcdir)/public-api/libgeoclue-public-api.la
 
 # Extra options to supply to gtkdoc-mkdb
 MKDB_OPTIONS=--sgml-mode --output-format=xml

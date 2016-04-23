@@ -417,11 +417,11 @@ AM_CPPFLAGS = $(LIBGEOCLUE_CFLAGS) 		     	  \
 	      -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
 	      -DABS_TOP_SRCDIR=\""$(abs_top_srcdir)"\" 	  \
 	      -DSYSCONFDIR=\""$(sysconfdir)"\"		  \
-	      -I$(top_srcdir)/src/public-api		  \
-	      -I$(top_builddir)/src/public-api
+	      -I$(top_srcdir)/public-api		  \
+	      -I$(top_builddir)/public-api
 
-ENUMS_HEADER = $(top_srcdir)/src/public-api/gclue-enums.h
-ENUMS_LIB = $(top_builddir)/src/public-api/libgeoclue-public-api.la
+ENUMS_HEADER = $(top_srcdir)/public-api/gclue-enums.h
+ENUMS_LIB = $(top_builddir)/public-api/libgeoclue-public-api.la
 libgeoclue_2_la_SOURCES = \
 	gclue-client.c 	   \
 	gclue-location.c   \
@@ -941,7 +941,7 @@ gclue-manager.h: Makefile.am $(MANAGER_INTERFACE_XML)
 @HAVE_INTROSPECTION_TRUE@	    --namespace Geoclue                 \
 @HAVE_INTROSPECTION_TRUE@	    --identifier-prefix=GClue           \
 @HAVE_INTROSPECTION_TRUE@	    --symbol-prefix=gclue               \
-@HAVE_INTROSPECTION_TRUE@	    --nsversion=1.0                     \
+@HAVE_INTROSPECTION_TRUE@	    --nsversion=2.0                     \
 @HAVE_INTROSPECTION_TRUE@	    --include=Gio-2.0                   \
 @HAVE_INTROSPECTION_TRUE@	    --library=geoclue-2	                \
 @HAVE_INTROSPECTION_TRUE@	    --output $@                         \
@@ -951,8 +951,8 @@ gclue-manager.h: Makefile.am $(MANAGER_INTERFACE_XML)
 @HAVE_INTROSPECTION_TRUE@	    --pkg-export=libgeoclue-2.0         \
 @HAVE_INTROSPECTION_TRUE@	    --libtool=$(top_builddir)/libtool   \
 @HAVE_INTROSPECTION_TRUE@	    -I$(srcdir)				\
-@HAVE_INTROSPECTION_TRUE@	    -I$(top_srcdir)/src/public-api	\
-@HAVE_INTROSPECTION_TRUE@	    -I$(top_builddir)/src/public-api	\
+@HAVE_INTROSPECTION_TRUE@	    -I$(top_srcdir)/public-api	\
+@HAVE_INTROSPECTION_TRUE@	    -I$(top_builddir)/public-api	\
 @HAVE_INTROSPECTION_TRUE@	    --c-include='geoclue.h'             \
 @HAVE_INTROSPECTION_TRUE@	    $^                                  \
 @HAVE_INTROSPECTION_TRUE@	    $(ENUMS_HEADER) 			\

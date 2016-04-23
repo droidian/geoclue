@@ -313,7 +313,7 @@ DOC_MAIN_SGML_FILE = libgeoclue-docs.xml
 SCAN_OPTIONS = --ignore-headers=config.h --rebuild-types
 
 # The directory containing the source code. Relative to $(srcdir)
-DOC_SOURCE_DIR = ../../libgeoclue ../../src/public-api
+DOC_SOURCE_DIR = ../../libgeoclue ../../public-api
 
 # Used for dependencies
 HFILE_GLOB = 
@@ -554,9 +554,9 @@ maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
-@ENABLE_GTK_DOC_FALSE@uninstall-local:
-@ENABLE_GTK_DOC_FALSE@clean-local:
 @ENABLE_GTK_DOC_FALSE@install-data-local:
+@ENABLE_GTK_DOC_FALSE@clean-local:
+@ENABLE_GTK_DOC_FALSE@uninstall-local:
 @ENABLE_GTK_DOC_FALSE@maintainer-clean-local:
 @ENABLE_GTK_DOC_FALSE@distclean-local:
 clean: clean-am

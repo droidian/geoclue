@@ -44,7 +44,8 @@
         DesktopId:
 
         The desktop file id (the basename of the desktop file). This property
-        must be set by applications for authorization to work.
+        must be set by applications for authorization to work, unless your app
+        is an xdg-app bundle.
     -->
     <property name="DesktopId" type="s" access="readwrite"/>
 

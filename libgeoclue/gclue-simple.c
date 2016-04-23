@@ -284,8 +284,10 @@ on_client_started (GObject      *source_object,
 
         gclue_client_call_start_finish (client, res, &error);
         if (error != NULL) {
+                GClueSimple *simple = g_task_get_source_object (task);
+
                 g_task_return_error (task, error);
-                g_object_unref (task);
+                g_clear_object (&simple->priv->task);
         }
 }
 
@@ -302,7 +304,7 @@ on_client_created (GObject      *source_object,
         priv->client = gclue_client_proxy_create_finish (res, &error);
         if (error != NULL) {
                 g_task_return_error (task, error);
-                g_object_unref (task);
+                g_clear_object (&priv->task);
 
                 return;
         }

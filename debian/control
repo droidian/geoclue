@@ -18,8 +18,8 @@ Build-Depends: autotools-dev,
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
 Standards-Version: 3.9.8
-Vcs-Git: git://anonscm.debian.org/collab-maint/geoclue-2.0.git
-Vcs-Browser: http://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
+Vcs-Git: https://anonscm.debian.org/git/collab-maint/geoclue-2.0.git
+Vcs-Browser: https://anonscm.debian.org/gitweb/?p=collab-maint/geoclue-2.0.git
 
 Package: geoclue-2.0
 Architecture: any

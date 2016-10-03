@@ -17,6 +17,7 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_client_get_distance_threshold@Base 2.4.0
  gclue_client_get_location@Base 2.4.0
  gclue_client_get_requested_accuracy_level@Base 2.4.0
+ gclue_client_get_time_threshold@Base 2.4.4
  gclue_client_get_type@Base 2.4.0
  gclue_client_interface_info@Base 2.4.0
  gclue_client_override_properties@Base 2.4.0
@@ -35,9 +36,11 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_client_set_distance_threshold@Base 2.4.0
  gclue_client_set_location@Base 2.4.0
  gclue_client_set_requested_accuracy_level@Base 2.4.0
+ gclue_client_set_time_threshold@Base 2.4.4
  gclue_client_skeleton_get_type@Base 2.4.0
  gclue_client_skeleton_new@Base 2.4.0
  gclue_location_dup_description@Base 2.4.0
+ gclue_location_dup_timestamp@Base 2.4.4
  gclue_location_get_accuracy@Base 2.4.0
  gclue_location_get_altitude@Base 2.4.0
  gclue_location_get_description@Base 2.4.0
@@ -45,6 +48,7 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_location_get_latitude@Base 2.4.0
  gclue_location_get_longitude@Base 2.4.0
  gclue_location_get_speed@Base 2.4.0
+ gclue_location_get_timestamp@Base 2.4.4
  gclue_location_get_type@Base 2.4.0
  gclue_location_interface_info@Base 2.4.0
  gclue_location_override_properties@Base 2.4.0
@@ -62,6 +66,7 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_location_set_latitude@Base 2.4.0
  gclue_location_set_longitude@Base 2.4.0
  gclue_location_set_speed@Base 2.4.0
+ gclue_location_set_timestamp@Base 2.4.4
  gclue_location_skeleton_get_type@Base 2.4.0
  gclue_location_skeleton_new@Base 2.4.0
  gclue_manager_call_add_agent@Base 2.4.0

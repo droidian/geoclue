@@ -1,6 +1,8 @@
 #!/usr/bin/make -f
 # -*- makefile -*-
 
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
 ifneq ($(DEB_BUILD_ARCH_OS),linux)
   MM_NM_FLAGS := --disable-3g-source \
                  --disable-modem-gps-source \

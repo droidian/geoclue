@@ -191,7 +191,7 @@ main (int argc, char **argv)
         main_loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (main_loop);
 
-        if (manager != NULL);
+        if (manager != NULL)
                 g_object_unref (manager);
         g_bus_unown_name (owner_id);
         g_main_loop_unref (main_loop);

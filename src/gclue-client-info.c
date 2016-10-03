@@ -207,10 +207,13 @@ get_xdg_id (guint32 pid)
                         continue;
 
                 scope = g_path_get_basename (unit);
-                if (!g_str_has_prefix (scope, "xdg-app-") ||
+                if ((!g_str_has_prefix (scope, "xdg-app-") &&
+                     !g_str_has_prefix (scope, "flatpak-")) ||
                     !g_str_has_suffix (scope, ".scope"))
                         break;
 
+                /* strlen("flatpak-") == strlen("xdg-app-")
+                 * so all is good here */
                 name = scope + strlen("xdg-app-");
                 dash = strchr (name, '-');
 

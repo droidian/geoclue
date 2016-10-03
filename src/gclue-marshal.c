@@ -53,7 +53,7 @@ G_BEGIN_DECLS
 #endif /* !G_ENABLE_DEBUG */
 
 
-/* VOID:UINT,UINT,ULONG,ULONG (./gclue-marshal.list:1) */
+/* VOID:UINT,UINT,ULONG,ULONG (/home/hadess/Projects/jhbuild/geoclue/src/gclue-marshal.list:1) */
 extern void gclue_marshal_VOID__UINT_UINT_ULONG_ULONG (GClosure     *closure,
                                                        GValue       *return_value,
                                                        guint         n_param_values,
@@ -100,7 +100,7 @@ gclue_marshal_VOID__UINT_UINT_ULONG_ULONG (GClosure     *closure,
             data2);
 }
 
-/* VOID:DOUBLE,DOUBLE (./gclue-marshal.list:2) */
+/* VOID:DOUBLE,DOUBLE (/home/hadess/Projects/jhbuild/geoclue/src/gclue-marshal.list:2) */
 extern void gclue_marshal_VOID__DOUBLE_DOUBLE (GClosure     *closure,
                                                GValue       *return_value,
                                                guint         n_param_values,

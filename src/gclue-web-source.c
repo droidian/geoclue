@@ -48,7 +48,7 @@ struct _GClueWebSourcePrivate {
 
         guint64 last_submitted;
 
-        gboolean network_available;
+        gboolean internet_available;
 };
 
 G_DEFINE_ABSTRACT_TYPE (GClueWebSource, gclue_web_source, GCLUE_TYPE_LOCATION_SOURCE)
@@ -99,12 +99,37 @@ query_callback (SoupSession *session,
         g_object_unref (location);
 }
 
+static gboolean
+get_internet_available (void)
+{
+        GNetworkMonitor *monitor = g_network_monitor_get_default ();
+        gboolean available;
+
+#if GLIB_CHECK_VERSION(2, 44, 0)
+        available = (g_network_monitor_get_connectivity (monitor) ==
+                     G_NETWORK_CONNECTIVITY_FULL);
+#else
+        GSocketConnectable *connectable;
+
+        connectable = g_network_address_new ("location.services.mozilla.com",
+                                             80);
+        available = g_network_monitor_can_reach (monitor,
+                                                 connectable,
+                                                 NULL,
+                                                 NULL);
+        g_object_unref (connectable);
+#endif
+
+        return available;
+}
+
 static void
-refresh_accuracy_level (GClueWebSource *web,
-                        gboolean        available)
+refresh_accuracy_level (GClueWebSource *web)
 {
         GClueAccuracyLevel new, existing;
+        gboolean available;
 
+        available = get_internet_available ();
         existing = gclue_location_source_get_available_accuracy_level
                         (GCLUE_LOCATION_SOURCE (web));
         new = GCLUE_WEB_SOURCE_GET_CLASS (web)->get_available_accuracy_level
@@ -119,23 +144,23 @@ refresh_accuracy_level (GClueWebSource *web,
 }
 
 static void
-on_network_changed (GNetworkMonitor *monitor,
-                    gboolean         available,
+on_network_changed (GNetworkMonitor *monitor G_GNUC_UNUSED,
+                    gboolean         available G_GNUC_UNUSED,
                     gpointer         user_data)
 {
         GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
         GError *error = NULL;
-        gboolean last_available = web->priv->network_available;
+        gboolean last_available = web->priv->internet_available;
 
-        refresh_accuracy_level (web, available);
+        refresh_accuracy_level (web);
 
         if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (user_data)))
                 return;
 
-        web->priv->network_available = available;
-        if (last_available == available)
-                return; /* We already reacted to netork change */
-        if (!available) {
+        web->priv->internet_available = get_internet_available ();
+        if (last_available == web->priv->internet_available)
+                return; /* We already reacted to network change */
+        if (!web->priv->internet_available) {
                 g_debug ("Network unavailable");
                 return;
         }
@@ -203,8 +228,8 @@ gclue_web_source_constructed (GObject *object)
                                   "network-changed",
                                   G_CALLBACK (on_network_changed),
                                   object);
-        on_network_changed (monitor,
-                            g_network_monitor_get_network_available (monitor),
+        on_network_changed (NULL,
+                            TRUE,
                             object);
 }
 
@@ -239,14 +264,11 @@ gclue_web_source_init (GClueWebSource *web)
 void
 gclue_web_source_refresh (GClueWebSource *source)
 {
-        GNetworkMonitor *monitor;
-
         g_return_if_fail (GCLUE_IS_WEB_SOURCE (source));
 
-        monitor = g_network_monitor_get_default ();
-        if (g_network_monitor_get_network_available (monitor)) {
-                source->priv->network_available = FALSE;
-                on_network_changed (monitor, TRUE, source);
+        if (get_internet_available ()) {
+                source->priv->internet_available = FALSE;
+                on_network_changed (NULL, TRUE, source);
         }
 }
 
@@ -292,7 +314,6 @@ on_submit_source_location_notify (GObject    *source_object,
 {
         GClueLocationSource *source = GCLUE_LOCATION_SOURCE (source_object);
         GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
-        GNetworkMonitor *monitor;
         GClueLocation *location;
         SoupMessage *query;
         GError *error = NULL;
@@ -308,8 +329,7 @@ on_submit_source_location_notify (GObject    *source_object,
         web->priv->last_submitted = geocode_location_get_timestamp
                 (GEOCODE_LOCATION (location));
 
-        monitor = g_network_monitor_get_default ();
-        if (!g_network_monitor_get_network_available (monitor))
+        if (!get_internet_available ())
                 return;
 
         query = GCLUE_WEB_SOURCE_GET_CLASS (web)->create_submit_query

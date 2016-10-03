@@ -23,6 +23,7 @@
     <keyword type="signal" name="The &quot;LocationUpdated&quot; signal" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-signal-org-freedesktop-GeoClue2-Client.LocationUpdated"/>
     <keyword type="property" name="The &quot;Location&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location"/>
     <keyword type="property" name="The &quot;DistanceThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold"/>
+    <keyword type="property" name="The &quot;TimeThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.TimeThreshold"/>
     <keyword type="property" name="The &quot;DesktopId&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId"/>
     <keyword type="property" name="The &quot;RequestedAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel"/>
     <keyword type="property" name="The &quot;Active&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Active"/>
@@ -33,6 +34,7 @@
     <keyword type="property" name="The &quot;Speed&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Speed"/>
     <keyword type="property" name="The &quot;Heading&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Heading"/>
     <keyword type="property" name="The &quot;Description&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description"/>
+    <keyword type="property" name="The &quot;Timestamp&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp"/>
     <keyword type="enum" name="enum GClueAccuracyLevel" link="geoclue-gclue-enums.html#GClueAccuracyLevel"/>
     <keyword type="method" name="The AuthorizeApp() method" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"/>
     <keyword type="property" name="The &quot;MaxAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel"/>

@@ -1,3 +1,24 @@
+2.4.4
+=====
+
+
+- Expose location timestamp over D-Bus.
+- Add a TimeThreshold property that allows clients to limit location updates by
+  time.
+- Annotate default value of DistanceThreshold property.
+- Check for full internet availability before declaring ourselves online.
+- Fix autogen.sh against builddir ≠ srcdir.
+- Fix a bunch of memory leaks.
+- Fix a bunch of build issues.
+- Other minor fixes.
+
+Colin Walters <walters@verbum.org>
+Emilio Pozuelo Monfort <emilio.pozuelo@collabora.co.uk>
+Justin Kim <justin.kim@collabora.com>
+Philip Withnall <philip.withnall@collabora.co.uk>
+Ting-Wei Lan <lantw@src.gnome.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.4.3
 =====
 

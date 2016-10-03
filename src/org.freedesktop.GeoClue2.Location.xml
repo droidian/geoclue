@@ -74,5 +74,21 @@
         geocode-glib.
     -->
     <property name="Description" type="s" access="read"/>
+
+
+    <!--
+        Timestamp:
+
+        The timestamp when the location was determined, in seconds and
+        microseconds since the Epoch. This is the time of measurement if the
+        backend provided that information, otherwise the time when GeoClue
+        received the new location.
+
+        Note that GeoClue can't guarantee that the timestamp will always
+        monotonically increase, as a backend may not respect that.
+        Also note that a timestamp can be very old, e.g. because of a cached
+        location.
+    -->
+    <property name="Timestamp" type="(tt)" access="read"/>
   </interface>
 </node>

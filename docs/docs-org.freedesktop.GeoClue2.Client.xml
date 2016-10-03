@@ -24,6 +24,7 @@
     <synopsis>
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.Location">Location</link>                readable   o
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold">DistanceThreshold</link>       readwrite  u
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.TimeThreshold">TimeThreshold</link>           readwrite  u
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">DesktopId</link>               readwrite  s
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel">RequestedAccuracyLevel</link>  readwrite  u
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Client.Active">Active</link>                  readable   b
@@ -110,6 +111,21 @@ DistanceThreshold  readwrite  u
 <para>        Contains the current distance threshold in meters. This value is used
         by the service when it gets new location info. If the distance moved is
         below the threshold, it won't emit the LocationUpdated signal.
+        The default value is 0. When TimeThreshold is zero, it always emits
+        the signal.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Client.TimeThreshold">
+  <title>The "TimeThreshold" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Client.TimeThreshold"><primary sortas="Client:TimeThreshold">org.freedesktop.GeoClue2.Client:TimeThreshold</primary></indexterm>
+<programlisting>
+TimeThreshold  readwrite  u
+</programlisting>
+<para>        Contains the current time threshold in seconds. This value is used
+        by the service when it gets new location info. If the time since the
+        last update is below the threshold, it won't emit the LocationUpdated
+        signal. The default value is 0. When TimeThreshold is zero, it always
+        emits the signal.
 </para>
 </refsect2>
 <refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId">

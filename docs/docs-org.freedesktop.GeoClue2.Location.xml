@@ -15,6 +15,7 @@
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Speed">Speed</link>        readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Heading">Heading</link>      readable   d
 <link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Description">Description</link>  readable   s
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp">Timestamp</link>    readable   (tt)
 </synopsis>
   </refsect1>
 <refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Location">
@@ -93,6 +94,22 @@ Description  readable   s
         sources provide a description. If you really need a description (or
         more details) about current location, use a reverse-geocoding API, e.g
         geocode-glib.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp">
+  <title>The "Timestamp" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp"><primary sortas="Location:Timestamp">org.freedesktop.GeoClue2.Location:Timestamp</primary></indexterm>
+<programlisting>
+Timestamp  readable   (tt)
+</programlisting>
+<para>        The timestamp when the location was determined, in seconds and
+        microseconds since the Epoch. This is the time of measurement if the
+        backend provided that information, otherwise the time when GeoClue
+        received the new location.
+</para><para>        Note that GeoClue can't guarantee that the timestamp will always
+        monotonically increase, as a backend may not respect that.
+        Also note that a timestamp can be very old, e.g. because of a cached
+        location.
 </para>
 </refsect2>
 </refsect1>

@@ -8,7 +8,7 @@
 <link rel="up" href="index.html" title="Libgeoclue Reference Manual">
 <link rel="prev" href="GClueLocationProxy.html" title="GClueLocationProxy">
 <link rel="next" href="license.html" title="Appendix A. License">
-<meta name="generator" content="GTK-Doc V1.24.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
@@ -25,8 +25,6 @@
 <div class="index"><div class="indexdiv">
 <h3>G</h3>
 <dl>
-<dt>GClueAccuracyLevel, <a class="indexterm" href="libgeoclue-gclue-enums.html#GClueAccuracyLevel">enum GClueAccuracyLevel</a>
-</dt>
 <dt>GClueClient::handle-start, <a class="indexterm" href="GClueClient.html#GClueClient-handle-start">The “handle-start” signal</a>
 </dt>
 <dt>GClueClient::handle-stop, <a class="indexterm" href="GClueClient.html#GClueClient-handle-stop">The “handle-stop” signal</a>
@@ -43,6 +41,8 @@
 </dt>
 <dt>GClueClient:requested-accuracy-level, <a class="indexterm" href="GClueClient.html#GClueClient--requested-accuracy-level">The “requested-accuracy-level” property</a>
 </dt>
+<dt>GClueClient:time-threshold, <a class="indexterm" href="GClueClient.html#GClueClient--time-threshold">The “time-threshold” property</a>
+</dt>
 <dt>GClueLocation:accuracy, <a class="indexterm" href="GClueLocation.html#GClueLocation--accuracy">The “accuracy” property</a>
 </dt>
 <dt>GClueLocation:altitude, <a class="indexterm" href="GClueLocation.html#GClueLocation--altitude">The “altitude” property</a>
@@ -57,6 +57,8 @@
 </dt>
 <dt>GClueLocation:speed, <a class="indexterm" href="GClueLocation.html#GClueLocation--speed">The “speed” property</a>
 </dt>
+<dt>GClueLocation:timestamp, <a class="indexterm" href="GClueLocation.html#GClueLocation--timestamp">The “timestamp” property</a>
+</dt>
 <dt>GClueManager::handle-add-agent, <a class="indexterm" href="GClueManager.html#GClueManager-handle-add-agent">The “handle-add-agent” signal</a>
 </dt>
 <dt>GClueManager::handle-get-client, <a class="indexterm" href="GClueManager.html#GClueManager-handle-get-client">The “handle-get-client” signal</a>
@@ -64,14 +66,6 @@
 <dt>GClueManager:available-accuracy-level, <a class="indexterm" href="GClueManager.html#GClueManager--available-accuracy-level">The “available-accuracy-level” property</a>
 </dt>
 <dt>GClueManager:in-use, <a class="indexterm" href="GClueManager.html#GClueManager--in-use">The “in-use” property</a>
-</dt>
-<dt>GClueSimple:accuracy-level, <a class="indexterm" href="GClueSimple.html#GClueSimple--accuracy-level">The “accuracy-level” property</a>
-</dt>
-<dt>GClueSimple:client, <a class="indexterm" href="GClueSimple.html#GClueSimple--client">The “client” property</a>
-</dt>
-<dt>GClueSimple:desktop-id, <a class="indexterm" href="GClueSimple.html#GClueSimple--desktop-id">The “desktop-id” property</a>
-</dt>
-<dt>GClueSimple:location, <a class="indexterm" href="GClueSimple.html#GClueSimple--location">The “location” property</a>
 </dt>
 <dt>gclue_accuracy_level_get_type, <a class="indexterm" href="libgeoclue-gclue-enums.html#gclue-accuracy-level-get-type">gclue_accuracy_level_get_type ()</a>
 </dt>
@@ -107,12 +101,6 @@
 </dt>
 <dt>gclue_client_override_properties, <a class="indexterm" href="GClueClient.html#gclue-client-override-properties">gclue_client_override_properties ()</a>
 </dt>
-<dt>gclue_client_proxy_create, <a class="indexterm" href="GClueClientProxy.html#gclue-client-proxy-create">gclue_client_proxy_create ()</a>
-</dt>
-<dt>gclue_client_proxy_create_finish, <a class="indexterm" href="GClueClientProxy.html#gclue-client-proxy-create-finish">gclue_client_proxy_create_finish ()</a>
-</dt>
-<dt>gclue_client_proxy_create_sync, <a class="indexterm" href="GClueClientProxy.html#gclue-client-proxy-create-sync">gclue_client_proxy_create_sync ()</a>
-</dt>
 <dt>gclue_client_proxy_new, <a class="indexterm" href="GClueClientProxy.html#gclue-client-proxy-new">gclue_client_proxy_new ()</a>
 </dt>
 <dt>gclue_client_proxy_new_finish, <a class="indexterm" href="GClueClientProxy.html#gclue-client-proxy-new-finish">gclue_client_proxy_new_finish ()</a>
@@ -137,6 +125,8 @@
 </dt>
 <dt>gclue_location_dup_description, <a class="indexterm" href="GClueLocation.html#gclue-location-dup-description">gclue_location_dup_description ()</a>
 </dt>
+<dt>gclue_location_dup_timestamp, <a class="indexterm" href="GClueLocation.html#gclue-location-dup-timestamp">gclue_location_dup_timestamp ()</a>
+</dt>
 <dt>gclue_location_get_accuracy, <a class="indexterm" href="GClueLocation.html#gclue-location-get-accuracy">gclue_location_get_accuracy ()</a>
 </dt>
 <dt>gclue_location_get_altitude, <a class="indexterm" href="GClueLocation.html#gclue-location-get-altitude">gclue_location_get_altitude ()</a>
@@ -150,6 +140,8 @@
 <dt>gclue_location_get_longitude, <a class="indexterm" href="GClueLocation.html#gclue-location-get-longitude">gclue_location_get_longitude ()</a>
 </dt>
 <dt>gclue_location_get_speed, <a class="indexterm" href="GClueLocation.html#gclue-location-get-speed">gclue_location_get_speed ()</a>
+</dt>
+<dt>gclue_location_get_timestamp, <a class="indexterm" href="GClueLocation.html#gclue-location-get-timestamp">gclue_location_get_timestamp ()</a>
 </dt>
 <dt>gclue_location_interface_info, <a class="indexterm" href="GClueLocation.html#gclue-location-interface-info">gclue_location_interface_info ()</a>
 </dt>
@@ -180,6 +172,8 @@
 <dt>gclue_location_set_longitude, <a class="indexterm" href="GClueLocation.html#gclue-location-set-longitude">gclue_location_set_longitude ()</a>
 </dt>
 <dt>gclue_location_set_speed, <a class="indexterm" href="GClueLocation.html#gclue-location-set-speed">gclue_location_set_speed ()</a>
+</dt>
+<dt>gclue_location_set_timestamp, <a class="indexterm" href="GClueLocation.html#gclue-location-set-timestamp">gclue_location_set_timestamp ()</a>
 </dt>
 <dt>gclue_manager_call_add_agent, <a class="indexterm" href="GClueManager.html#gclue-manager-call-add-agent">gclue_manager_call_add_agent ()</a>
 </dt>
@@ -217,22 +211,12 @@
 </dt>
 <dt>gclue_manager_set_in_use, <a class="indexterm" href="GClueManager.html#gclue-manager-set-in-use">gclue_manager_set_in_use ()</a>
 </dt>
-<dt>gclue_simple_get_client, <a class="indexterm" href="GClueSimple.html#gclue-simple-get-client">gclue_simple_get_client ()</a>
-</dt>
-<dt>gclue_simple_get_location, <a class="indexterm" href="GClueSimple.html#gclue-simple-get-location">gclue_simple_get_location ()</a>
-</dt>
-<dt>gclue_simple_new, <a class="indexterm" href="GClueSimple.html#gclue-simple-new">gclue_simple_new ()</a>
-</dt>
-<dt>gclue_simple_new_finish, <a class="indexterm" href="GClueSimple.html#gclue-simple-new-finish">gclue_simple_new_finish ()</a>
-</dt>
-<dt>gclue_simple_new_sync, <a class="indexterm" href="GClueSimple.html#gclue-simple-new-sync">gclue_simple_new_sync ()</a>
-</dt>
 <dt>GCLUE_TYPE_ACCURACY_LEVEL, <a class="indexterm" href="libgeoclue-gclue-enums.html#GCLUE-TYPE-ACCURACY-LEVEL:CAPS">GCLUE_TYPE_ACCURACY_LEVEL</a>
 </dt>
 </dl>
 </div></div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24.1</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

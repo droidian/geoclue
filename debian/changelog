@@ -1,3 +1,12 @@
+geoclue-2.0 (2.4.4-1) unstable; urgency=medium
+
+  * [f75c7386] New upstream version 2.4.4
+  * [33211aef] debian/libgeoclue-2-0.symbols: Add new exported symbols
+  * [5ad1c133] debian/libgeoclue-2-0.symbols: Add Build-Depends-Package field
+  * [286914d2] debian/rules: Enable all hardening flags
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 03 Oct 2016 14:14:39 +0200
+
 geoclue-2.0 (2.4.3-1) unstable; urgency=medium
 
   * [056c5e99] Imported Upstream version 2.4.3

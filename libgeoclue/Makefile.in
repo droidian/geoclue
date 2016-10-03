@@ -936,22 +936,28 @@ gclue-manager.h: Makefile.am $(MANAGER_INTERFACE_XML)
 		$(MANAGER_INTERFACE_XML)
 
 @HAVE_INTROSPECTION_TRUE@Geoclue-2.0.gir: $(libgeoclue_2_la_SOURCES) $(geoclue_include_HEADERS)
-@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v  \
+@HAVE_INTROSPECTION_TRUE@	$(AM_V_GEN) env CPPFLAGS="$(CPPFLAGS)"  \
+@HAVE_INTROSPECTION_TRUE@	    CFLAGS="$(CFLAGS)"			\
+@HAVE_INTROSPECTION_TRUE@	    LDFLAGS="$(LDFLAGS)"		\
+@HAVE_INTROSPECTION_TRUE@	    CC="$(CC)"				\
+@HAVE_INTROSPECTION_TRUE@	    PKG_CONFIG="$(PKG_CONFIG)"		\
+@HAVE_INTROSPECTION_TRUE@	    DLLTOOL="$(DLLTOOL)" 		\
+@HAVE_INTROSPECTION_TRUE@	    $(INTROSPECTION_SCANNER) -v 	\
 @HAVE_INTROSPECTION_TRUE@	    --warn-all                          \
 @HAVE_INTROSPECTION_TRUE@	    --namespace Geoclue                 \
 @HAVE_INTROSPECTION_TRUE@	    --identifier-prefix=GClue           \
 @HAVE_INTROSPECTION_TRUE@	    --symbol-prefix=gclue               \
 @HAVE_INTROSPECTION_TRUE@	    --nsversion=2.0                     \
 @HAVE_INTROSPECTION_TRUE@	    --include=Gio-2.0                   \
-@HAVE_INTROSPECTION_TRUE@	    --library=geoclue-2	                \
+@HAVE_INTROSPECTION_TRUE@	    --library=libgeoclue-2.la	        \
 @HAVE_INTROSPECTION_TRUE@	    --output $@                         \
 @HAVE_INTROSPECTION_TRUE@	    --pkg=glib-2.0                      \
 @HAVE_INTROSPECTION_TRUE@	    --pkg=gobject-2.0                   \
 @HAVE_INTROSPECTION_TRUE@	    --pkg=gio-2.0                       \
 @HAVE_INTROSPECTION_TRUE@	    --pkg-export=libgeoclue-2.0         \
-@HAVE_INTROSPECTION_TRUE@	    --libtool=$(top_builddir)/libtool   \
+@HAVE_INTROSPECTION_TRUE@	    --libtool="${LIBTOOL}"   		\
 @HAVE_INTROSPECTION_TRUE@	    -I$(srcdir)				\
-@HAVE_INTROSPECTION_TRUE@	    -I$(top_srcdir)/public-api	\
+@HAVE_INTROSPECTION_TRUE@	    -I$(top_srcdir)/public-api		\
 @HAVE_INTROSPECTION_TRUE@	    -I$(top_builddir)/public-api	\
 @HAVE_INTROSPECTION_TRUE@	    --c-include='geoclue.h'             \
 @HAVE_INTROSPECTION_TRUE@	    $^                                  \

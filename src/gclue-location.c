@@ -212,7 +212,7 @@ parse_coordinate_string (const char *coordinate,
         degrees = g_ascii_strtod (degrees_str, NULL);
         g_free (degrees_str);
 
-        minutes = g_ascii_strtod (coordinate + dot_offset - 2, NULL);
+        minutes = g_ascii_strtod (dot_str - 2, NULL);
 
         /* Include the minutes as part of the degrees */
         out = degrees + (minutes / 60.0);
@@ -319,10 +319,14 @@ gclue_location_new (gdouble latitude,
 }
 
 /**
- * gclue_location_new_with_description:
+ * gclue_location_new_full:
  * @latitude: a valid latitude
  * @longitude: a valid longitude
  * @accuracy: accuracy of location in meters
+ * @speed: speed in meters per second
+ * @heading: heading in degrees
+ * @altitude: altitude of location in meters
+ * @timestamp: timestamp in seconds since the Epoch
  * @description: a description for the location
  *
  * Creates a new #GClueLocation object.
@@ -330,15 +334,23 @@ gclue_location_new (gdouble latitude,
  * Returns: a new #GClueLocation object. Use g_object_unref() when done.
  **/
 GClueLocation *
-gclue_location_new_with_description (gdouble     latitude,
-                                     gdouble     longitude,
-                                     gdouble     accuracy,
-                                     const char *description)
+gclue_location_new_full (gdouble     latitude,
+                         gdouble     longitude,
+                         gdouble     accuracy,
+                         gdouble     speed,
+                         gdouble     heading,
+                         gdouble     altitude,
+                         guint64     timestamp,
+                         const char *description)
 {
         return g_object_new (GCLUE_TYPE_LOCATION,
                              "latitude", latitude,
                              "longitude", longitude,
                              "accuracy", accuracy,
+                             "speed", speed,
+                             "heading", heading,
+                             "altitude", altitude,
+                             "timestamp", timestamp,
                              "description", description,
                              NULL);
 }

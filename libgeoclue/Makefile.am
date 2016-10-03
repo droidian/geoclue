@@ -87,22 +87,28 @@ typelibsdir = $(libdir)/girepository-1.0
 typelibs_DATA = Geoclue-2.0.typelib
 
 Geoclue-2.0.gir: $(libgeoclue_2_la_SOURCES) $(geoclue_include_HEADERS)
-	$(AM_V_GEN)$(INTROSPECTION_SCANNER) -v  \
+	$(AM_V_GEN) env CPPFLAGS="$(CPPFLAGS)"  \
+	    CFLAGS="$(CFLAGS)"			\
+	    LDFLAGS="$(LDFLAGS)"		\
+	    CC="$(CC)"				\
+	    PKG_CONFIG="$(PKG_CONFIG)"		\
+	    DLLTOOL="$(DLLTOOL)" 		\
+	    $(INTROSPECTION_SCANNER) -v 	\
 	    --warn-all                          \
 	    --namespace Geoclue                 \
 	    --identifier-prefix=GClue           \
 	    --symbol-prefix=gclue               \
 	    --nsversion=2.0                     \
 	    --include=Gio-2.0                   \
-	    --library=geoclue-2	                \
+	    --library=libgeoclue-2.la	        \
 	    --output $@                         \
 	    --pkg=glib-2.0                      \
 	    --pkg=gobject-2.0                   \
 	    --pkg=gio-2.0                       \
 	    --pkg-export=libgeoclue-2.0         \
-	    --libtool=$(top_builddir)/libtool   \
+	    --libtool="${LIBTOOL}"   		\
 	    -I$(srcdir)				\
-	    -I$(top_srcdir)/public-api	\
+	    -I$(top_srcdir)/public-api		\
 	    -I$(top_builddir)/public-api	\
 	    --c-include='geoclue.h'             \
 	    $^                                  \

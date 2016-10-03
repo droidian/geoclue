@@ -202,7 +202,7 @@ geocode_forward_init (GeocodeForward *forward)
 	forward->priv = G_TYPE_INSTANCE_GET_PRIVATE ((forward), GEOCODE_TYPE_FORWARD, GeocodeForwardPrivate);
 	forward->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						   g_free, g_free);
-        forward->priv->soup_session = soup_session_new ();
+	forward->priv->soup_session = _geocode_glib_build_soup_session ();
 	forward->priv->answer_count = DEFAULT_ANSWER_COUNT;
 	forward->priv->search_area = NULL;
 	forward->priv->bounded = FALSE;
@@ -566,6 +566,7 @@ geocode_forward_search_async (GeocodeForward      *forward,
 					    on_cache_data_loaded,
 					    simple);
 		g_object_unref (cache);
+		g_free (cache_path);
 	}
 }
 
@@ -735,8 +736,11 @@ get_place_type_from_attributes (GHashTable *ht)
                 else
                         place_type =  GEOCODE_PLACE_TYPE_STREET;
         } else if (g_strcmp0 (category, "railway") == 0) {
-                if (g_strcmp0 (type, "station") == 0)
-                        place_type =  GEOCODE_PLACE_TYPE_RAILWAY_STATION;
+                if (g_strcmp0 (type, "station") == 0 ||
+                    g_strcmp0 (type, "halt") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_RAILWAY_STATION;
+                else if (g_strcmp0 (type, "tram_stop") == 0)
+                        place_type = GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION;
         } else if (g_strcmp0 (category, "waterway") == 0) {
                 place_type =  GEOCODE_PLACE_TYPE_DRAINAGE;
         } else if (g_strcmp0 (category, "boundary") == 0) {

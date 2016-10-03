@@ -74,6 +74,8 @@ print_location (GClueSimple *simple)
 {
         GClueLocation *location;
         gdouble altitude, speed, heading;
+        GVariant *timestamp;
+        GTimeVal tv = { 0 };
         const char *desc;
 
         location = gclue_simple_get_location (simple);
@@ -96,6 +98,23 @@ print_location (GClueSimple *simple)
         desc = gclue_location_get_description (location);
         if (strlen (desc) > 0)
                 g_print ("Description: %s\n", desc);
+
+        timestamp = gclue_location_get_timestamp (location);
+        if (timestamp) {
+                GDateTime *date_time;
+                gchar *str;
+
+                g_variant_get (timestamp, "(tt)", &tv.tv_sec, &tv.tv_usec);
+
+                date_time = g_date_time_new_from_timeval_local (&tv);
+                str = g_date_time_format
+                      (date_time,
+                       "%c (%s seconds since the Epoch)");
+                g_date_time_unref (date_time);
+
+                g_print ("Timestamp:   %s\n", str);
+                g_free (str);
+        }
 }
 
 static void

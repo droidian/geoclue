@@ -10,6 +10,7 @@ AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      -DG_LOG_DOMAIN=\""Geoclue"\"	     	  \
 	      -DABS_TOP_SRCDIR=\""$(abs_top_srcdir)"\" 	  \
 	      -DSYSCONFDIR=\""$(sysconfdir)"\"		  \
+	      -DPACKAGE_VERSION=\"@PACKAGE_VERSION@\"     \
 	      -I$(top_srcdir)/src			  \
 	      -I$(top_builddir)/src
 

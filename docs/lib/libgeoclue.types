@@ -8,4 +8,3 @@ gclue_location_skeleton_get_type
 gclue_manager_get_type
 gclue_manager_proxy_get_type
 gclue_manager_skeleton_get_type
-gclue_simple_get_type

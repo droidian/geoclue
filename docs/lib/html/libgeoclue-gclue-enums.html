@@ -8,15 +8,14 @@
 <link rel="up" href="ch01.html" title="Common enums and flags helpers">
 <link rel="prev" href="ch01.html" title="Common enums and flags helpers">
 <link rel="next" href="ch02.html" title="Convenience API">
-<meta name="generator" content="GTK-Doc V1.24.1 (XML mode)">
+<meta name="generator" content="GTK-Doc V1.25 (XML mode)">
 <link rel="stylesheet" href="style.css" type="text/css">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <table class="navigation" id="top" width="100%" summary="Navigation header" cellpadding="2" cellspacing="5"><tr valign="middle">
 <td width="100%" align="left" class="shortcuts">
 <a href="#" class="shortcut">Top</a><span id="nav_description">  <span class="dim">|</span> 
-                  <a href="#libgeoclue-gclue-enums.description" class="shortcut">Description</a></span><span id="nav_hierarchy">  <span class="dim">|</span> 
-                  <a href="#libgeoclue-gclue-enums.object-hierarchy" class="shortcut">Object Hierarchy</a></span>
+                  <a href="#libgeoclue-gclue-enums.description" class="shortcut">Description</a></span>
 </td>
 <td><a accesskey="h" href="index.html"><img src="home.png" width="16" height="16" border="0" alt="Home"></a></td>
 <td><a accesskey="u" href="ch01.html"><img src="up.png" width="16" height="16" border="0" alt="Up"></a></td>
@@ -41,7 +40,7 @@
 </colgroup>
 <tbody><tr>
 <td class="function_type">
-<a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
+<a href="https://developer.gnome.org/gobject/unstable/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
 </td>
 <td class="function_name">
 <a class="link" href="libgeoclue-gclue-enums.html#gclue-accuracy-level-get-type" title="gclue_accuracy_level_get_type ()">gclue_accuracy_level_get_type</a> <span class="c_punctuation">()</span>
@@ -56,23 +55,11 @@
 <col width="150px" class="name">
 <col class="description">
 </colgroup>
-<tbody>
-<tr>
-<td class="datatype_keyword">enum</td>
-<td class="function_name"><a class="link" href="libgeoclue-gclue-enums.html#GClueAccuracyLevel" title="enum GClueAccuracyLevel">GClueAccuracyLevel</a></td>
-</tr>
-<tr>
+<tbody><tr>
 <td class="define_keyword">#define</td>
 <td class="function_name"><a class="link" href="libgeoclue-gclue-enums.html#GCLUE-TYPE-ACCURACY-LEVEL:CAPS" title="GCLUE_TYPE_ACCURACY_LEVEL">GCLUE_TYPE_ACCURACY_LEVEL</a></td>
-</tr>
-</tbody>
+</tr></tbody>
 </table></div>
-</div>
-<div class="refsect1">
-<a name="libgeoclue-gclue-enums.object-hierarchy"></a><h2>Object Hierarchy</h2>
-<pre class="screen">    <a href="/home/zeenix/jhbuild/share/gtk-doc/html/gobject/gobject-Enumeration-and-Flag-Types.html">GEnum</a>
-    <span class="lineart">╰──</span> GClueAccuracyLevel
-</pre>
 </div>
 <div class="refsect1">
 <a name="libgeoclue-gclue-enums.description"></a><h2>Description</h2>
@@ -81,71 +68,12 @@
 <a name="libgeoclue-gclue-enums.functions_details"></a><h2>Functions</h2>
 <div class="refsect2">
 <a name="gclue-accuracy-level-get-type"></a><h3>gclue_accuracy_level_get_type ()</h3>
-<pre class="programlisting"><a href="../gobject/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
+<pre class="programlisting"><a href="https://developer.gnome.org/gobject/unstable/gobject-Type-Information.html#GType"><span class="returnvalue">GType</span></a>
 gclue_accuracy_level_get_type (<em class="parameter"><code><span class="type">void</span></code></em>);</pre>
 </div>
 </div>
 <div class="refsect1">
 <a name="libgeoclue-gclue-enums.other_details"></a><h2>Types and Values</h2>
-<div class="refsect2">
-<a name="GClueAccuracyLevel"></a><h3>enum GClueAccuracyLevel</h3>
-<p>Used to specify level of accuracy requested by, or allowed for a client.</p>
-<div class="refsect3">
-<a name="GClueAccuracyLevel.members"></a><h4>Members</h4>
-<div class="informaltable"><table width="100%" border="0">
-<colgroup>
-<col width="300px" class="enum_members_name">
-<col class="enum_members_description">
-<col width="200px" class="enum_members_annotations">
-</colgroup>
-<tbody>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-NONE:CAPS"></a>GCLUE_ACCURACY_LEVEL_NONE</p></td>
-<td class="enum_member_description">
-<p>Accuracy level unknown or unset.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"></a>GCLUE_ACCURACY_LEVEL_COUNTRY</p></td>
-<td class="enum_member_description">
-<p>Country-level accuracy.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-CITY:CAPS"></a>GCLUE_ACCURACY_LEVEL_CITY</p></td>
-<td class="enum_member_description">
-<p>City-level accuracy.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"></a>GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD</p></td>
-<td class="enum_member_description">
-<p>neighborhood-level accuracy.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-STREET:CAPS"></a>GCLUE_ACCURACY_LEVEL_STREET</p></td>
-<td class="enum_member_description">
-<p>Street-level accuracy.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-<tr>
-<td class="enum_member_name"><p><a name="GCLUE-ACCURACY-LEVEL-EXACT:CAPS"></a>GCLUE_ACCURACY_LEVEL_EXACT</p></td>
-<td class="enum_member_description">
-<p>Exact accuracy. Typically requires GPS receiver.</p>
-</td>
-<td class="enum_member_annotations"> </td>
-</tr>
-</tbody>
-</table></div>
-</div>
-</div>
-<hr>
 <div class="refsect2">
 <a name="GCLUE-TYPE-ACCURACY-LEVEL:CAPS"></a><h3>GCLUE_TYPE_ACCURACY_LEVEL</h3>
 <pre class="programlisting">#define GCLUE_TYPE_ACCURACY_LEVEL (gclue_accuracy_level_get_type ())
@@ -154,6 +82,6 @@ gclue_accuracy_level_get_type (<em class="parameter"><code><span class="type">vo
 </div>
 </div>
 <div class="footer">
-<hr>Generated by GTK-Doc V1.24.1</div>
+<hr>Generated by GTK-Doc V1.25</div>
 </body>
 </html>

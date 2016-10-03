@@ -129,6 +129,9 @@ gclue_location_set_heading
 gclue_location_get_description
 gclue_location_dup_description
 gclue_location_set_description
+gclue_location_get_timestamp
+gclue_location_dup_timestamp
+gclue_location_set_timestamp
 <SUBSECTION Standard>
 GCLUE_IS_LOCATION
 GCLUE_LOCATION

@@ -79,7 +79,7 @@ geocode_reverse_init (GeocodeReverse *object)
 	object->priv = G_TYPE_INSTANCE_GET_PRIVATE ((object), GEOCODE_TYPE_REVERSE, GeocodeReversePrivate);
 	object->priv->ht = g_hash_table_new_full (g_str_hash, g_str_equal,
 						  g_free, g_free);
-        object->priv->soup_session = soup_session_new ();
+	object->priv->soup_session = _geocode_glib_build_soup_session ();
 }
 
 /**
@@ -467,6 +467,7 @@ geocode_reverse_resolve_async (GeocodeReverse     *object,
 					    on_cache_data_loaded,
 					    simple);
 		g_object_unref (cache);
+		g_free (cache_path);
 	}
 }
 

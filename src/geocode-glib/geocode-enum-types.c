@@ -92,6 +92,7 @@ geocode_place_type_get_type (void)
       { GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP, "GEOCODE_PLACE_TYPE_PLACE_OF_WORSHIP", "place-of-worship" },
       { GEOCODE_PLACE_TYPE_RESTAURANT, "GEOCODE_PLACE_TYPE_RESTAURANT", "restaurant" },
       { GEOCODE_PLACE_TYPE_BAR, "GEOCODE_PLACE_TYPE_BAR", "bar" },
+      { GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION, "GEOCODE_PLACE_TYPE_LIGHT_RAIL_STATION", "light-rail-station" },
       { 0, NULL, NULL }
     };
     etype = g_enum_register_static ("GeocodePlaceType", values);

@@ -52,7 +52,8 @@ struct _GClueServiceClientPrivate
 
         GClueServiceLocation *location;
         GClueServiceLocation *prev_location;
-        guint threshold;
+        guint distance_threshold;
+        guint time_threshold;
 
         GClueLocator *locator;
 
@@ -113,15 +114,15 @@ emit_location_updated (GClueServiceClient *client,
 }
 
 static gboolean
-below_threshold (GClueServiceClient *client,
-                 GClueLocation      *location)
+distance_below_threshold (GClueServiceClient *client,
+                          GClueLocation      *location)
 {
         GClueServiceClientPrivate *priv = client->priv;
         GClueLocation *cur_location;
         gdouble distance;
         gdouble threshold_km;
 
-        if (priv->threshold == 0)
+        if (priv->distance_threshold == 0)
                 return FALSE;
 
         g_object_get (priv->location,
@@ -131,11 +132,57 @@ below_threshold (GClueServiceClient *client,
                 (GEOCODE_LOCATION (cur_location), GEOCODE_LOCATION (location));
         g_object_unref (cur_location);
 
-        threshold_km = priv->threshold / 1000.0;
-        if (distance < threshold_km)
+        threshold_km = priv->distance_threshold / 1000.0;
+        if (distance < threshold_km) {
+                g_debug ("Distance from previous location is %f km and "
+                         "below threshold of %f km.",
+                         distance, threshold_km); 
                 return TRUE;
+        }
 
         return FALSE;
+}
+
+static gboolean
+time_below_threshold (GClueServiceClient *client,
+                      GClueLocation      *location)
+{
+        GClueServiceClientPrivate *priv = client->priv;
+        GClueLocation *cur_location;
+        gint64 cur_ts, ts;
+        guint64 diff_ts;
+
+        if (priv->time_threshold == 0)
+                return FALSE;
+
+        g_object_get (priv->location,
+                      "location", &cur_location,
+                      NULL);
+
+        cur_ts = geocode_location_get_timestamp
+                                (GEOCODE_LOCATION (cur_location));
+        ts = geocode_location_get_timestamp (GEOCODE_LOCATION (location));
+        diff_ts = ABS (ts - cur_ts);
+
+        g_object_unref (cur_location);
+
+        if (diff_ts < priv->time_threshold) {
+                g_debug ("Time difference between previous and new location"
+                         " is %" G_GUINT64_FORMAT " seconds and"
+                         " below threshold of %" G_GUINT32_FORMAT " seconds.",
+                         diff_ts, priv->time_threshold);
+                return TRUE;
+        }
+
+        return FALSE;
+}
+
+static gboolean
+below_threshold (GClueServiceClient *client,
+                 GClueLocation      *location)
+{
+        return (distance_below_threshold (client, location) ||
+                time_below_threshold (client, location));
 }
 
 static gboolean
@@ -238,7 +285,7 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
         GVariant *value;
         gchar *key;
         
-        if (g_variant_n_children (changed_properties) < 0)
+        if (g_variant_n_children (changed_properties) <= 0)
                 return;
 
         g_variant_get (changed_properties, "a{sv}", &iter);
@@ -649,9 +696,13 @@ gclue_service_client_handle_set_property (GDBusConnection *connection,
                                              error,
                                              user_data);
         if (ret && strcmp (property_name, "DistanceThreshold") == 0) {
-                priv->threshold = gclue_dbus_client_get_distance_threshold
+                priv->distance_threshold = gclue_dbus_client_get_distance_threshold
                         (client);
-                g_debug ("New distance threshold: %u", priv->threshold);
+                g_debug ("New distance threshold: %u", priv->distance_threshold);
+        } else if (ret && strcmp (property_name, "TimeThreshold") == 0) {
+                priv->time_threshold = gclue_dbus_client_get_time_threshold
+                        (client);
+                g_debug ("New time threshold: %u", priv->time_threshold);
         }
 
         return ret;

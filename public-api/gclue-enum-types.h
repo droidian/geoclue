@@ -9,7 +9,7 @@
 
 G_BEGIN_DECLS
 
-/* enumerations from "./gclue-enums.h" */
+/* enumerations from "/home/hadess/Projects/jhbuild/geoclue/public-api/gclue-enums.h" */
 GType gclue_accuracy_level_get_type (void) G_GNUC_CONST;
 #define GCLUE_TYPE_ACCURACY_LEVEL (gclue_accuracy_level_get_type ())
 

@@ -2,7 +2,7 @@
 /* Generated data (by glib-mkenums) */
 
 #include "gclue-enum-types.h"
-/* enumerations from "/home/hadess/Projects/jhbuild/geoclue/public-api/gclue-enums.h" */
+/* enumerations from "./gclue-enums.h" */
 static const GEnumValue gclue_accuracy_level_values[] = {
     { GCLUE_ACCURACY_LEVEL_NONE, "GCLUE_ACCURACY_LEVEL_NONE", "none" },
     { GCLUE_ACCURACY_LEVEL_COUNTRY, "GCLUE_ACCURACY_LEVEL_COUNTRY", "country" },

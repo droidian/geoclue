@@ -1,5 +1,0 @@
-<SECTION>
-<FILE>gclue-enums</FILE>
-GClueAccuracyLevel
-</SECTION>
-

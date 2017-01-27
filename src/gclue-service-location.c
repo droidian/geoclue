@@ -97,7 +97,6 @@ gclue_service_location_get_property (GObject    *object,
 
                 timestamp = gclue_dbus_location_get_timestamp (location);
                 g_variant_get (timestamp, "(tt)", &sec, &usec);
-                g_variant_unref (timestamp);
 
                 loc = gclue_location_new_full
                         (gclue_dbus_location_get_latitude (location),

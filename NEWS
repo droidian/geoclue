@@ -1,6 +1,10 @@
-2.4.4
+2.4.5
 =====
 
+- Fix a potential crash.
+
+2.4.4
+=====
 
 - Expose location timestamp over D-Bus.
 - Add a TimeThreshold property that allows clients to limit location updates by

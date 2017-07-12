@@ -398,8 +398,6 @@ gclue_location_create_from_gga (const char *gga, GError **error)
         }
 
         altitude = parse_altitude_string (parts[9], parts[10]);
-        if (altitude == GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
-                goto out;
 
         hdop = g_ascii_strtod (parts[8], NULL);
         accuracy = get_accuracy_from_hdop (hdop);
@@ -429,6 +427,8 @@ out:
 GClueLocation *
 gclue_location_duplicate (GClueLocation *location)
 {
+        g_return_val_if_fail (GCLUE_IS_LOCATION (location), NULL);
+
         GeocodeLocation *gloc = GEOCODE_LOCATION (location);
 
         return g_object_new

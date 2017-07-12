@@ -376,7 +376,7 @@ gclue_simple_init (GClueSimple *simple)
  * Asynchronously creates a #GClueSimple instance. Use
  * #gclue_simple_new_finish() to get the created #GClueSimple instance.
  *
- * See #gclue_fetch_location_sync() for the synchronous, blocking version
+ * See #gclue_simple_new_sync() for the synchronous, blocking version
  * of this function.
  */
 void

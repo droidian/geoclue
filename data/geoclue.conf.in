@@ -68,6 +68,16 @@ allowed=true
 system=true
 users=
 
+[gnome-color-panel]
+allowed=true
+system=true
+users=
+
+[org.gnome.Shell]
+allowed=true
+system=true
+users=
+
 [epiphany]
 allowed=true
 system=false

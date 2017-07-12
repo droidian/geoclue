@@ -1,3 +1,21 @@
+2.4.7
+=====
+
+- Fix a potential crash.
+- More verbose warning on invalid accuracy from NMEA source.
+
+2.4.6
+=====
+
+- Add to white-list
+  - gnome-color-panel for "Night Light" functionality.
+  - gnome-shell for new weather view in the calendar.
+- Other minor fixes.
+
+Bastien Nocera <hadess@hadess.net>
+Florian Müllner <fmuellner@gnome.org>
+Rob Norris <rw_norris@hotmail.com>
+
 2.4.5
 =====
 

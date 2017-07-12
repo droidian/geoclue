@@ -222,7 +222,8 @@ add_new_service (GClueNMEASource *source,
         g_type_class_unref (enum_class);
 
         if (enum_value == NULL) {
-                g_warning ("Invalid `accuracy` value inside TXT records.");
+                g_warning ("Invalid `accuracy` value `%s` inside TXT records.",
+                           value);
                 accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
 
                 goto CREATE_SERVICE;

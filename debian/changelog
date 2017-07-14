@@ -1,3 +1,13 @@
+geoclue-2.0 (2.4.7-1) unstable; urgency=medium
+
+  * [065bebb7] New upstream version 2.4.7
+  * [d23d922d] Drop d/p/01-debianize-desktop-name.patch, not relevant anymore
+  * [bae39d49] debian/control: Bump Standards-Version to 4.0.0 (no further
+    changes)
+  * [bfafc110] debian/gbp.conf: Rename the sections as requested
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 14 Jul 2017 16:56:04 +0200
+
 geoclue-2.0 (2.4.5-1) unstable; urgency=medium
 
   * [c9d350d8] New upstream version 2.4.5

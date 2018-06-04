@@ -12,7 +12,7 @@ Build-Depends: debhelper (>= 9.20160114),
                libgirepository1.0-dev (>= 0.9.6),
                libglib2.0-dev (>= 2.34.0),
                libjson-glib-dev (>= 0.14),
-               libmm-glib-dev (>= 1.0) [linux-any],
+               libmm-glib-dev (>= 1.6) [linux-any],
                libsoup2.4-dev (>= 2.42),
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue

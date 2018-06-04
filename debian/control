@@ -13,6 +13,7 @@ Build-Depends: debhelper (>= 9.20160114),
                libglib2.0-dev (>= 2.34.0),
                libjson-glib-dev (>= 0.14),
                libmm-glib-dev (>= 1.6) [linux-any],
+               libnotify-dev,
                libsoup2.4-dev (>= 2.42),
                pkg-config
 Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
@@ -34,6 +35,17 @@ Description: geoinformation service
  is to make creating location-aware applications as simple as possible.
  .
  This package contains the D-Bus system service for GeoClue.
+
+Package: geoclue-2-demo
+Architecture: any
+Depends: geoclue-2.0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Breaks: geoclue-2.0 (<< 2.4.10)
+Replaces: geoclue-2.0 (<< 2.4.10)
+Description: geoinformation service (demonstration programs)
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+ .
+ This package contains the demonstration programs.
 
 Package: libgeoclue-2-0
 Architecture: any

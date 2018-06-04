@@ -12,3 +12,14 @@ Author: Laurent Bigonville <bigon@debian.org>
  Icon=mark-location-symbolic
  NoDisplay=true
  Terminal=true
+--- a/demo/geoclue-demo-agent.desktop.in.in
++++ b/demo/geoclue-demo-agent.desktop.in.in
+@@ -2,7 +2,7 @@
+ _Name=Geoclue Demo agent
+ _GenericName=Demo geoclue agent
+ _Keywords=geolocation;
+-Exec=@libexecdir@/geoclue-2.0/demos/agent
++Exec=/usr/lib/geoclue-2.0/demos/agent
+ Icon=mark-location-symbolic
+ NotShowIn=GNOME;
+ NoDisplay=true

@@ -4,8 +4,6 @@ etc/dbus-1/system.d/
 etc/geoclue/
 lib/systemd/system/
 usr/lib/*/pkgconfig/geoclue-2.0.pc
-usr/lib/geoclue-2.0/demos/where-am-i
 usr/lib/geoclue-2.0/geoclue
-usr/share/applications/geoclue-where-am-i.desktop
 usr/share/dbus-1/interfaces/
 usr/share/dbus-1/system-services/

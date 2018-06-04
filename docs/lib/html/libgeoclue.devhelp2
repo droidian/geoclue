@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<book xmlns="http://www.devhelp.net/book" title="Libgeoclue Reference Manual" link="index.html" author="Zeeshan Ali (Khattak)" name="libgeoclue" version="2" language="c">
+  <chapters>
+    <sub name="Common enums and flags helpers" link="ch01.html">
+      <sub name="gclue-enums" link="libgeoclue-gclue-enums.html"/>
+    </sub>
+    <sub name="Convenience API" link="ch02.html">
+      <sub name="GClueSimple" link="GClueSimple.html"/>
+    </sub>
+    <sub name="The Manager object" link="ch03.html">
+      <sub name="GClueManager" link="GClueManager.html"/>
+      <sub name="GClueManagerProxy" link="GClueManagerProxy.html"/>
+    </sub>
+    <sub name="The Client object" link="ch04.html">
+      <sub name="GClueClient" link="GClueClient.html"/>
+      <sub name="GClueClientProxy" link="GClueClientProxy.html"/>
+    </sub>
+    <sub name="The Location object" link="ch05.html">
+      <sub name="GClueLocation" link="GClueLocation.html"/>
+      <sub name="GClueLocationProxy" link="GClueLocationProxy.html"/>
+    </sub>
+    <sub name="Index" link="ix01.html"/>
+    <sub name="License" link="license.html"/>
+    <sub name="Annotation Glossary" link="annotation-glossary.html"/>
+  </chapters>
+  <functions>
+    <keyword type="function" name="gclue_accuracy_level_get_type ()" link="libgeoclue-gclue-enums.html#gclue-accuracy-level-get-type"/>
+    <keyword type="enum" name="enum GClueAccuracyLevel" link="libgeoclue-gclue-enums.html#GClueAccuracyLevel"/>
+    <keyword type="macro" name="GCLUE_TYPE_ACCURACY_LEVEL" link="libgeoclue-gclue-enums.html#GCLUE-TYPE-ACCURACY-LEVEL:CAPS"/>
+    <keyword type="function" name="gclue_simple_new ()" link="GClueSimple.html#gclue-simple-new"/>
+    <keyword type="function" name="gclue_simple_new_finish ()" link="GClueSimple.html#gclue-simple-new-finish"/>
+    <keyword type="function" name="gclue_simple_new_sync ()" link="GClueSimple.html#gclue-simple-new-sync"/>
+    <keyword type="function" name="gclue_simple_get_client ()" link="GClueSimple.html#gclue-simple-get-client"/>
+    <keyword type="function" name="gclue_simple_get_location ()" link="GClueSimple.html#gclue-simple-get-location"/>
+    <keyword type="property" name="The “accuracy-level” property" link="GClueSimple.html#GClueSimple--accuracy-level"/>
+    <keyword type="property" name="The “client” property" link="GClueSimple.html#GClueSimple--client"/>
+    <keyword type="property" name="The “desktop-id” property" link="GClueSimple.html#GClueSimple--desktop-id"/>
+    <keyword type="property" name="The “location” property" link="GClueSimple.html#GClueSimple--location"/>
+    <keyword type="function" name="gclue_manager_interface_info ()" link="GClueManager.html#gclue-manager-interface-info"/>
+    <keyword type="function" name="gclue_manager_override_properties ()" link="GClueManager.html#gclue-manager-override-properties"/>
+    <keyword type="function" name="gclue_manager_call_get_client ()" link="GClueManager.html#gclue-manager-call-get-client"/>
+    <keyword type="function" name="gclue_manager_call_get_client_finish ()" link="GClueManager.html#gclue-manager-call-get-client-finish"/>
+    <keyword type="function" name="gclue_manager_call_get_client_sync ()" link="GClueManager.html#gclue-manager-call-get-client-sync"/>
+    <keyword type="function" name="gclue_manager_call_add_agent ()" link="GClueManager.html#gclue-manager-call-add-agent"/>
+    <keyword type="function" name="gclue_manager_call_add_agent_finish ()" link="GClueManager.html#gclue-manager-call-add-agent-finish"/>
+    <keyword type="function" name="gclue_manager_call_add_agent_sync ()" link="GClueManager.html#gclue-manager-call-add-agent-sync"/>
+    <keyword type="function" name="gclue_manager_get_in_use ()" link="GClueManager.html#gclue-manager-get-in-use"/>
+    <keyword type="function" name="gclue_manager_set_in_use ()" link="GClueManager.html#gclue-manager-set-in-use"/>
+    <keyword type="function" name="gclue_manager_get_available_accuracy_level ()" link="GClueManager.html#gclue-manager-get-available-accuracy-level"/>
+    <keyword type="function" name="gclue_manager_set_available_accuracy_level ()" link="GClueManager.html#gclue-manager-set-available-accuracy-level"/>
+    <keyword type="property" name="The “available-accuracy-level” property" link="GClueManager.html#GClueManager--available-accuracy-level"/>
+    <keyword type="property" name="The “in-use” property" link="GClueManager.html#GClueManager--in-use"/>
+    <keyword type="signal" name="The “handle-add-agent” signal" link="GClueManager.html#GClueManager-handle-add-agent"/>
+    <keyword type="signal" name="The “handle-get-client” signal" link="GClueManager.html#GClueManager-handle-get-client"/>
+    <keyword type="function" name="gclue_manager_proxy_new ()" link="GClueManagerProxy.html#gclue-manager-proxy-new"/>
+    <keyword type="function" name="gclue_manager_proxy_new_finish ()" link="GClueManagerProxy.html#gclue-manager-proxy-new-finish"/>
+    <keyword type="function" name="gclue_manager_proxy_new_sync ()" link="GClueManagerProxy.html#gclue-manager-proxy-new-sync"/>
+    <keyword type="function" name="gclue_manager_proxy_new_for_bus ()" link="GClueManagerProxy.html#gclue-manager-proxy-new-for-bus"/>
+    <keyword type="function" name="gclue_manager_proxy_new_for_bus_finish ()" link="GClueManagerProxy.html#gclue-manager-proxy-new-for-bus-finish"/>
+    <keyword type="function" name="gclue_manager_proxy_new_for_bus_sync ()" link="GClueManagerProxy.html#gclue-manager-proxy-new-for-bus-sync"/>
+    <keyword type="function" name="gclue_client_interface_info ()" link="GClueClient.html#gclue-client-interface-info"/>
+    <keyword type="function" name="gclue_client_override_properties ()" link="GClueClient.html#gclue-client-override-properties"/>
+    <keyword type="function" name="gclue_client_emit_location_updated ()" link="GClueClient.html#gclue-client-emit-location-updated"/>
+    <keyword type="function" name="gclue_client_call_start ()" link="GClueClient.html#gclue-client-call-start"/>
+    <keyword type="function" name="gclue_client_call_start_finish ()" link="GClueClient.html#gclue-client-call-start-finish"/>
+    <keyword type="function" name="gclue_client_call_start_sync ()" link="GClueClient.html#gclue-client-call-start-sync"/>
+    <keyword type="function" name="gclue_client_call_stop ()" link="GClueClient.html#gclue-client-call-stop"/>
+    <keyword type="function" name="gclue_client_call_stop_finish ()" link="GClueClient.html#gclue-client-call-stop-finish"/>
+    <keyword type="function" name="gclue_client_call_stop_sync ()" link="GClueClient.html#gclue-client-call-stop-sync"/>
+    <keyword type="function" name="gclue_client_get_location ()" link="GClueClient.html#gclue-client-get-location"/>
+    <keyword type="function" name="gclue_client_dup_location ()" link="GClueClient.html#gclue-client-dup-location"/>
+    <keyword type="function" name="gclue_client_set_location ()" link="GClueClient.html#gclue-client-set-location"/>
+    <keyword type="function" name="gclue_client_get_distance_threshold ()" link="GClueClient.html#gclue-client-get-distance-threshold"/>
+    <keyword type="function" name="gclue_client_set_distance_threshold ()" link="GClueClient.html#gclue-client-set-distance-threshold"/>
+    <keyword type="function" name="gclue_client_get_desktop_id ()" link="GClueClient.html#gclue-client-get-desktop-id"/>
+    <keyword type="function" name="gclue_client_dup_desktop_id ()" link="GClueClient.html#gclue-client-dup-desktop-id"/>
+    <keyword type="function" name="gclue_client_set_desktop_id ()" link="GClueClient.html#gclue-client-set-desktop-id"/>
+    <keyword type="function" name="gclue_client_get_requested_accuracy_level ()" link="GClueClient.html#gclue-client-get-requested-accuracy-level"/>
+    <keyword type="function" name="gclue_client_set_requested_accuracy_level ()" link="GClueClient.html#gclue-client-set-requested-accuracy-level"/>
+    <keyword type="function" name="gclue_client_get_active ()" link="GClueClient.html#gclue-client-get-active"/>
+    <keyword type="function" name="gclue_client_set_active ()" link="GClueClient.html#gclue-client-set-active"/>
+    <keyword type="property" name="The “active” property" link="GClueClient.html#GClueClient--active"/>
+    <keyword type="property" name="The “desktop-id” property" link="GClueClient.html#GClueClient--desktop-id"/>
+    <keyword type="property" name="The “distance-threshold” property" link="GClueClient.html#GClueClient--distance-threshold"/>
+    <keyword type="property" name="The “location” property" link="GClueClient.html#GClueClient--location"/>
+    <keyword type="property" name="The “requested-accuracy-level” property" link="GClueClient.html#GClueClient--requested-accuracy-level"/>
+    <keyword type="property" name="The “time-threshold” property" link="GClueClient.html#GClueClient--time-threshold"/>
+    <keyword type="signal" name="The “handle-start” signal" link="GClueClient.html#GClueClient-handle-start"/>
+    <keyword type="signal" name="The “handle-stop” signal" link="GClueClient.html#GClueClient-handle-stop"/>
+    <keyword type="signal" name="The “location-updated” signal" link="GClueClient.html#GClueClient-location-updated"/>
+    <keyword type="function" name="gclue_client_proxy_create ()" link="GClueClientProxy.html#gclue-client-proxy-create"/>
+    <keyword type="function" name="gclue_client_proxy_create_finish ()" link="GClueClientProxy.html#gclue-client-proxy-create-finish"/>
+    <keyword type="function" name="gclue_client_proxy_create_sync ()" link="GClueClientProxy.html#gclue-client-proxy-create-sync"/>
+    <keyword type="function" name="gclue_client_proxy_new ()" link="GClueClientProxy.html#gclue-client-proxy-new"/>
+    <keyword type="function" name="gclue_client_proxy_new_finish ()" link="GClueClientProxy.html#gclue-client-proxy-new-finish"/>
+    <keyword type="function" name="gclue_client_proxy_new_sync ()" link="GClueClientProxy.html#gclue-client-proxy-new-sync"/>
+    <keyword type="function" name="gclue_client_proxy_new_for_bus ()" link="GClueClientProxy.html#gclue-client-proxy-new-for-bus"/>
+    <keyword type="function" name="gclue_client_proxy_new_for_bus_finish ()" link="GClueClientProxy.html#gclue-client-proxy-new-for-bus-finish"/>
+    <keyword type="function" name="gclue_client_proxy_new_for_bus_sync ()" link="GClueClientProxy.html#gclue-client-proxy-new-for-bus-sync"/>
+    <keyword type="function" name="gclue_location_interface_info ()" link="GClueLocation.html#gclue-location-interface-info"/>
+    <keyword type="function" name="gclue_location_override_properties ()" link="GClueLocation.html#gclue-location-override-properties"/>
+    <keyword type="function" name="gclue_location_get_latitude ()" link="GClueLocation.html#gclue-location-get-latitude"/>
+    <keyword type="function" name="gclue_location_set_latitude ()" link="GClueLocation.html#gclue-location-set-latitude"/>
+    <keyword type="function" name="gclue_location_get_longitude ()" link="GClueLocation.html#gclue-location-get-longitude"/>
+    <keyword type="function" name="gclue_location_set_longitude ()" link="GClueLocation.html#gclue-location-set-longitude"/>
+    <keyword type="function" name="gclue_location_get_accuracy ()" link="GClueLocation.html#gclue-location-get-accuracy"/>
+    <keyword type="function" name="gclue_location_set_accuracy ()" link="GClueLocation.html#gclue-location-set-accuracy"/>
+    <keyword type="function" name="gclue_location_get_altitude ()" link="GClueLocation.html#gclue-location-get-altitude"/>
+    <keyword type="function" name="gclue_location_set_altitude ()" link="GClueLocation.html#gclue-location-set-altitude"/>
+    <keyword type="function" name="gclue_location_get_speed ()" link="GClueLocation.html#gclue-location-get-speed"/>
+    <keyword type="function" name="gclue_location_set_speed ()" link="GClueLocation.html#gclue-location-set-speed"/>
+    <keyword type="function" name="gclue_location_get_heading ()" link="GClueLocation.html#gclue-location-get-heading"/>
+    <keyword type="function" name="gclue_location_set_heading ()" link="GClueLocation.html#gclue-location-set-heading"/>
+    <keyword type="function" name="gclue_location_get_description ()" link="GClueLocation.html#gclue-location-get-description"/>
+    <keyword type="function" name="gclue_location_dup_description ()" link="GClueLocation.html#gclue-location-dup-description"/>
+    <keyword type="function" name="gclue_location_set_description ()" link="GClueLocation.html#gclue-location-set-description"/>
+    <keyword type="function" name="gclue_location_get_timestamp ()" link="GClueLocation.html#gclue-location-get-timestamp"/>
+    <keyword type="function" name="gclue_location_dup_timestamp ()" link="GClueLocation.html#gclue-location-dup-timestamp"/>
+    <keyword type="function" name="gclue_location_set_timestamp ()" link="GClueLocation.html#gclue-location-set-timestamp"/>
+    <keyword type="property" name="The “accuracy” property" link="GClueLocation.html#GClueLocation--accuracy"/>
+    <keyword type="property" name="The “altitude” property" link="GClueLocation.html#GClueLocation--altitude"/>
+    <keyword type="property" name="The “description” property" link="GClueLocation.html#GClueLocation--description"/>
+    <keyword type="property" name="The “heading” property" link="GClueLocation.html#GClueLocation--heading"/>
+    <keyword type="property" name="The “latitude” property" link="GClueLocation.html#GClueLocation--latitude"/>
+    <keyword type="property" name="The “longitude” property" link="GClueLocation.html#GClueLocation--longitude"/>
+    <keyword type="property" name="The “speed” property" link="GClueLocation.html#GClueLocation--speed"/>
+    <keyword type="property" name="The “timestamp” property" link="GClueLocation.html#GClueLocation--timestamp"/>
+    <keyword type="function" name="gclue_location_proxy_new ()" link="GClueLocationProxy.html#gclue-location-proxy-new"/>
+    <keyword type="function" name="gclue_location_proxy_new_finish ()" link="GClueLocationProxy.html#gclue-location-proxy-new-finish"/>
+    <keyword type="function" name="gclue_location_proxy_new_sync ()" link="GClueLocationProxy.html#gclue-location-proxy-new-sync"/>
+    <keyword type="function" name="gclue_location_proxy_new_for_bus ()" link="GClueLocationProxy.html#gclue-location-proxy-new-for-bus"/>
+    <keyword type="function" name="gclue_location_proxy_new_for_bus_finish ()" link="GClueLocationProxy.html#gclue-location-proxy-new-for-bus-finish"/>
+    <keyword type="function" name="gclue_location_proxy_new_for_bus_sync ()" link="GClueLocationProxy.html#gclue-location-proxy-new-for-bus-sync"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_NONE" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-NONE:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_COUNTRY" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_CITY" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-CITY:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_STREET" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-STREET:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_EXACT" link="libgeoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-EXACT:CAPS"/>
+  </functions>
+</book>

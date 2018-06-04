@@ -48,6 +48,12 @@ submission-nick=geoclue
 #       authorization mechanism (e.g web browsers) do not have to be bound to
 #       agents.
 #
+#       If your application is denied access to location information and your
+#       operating system doesn't provide any mechanism to change that, it is
+#       likely a bug in your operation system (or geoclue). The solution is to
+#       report the issue with all details, rather than adding your application
+#       to this list.
+#
 # Format:
 #
 # # Desktop ID of application without .desktop part

@@ -1,6 +1,6 @@
 /* vim: set et ts=8 sw=8: */
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright 2014 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -43,6 +43,7 @@ struct _GClueLocationSourcePrivate
         GClueLocation *location;
 
         guint active_counter;
+        GClueMinUINT *time_threshold;
 
         GClueAccuracyLevel avail_accuracy_level;
 
@@ -58,6 +59,7 @@ enum
         PROP_0,
         PROP_LOCATION,
         PROP_ACTIVE,
+        PROP_TIME_THRESHOLD,
         PROP_AVAILABLE_ACCURACY_LEVEL,
         PROP_COMPUTE_MOVEMENT,
         LAST_PROP
@@ -121,6 +123,10 @@ gclue_location_source_get_property (GObject    *object,
         case PROP_ACTIVE:
                 g_value_set_boolean (value,
                                      gclue_location_source_get_active (source));
+                break;
+
+        case PROP_TIME_THRESHOLD:
+                g_value_set_object (value, source->priv->time_threshold);
                 break;
 
         case PROP_AVAILABLE_ACCURACY_LEVEL:
@@ -209,6 +215,16 @@ gclue_location_source_class_init (GClueLocationSourceClass *klass)
                                          PROP_ACTIVE,
                                          gParamSpecs[PROP_ACTIVE]);
 
+        gParamSpecs[PROP_TIME_THRESHOLD] =
+                g_param_spec_object ("time-threshold",
+                                     "TimeThreshold",
+                                     "TimeThreshold",
+                                     GCLUE_TYPE_MIN_UINT,
+                                     G_PARAM_READABLE);
+        g_object_class_install_property (object_class,
+                                         PROP_TIME_THRESHOLD,
+                                         gParamSpecs[PROP_TIME_THRESHOLD]);
+
         gParamSpecs[PROP_AVAILABLE_ACCURACY_LEVEL] =
                 g_param_spec_enum ("available-accuracy-level",
                                    "AvailableAccuracyLevel",
@@ -241,6 +257,7 @@ gclue_location_source_init (GClueLocationSource *source)
                                              GCLUE_TYPE_LOCATION_SOURCE,
                                              GClueLocationSourcePrivate);
         source->priv->compute_movement = TRUE;
+        source->priv->time_threshold = gclue_min_uint_new ();
 }
 
 static gboolean
@@ -446,4 +463,19 @@ gclue_location_source_set_compute_movement (GClueLocationSource *source,
         g_return_if_fail (GCLUE_IS_LOCATION_SOURCE (source));
 
         source->priv->compute_movement = compute;
+}
+
+/**
+ * gclue_location_source_get_time_threshold
+ * @source: a #GClueLocationSource
+ *
+ * Returns: (transfer none): The current time-threshold object, or NULL if
+ * @source is not a valid #GClueLocationSource instance.
+ **/
+GClueMinUINT *
+gclue_location_source_get_time_threshold (GClueLocationSource *source)
+{
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), NULL);
+
+        return source->priv->time_threshold;
 }

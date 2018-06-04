@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-locator.c
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -62,6 +62,8 @@ struct _GClueLocatorPrivate
         GList *active_sources;
 
         GClueAccuracyLevel accuracy_level;
+
+        guint time_threshold;
 };
 
 enum
@@ -226,6 +228,35 @@ on_avail_accuracy_level_changed (GObject    *gobject,
 }
 
 static void
+reset_time_threshold (GClueLocator        *locator,
+                      GClueLocationSource *source,
+                      guint                value)
+{
+        GClueMinUINT *threshold;
+
+        threshold = gclue_location_source_get_time_threshold (source);
+
+        gclue_min_uint_add_value (threshold, value, G_OBJECT (locator));
+}
+
+static void
+on_time_threshold_changed (GObject    *gobject,
+                           GParamSpec *pspec,
+                           gpointer    user_data)
+{
+        GClueMinUINT *threshold = GCLUE_MIN_UINT (gobject);
+        GClueLocator *locator = GCLUE_LOCATOR (user_data);
+        guint value = gclue_min_uint_get_value (threshold);
+        GList *node;
+
+        for (node = locator->priv->sources; node != NULL; node = node->next) {
+                reset_time_threshold (locator,
+                                      GCLUE_LOCATION_SOURCE (node->data),
+                                      value);
+        }
+}
+
+static void
 gclue_locator_get_property (GObject    *object,
                             guint       prop_id,
                             GValue     *value,
@@ -267,14 +298,23 @@ gclue_locator_finalize (GObject *gsource)
         GClueLocator *locator = GCLUE_LOCATOR (gsource);
         GClueLocatorPrivate *priv = locator->priv;
         GList *node;
+        GClueMinUINT *threshold;
 
         G_OBJECT_CLASS (gclue_locator_parent_class)->finalize (gsource);
 
-        for (node = locator->priv->sources; node != NULL; node = node->next)
+        threshold = gclue_location_source_get_time_threshold
+                        (GCLUE_LOCATION_SOURCE (locator));
+        g_signal_handlers_disconnect_by_func
+                (G_OBJECT (threshold),
+                 G_CALLBACK (on_time_threshold_changed),
+                 locator);
+
+        for (node = locator->priv->sources; node != NULL; node = node->next) {
                 g_signal_handlers_disconnect_by_func
                         (G_OBJECT (node->data),
                          G_CALLBACK (on_avail_accuracy_level_changed),
                          locator);
+        }
         for (node = locator->priv->active_sources; node != NULL; node = node->next) {
                 g_signal_handlers_disconnect_by_func
                         (G_OBJECT (node->data),
@@ -294,6 +334,7 @@ gclue_locator_constructed (GObject *object)
         GClueLocationSource *submit_source = NULL;
         GClueConfig *gconfig = gclue_config_get_singleton ();
         GList *node;
+        GClueMinUINT *threshold;
 
         G_OBJECT_CLASS (gclue_locator_parent_class)->constructed (object);
 
@@ -331,6 +372,13 @@ gclue_locator_constructed (GObject *object)
                         gclue_web_source_set_submit_source
                                 (GCLUE_WEB_SOURCE (node->data), submit_source);
         }
+
+        threshold = gclue_location_source_get_time_threshold
+                        (GCLUE_LOCATION_SOURCE (locator));
+        g_signal_connect (G_OBJECT (threshold),
+                          "notify::value",
+                          G_CALLBACK (on_time_threshold_changed),
+                          locator);
         refresh_available_accuracy_level (locator);
 }
 
@@ -465,4 +513,46 @@ gclue_locator_get_accuracy_level (GClueLocator *locator)
                               GCLUE_ACCURACY_LEVEL_NONE);
 
         return locator->priv->accuracy_level;
+}
+
+/**
+ * gclue_locator_get_time_threshold
+ * @locator: a #GClueLocator
+ *
+ * Returns: The current time-threshold in seconds.
+ **/
+guint
+gclue_locator_get_time_threshold (GClueLocator *locator)
+{
+        GClueMinUINT *threshold;
+
+        g_return_val_if_fail (GCLUE_IS_LOCATOR (locator), 0);
+
+        threshold = gclue_location_source_get_time_threshold
+                        (GCLUE_LOCATION_SOURCE (locator));
+
+        return gclue_min_uint_get_value (threshold);
+}
+
+/**
+ * gclue_locator_set_time_threshold
+ * @locator: a #GClueLocator
+ * @value: The new threshold value
+ *
+ * Sets the time-threshold to @value.
+ *
+ * Unlike other (real) location sources, Locator instances are unique for each
+ * client application. Which means we only need just one time-threshold value
+ * and hence the reason we have these getter and setters, instead of making use
+ * of the #GClueLocationSource:time-threshold property.
+ **/
+void
+gclue_locator_set_time_threshold (GClueLocator *locator,
+                                  guint         value)
+{
+        g_return_if_fail (GCLUE_IS_LOCATOR (locator));
+
+        reset_time_threshold (locator,
+                              GCLUE_LOCATION_SOURCE (locator),
+                              value);
 }

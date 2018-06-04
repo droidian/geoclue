@@ -2,7 +2,7 @@
 /*
  * Geoclue convenience library.
  *
- * Copyright (C) 2015 Red Hat, Inc.
+ * Copyright 2015 Red Hat, Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -280,15 +280,23 @@ on_client_started (GObject      *source_object,
 {
         GTask *task = G_TASK (user_data);
         GClueClient *client = GCLUE_CLIENT (source_object);
+        GClueSimple *simple;
+        const char *location;
         GError *error = NULL;
+
+        simple = g_task_get_source_object (task);
 
         gclue_client_call_start_finish (client, res, &error);
         if (error != NULL) {
-                GClueSimple *simple = g_task_get_source_object (task);
-
                 g_task_return_error (task, error);
                 g_clear_object (&simple->priv->task);
+
+                return;
         }
+
+        location = gclue_client_get_location (client);
+
+        on_location_updated (client, NULL, location, simple);
 }
 
 static void

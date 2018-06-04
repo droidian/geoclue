@@ -1,6 +1,6 @@
 /* vim: set et ts=8 sw=8: */
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright 2014 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -26,6 +26,7 @@
 #include <gio/gio.h>
 #include "gclue-enum-types.h"
 #include "gclue-location.h"
+#include "gclue-min-uint.h"
 
 G_BEGIN_DECLS
 
@@ -71,6 +72,9 @@ gboolean          gclue_location_source_get_active
 GClueAccuracyLevel
                   gclue_location_source_get_available_accuracy_level
                                               (GClueLocationSource *source);
+GClueMinUINT     *gclue_location_source_get_time_threshold
+                                              (GClueLocationSource *source);
+
 gboolean
 gclue_location_source_get_compute_movement (GClueLocationSource *source);
 void

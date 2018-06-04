@@ -1,8 +1,8 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-location.h
  *
- * Copyright (C) 2012 Bastien Nocera
- * Copyright (C) 2015 Ankit (Verma)
+ * Copyright 2012 Bastien Nocera
+ * Copyright 2015 Ankit (Verma)
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free

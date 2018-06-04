@@ -1,3 +1,57 @@
+2.4.10
+======
+
+- Fix issues introduced by last release 2.4.9:
+  - a crash on startup.
+  - Revert the new desktop ID detection code as that turned out to not work for
+    non-root user that geoclue is supposed to be run as.
+- Use systemd's service file to lockdown the geoclue daemon to stop eventual
+  security problems.
+
+Contributors:
+
+Bastien Nocera <hadess@hadess.net>
+Zeeshan Ali <zeenix@collabora.co.uk>
+
+2.4.9
+=====
+
+- Modem GPS refresh rate is now based on the location refresh rate of apps.
+- Refuse location access if no app-auth agent is registered. This fixes a
+  security hole where an app requests location access before the agent gets to
+  register itself and we end up giving out locaiton access even though user has
+  disabled it.
+- Port desktop ID detection to Flatpak >= 0.6.10.
+- The default timeout on the service binary is now the same as the service
+  itself: 5 seconds.
+- Demo applications:
+  - where-am-i now allows setting location refresh-rate.
+  - Only install demo agent's desktop file if it's enabled.
+  - Build and install demo agent unless disabled explicitly.
+  - Autostart the demo agent by default on non-GNOME platforms, since an agent
+    is required now and no one other than GNOME yet provides one (sigh).
+
+Dependency-related changes:
+
+Bastien Nocera <hadess@hadess.net>
+Mathieu Bridon <bochecha@daitauha.fr>
+Zeeshan Ali <zeenix@collabora.co.uk>
+
+2.4.8
+=====
+
+- Fix threshold for detecting too old location update.
+- Explain in the configuration what the applications white-list is meant for.
+- Allow instant location updates from modem-based GPS.
+- Fix a deadlock case in the helper library.
+
+Dependency-related changes:
+
+Require mm-glib >= 1.6
+
+Valentin Blot <freedesktop-devel@valentinblot.org>
+Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
+
 2.4.7
 =====
 

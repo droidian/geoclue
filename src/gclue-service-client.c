@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-service-client.c
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -29,6 +29,7 @@
 #include "gclue-config.h"
 
 #define DEFAULT_ACCURACY_LEVEL GCLUE_ACCURACY_LEVEL_CITY
+#define DEFAULT_AGENT_STARTUP_WAIT_SECS 5
 
 static void
 gclue_service_client_client_iface_init (GClueDBusClientIface *iface);
@@ -43,12 +44,16 @@ G_DEFINE_TYPE_WITH_CODE (GClueServiceClient,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 gclue_service_client_initable_iface_init));
 
+typedef struct _StartData StartData;
+
 struct _GClueServiceClientPrivate
 {
         GClueClientInfo *client_info;
         const char *path;
         GDBusConnection *connection;
         GClueAgent *agent_proxy;
+        StartData *pending_auth_start_data;
+        guint pending_auth_timeout_id;
 
         GClueServiceLocation *location;
         GClueServiceLocation *prev_location;
@@ -258,6 +263,7 @@ start_client (GClueServiceClient *client, GClueAccuracyLevel accuracy_level)
 
         gclue_dbus_client_set_active (GCLUE_DBUS_CLIENT (client), TRUE);
         priv->locator = gclue_locator_new (accuracy_level);
+        gclue_locator_set_time_threshold (priv->locator, 0);
         g_signal_connect (priv->locator,
                           "notify::location",
                           G_CALLBACK (on_locator_location_changed),
@@ -327,13 +333,13 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
         g_variant_iter_free (iter);
 }
 
-typedef struct
+struct _StartData
 {
         GClueServiceClient *client;
         GDBusMethodInvocation *invocation;
         char *desktop_id;
         GClueAccuracyLevel accuracy_level;
-} StartData;
+};
 
 static void
 start_data_free (StartData *data)
@@ -400,6 +406,105 @@ error_out:
         start_data_free (data);
 }
 
+static void
+handle_post_agent_check_auth (StartData *data)
+{
+        GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (data->client)->priv;
+        GClueAccuracyLevel max_accuracy;
+        GClueConfig *config;
+        GClueAppPerm app_perm;
+        guint32 uid;
+
+        uid = gclue_client_info_get_user_id (priv->client_info);
+        max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
+
+        if (max_accuracy == 0) {
+                // Agent disabled geolocation for the user
+                g_dbus_method_invocation_return_error (data->invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "Geolocation disabled for"
+                                                       " UID %u",
+                                                       uid);
+                start_data_free (data);
+                return;
+        }
+        g_debug ("requested accuracy level: %u. "
+                 "Max accuracy level allowed by agent: %u",
+                 data->accuracy_level, max_accuracy);
+        data->accuracy_level = CLAMP (data->accuracy_level, 0, max_accuracy);
+
+        config = gclue_config_get_singleton ();
+        app_perm = gclue_config_get_app_perm (config,
+                                              data->desktop_id,
+                                              priv->client_info);
+
+        if (gclue_config_is_system_component (config, data->desktop_id) ||
+            app_perm == GCLUE_APP_PERM_ALLOWED) {
+                complete_start (data);
+                return;
+        }
+
+        gclue_agent_call_authorize_app (priv->agent_proxy,
+                                        data->desktop_id,
+                                        data->accuracy_level,
+                                        NULL,
+                                        on_authorize_app_ready,
+                                        data);
+}
+
+static gboolean
+handle_pending_auth (gpointer user_data)
+{
+        GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (user_data)->priv;
+        StartData *data = priv->pending_auth_start_data;
+        guint32 uid;
+
+        g_return_val_if_fail (data != NULL, G_SOURCE_REMOVE);
+
+        uid = gclue_client_info_get_user_id (priv->client_info);
+        if (priv->agent_proxy == NULL) {
+                g_dbus_method_invocation_return_error (data->invocation,
+                                                       G_DBUS_ERROR,
+                                                       G_DBUS_ERROR_ACCESS_DENIED,
+                                                       "'%s' disallowed, no agent "
+                                                       "for UID %u",
+                                                       data->desktop_id,
+                                                       uid);
+                start_data_free (data);
+        } else {
+                handle_post_agent_check_auth (data);
+        }
+
+        priv->pending_auth_timeout_id = 0;
+        priv->pending_auth_start_data = NULL;
+
+        return G_SOURCE_REMOVE;
+}
+
+static void
+set_pending_auth_timeout_enable (GClueDBusClient *client)
+{
+        GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
+
+        if (priv->pending_auth_timeout_id > 0)
+                return;
+        priv->pending_auth_timeout_id = g_timeout_add_seconds
+                (DEFAULT_AGENT_STARTUP_WAIT_SECS, handle_pending_auth, client);
+}
+
+static void
+set_pending_auth_timeout_disable (GClueDBusClient *client)
+{
+        GClueServiceClientPrivate *priv = GCLUE_SERVICE_CLIENT (client)->priv;
+
+        if (priv->pending_auth_timeout_id == 0)
+                return;
+
+        g_source_remove (priv->pending_auth_timeout_id);
+        priv->pending_auth_timeout_id = 0;
+}
+
 static gboolean
 gclue_service_client_handle_start (GClueDBusClient       *client,
                                    GDBusMethodInvocation *invocation)
@@ -408,7 +513,6 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         GClueConfig *config;
         StartData *data;
         const char *desktop_id;
-        GClueAccuracyLevel max_accuracy;
         GClueAppPerm app_perm;
         guint32 uid;
 
@@ -449,7 +553,7 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
         }
 
         data = g_slice_new (StartData);
-        data->client = g_object_ref (client);
+        data->client = g_object_ref (GCLUE_SERVICE_CLIENT (client));
         data->invocation =  g_object_ref (invocation);
         data->desktop_id =  g_strdup (desktop_id);
 
@@ -458,41 +562,23 @@ gclue_service_client_handle_start (GClueDBusClient       *client,
                                       GCLUE_ACCURACY_LEVEL_COUNTRY,
                                       GCLUE_ACCURACY_LEVEL_EXACT);
 
-        /* No agent == No authorization needed */
-        if (priv->agent_proxy == NULL ||
-            gclue_config_is_system_component (config, desktop_id) ||
-            app_perm == GCLUE_APP_PERM_ALLOWED) {
-                complete_start (data);
-
+        /* No agent == No authorization */
+        if (priv->agent_proxy == NULL) {
+                /* Already a pending Start()? Denied! */
+                if (priv->pending_auth_start_data) {
+                        g_dbus_method_invocation_return_error_literal
+                                (invocation,
+                                 G_DBUS_ERROR,
+                                 G_DBUS_ERROR_ACCESS_DENIED,
+                                 "An authorization request is already pending");
+                } else {
+                        priv->pending_auth_start_data = data;
+                        set_pending_auth_timeout_enable (client);
+                }
                 return TRUE;
         }
 
-        if (priv->agent_proxy != NULL)
-                max_accuracy = gclue_agent_get_max_accuracy_level (priv->agent_proxy);
-        else
-                max_accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
-
-        if (max_accuracy == 0) {
-                g_dbus_method_invocation_return_error (invocation,
-                                                       G_DBUS_ERROR,
-                                                       G_DBUS_ERROR_ACCESS_DENIED,
-                                                       "Geolocation disabled for"
-                                                       " UID %u",
-                                                       uid);
-                start_data_free (data);
-                return TRUE;
-        }
-        g_debug ("requested accuracy level: %u. "
-                 "Max accuracy level allowed by agent: %u",
-                 data->accuracy_level, max_accuracy);
-        data->accuracy_level = CLAMP (data->accuracy_level, 0, max_accuracy);
-
-        gclue_agent_call_authorize_app (priv->agent_proxy,
-                                        desktop_id,
-                                        data->accuracy_level,
-                                        NULL,
-                                        on_authorize_app_ready,
-                                        data);
+        handle_post_agent_check_auth (data);
 
         return TRUE;
 }
@@ -515,6 +601,8 @@ gclue_service_client_finalize (GObject *object)
 
         g_clear_pointer (&priv->path, g_free);
         g_clear_object (&priv->connection);
+        set_pending_auth_timeout_disable (GCLUE_DBUS_CLIENT (object));
+        g_clear_pointer (&priv->pending_auth_start_data, start_data_free);
         if (priv->agent_proxy != NULL)
                 g_signal_handlers_disconnect_by_func
                                 (priv->agent_proxy,
@@ -588,6 +676,8 @@ gclue_service_client_set_property (GObject      *object,
                                           "g-properties-changed",
                                           G_CALLBACK (on_agent_props_changed),
                                           object);
+                if (client->priv->pending_auth_start_data != NULL)
+                        handle_pending_auth (client);
                 break;
 
         default:
@@ -702,7 +792,11 @@ gclue_service_client_handle_set_property (GDBusConnection *connection,
         } else if (ret && strcmp (property_name, "TimeThreshold") == 0) {
                 priv->time_threshold = gclue_dbus_client_get_time_threshold
                         (client);
-                g_debug ("New time threshold: %u", priv->time_threshold);
+                gclue_locator_set_time_threshold (priv->locator,
+                                                  priv->time_threshold);
+                g_debug ("%s: New time-threshold:  %u",
+                         G_OBJECT_TYPE_NAME (client),
+                         priv->time_threshold);
         }
 
         return ret;

@@ -1,8 +1,8 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-location.c
  *
- * Copyright (C) 2012 Bastien Nocera
- * Copyright (C) 2015 Ankit (Verma)
+ * Copyright 2012 Bastien Nocera
+ * Copyright 2015 Ankit (Verma)
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define TIME_DIFF_THRESHOLD 60
+#define TIME_DIFF_THRESHOLD 60000000 /* 60 seconds */
 
 struct _GClueLocationPrivate {
         gdouble speed;

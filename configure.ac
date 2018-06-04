@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.4.7],
+        [2.4.10],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -39,7 +39,7 @@ AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext d
 
 GLIB_MIN_VERSION=2.34.0
 JSON_GLIB_MIN_VERSION=0.14
-LIBMM_GLIB_MIN_VERSION=1.0
+LIBMM_GLIB_MIN_VERSION=1.6
 LIBSOUP_MIN_VERSION=2.42
 AVAHI_MIN_VERSION=0.6.10
 
@@ -164,9 +164,9 @@ AM_CONDITIONAL([BUILD_BACKEND], [test "x$build_backend" = "xyes"])
 # Demo agent
 AC_ARG_ENABLE(demo-agent,
               AS_HELP_STRING([--enable-demo-agent=yes|no],
-                             [Build demo agent (default=no)]),
+                             [Build demo agent (default=yes)]),
               [enable_demo_agent=$enableval],
-              [enable_demo_agent=no])
+              [enable_demo_agent=yes])
 if test "x$enable_demo_agent" = "xyes"; then
     PKG_CHECK_MODULES(DEMO_AGENT, [
                       glib-2.0 >= $GLIB_MIN_VERSION

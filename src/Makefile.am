@@ -136,6 +136,8 @@ libgeoclue_internal_la_SOURCES = \
 	gclue-location-source.c	 \
 	gclue-locator.h 	 \
 	gclue-locator.c 	 \
+	gclue-min-uint.h 	 \
+	gclue-min-uint.c 	 \
 	gclue-service-manager.h  \
 	gclue-service-manager.c  \
 	gclue-service-client.h   \

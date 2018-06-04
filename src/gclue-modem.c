@@ -1,6 +1,6 @@
 /* vim: set et ts=8 sw=8: */
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright 2014 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -63,6 +63,15 @@ gclue_modem_default_init (GClueModemInterface *iface)
                                      G_PARAM_READABLE);
         g_object_interface_install_property (iface, spec);
 
+        spec = g_param_spec_uint ("time-threshold",
+                                  "TimeThreshold",
+                                  "Time Threshold",
+                                  0,
+                                  G_MAXUINT,
+                                  0,
+                                  G_PARAM_READWRITE);
+        g_object_interface_install_property (iface, spec);
+
         g_signal_new ("fix-3g",
                       GCLUE_TYPE_MODEM,
                       G_SIGNAL_RUN_LAST,
@@ -123,6 +132,24 @@ gclue_modem_get_is_gps_available (GClueModem *modem)
         g_return_val_if_fail (GCLUE_IS_MODEM (modem), FALSE);
 
         return GCLUE_MODEM_GET_INTERFACE (modem)->get_is_gps_available (modem);
+}
+
+guint
+gclue_modem_get_time_threshold (GClueModem *modem)
+{
+        g_return_val_if_fail (GCLUE_IS_MODEM (modem), 0);
+
+        return GCLUE_MODEM_GET_INTERFACE (modem)->get_time_threshold (modem);
+}
+
+void
+gclue_modem_set_time_threshold (GClueModem *modem,
+                                guint       threshold)
+{
+        g_return_if_fail (GCLUE_IS_MODEM (modem));
+
+        return GCLUE_MODEM_GET_INTERFACE (modem)->set_time_threshold
+                                                        (modem, threshold);
 }
 
 void

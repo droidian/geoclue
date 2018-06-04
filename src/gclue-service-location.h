@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-service-location.h
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free

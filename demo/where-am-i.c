@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* where-am-i.c
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -30,6 +30,7 @@
 /* Commandline options */
 static gint timeout = 30; /* seconds */
 static GClueAccuracyLevel accuracy_level = GCLUE_ACCURACY_LEVEL_EXACT;
+static gint time_threshold;
 
 static GOptionEntry entries[] =
 {
@@ -39,6 +40,14 @@ static GOptionEntry entries[] =
           G_OPTION_ARG_INT,
           &timeout,
           N_("Exit after T seconds. Default: 30"),
+          "T" },
+        { "time-threshold",
+          'i',
+          0,
+          G_OPTION_ARG_INT,
+          &time_threshold,
+          N_("Only report location update after T seconds. "
+             "Default: 0 (report new location without any delay)"),
           "T" },
         { "accuracy-level",
           'a',
@@ -146,6 +155,9 @@ on_simple_ready (GObject      *source_object,
         g_object_ref (client);
         g_print ("Client object: %s\n",
                  g_dbus_proxy_get_object_path (G_DBUS_PROXY (client)));
+        if (time_threshold > 0) {
+                gclue_client_set_time_threshold (client, time_threshold);
+        }
 
         print_location (simple);
 

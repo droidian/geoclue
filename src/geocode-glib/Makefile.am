@@ -2,8 +2,6 @@ include $(top_srcdir)/Makefile.decl
 
 noinst_LTLIBRARIES = libgeocode-glib.la
 
-CACHE_DIR = "/var/cache/geoclue-2.0"
-
 AM_CPPFLAGS = $(GEOCLUE_CFLAGS) 		     	  \
 	      $(WARN_CFLAGS)			     	  \
 	      -DGEOCODE_LOCALEDIR="\"$(datadir)/locale\"" \

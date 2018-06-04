@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* gclue-locator.h
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -59,6 +59,9 @@ GType gclue_locator_get_type (void) G_GNUC_CONST;
 
 GClueLocator *      gclue_locator_new                (GClueAccuracyLevel level);
 GClueAccuracyLevel  gclue_locator_get_accuracy_level (GClueLocator *locator);
+guint               gclue_locator_get_time_threshold (GClueLocator *locator);
+void                gclue_locator_set_time_threshold (GClueLocator *locator,
+                                                      guint         threshold);
 
 G_END_DECLS
 

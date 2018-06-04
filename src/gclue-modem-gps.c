@@ -1,6 +1,6 @@
 /* vim: set et ts=8 sw=8: */
 /*
- * Copyright (C) 2014 Red Hat, Inc.
+ * Copyright 2014 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -28,7 +28,7 @@
 
 /**
  * SECTION:gclue-modem-gps
- * @short_description: WiFi-based geolocation
+ * @short_description: GPS modem-based geolocation source
  * @include: gclue-glib/gclue-modem-gps.h
  *
  * Contains functions to get the geolocation from a GPS modem.
@@ -107,6 +107,18 @@ on_is_gps_available_notify (GObject    *gobject,
 }
 
 static void
+on_time_threshold_changed (GObject    *gobject,
+                           GParamSpec *pspec,
+                           gpointer    user_data)
+{
+        GClueModemGPS *source = GCLUE_MODEM_GPS (user_data);
+        guint threshold;
+
+        threshold = gclue_min_uint_get_value (GCLUE_MIN_UINT (gobject));
+        gclue_modem_set_time_threshold (source->priv->modem, threshold);
+}
+
+static void
 gclue_modem_gps_finalize (GObject *ggps)
 {
         GClueModemGPSPrivate *priv = GCLUE_MODEM_GPS (ggps)->priv;
@@ -140,6 +152,7 @@ static void
 gclue_modem_gps_init (GClueModemGPS *source)
 {
         GClueModemGPSPrivate *priv;
+        GClueMinUINT *threshold;
 
         source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source), GCLUE_TYPE_MODEM_GPS, GClueModemGPSPrivate);
         priv = source->priv;
@@ -152,6 +165,12 @@ gclue_modem_gps_init (GClueModemGPS *source)
                                           "notify::is-gps-available",
                                           G_CALLBACK (on_is_gps_available_notify),
                                           source);
+        threshold = gclue_location_source_get_time_threshold
+                        (GCLUE_LOCATION_SOURCE (source));
+        g_signal_connect (threshold,
+                          "notify::value",
+                          G_CALLBACK (on_time_threshold_changed),
+                          source);
 }
 
 static void

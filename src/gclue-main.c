@@ -1,7 +1,7 @@
 /* vim: set et ts=8 sw=8: */
 /* main.c
  *
- * Copyright (C) 2013 Red Hat, Inc.
+ * Copyright 2013 Red Hat, Inc.
  *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
@@ -33,7 +33,7 @@
 
 /* Commandline options */
 static gboolean version = FALSE;
-static gint inactivity_timeout = 0;
+static gint inactivity_timeout = 5;
 static gboolean submit_data = FALSE;
 static char *submit_nick = NULL;
 
@@ -51,7 +51,7 @@ static GOptionEntry entries[] =
           0,
           G_OPTION_ARG_INT,
           &inactivity_timeout,
-          N_("Exit after T seconds of inactivity. Default: 0 (never)"),
+          N_("Exit after T seconds of inactivity, 0 for never. Default: 5"),
           "T" },
         { "submit-data",
           's',

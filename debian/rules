@@ -29,7 +29,7 @@ override_dh_auto_install:
 		$(CURDIR)/debian/tmp/usr/lib/geoclue-2.0/demos
 
 %:
-	dh $@ --with autotools-dev,autoreconf,gir
+	dh $@ --with autoreconf,gir
 
 override_dh_missing:
 	dh_missing --list-missing

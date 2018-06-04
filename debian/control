@@ -3,8 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Laurent Bigonville <bigon@debian.org>
 Uploaders: Craig Andrews <candrews@integralblue.com>
-Build-Depends: autotools-dev,
-               debhelper (>= 9),
+Build-Depends: debhelper (>= 9.20160114),
                dh-autoreconf,
                gobject-introspection (>= 0.9.6),
                intltool (>= 0.40.0),

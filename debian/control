@@ -15,7 +15,7 @@ Build-Depends: debhelper (>= 11),
                libnotify-dev,
                libsoup2.4-dev (>= 2.42),
                pkg-config
-Homepage: http://www.freedesktop.org/wiki/Software/GeoClue
+Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home
 Standards-Version: 4.1.4
 Vcs-Git: https://salsa.debian.org/freedesktop-team/geoclue-2.0.git
 Vcs-Browser: https://salsa.debian.org/freedesktop-team/geoclue-2.0

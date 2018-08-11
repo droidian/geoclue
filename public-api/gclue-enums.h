@@ -20,8 +20,8 @@
  * Author: Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
  */
 
-#ifndef GCLUE_ENUM_H
-#define GCLUE_ENUM_H
+#ifndef GCLUE_ENUMS_H
+#define GCLUE_ENUMS_H
 
 #include <glib.h>
 
@@ -49,4 +49,4 @@ typedef enum {/*< underscore_name=gclue_accuracy_level>*/
 
 G_END_DECLS
 
-#endif /* GCLUE_ENUM_H */
+#endif /* GCLUE_ENUMS_H */

@@ -1,3 +1,16 @@
+geoclue-2.0 (2.4.11-1) unstable; urgency=medium
+
+  * [7ccde738] Bump debhelper compatibility to 11
+  * [30d692b7] debian/control: Update Homepage field
+  * [80038652] New upstream version 2.4.11
+    - Fix the demo agent, so it's functional for DE not implementing one
+      (Closes: #900936)
+  * [aca24ff5] debian/control: Bump libglib2.0-dev build-dep to 2.44.0
+  * [13ace8c7] debian/control: Bump Standards-Version to 4.2.0 (no further
+    changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Sat, 11 Aug 2018 13:26:52 +0200
+
 geoclue-2.0 (2.4.10-1) unstable; urgency=medium
 
   * [1302d116] debian/control: Update Vcs-* fields, git repository moved to

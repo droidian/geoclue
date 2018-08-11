@@ -332,7 +332,9 @@ gclue_locator_constructed (GObject *object)
 {
         GClueLocator *locator = GCLUE_LOCATOR (object);
         GClueLocationSource *submit_source = NULL;
+#if GCLUE_USE_NMEA_SOURCE
         GClueConfig *gconfig = gclue_config_get_singleton ();
+#endif
         GList *node;
         GClueMinUINT *threshold;
 

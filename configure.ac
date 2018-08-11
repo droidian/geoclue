@@ -1,7 +1,7 @@
 AC_PREREQ([2.63])
 
 AC_INIT([geoclue],
-        [2.4.10],
+        [2.4.11],
         [http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue],
         [geoclue],
         [http://www.freedesktop.org/wiki/Software/GeoClue])
@@ -37,7 +37,7 @@ GETTEXT_PACKAGE=AC_PACKAGE_NAME
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE",[The name of the gettext domain])
 
-GLIB_MIN_VERSION=2.34.0
+GLIB_MIN_VERSION=2.44.0
 JSON_GLIB_MIN_VERSION=0.14
 LIBMM_GLIB_MIN_VERSION=1.6
 LIBSOUP_MIN_VERSION=2.42
@@ -60,6 +60,7 @@ PKG_CHECK_MODULES(GEOCLUE, [
 
 # GObject-introspection support
 GOBJECT_INTROSPECTION_CHECK([0.9.6])
+VAPIGEN_CHECK()
 build_introspection=no
 
 # libgeoclue

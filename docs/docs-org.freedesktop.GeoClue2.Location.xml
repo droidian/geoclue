@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+               "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd" [
+]>
+<refentry id="gdbus-org.freedesktop.GeoClue2.Location">
+  <refmeta>    <refentrytitle role="top_of_page" id="gdbus-interface-org-freedesktop-GeoClue2-Location.top_of_page">org.freedesktop.GeoClue2.Location</refentrytitle>
+  <indexterm zone="gdbus-interface-org-freedesktop-GeoClue2-Location.top_of_page"><primary sortas="Location">org.freedesktop.GeoClue2.Location</primary></indexterm>
+  </refmeta>  <refnamediv>    <refname>org.freedesktop.GeoClue2.Location</refname>    <refpurpose>The Location interface</refpurpose>  </refnamediv>  <refsect1 role="properties">
+    <title role="properties.title">Properties</title>
+    <synopsis>
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Latitude">Latitude</link>     readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">Longitude</link>    readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">Accuracy</link>     readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">Altitude</link>     readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Speed">Speed</link>        readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Heading">Heading</link>      readable   d
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Description">Description</link>  readable   s
+<link linkend="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp">Timestamp</link>    readable   (tt)
+</synopsis>
+  </refsect1>
+<refsect1 role="desc" id="gdbus-interface-org-freedesktop-GeoClue2-Location">
+  <title role="desc.title">Description</title>
+  <para>      This is the interface you use on location objects.
+</para>
+</refsect1>
+<refsect1 role="details" id="gdbus-properties-org.freedesktop.GeoClue2.Location">
+  <title role="details.title">Property Details</title>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Latitude">
+  <title>The "Latitude" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Latitude"><primary sortas="Location:Latitude">org.freedesktop.GeoClue2.Location:Latitude</primary></indexterm>
+<programlisting>
+Latitude  readable   d
+</programlisting>
+<para>        The latitude of the location, in degrees.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude">
+  <title>The "Longitude" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Longitude"><primary sortas="Location:Longitude">org.freedesktop.GeoClue2.Location:Longitude</primary></indexterm>
+<programlisting>
+Longitude  readable   d
+</programlisting>
+<para>        The longitude of the location, in degrees.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy">
+  <title>The "Accuracy" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy"><primary sortas="Location:Accuracy">org.freedesktop.GeoClue2.Location:Accuracy</primary></indexterm>
+<programlisting>
+Accuracy  readable   d
+</programlisting>
+<para>        The accuracy of the location fix, in meters.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude">
+  <title>The "Altitude" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Altitude"><primary sortas="Location:Altitude">org.freedesktop.GeoClue2.Location:Altitude</primary></indexterm>
+<programlisting>
+Altitude  readable   d
+</programlisting>
+<para>        The altitude of the location fix, in meters. When unknown, its set to
+        minimum double value, -1.7976931348623157e+308.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Speed">
+  <title>The "Speed" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Speed"><primary sortas="Location:Speed">org.freedesktop.GeoClue2.Location:Speed</primary></indexterm>
+<programlisting>
+Speed  readable   d
+</programlisting>
+<para>        The speed in meters per second. When unknown, it's set to -1.0.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Heading">
+  <title>The "Heading" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Heading"><primary sortas="Location:Heading">org.freedesktop.GeoClue2.Location:Heading</primary></indexterm>
+<programlisting>
+Heading  readable   d
+</programlisting>
+<para>        The heading direction in degrees with respect to North direction, in
+        clockwise order. That means North becomes 0 degree, East: 90 degrees,
+        South: 180 degrees, West: 270 degrees and so on. When unknown,
+        it's set to -1.0.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Description">
+  <title>The "Description" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Description"><primary sortas="Location:Description">org.freedesktop.GeoClue2.Location:Description</primary></indexterm>
+<programlisting>
+Description  readable   s
+</programlisting>
+<para>        A human-readable description of the location, if available.
+</para><para>        WARNING: Applications should not rely on this property since not all
+        sources provide a description. If you really need a description (or
+        more details) about current location, use a reverse-geocoding API, e.g
+        geocode-glib.
+</para>
+</refsect2>
+<refsect2 role="property" id="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp">
+  <title>The "Timestamp" property</title>
+  <indexterm zone="gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp"><primary sortas="Location:Timestamp">org.freedesktop.GeoClue2.Location:Timestamp</primary></indexterm>
+<programlisting>
+Timestamp  readable   (tt)
+</programlisting>
+<para>        The timestamp when the location was determined, in seconds and
+        microseconds since the Epoch. This is the time of measurement if the
+        backend provided that information, otherwise the time when GeoClue
+        received the new location.
+</para><para>        Note that GeoClue can't guarantee that the timestamp will always
+        monotonically increase, as a backend may not respect that.
+        Also note that a timestamp can be very old, e.g. because of a cached
+        location.
+</para>
+</refsect2>
+</refsect1>
+</refentry>
+

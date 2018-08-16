@@ -9,11 +9,17 @@ ifneq ($(DEB_BUILD_ARCH_OS),linux)
                  --disable-cdma-source
 endif
 
+ifneq ($(shell which gtkdoc-scan),)
+ifeq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
+  BUILD_DOC := --enable-gtk-doc
+endif
+endif
+
 override_dh_auto_configure:
 	dh_auto_configure -- --libexec=/usr/lib/geoclue-2.0 \
                              --with-dbus-service-user=geoclue \
                              --with-systemdsystemunitdir=/lib/systemd/system \
-                             --disable-silent-rules \
+			     ${BUILD_DOC} \
                              ${MM_NM_FLAGS}
 
 override_dh_auto_test:

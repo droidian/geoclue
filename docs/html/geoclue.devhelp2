@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<book xmlns="http://www.devhelp.net/book" title="Geoclue Reference Manual" link="index.html" author="Zeeshan Ali (Khattak)" name="geoclue" version="2" language="c">
+  <chapters>
+    <sub name="D-Bus API Reference" link="ref-dbus.html">
+      <sub name="org.freedesktop.GeoClue2.Manager" link="gdbus-org.freedesktop.GeoClue2.Manager.html"/>
+      <sub name="org.freedesktop.GeoClue2.Client" link="gdbus-org.freedesktop.GeoClue2.Client.html"/>
+      <sub name="org.freedesktop.GeoClue2.Location" link="gdbus-org.freedesktop.GeoClue2.Location.html"/>
+      <sub name="gclue-enums" link="geoclue-gclue-enums.html"/>
+    </sub>
+    <sub name="Agent D-Bus API Reference" link="ref-agent-dbus.html">
+      <sub name="org.freedesktop.GeoClue2.Agent" link="gdbus-org.freedesktop.GeoClue2.Agent.html"/>
+    </sub>
+    <sub name="Index" link="ix01.html"/>
+    <sub name="License" link="license.html"/>
+  </chapters>
+  <functions>
+    <keyword type="method" name="The GetClient() method" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.GetClient"/>
+    <keyword type="method" name="The AddAgent() method" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-method-org-freedesktop-GeoClue2-Manager.AddAgent"/>
+    <keyword type="property" name="The &quot;InUse&quot; property" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-property-org-freedesktop-GeoClue2-Manager.InUse"/>
+    <keyword type="property" name="The &quot;AvailableAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Manager.html#gdbus-property-org-freedesktop-GeoClue2-Manager.AvailableAccuracyLevel"/>
+    <keyword type="method" name="The Start() method" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-method-org-freedesktop-GeoClue2-Client.Start"/>
+    <keyword type="method" name="The Stop() method" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-method-org-freedesktop-GeoClue2-Client.Stop"/>
+    <keyword type="signal" name="The &quot;LocationUpdated&quot; signal" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-signal-org-freedesktop-GeoClue2-Client.LocationUpdated"/>
+    <keyword type="property" name="The &quot;Location&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Location"/>
+    <keyword type="property" name="The &quot;DistanceThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DistanceThreshold"/>
+    <keyword type="property" name="The &quot;TimeThreshold&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.TimeThreshold"/>
+    <keyword type="property" name="The &quot;DesktopId&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.DesktopId"/>
+    <keyword type="property" name="The &quot;RequestedAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.RequestedAccuracyLevel"/>
+    <keyword type="property" name="The &quot;Active&quot; property" link="gdbus-org.freedesktop.GeoClue2.Client.html#gdbus-property-org-freedesktop-GeoClue2-Client.Active"/>
+    <keyword type="property" name="The &quot;Latitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Latitude"/>
+    <keyword type="property" name="The &quot;Longitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Longitude"/>
+    <keyword type="property" name="The &quot;Accuracy&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Accuracy"/>
+    <keyword type="property" name="The &quot;Altitude&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Altitude"/>
+    <keyword type="property" name="The &quot;Speed&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Speed"/>
+    <keyword type="property" name="The &quot;Heading&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Heading"/>
+    <keyword type="property" name="The &quot;Description&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Description"/>
+    <keyword type="property" name="The &quot;Timestamp&quot; property" link="gdbus-org.freedesktop.GeoClue2.Location.html#gdbus-property-org-freedesktop-GeoClue2-Location.Timestamp"/>
+    <keyword type="enum" name="enum GClueAccuracyLevel" link="geoclue-gclue-enums.html#GClueAccuracyLevel"/>
+    <keyword type="method" name="The AuthorizeApp() method" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-method-org-freedesktop-GeoClue2-Agent.AuthorizeApp"/>
+    <keyword type="property" name="The &quot;MaxAccuracyLevel&quot; property" link="gdbus-org.freedesktop.GeoClue2.Agent.html#gdbus-property-org-freedesktop-GeoClue2-Agent.MaxAccuracyLevel"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_NONE" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-NONE:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_COUNTRY" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-COUNTRY:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_CITY" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-CITY:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_NEIGHBORHOOD" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-NEIGHBORHOOD:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_STREET" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-STREET:CAPS"/>
+    <keyword type="constant" name="GCLUE_ACCURACY_LEVEL_EXACT" link="geoclue-gclue-enums.html#GCLUE-ACCURACY-LEVEL-EXACT:CAPS"/>
+  </functions>
+</book>

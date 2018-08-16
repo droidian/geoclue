@@ -1,3 +1,10 @@
+geoclue-2.0 (2.4.12-1) unstable; urgency=medium
+
+  * [9e431aae] New upstream version 2.4.12
+  * [d3f6d85e] Add API and library documentation packages
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 16 Aug 2018 17:08:08 +0200
+
 geoclue-2.0 (2.4.11-1) unstable; urgency=medium
 
   * [7ccde738] Bump debhelper compatibility to 11

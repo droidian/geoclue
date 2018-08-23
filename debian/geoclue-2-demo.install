@@ -1,3 +1,2 @@
-etc/xdg/autostart/
-usr/lib/geoclue-2.0/demos/
-usr/share/applications/
+usr/lib/geoclue-2.0/demos/where-am-i
+usr/share/applications/geoclue-where-am-i.desktop

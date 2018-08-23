@@ -28,8 +28,8 @@ Recommends: avahi-daemon,
             iio-sensor-proxy [linux-any],
             modemmanager [linux-any],
             wpasupplicant [!hurd-any]
-Breaks: geoclue (>= 2.0)
-Replaces: geoclue (>= 2.0)
+Breaks: geoclue (>= 2.0), geoclue-2-demo (<< 2.4.12-2~)
+Replaces: geoclue (>= 2.0), geoclue-2-demo (<< 2.4.12-2~)
 Description: geoinformation service
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.

@@ -1,3 +1,9 @@
+geoclue-2.0 (2.4.12-2) unstable; urgency=medium
+
+  * [41f51d40] Move the demo agent to the main package (Closes: #901594)
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 23 Aug 2018 09:26:03 +0200
+
 geoclue-2.0 (2.4.12-1) unstable; urgency=medium
 
   * [9e431aae] New upstream version 2.4.12

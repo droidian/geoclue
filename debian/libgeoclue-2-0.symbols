@@ -1,6 +1,5 @@
 libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
 * Build-Depends-Package: libgeoclue-2-dev
- gclue_accuracy_level_get_string@Base 2.4.0
  gclue_accuracy_level_get_type@Base 2.4.0
  gclue_client_call_start@Base 2.4.0
  gclue_client_call_start_finish@Base 2.4.0

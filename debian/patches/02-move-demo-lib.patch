@@ -3,10 +3,10 @@ Author: Laurent Bigonville <bigon@debian.org>
 
 --- a/demo/geoclue-where-am-i.desktop.in.in
 +++ b/demo/geoclue-where-am-i.desktop.in.in
-@@ -3,7 +3,7 @@ _Name=Where am I?
- _GenericName=Demo geolocation application
- _Comment=Find your current location
- _Keywords=geolocation;
+@@ -3,7 +3,7 @@ Name=Where am I?
+ GenericName=Demo geolocation application
+ Comment=Find your current location
+ Keywords=geolocation;
 -Exec=@libexecdir@/geoclue-2.0/demos/where-am-i
 +Exec=/usr/lib/geoclue-2.0/demos/where-am-i
  Icon=mark-location-symbolic
@@ -15,9 +15,9 @@ Author: Laurent Bigonville <bigon@debian.org>
 --- a/demo/geoclue-demo-agent.desktop.in.in
 +++ b/demo/geoclue-demo-agent.desktop.in.in
 @@ -2,7 +2,7 @@
- _Name=Geoclue Demo agent
- _GenericName=Demo geoclue agent
- _Keywords=geolocation;
+ Name=Geoclue Demo agent
+ GenericName=Demo geoclue agent
+ Keywords=geolocation;
 -Exec=@libexecdir@/geoclue-2.0/demos/agent
 +Exec=/usr/lib/geoclue-2.0/demos/agent
  Icon=mark-location-symbolic

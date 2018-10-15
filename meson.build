@@ -1,0 +1,90 @@
+project('geoclue', 'c', version: '2.5.0', meson_version : '>= 0.47.2')
+
+gclue_version = meson.project_version()
+ver_arr = gclue_version.split('.')
+
+gclue_major_version = ver_arr[0]
+gclue_minor_version = ver_arr[1]
+gclue_micro_version = ver_arr[2]
+
+gclue_api_version='2.0'
+
+conf = configuration_data()
+conf.set_quoted('VERSION', gclue_version)
+conf.set_quoted('PACKAGE_VERSION', gclue_version)
+conf.set_quoted('PACKAGE_NAME', 'geoclue')
+conf.set_quoted('GETTEXT_PACKAGE', 'geoclue')
+conf.set_quoted('PACKAGE_TARNAME', 'geoclue')
+conf.set_quoted('PACKAGE_STRING', 'geoclue ' + gclue_version)
+conf.set_quoted('PACKAGE_URL', 'http://www.freedesktop.org/wiki/Software/GeoClue')
+conf.set_quoted('PACKAGE_BUGREPORT', 'http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue')
+conf.set_quoted('TEST_SRCDIR', meson.source_root() + '/data/')
+datadir = get_option('prefix') + '/' + get_option('datadir')
+conf.set_quoted('LOCALEDIR', datadir + '/locale')
+conf.set_quoted('SYSCONFDIR', get_option('sysconfdir'))
+
+configure_file(output: 'config.h', configuration : conf)
+configinc = include_directories('.')
+
+gnome = import('gnome')
+cc = meson.get_compiler('c')
+
+base_deps = [ dependency('glib-2.0', version: '>= 2.34.0'),
+              dependency('gio-2.0', version: '>= 2.34.0'),
+              dependency('gio-unix-2.0', version: '>= 2.34.0') ]
+libm = cc.find_library('m', required: false)
+if libm.found()
+    base_deps += [ libm ]
+endif
+
+subdir('public-api')
+if get_option('enable-backend')
+    subdir('src')
+endif
+if get_option('libgeoclue')
+    subdir('libgeoclue')
+endif
+subdir('data')
+subdir('demo')
+subdir('po')
+
+# FIXME: The D-Bus docs should not need libgeoclue but after a few hours of
+# banging my head agaist gtk-doc+meson and asking on IRC, I failed to find a
+# way to tell gtk-doc to link to the uninstalled public-api static library. A
+# non-working solution is in 'wip/fix-srv-docs' branch.
+#
+# If you look into this issue, you might also want to see how we can fix the
+# dependency issue that stops the user to run `ninja -C build geoclue-doc`
+# before `ninja -C build`.
+if get_option('gtk-doc') and get_option('libgeoclue')
+  subdir('docs')
+endif
+
+# FIXME: Remove this once meson does it itself: https://github.com/mesonbuild/meson/issues/757
+summary = '''
+        GeoClue @0@
+        =================
+
+        prefix:                   @1@
+        c compiler:               @2@
+        Systemd system unit dir:  @3@
+
+        Backend:                  @4@
+        Convenience library:      @5@
+        Introspection:            @6@
+        3G source:                @7@
+        CDMA source:              @8@
+        Modem GPS source:         @9@
+        Network NMEA source:      @10@
+'''.format(gclue_version,
+           get_option('prefix'),
+           cc.get_id(),
+           systemd_unit_dir,
+           get_option('enable-backend'),
+           get_option('libgeoclue'),
+           get_option('introspection'),
+           get_option('3g-source'),
+           get_option('cdma-source'),
+           get_option('modem-gps-source'),
+           get_option('nmea-source'))
+message(summary)

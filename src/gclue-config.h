@@ -67,6 +67,7 @@ GClueConfig *       gclue_config_get_singleton          (void);
 gboolean            gclue_config_is_agent_allowed       (GClueConfig     *config,
                                                          const char      *desktop_id,
                                                          GClueClientInfo *agent_info);
+gsize               gclue_config_get_num_allowed_agents (GClueConfig     *config);
 GClueAppPerm        gclue_config_get_app_perm           (GClueConfig     *config,
                                                          const char      *desktop_id,
                                                          GClueClientInfo *app_info);
@@ -78,6 +79,11 @@ const char *        gclue_config_get_wifi_submit_nick   (GClueConfig     *config
 void                gclue_config_set_wifi_submit_nick   (GClueConfig     *config,
                                                          const char      *nick);
 gboolean            gclue_config_get_wifi_submit_data   (GClueConfig     *config);
+gboolean            gclue_config_get_enable_wifi_source (GClueConfig     *config);
+gboolean            gclue_config_get_enable_3g_source   (GClueConfig     *config);
+gboolean            gclue_config_get_enable_cdma_source (GClueConfig     *config);
+gboolean            gclue_config_get_enable_modem_gps_source
+                                                        (GClueConfig     *config);
 gboolean            gclue_config_get_enable_nmea_source (GClueConfig     *config);
 void                gclue_config_set_wifi_submit_data   (GClueConfig     *config,
                                                          gboolean         submit);

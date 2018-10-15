@@ -4,21 +4,21 @@
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 
 ifneq ($(DEB_BUILD_ARCH_OS),linux)
-  MM_NM_FLAGS := --disable-3g-source \
-                 --disable-modem-gps-source \
-                 --disable-cdma-source
+  MM_NM_FLAGS := -D3g-source=false \
+                 -Dmodem-gps-source=false \
+                 -Dcdma-source=false
 endif
 
-ifneq ($(shell which gtkdoc-scan),)
-ifeq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
-  BUILD_DOC := --enable-gtk-doc
+ifeq ($(shell which gtkdoc-scan),)
+ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
+  BUILD_DOC := -Dgtk-doc=false
 endif
 endif
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libexec=/usr/lib/geoclue-2.0 \
-                             --with-dbus-service-user=geoclue \
-                             --with-systemdsystemunitdir=/lib/systemd/system \
+	dh_auto_configure -- --libexecdir=/usr/lib/geoclue-2.0 \
+                             -Ddbus-srv-user=geoclue \
+                             -Dsystemd-system-unit-dir=/lib/systemd/system \
 			     ${BUILD_DOC} \
                              ${MM_NM_FLAGS}
 

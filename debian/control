@@ -14,6 +14,7 @@ Build-Depends: debhelper (>= 11),
                libmm-glib-dev (>= 1.6) [linux-any],
                libnotify-dev,
                libsoup2.4-dev (>= 2.42),
+               meson (>= 0.47.2),
                pkg-config
 Build-Depends-Indep: gtk-doc-tools <!nodoc>, libglib2.0-doc <!nodoc>
 Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home

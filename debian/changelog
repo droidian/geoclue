@@ -1,3 +1,16 @@
+geoclue-2.0 (2.5.0-1) unstable; urgency=medium
+
+  * [3ad2110f] New upstream version 2.5.0
+  * [94136a08] debian/watch: Update URL and point to gitlab.fdo
+  * [5960ec67] Update the debian buildsystem now that the upstream one has
+    switched to meson (Closes: #829822)
+  * [1cf79680] debian/patches/02-move-demo-lib.patch: Refreshed
+  * [c1fafc87] debian/libgeoclue-2-0.symbols: Drop
+    gclue_accuracy_level_get_string, not part of the public API
+  * [36f68d91] d/p/fix-libexecdir.patch: Fix libexecdir in .service files
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 15 Oct 2018 20:21:16 +0200
+
 geoclue-2.0 (2.4.12-2) unstable; urgency=medium
 
   * [41f51d40] Move the demo agent to the main package (Closes: #901594)

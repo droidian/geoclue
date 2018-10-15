@@ -33,7 +33,7 @@
 
 /* Commandline options */
 static gboolean version = FALSE;
-static gint inactivity_timeout = 5;
+static gint inactivity_timeout = 60;
 static gboolean submit_data = FALSE;
 static char *submit_nick = NULL;
 
@@ -51,7 +51,7 @@ static GOptionEntry entries[] =
           0,
           G_OPTION_ARG_INT,
           &inactivity_timeout,
-          N_("Exit after T seconds of inactivity, 0 for never. Default: 5"),
+          N_("Exit after T seconds of inactivity, 0 for never. Default: 60"),
           "T" },
         { "submit-data",
           's',
@@ -77,6 +77,8 @@ guint inactivity_timeout_id = 0;
 static gboolean
 on_inactivity_timeout (gpointer user_data)
 {
+        g_message ("Service not used for %d seconds. Shutting down..",
+                   inactivity_timeout);
         g_main_loop_quit (main_loop);
 
         return FALSE;

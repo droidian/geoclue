@@ -76,6 +76,7 @@ Architecture: any
 Section: libdevel
 Depends: gir1.2-geoclue-2.0 (= ${binary:Version}),
          libgeoclue-2-0 (= ${binary:Version}),
+         libglib2.0-dev (>= 2.34.0),
          ${misc:Depends},
          ${shlibs:Depends}
 Suggests: libgeoclue-doc

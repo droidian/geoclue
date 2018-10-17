@@ -1,3 +1,13 @@
+geoclue-2.0 (2.5.0-2) unstable; urgency=medium
+
+  * [3a99c10e] debian/rules: Fix FTBFS if gtkdoc-scan is not installed or
+    nodoc profile is set
+  * [a365e5d4] Install Vala API files
+  * [6ee8e720] debian/control: Bump Standards-Version to 4.2.1 (no further
+    changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 17 Oct 2018 14:40:30 +0200
+
 geoclue-2.0 (2.5.0-1) unstable; urgency=medium
 
   * [3ad2110f] New upstream version 2.5.0

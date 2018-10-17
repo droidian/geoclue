@@ -10,9 +10,10 @@ ifneq ($(DEB_BUILD_ARCH_OS),linux)
 endif
 
 ifeq ($(shell which gtkdoc-scan),)
-ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
   BUILD_DOC := -Dgtk-doc=false
 endif
+ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
+  BUILD_DOC := -Dgtk-doc=false
 endif
 
 override_dh_auto_configure:

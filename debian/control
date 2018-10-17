@@ -15,7 +15,8 @@ Build-Depends: debhelper (>= 11),
                libnotify-dev,
                libsoup2.4-dev (>= 2.42),
                meson (>= 0.47.2),
-               pkg-config
+               pkg-config,
+               valac
 Build-Depends-Indep: gtk-doc-tools <!nodoc>, libglib2.0-doc <!nodoc>
 Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home
 Standards-Version: 4.2.0

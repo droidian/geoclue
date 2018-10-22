@@ -1,3 +1,16 @@
+geoclue-2.0 (2.5.1-1) unstable; urgency=high
+
+  * [1fe595bd] debian/control: Make libgeoclue-2-dev depend explicitly against
+    libglib2.0-dev
+  * [70d0712f] New upstream version 2.5.1
+  * [1b962c94] Drop debian/patches/fix-libexecdir.patch, merged upstream
+  * [19ba20a3] debian/libgeoclue-2-0.symbols: Readd
+    gclue_accuracy_level_get_string(), as it was part of the public API in the
+    end, oups. Set the urgency to high so the fix for the API/ABI is going to
+    testing faster.
+
+ -- Laurent Bigonville <bigon@debian.org>  Mon, 22 Oct 2018 09:09:32 +0200
+
 geoclue-2.0 (2.5.0-2) unstable; urgency=medium
 
   * [3a99c10e] debian/rules: Fix FTBFS if gtkdoc-scan is not installed or

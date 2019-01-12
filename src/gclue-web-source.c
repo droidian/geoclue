@@ -45,13 +45,17 @@ struct _GClueWebSourcePrivate {
         SoupMessage *query;
 
         gulong network_changed_id;
+        gulong connectivity_changed_id;
 
         guint64 last_submitted;
 
         gboolean internet_available;
 };
 
-G_DEFINE_ABSTRACT_TYPE (GClueWebSource, gclue_web_source, GCLUE_TYPE_LOCATION_SOURCE)
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GClueWebSource,
+                                  gclue_web_source,
+                                  GCLUE_TYPE_LOCATION_SOURCE,
+                                  G_ADD_PRIVATE (GClueWebSource))
 
 static void
 query_callback (SoupSession *session,
@@ -105,20 +109,8 @@ get_internet_available (void)
         GNetworkMonitor *monitor = g_network_monitor_get_default ();
         gboolean available;
 
-#if GLIB_CHECK_VERSION(2, 44, 0)
         available = (g_network_monitor_get_connectivity (monitor) ==
                      G_NETWORK_CONNECTIVITY_FULL);
-#else
-        GSocketConnectable *connectable;
-
-        connectable = g_network_address_new ("location.services.mozilla.com",
-                                             80);
-        available = g_network_monitor_can_reach (monitor,
-                                                 connectable,
-                                                 NULL,
-                                                 NULL);
-        g_object_unref (connectable);
-#endif
 
         return available;
 }
@@ -127,13 +119,11 @@ static void
 refresh_accuracy_level (GClueWebSource *web)
 {
         GClueAccuracyLevel new, existing;
-        gboolean available;
 
-        available = get_internet_available ();
         existing = gclue_location_source_get_available_accuracy_level
                         (GCLUE_LOCATION_SOURCE (web));
         new = GCLUE_WEB_SOURCE_GET_CLASS (web)->get_available_accuracy_level
-                        (web, available);
+                        (web, web->priv->internet_available);
         if (new != existing) {
                 g_debug ("Available accuracy level from %s: %u",
                          G_OBJECT_TYPE_NAME (web), new);
@@ -152,14 +142,15 @@ on_network_changed (GNetworkMonitor *monitor G_GNUC_UNUSED,
         GError *error = NULL;
         gboolean last_available = web->priv->internet_available;
 
+        web->priv->internet_available = get_internet_available ();
+        if (last_available == web->priv->internet_available)
+                return; /* We already reacted to network change */
+
         refresh_accuracy_level (web);
 
         if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (user_data)))
                 return;
 
-        web->priv->internet_available = get_internet_available ();
-        if (last_available == web->priv->internet_available)
-                return; /* We already reacted to network change */
         if (!web->priv->internet_available) {
                 g_debug ("Network unavailable");
                 return;
@@ -186,6 +177,14 @@ on_network_changed (GNetworkMonitor *monitor G_GNUC_UNUSED,
 }
 
 static void
+on_connectivity_changed (GObject    *gobject,
+                         GParamSpec *pspec,
+                         gpointer    user_data)
+{
+        on_network_changed (NULL, FALSE, user_data);
+}
+
+static void
 gclue_web_source_finalize (GObject *gsource)
 {
         GClueWebSourcePrivate *priv = GCLUE_WEB_SOURCE (gsource)->priv;
@@ -194,6 +193,12 @@ gclue_web_source_finalize (GObject *gsource)
                 g_signal_handler_disconnect (g_network_monitor_get_default (),
                                              priv->network_changed_id);
                 priv->network_changed_id = 0;
+        }
+
+        if (priv->connectivity_changed_id) {
+                g_signal_handler_disconnect (g_network_monitor_get_default (),
+                                             priv->connectivity_changed_id);
+                priv->connectivity_changed_id = 0;
         }
 
         if (priv->query != NULL) {
@@ -228,6 +233,11 @@ gclue_web_source_constructed (GObject *object)
                                   "network-changed",
                                   G_CALLBACK (on_network_changed),
                                   object);
+        priv->connectivity_changed_id =
+                g_signal_connect (monitor,
+                                  "notify::connectivity",
+                                  G_CALLBACK (on_connectivity_changed),
+                                  object);
         on_network_changed (NULL,
                             TRUE,
                             object);
@@ -243,8 +253,6 @@ gclue_web_source_class_init (GClueWebSourceClass *klass)
 
         gsource_class->finalize = gclue_web_source_finalize;
         gsource_class->constructed = gclue_web_source_constructed;
-
-        g_type_class_add_private (klass, sizeof (GClueWebSourcePrivate));
 }
 
 static void
@@ -266,10 +274,10 @@ gclue_web_source_refresh (GClueWebSource *source)
 {
         g_return_if_fail (GCLUE_IS_WEB_SOURCE (source));
 
-        if (get_internet_available ()) {
-                source->priv->internet_available = FALSE;
-                on_network_changed (NULL, TRUE, source);
-        }
+        /* Make sure ->internet_available is different from
+         * the real availability of internet access */
+        source->priv->internet_available = FALSE;
+        on_network_changed (NULL, TRUE, source);
 }
 
 static gboolean
@@ -320,14 +328,13 @@ on_submit_source_location_notify (GObject    *source_object,
 
         location = gclue_location_source_get_location (source);
         if (location == NULL ||
-            geocode_location_get_accuracy (GEOCODE_LOCATION (location)) >
+            gclue_location_get_accuracy (location) >
             SUBMISSION_ACCURACY_THRESHOLD ||
-            geocode_location_get_timestamp (GEOCODE_LOCATION (location)) <
+            gclue_location_get_timestamp (location) <
             web->priv->last_submitted + SUBMISSION_TIME_THRESHOLD)
                 return;
 
-        web->priv->last_submitted = geocode_location_get_timestamp
-                (GEOCODE_LOCATION (location));
+        web->priv->last_submitted = gclue_location_get_timestamp (location);
 
         if (!get_internet_available ())
                 return;

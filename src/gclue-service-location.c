@@ -27,18 +27,19 @@
 static void
 gclue_service_location_initable_iface_init (GInitableIface *iface);
 
+struct _GClueServiceLocationPrivate
+{
+        GClueClientInfo *client_info;
+        char *path;
+        GDBusConnection *connection;
+};
+
 G_DEFINE_TYPE_WITH_CODE (GClueServiceLocation,
                          gclue_service_location,
                          GCLUE_DBUS_TYPE_LOCATION_SKELETON,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                gclue_service_location_initable_iface_init));
-
-struct _GClueServiceLocationPrivate
-{
-        GClueClientInfo *client_info;
-        const char *path;
-        GDBusConnection *connection;
-};
+                                                gclue_service_location_initable_iface_init)
+                         G_ADD_PRIVATE (GClueServiceLocation));
 
 enum
 {
@@ -143,32 +144,30 @@ gclue_service_location_set_property (GObject      *object,
                 GClueDBusLocation *location;
                 GClueLocation *loc;
                 gdouble altitude;
-                GeocodeLocation *g_loc;
                 GVariant *timestamp;
 
                 location = GCLUE_DBUS_LOCATION (object);
                 loc = g_value_get_object (value);
-                g_loc = GEOCODE_LOCATION (loc);
                 gclue_dbus_location_set_latitude
-                        (location, geocode_location_get_latitude (g_loc));
+                        (location, gclue_location_get_latitude (loc));
                 gclue_dbus_location_set_longitude
-                        (location, geocode_location_get_longitude (g_loc));
+                        (location, gclue_location_get_longitude (loc));
                 gclue_dbus_location_set_accuracy
-                        (location, geocode_location_get_accuracy (g_loc));
+                        (location, gclue_location_get_accuracy (loc));
                 gclue_dbus_location_set_description
-                        (location, geocode_location_get_description (g_loc));
+                        (location, gclue_location_get_description (loc));
                 gclue_dbus_location_set_speed
                         (location, gclue_location_get_speed (loc));
                 gclue_dbus_location_set_heading
                         (location, gclue_location_get_heading (loc));
                 timestamp = g_variant_new
                         ("(tt)",
-                         (guint64) geocode_location_get_timestamp (g_loc),
+                         (guint64) gclue_location_get_timestamp (loc),
                          (guint64) 0);
                 gclue_dbus_location_set_timestamp
                         (location, timestamp);
-                altitude = geocode_location_get_altitude (g_loc);
-                if (altitude != GEOCODE_LOCATION_ALTITUDE_UNKNOWN)
+                altitude = gclue_location_get_altitude (loc);
+                if (altitude != GCLUE_LOCATION_ALTITUDE_UNKNOWN)
                         gclue_dbus_location_set_altitude (location, altitude);
                 break;
         }
@@ -306,8 +305,6 @@ gclue_service_location_class_init (GClueServiceLocationClass *klass)
         skeleton_class = G_DBUS_INTERFACE_SKELETON_CLASS (klass);
         skeleton_class->get_vtable = gclue_service_location_get_vtable;
 
-        g_type_class_add_private (object_class, sizeof (GClueServiceLocationPrivate));
-
         gParamSpecs[PROP_CLIENT_INFO] = g_param_spec_object ("client-info",
                                                              "ClientInfo",
                                                              "Information on client",
@@ -355,7 +352,7 @@ gclue_service_location_init (GClueServiceLocation *location)
                                                       GCLUE_TYPE_SERVICE_LOCATION,
                                                       GClueServiceLocationPrivate);
         gclue_dbus_location_set_altitude (GCLUE_DBUS_LOCATION (location),
-                                          GEOCODE_LOCATION_ALTITUDE_UNKNOWN);
+                                          GCLUE_LOCATION_ALTITUDE_UNKNOWN);
 }
 
 static gboolean

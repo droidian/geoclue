@@ -36,8 +36,6 @@ start_source (GClueLocationSource *source);
 static gboolean
 stop_source (GClueLocationSource *source);
 
-G_DEFINE_ABSTRACT_TYPE (GClueLocationSource, gclue_location_source, G_TYPE_OBJECT)
-
 struct _GClueLocationSourcePrivate
 {
         GClueLocation *location;
@@ -54,6 +52,11 @@ struct _GClueLocationSourcePrivate
 
         guint heading_changed_id;
 };
+
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GClueLocationSource,
+                                  gclue_location_source,
+                                  G_TYPE_OBJECT,
+                                  G_ADD_PRIVATE (GClueLocationSource))
 
 enum
 {
@@ -205,7 +208,6 @@ gclue_location_source_class_init (GClueLocationSourceClass *klass)
         object_class->get_property = gclue_location_source_get_property;
         object_class->set_property = gclue_location_source_set_property;
         object_class->finalize = gclue_location_source_finalize;
-        g_type_class_add_private (object_class, sizeof (GClueLocationSourcePrivate));
 
         gParamSpecs[PROP_LOCATION] = g_param_spec_object ("location",
                                                           "Location",
@@ -400,10 +402,8 @@ gclue_location_source_set_location (GClueLocationSource *source,
         if (priv->scramble_location) {
                 gdouble latitude, distance, accuracy;
 
-                latitude = geocode_location_get_latitude
-                        (GEOCODE_LOCATION (priv->location));
-                accuracy = geocode_location_get_accuracy
-                        (GEOCODE_LOCATION (priv->location));
+                latitude = gclue_location_get_latitude (priv->location);
+                accuracy = gclue_location_get_accuracy (priv->location);
 
                 /* Randomization is needed to stop apps from calculationg the
                  * actual location.
@@ -428,10 +428,9 @@ gclue_location_source_set_location (GClueLocationSource *source,
                 if (cur_location != NULL && priv->compute_movement) {
                         guint64 cur_timestamp, timestamp;
 
-                        timestamp = geocode_location_get_timestamp
-                                        (GEOCODE_LOCATION (location));
-                        cur_timestamp = geocode_location_get_timestamp
-                                        (GEOCODE_LOCATION (cur_location));
+                        timestamp = gclue_location_get_timestamp (location);
+                        cur_timestamp = gclue_location_get_timestamp
+                                        (cur_location);
 
                         if (timestamp != cur_timestamp)
                                 gclue_location_set_speed_from_prev_location

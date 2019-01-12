@@ -54,8 +54,6 @@ gclue_locator_start (GClueLocationSource *source);
 static gboolean
 gclue_locator_stop (GClueLocationSource *source);
 
-G_DEFINE_TYPE (GClueLocator, gclue_locator, GCLUE_TYPE_LOCATION_SOURCE)
-
 struct _GClueLocatorPrivate
 {
         GList *sources;
@@ -65,6 +63,11 @@ struct _GClueLocatorPrivate
 
         guint time_threshold;
 };
+
+G_DEFINE_TYPE_WITH_CODE (GClueLocator,
+                         gclue_locator,
+                         GCLUE_TYPE_LOCATION_SOURCE,
+                         G_ADD_PRIVATE (GClueLocator))
 
 enum
 {
@@ -80,26 +83,24 @@ set_location (GClueLocator  *locator,
               GClueLocation *location)
 {
         GClueLocation *cur_location;
-        GeocodeLocation *gloc, *cur_gloc;
 
         cur_location = gclue_location_source_get_location
                         (GCLUE_LOCATION_SOURCE (locator));
-        gloc = GEOCODE_LOCATION (location);
-        cur_gloc = GEOCODE_LOCATION (cur_location);
 
         g_debug ("New location available");
 
         if (cur_location != NULL) {
-            if (geocode_location_get_timestamp (gloc) <
-                geocode_location_get_timestamp (cur_gloc)) {
+            if (gclue_location_get_timestamp (location) <
+                gclue_location_get_timestamp (cur_location)) {
                     g_debug ("New location older than current, ignoring.");
                     return;
             }
 
-            if (geocode_location_get_distance_from (gloc, cur_gloc) * 1000 <
-                geocode_location_get_accuracy (gloc) &&
-                geocode_location_get_accuracy (gloc) >
-                geocode_location_get_accuracy (cur_gloc)) {
+            if (gclue_location_get_distance_from (location, cur_location)
+                * 1000 <
+                gclue_location_get_accuracy (location) &&
+                gclue_location_get_accuracy (location) >
+                gclue_location_get_accuracy (cur_location)) {
                     /* We only take the new location if either the previous one
                      * lies outside its accuracy circle or its more or as
                      * accurate as previous one.
@@ -409,7 +410,6 @@ gclue_locator_class_init (GClueLocatorClass *klass)
         object_class->set_property = gclue_locator_set_property;
         object_class->finalize = gclue_locator_finalize;
         object_class->constructed = gclue_locator_constructed;
-        g_type_class_add_private (object_class, sizeof (GClueLocatorPrivate));
 
         gParamSpecs[PROP_ACCURACY_LEVEL] = g_param_spec_enum ("accuracy-level",
                                                               "AccuracyLevel",

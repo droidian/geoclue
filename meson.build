@@ -1,4 +1,4 @@
-project('geoclue', 'c', version: '2.5.1', meson_version : '>= 0.47.2')
+project('geoclue', 'c', version: '2.5.2', meson_version : '>= 0.47.2')
 
 gclue_version = meson.project_version()
 ver_arr = gclue_version.split('.')
@@ -8,6 +8,15 @@ gclue_minor_version = ver_arr[1]
 gclue_micro_version = ver_arr[2]
 
 gclue_api_version='2.0'
+
+datadir = join_paths(get_option('prefix'), get_option('datadir'))
+includedir = join_paths(get_option('prefix'), get_option('includedir'))
+libexecdir = join_paths(get_option('prefix'), get_option('libexecdir'))
+sysconfdir = join_paths(get_option('prefix'), get_option('sysconfdir'))
+localedir = join_paths(datadir, 'locale')
+
+header_dir = 'libgeoclue-' + gclue_api_version
+include_subdir = join_paths(includedir, header_dir)
 
 conf = configuration_data()
 conf.set_quoted('VERSION', gclue_version)
@@ -19,9 +28,12 @@ conf.set_quoted('PACKAGE_STRING', 'geoclue ' + gclue_version)
 conf.set_quoted('PACKAGE_URL', 'http://www.freedesktop.org/wiki/Software/GeoClue')
 conf.set_quoted('PACKAGE_BUGREPORT', 'http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue')
 conf.set_quoted('TEST_SRCDIR', meson.source_root() + '/data/')
-datadir = join_paths(get_option('prefix'), get_option('datadir'))
-conf.set_quoted('LOCALEDIR', datadir + '/locale')
-conf.set_quoted('SYSCONFDIR', get_option('sysconfdir'))
+conf.set_quoted('LOCALEDIR', localedir)
+conf.set_quoted('SYSCONFDIR', sysconfdir)
+conf.set10('GCLUE_USE_3G_SOURCE', get_option('3g-source'))
+conf.set10('GCLUE_USE_CDMA_SOURCE', get_option('cdma-source'))
+conf.set10('GCLUE_USE_MODEM_GPS_SOURCE', get_option('modem-gps-source'))
+conf.set10('GCLUE_USE_NMEA_SOURCE', get_option('nmea-source'))
 
 configure_file(output: 'config.h', configuration : conf)
 configinc = include_directories('.')
@@ -29,9 +41,9 @@ configinc = include_directories('.')
 gnome = import('gnome')
 cc = meson.get_compiler('c')
 
-base_deps = [ dependency('glib-2.0', version: '>= 2.34.0'),
-              dependency('gio-2.0', version: '>= 2.34.0'),
-              dependency('gio-unix-2.0', version: '>= 2.34.0') ]
+base_deps = [ dependency('glib-2.0', version: '>= 2.44.0'),
+              dependency('gio-2.0', version: '>= 2.44.0'),
+              dependency('gio-unix-2.0', version: '>= 2.44.0') ]
 libm = cc.find_library('m', required: false)
 if libm.found()
     base_deps += [ libm ]

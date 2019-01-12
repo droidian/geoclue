@@ -1,3 +1,13 @@
+geoclue-2.0 (2.5.2-1) unstable; urgency=medium
+
+  * [da1f3cfb] New upstream version 2.5.2
+  * [e6718a56] debian/control: Bump glib dependency to 2.44.0
+  * [768c8549] debian/control: Bump Standards-Version to 4.3.0 (no further
+    changes)
+  * [6c170f04] debian/libgeoclue-2-0.symbols: Add newly exported symbols
+
+ -- Laurent Bigonville <bigon@debian.org>  Sat, 12 Jan 2019 14:41:17 +0100
+
 geoclue-2.0 (2.5.1-1) unstable; urgency=high
 
   * [1fe595bd] debian/control: Make libgeoclue-2-dev depend explicitly against

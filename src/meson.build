@@ -1,11 +1,9 @@
-dbus_interface_dir = join_paths(get_option('datadir'), 'dbus-1', 'interfaces')
-abs_dbus_interface_dir = join_paths(get_option('prefix'), dbus_interface_dir)
+dbus_interface_dir = join_paths(datadir, 'dbus-1', 'interfaces')
 
 subdir('agent')
 
 geoclue_deps = base_deps + [ dependency('json-glib-1.0', version: '>= 0.14.0'),
                              dependency('libsoup-2.4', version: '>= 2.42.0') ]
-subdir('geocode-glib')
 
 dbus_gen_src = []
 
@@ -118,8 +116,7 @@ if get_option('nmea-source')
 endif
 
 c_args = [ '-DG_LOG_DOMAIN="Geoclue"' ]
-link_with = [ libgeoclue_public_api, libgeoclue_agent, libgeocode_glib ]
-install_dir = get_option('libexecdir')
+link_with = [ libgeoclue_public_api, libgeoclue_agent ]
 executable('geoclue',
            sources,
            link_with: link_with,
@@ -127,10 +124,10 @@ executable('geoclue',
            c_args: c_args,
            dependencies: geoclue_deps,
            install: true,
-           install_dir: install_dir)
+           install_dir: libexecdir)
 
-dbus_interface = join_paths(abs_dbus_interface_dir, 'org.freedesktop.GeoClue2.xml')
-agent_dbus_interface = join_paths(abs_dbus_interface_dir, 'org.freedesktop.GeoClue2.Agent.xml')
+dbus_interface = join_paths(dbus_interface_dir, 'org.freedesktop.GeoClue2.xml')
+agent_dbus_interface = join_paths(dbus_interface_dir, 'org.freedesktop.GeoClue2.Agent.xml')
 pkgconf = import('pkgconfig')
 pkgconf.generate(version: gclue_version,
                  name: 'Geoclue',

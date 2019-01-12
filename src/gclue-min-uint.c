@@ -33,14 +33,17 @@
  * by different applications.
  **/
 
-G_DEFINE_TYPE (GClueMinUINT, gclue_min_uint, G_TYPE_OBJECT)
-
 struct _GClueMinUINTPrivate
 {
         GHashTable *all_values;
 
         gboolean notify_value;
 };
+
+G_DEFINE_TYPE_WITH_CODE (GClueMinUINT,
+                         gclue_min_uint,
+                         G_TYPE_OBJECT,
+                         G_ADD_PRIVATE (GClueMinUINT))
 
 enum
 {
@@ -116,11 +119,9 @@ gclue_min_uint_class_init (GClueMinUINTClass *klass)
         object_class->finalize = gclue_min_uint_finalize;
         object_class->get_property = gclue_min_uint_get_property;
 
-        g_type_class_add_private (object_class, sizeof (GClueMinUINTPrivate));
-
         gParamSpecs[PROP_VALUE] = g_param_spec_uint ("value",
                                                      "Value",
-                                                     "The mininum value",
+                                                     "The minimum value",
                                                      0,
                                                      G_MAXINT,
                                                      0,
@@ -156,7 +157,7 @@ gclue_min_uint_new (void)
  * gclue_min_uint_get_value
  * @muint: a #GClueMinUINT
  *
- * Returns: The current mininum value from the list.
+ * Returns: The current minimum value from the list.
  **/
 guint
 gclue_min_uint_get_value (GClueMinUINT *muint)

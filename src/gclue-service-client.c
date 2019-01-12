@@ -36,20 +36,12 @@ gclue_service_client_client_iface_init (GClueDBusClientIface *iface);
 static void
 gclue_service_client_initable_iface_init (GInitableIface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (GClueServiceClient,
-                         gclue_service_client,
-                         GCLUE_DBUS_TYPE_CLIENT_SKELETON,
-                         G_IMPLEMENT_INTERFACE (GCLUE_DBUS_TYPE_CLIENT,
-                                                gclue_service_client_client_iface_init)
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                gclue_service_client_initable_iface_init));
-
 typedef struct _StartData StartData;
 
 struct _GClueServiceClientPrivate
 {
         GClueClientInfo *client_info;
-        const char *path;
+        char *path;
         GDBusConnection *connection;
         GClueAgent *agent_proxy;
         StartData *pending_auth_start_data;
@@ -67,6 +59,15 @@ struct _GClueServiceClientPrivate
 
         gboolean agent_stopped; /* Agent stopped client, not the app */
 };
+
+G_DEFINE_TYPE_WITH_CODE (GClueServiceClient,
+                         gclue_service_client,
+                         GCLUE_DBUS_TYPE_CLIENT_SKELETON,
+                         G_IMPLEMENT_INTERFACE (GCLUE_DBUS_TYPE_CLIENT,
+                                                gclue_service_client_client_iface_init)
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                gclue_service_client_initable_iface_init)
+                         G_ADD_PRIVATE (GClueServiceClient));
 
 enum
 {
@@ -133,8 +134,7 @@ distance_below_threshold (GClueServiceClient *client,
         g_object_get (priv->location,
                       "location", &cur_location,
                       NULL);
-        distance = geocode_location_get_distance_from
-                (GEOCODE_LOCATION (cur_location), GEOCODE_LOCATION (location));
+        distance = gclue_location_get_distance_from (cur_location, location);
         g_object_unref (cur_location);
 
         threshold_km = priv->distance_threshold / 1000.0;
@@ -164,9 +164,8 @@ time_below_threshold (GClueServiceClient *client,
                       "location", &cur_location,
                       NULL);
 
-        cur_ts = geocode_location_get_timestamp
-                                (GEOCODE_LOCATION (cur_location));
-        ts = geocode_location_get_timestamp (GEOCODE_LOCATION (location));
+        cur_ts = gclue_location_get_timestamp (cur_location);
+        ts = gclue_location_get_timestamp (location);
         diff_ts = ABS (ts - cur_ts);
 
         g_object_unref (cur_location);
@@ -340,7 +339,7 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
                 id = gclue_dbus_client_get_desktop_id (gdbus_client);
                 max_accuracy = g_variant_get_uint32 (value);
                 system_app = (gclue_client_info_get_xdg_id
-                              (client->priv->client_info) != NULL);
+                              (client->priv->client_info) == NULL);
                 /* FIXME: We should be handling all values of max accuracy
                  *        level here, not just 0 and non-0.
                  */
@@ -881,8 +880,6 @@ gclue_service_client_class_init (GClueServiceClientClass *klass)
 
         skeleton_class = G_DBUS_INTERFACE_SKELETON_CLASS (klass);
         skeleton_class->get_vtable = gclue_service_client_get_vtable;
-
-        g_type_class_add_private (object_class, sizeof (GClueServiceClientPrivate));
 
         gParamSpecs[PROP_CLIENT_INFO] = g_param_spec_object ("client-info",
                                                              "ClientInfo",

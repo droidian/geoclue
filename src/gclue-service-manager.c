@@ -41,27 +41,27 @@ gclue_service_manager_manager_iface_init (GClueDBusManagerIface *iface);
 static void
 gclue_service_manager_initable_iface_init (GInitableIface *iface);
 
+struct _GClueServiceManagerPrivate
+{
+        GDBusConnection *connection;
+        GList *clients;
+        GHashTable *agents;
+
+        guint last_client_id;
+        guint num_clients;
+        gint64 init_time;
+
+        GClueLocator *locator;
+};
+
 G_DEFINE_TYPE_WITH_CODE (GClueServiceManager,
                          gclue_service_manager,
                          GCLUE_DBUS_TYPE_MANAGER_SKELETON,
                          G_IMPLEMENT_INTERFACE (GCLUE_DBUS_TYPE_MANAGER,
                                                 gclue_service_manager_manager_iface_init)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                gclue_service_manager_initable_iface_init))
-
-struct _GClueServiceManagerPrivate
-{
-        GDBusConnection *connection;
-        GHashTable *clients;
-        GHashTable *agents;
-
-        guint num_clients;
-        gint64 init_time;
-
-        GClueLocator *locator;
-
-        gboolean active;
-};
+                                                gclue_service_manager_initable_iface_init)
+                         G_ADD_PRIVATE (GClueServiceManager))
 
 enum
 {
@@ -76,12 +76,11 @@ static GParamSpec *gParamSpecs[LAST_PROP];
 static void
 sync_in_use_property (GClueServiceManager *manager)
 {
-        gboolean in_use = FALSE, active = FALSE;
-        GList *clients, *l;
+        gboolean in_use = FALSE;
+        GList *l;
         GClueDBusManager *gdbus_manager;
 
-        clients = g_hash_table_get_values (manager->priv->clients);
-        for (l = clients; l != NULL; l = l->next) {
+        for (l = manager->priv->clients; l != NULL; l = l->next) {
                 GClueDBusClient *client = GCLUE_DBUS_CLIENT (l->data);
                 GClueConfig *config;
                 const char *id;
@@ -89,7 +88,6 @@ sync_in_use_property (GClueServiceManager *manager)
                 id = gclue_dbus_client_get_desktop_id (client);
                 config = gclue_config_get_singleton ();
 
-                active |= gclue_dbus_client_get_active (client);
                 if (gclue_dbus_client_get_active (client) &&
                     !gclue_config_is_system_component (config, id)) {
                         in_use = TRUE;
@@ -97,28 +95,64 @@ sync_in_use_property (GClueServiceManager *manager)
                         break;
                 }
         }
-        g_list_free (clients);
 
-        if (manager->priv->active != active) {
-                manager->priv->active = active;
-                g_object_notify (G_OBJECT (manager), "active");
-        }
         gdbus_manager = GCLUE_DBUS_MANAGER (manager);
         if (in_use != gclue_dbus_manager_get_in_use (gdbus_manager))
                 gclue_dbus_manager_set_in_use (gdbus_manager, in_use);
+}
+
+static int
+compare_client_bus_name (gconstpointer a,
+                         gconstpointer b)
+{
+        GClueClientInfo *info;
+        const char *bus_name = (const char *) b;
+
+        info = gclue_service_client_get_client_info (GCLUE_SERVICE_CLIENT (a));
+
+        return g_strcmp0 (bus_name, gclue_client_info_get_bus_name (info));
+}
+
+static void
+delete_client (GClueServiceManager *manager,
+                GCompareFunc        compare_func,
+                gpointer            compare_func_data)
+{
+        GClueServiceManagerPrivate *priv = manager->priv;
+        GList *l;
+
+        l = priv->clients;
+        while (l != NULL) {
+                GList *next = l->next;
+
+                if (compare_func (l->data, compare_func_data) == 0) {
+                        g_object_unref (G_OBJECT (l->data));
+                        priv->clients = g_list_remove_link (priv->clients, l);
+                        priv->num_clients--;
+                        if (priv->num_clients == 0) {
+                                g_object_notify (G_OBJECT (manager), "active");
+                        }
+                }
+                l = next;
+        }
+
+        g_debug ("Number of connected clients: %u", priv->num_clients);
+        sync_in_use_property (manager);
 }
 
 static void
 on_peer_vanished (GClueClientInfo *info,
                   gpointer         user_data)
 {
-        GClueServiceManager *manager = GCLUE_SERVICE_MANAGER (user_data);
+        const char *bus_name;
 
-        g_hash_table_remove (manager->priv->clients,
-                             gclue_client_info_get_bus_name (info));
-        g_debug ("Number of connected clients: %u",
-                 g_hash_table_size (manager->priv->clients));
-        sync_in_use_property (manager);
+        bus_name = gclue_client_info_get_bus_name (info);
+        g_debug ("Client `%s` vanished. Dropping associated client objects",
+                 bus_name);
+
+        delete_client (GCLUE_SERVICE_MANAGER (user_data),
+                       compare_client_bus_name,
+                       (char *) bus_name);
 }
 
 typedef struct
@@ -126,6 +160,8 @@ typedef struct
         GClueDBusManager *manager;
         GDBusMethodInvocation *invocation;
         GClueClientInfo *client_info;
+        gboolean reuse_client;
+
 } OnClientInfoNewReadyData;
 
 static gboolean
@@ -143,8 +179,27 @@ complete_get_client (OnClientInfoNewReadyData *data)
         agent_proxy = g_hash_table_lookup (priv->agents,
                                            GINT_TO_POINTER (user_id));
 
+        if (data->reuse_client) {
+                GList *node;
+                const char *peer;
+
+                peer = g_dbus_method_invocation_get_sender (data->invocation);
+                node = g_list_find_custom (priv->clients,
+                                           peer,
+                                           compare_client_bus_name);
+                if (node != NULL) {
+                        GClueServiceClient *client;
+
+                        client = GCLUE_SERVICE_CLIENT (node->data);
+                        path = g_strdup
+                                (gclue_service_client_get_path (client));
+
+                        goto client_created;
+                }
+        }
+
         path = g_strdup_printf ("/org/freedesktop/GeoClue2/Client/%u",
-                                ++priv->num_clients);
+                                ++priv->last_client_id);
 
         client = gclue_service_client_new (info,
                                            path,
@@ -154,24 +209,27 @@ complete_get_client (OnClientInfoNewReadyData *data)
         if (client == NULL)
                 goto error_out;
 
-        g_hash_table_insert (priv->clients,
-                             g_strdup (gclue_client_info_get_bus_name (info)),
-                             client);
-        g_debug ("Number of connected clients: %u",
-                 g_hash_table_size (priv->clients));
+        priv->clients = g_list_prepend (priv->clients, client);
+        priv->num_clients++;
+        if (priv->num_clients == 1) {
+                g_object_notify (G_OBJECT (data->manager), "active");
+        }
+        g_debug ("Number of connected clients: %u", priv->num_clients);
 
         g_signal_connect (info,
                           "peer-vanished",
                           G_CALLBACK (on_peer_vanished),
                           data->manager);
-        g_signal_connect_swapped (client,
-                                  "notify::active",
-                                  G_CALLBACK (sync_in_use_property),
-                                  data->manager);
 
-        gclue_dbus_manager_complete_get_client (data->manager,
-                                                data->invocation,
-                                                path);
+client_created:
+        if (data->reuse_client)
+                gclue_dbus_manager_complete_get_client (data->manager,
+                                                        data->invocation,
+                                                        path);
+        else
+                gclue_dbus_manager_complete_create_client (data->manager,
+                                                           data->invocation,
+                                                           path);
         goto out;
 
 error_out:
@@ -234,36 +292,89 @@ on_client_info_new_ready (GObject      *source_object,
         complete_get_client (data);
 }
 
-static gboolean
-gclue_service_manager_handle_get_client (GClueDBusManager      *manager,
-                                         GDBusMethodInvocation *invocation)
+static void
+handle_get_client (GClueDBusManager      *manager,
+                   GDBusMethodInvocation *invocation,
+                   gboolean               reuse_client)
 {
         GClueServiceManager *self = GCLUE_SERVICE_MANAGER (manager);
         GClueServiceManagerPrivate *priv = self->priv;
-        GClueServiceClient *client;
         const char *peer;
         OnClientInfoNewReadyData *data;
 
         peer = g_dbus_method_invocation_get_sender (invocation);
-        client = g_hash_table_lookup (priv->clients, peer);
-        if (client != NULL) {
-                const gchar *existing_path;
-
-                existing_path = gclue_service_client_get_path (client);
-                gclue_dbus_manager_complete_get_client (manager,
-                                                        invocation,
-                                                        existing_path);
-                return TRUE;
-        }
 
         data = g_slice_new (OnClientInfoNewReadyData);
         data->manager = manager;
         data->invocation = invocation;
+        data->reuse_client = reuse_client;
         gclue_client_info_new_async (peer,
                                      priv->connection,
                                      NULL,
                                      on_client_info_new_ready,
                                      data);
+}
+
+static gboolean
+gclue_service_manager_handle_get_client (GClueDBusManager      *manager,
+                                         GDBusMethodInvocation *invocation)
+{
+        handle_get_client (manager, invocation, TRUE);
+
+        return TRUE;
+}
+
+static gboolean
+gclue_service_manager_handle_create_client (GClueDBusManager      *manager,
+                                            GDBusMethodInvocation *invocation)
+{
+        handle_get_client (manager, invocation, FALSE);
+
+        return TRUE;
+}
+
+typedef struct
+{
+        const char *path;
+        const char *bus_name;
+} CompareClientPathNBusNameData;
+
+static int
+compare_client_path_n_bus_name (gconstpointer a,
+                                gconstpointer b)
+{
+        GClueServiceClient *client = GCLUE_SERVICE_CLIENT (a);
+        CompareClientPathNBusNameData *data =
+                (CompareClientPathNBusNameData *) b;
+        GClueClientInfo *info;
+
+        info = gclue_service_client_get_client_info (client);
+
+        if (g_strcmp0 (data->bus_name,
+                       gclue_client_info_get_bus_name (info)) == 0 &&
+            g_strcmp0 (data->path,
+                       gclue_service_client_get_path (client)) == 0)
+                return 0;
+        else
+                return 1;
+}
+
+static gboolean
+gclue_service_manager_handle_delete_client (GClueDBusManager      *manager,
+                                            GDBusMethodInvocation *invocation,
+                                            const char            *path)
+{
+        CompareClientPathNBusNameData data;
+
+        data.path = path;
+        data.bus_name = g_dbus_method_invocation_get_sender (invocation);
+
+        delete_client (GCLUE_SERVICE_MANAGER (manager),
+                       compare_client_path_n_bus_name,
+                       &data);
+
+        gclue_dbus_manager_complete_delete_client (manager, invocation);
+
         return TRUE;
 }
 
@@ -413,7 +524,10 @@ gclue_service_manager_finalize (GObject *object)
 
         g_clear_object (&priv->locator);
         g_clear_object (&priv->connection);
-        g_clear_pointer (&priv->clients, g_hash_table_unref);
+        if (priv->clients != NULL) {
+                g_list_free_full (priv->clients, g_object_unref);
+                priv->clients = NULL;
+        }
         g_clear_pointer (&priv->agents, g_hash_table_unref);
 
         /* Chain up to the parent class */
@@ -434,7 +548,7 @@ gclue_service_manager_get_property (GObject    *object,
                 break;
 
         case PROP_ACTIVE:
-                g_value_set_boolean (value, manager->priv->active);
+                g_value_set_boolean (value, (manager->priv->num_clients != 0));
                 break;
 
         default:
@@ -502,8 +616,6 @@ gclue_service_manager_class_init (GClueServiceManagerClass *klass)
         object_class->set_property = gclue_service_manager_set_property;
         object_class->constructed = gclue_service_manager_constructed;
 
-        g_type_class_add_private (object_class, sizeof (GClueServiceManagerPrivate));
-
         gParamSpecs[PROP_CONNECTION] = g_param_spec_object ("connection",
                                                             "Connection",
                                                             "DBus Connection",
@@ -517,8 +629,8 @@ gclue_service_manager_class_init (GClueServiceManagerClass *klass)
         /**
          * GClueServiceManager:active:
          *
-         * Unlike the D-Bus 'InUse' property, this doesn't differentiate
-         * between system components and apps.
+         * Unlike the D-Bus 'InUse' property, this indicates wether or not
+         * currently we have connected clients.
          */
         gParamSpecs[PROP_ACTIVE] = g_param_spec_boolean ("active",
                                                          "Active",
@@ -537,10 +649,6 @@ gclue_service_manager_init (GClueServiceManager *manager)
                                                      GCLUE_TYPE_SERVICE_MANAGER,
                                                      GClueServiceManagerPrivate);
 
-        manager->priv->clients = g_hash_table_new_full (g_str_hash,
-                                                        g_str_equal,
-                                                        g_free,
-                                                        g_object_unref);
         manager->priv->agents = g_hash_table_new_full (g_direct_hash,
                                                        g_direct_equal,
                                                        NULL,
@@ -564,6 +672,10 @@ static void
 gclue_service_manager_manager_iface_init (GClueDBusManagerIface *iface)
 {
         iface->handle_get_client = gclue_service_manager_handle_get_client;
+        iface->handle_create_client =
+                gclue_service_manager_handle_create_client;
+        iface->handle_delete_client =
+                gclue_service_manager_handle_delete_client;
         iface->handle_add_agent = gclue_service_manager_handle_add_agent;
 }
 
@@ -587,5 +699,5 @@ gclue_service_manager_new (GDBusConnection *connection,
 gboolean
 gclue_service_manager_get_active (GClueServiceManager *manager)
 {
-        return manager->priv->active;
+        return (manager->priv->num_clients != 0);
 }

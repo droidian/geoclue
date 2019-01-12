@@ -73,10 +73,18 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_manager_call_add_agent@Base 2.4.0
  gclue_manager_call_add_agent_finish@Base 2.4.0
  gclue_manager_call_add_agent_sync@Base 2.4.0
+ gclue_manager_call_create_client@Base 2.5.2
+ gclue_manager_call_create_client_finish@Base 2.5.2
+ gclue_manager_call_create_client_sync@Base 2.5.2
+ gclue_manager_call_delete_client@Base 2.5.2
+ gclue_manager_call_delete_client_finish@Base 2.5.2
+ gclue_manager_call_delete_client_sync@Base 2.5.2
  gclue_manager_call_get_client@Base 2.4.0
  gclue_manager_call_get_client_finish@Base 2.4.0
  gclue_manager_call_get_client_sync@Base 2.4.0
  gclue_manager_complete_add_agent@Base 2.4.0
+ gclue_manager_complete_create_client@Base 2.5.2
+ gclue_manager_complete_delete_client@Base 2.5.2
  gclue_manager_complete_get_client@Base 2.4.0
  gclue_manager_get_available_accuracy_level@Base 2.4.0
  gclue_manager_get_in_use@Base 2.4.0

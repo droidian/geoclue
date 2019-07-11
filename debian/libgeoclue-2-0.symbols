@@ -24,6 +24,10 @@ libgeoclue-2.so.0 libgeoclue-2-0 #MINVER#
  gclue_client_override_properties@Base 2.4.0
  gclue_client_proxy_create@Base 2.4.0
  gclue_client_proxy_create_finish@Base 2.4.0
+ gclue_client_proxy_create_flags_get_type@Base 2.5.3
+ gclue_client_proxy_create_full@Base 2.5.3
+ gclue_client_proxy_create_full_finish@Base 2.5.3
+ gclue_client_proxy_create_full_sync@Base 2.5.3
  gclue_client_proxy_create_sync@Base 2.4.0
  gclue_client_proxy_get_type@Base 2.4.0
  gclue_client_proxy_new@Base 2.4.0

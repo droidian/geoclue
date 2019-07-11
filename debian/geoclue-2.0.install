@@ -10,3 +10,4 @@ usr/lib/geoclue-2.0/geoclue
 usr/share/applications/geoclue-demo-agent.desktop
 usr/share/dbus-1/interfaces/
 usr/share/dbus-1/system-services/
+usr/share/man/man5/geoclue.5

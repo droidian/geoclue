@@ -1,7 +1,9 @@
 before_script:
     -  sed -i '/^#\sdeb-src /s/^#//' '/etc/apt/sources.list'
     - apt-get update && apt-get build-dep --yes geoclue-2.0
-    - apt-get install --yes git gobject-introspection libmm-glib-dev wget libnotify-dev xsltproc gtk-doc-tools python3-pip ninja-build gettext modemmanager-dev
+    - apt-get install --yes git gobject-introspection libmm-glib-dev wget
+    - apt-get install --yes libnotify-dev xsltproc gtk-doc-tools python3-pip
+    - apt-get install --yes ninja-build gettext modemmanager-dev
     - pip3 install meson
 
 # Ubuntu 14.04 is not supported, see README for details
@@ -17,15 +19,6 @@ ubuntu-16.04:
             - "${CI_PROJECT_DIR}/build"
     script: meson -Dgtk-doc=false build && ninja -C build && ninja -C build test && ninja -C build install
 
-ubuntu-17.10:
-    image: ubuntu:artful
-    artifacts:
-        when: always
-        name: "artful-${CI_COMMIT_REF_NAME}"
-        paths:
-            - "${CI_PROJECT_DIR}/build"
-    script: meson build && ninja -C build && ninja -C build test && ninja -C build install
-
 ubuntu-18.04:
     image: ubuntu:bionic
     artifacts:
@@ -34,3 +27,12 @@ ubuntu-18.04:
         paths:
             - "${CI_PROJECT_DIR}/build"
     script: meson build && ninja -C build && ninja -C build test && ninja -C build install
+
+ubuntu-18.04-no-backend:
+    image: ubuntu:bionic
+    artifacts:
+        when: always
+        name: "bionic-no-backend-${CI_COMMIT_REF_NAME}"
+        paths:
+            - "${CI_PROJECT_DIR}/build"
+    script: meson -Denable-backend=false build && ninja -C build && ninja -C build test && ninja -C build install

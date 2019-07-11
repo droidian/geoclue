@@ -1,4 +1,4 @@
-project('geoclue', 'c', version: '2.5.2', meson_version : '>= 0.47.2')
+project('geoclue', 'c', version: '2.5.3', meson_version : '>= 0.47.2')
 
 gclue_version = meson.project_version()
 ver_arr = gclue_version.split('.')
@@ -25,8 +25,8 @@ conf.set_quoted('PACKAGE_NAME', 'geoclue')
 conf.set_quoted('GETTEXT_PACKAGE', 'geoclue')
 conf.set_quoted('PACKAGE_TARNAME', 'geoclue')
 conf.set_quoted('PACKAGE_STRING', 'geoclue ' + gclue_version)
-conf.set_quoted('PACKAGE_URL', 'http://www.freedesktop.org/wiki/Software/GeoClue')
-conf.set_quoted('PACKAGE_BUGREPORT', 'http://bugs.freedesktop.org/enter_bug.cgi?product=GeoClue')
+conf.set_quoted('PACKAGE_URL', 'https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home')
+conf.set_quoted('PACKAGE_BUGREPORT', 'https://gitlab.freedesktop.org/geoclue/geoclue/issues/new')
 conf.set_quoted('TEST_SRCDIR', meson.source_root() + '/data/')
 conf.set_quoted('LOCALEDIR', localedir)
 conf.set_quoted('SYSCONFDIR', sysconfdir)
@@ -50,6 +50,7 @@ if libm.found()
 endif
 
 subdir('public-api')
+subdir('interface')
 if get_option('enable-backend')
     subdir('src')
 endif
@@ -72,9 +73,11 @@ if get_option('gtk-doc') and get_option('libgeoclue')
   subdir('docs')
 endif
 
+systemd_unit_dir = 'N/A'
+
 # FIXME: Remove this once meson does it itself: https://github.com/mesonbuild/meson/issues/757
 summary = '''
-        GeoClue @0@
+        Geoclue @0@
         =================
 
         prefix:                   @1@

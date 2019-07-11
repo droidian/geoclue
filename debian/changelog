@@ -1,3 +1,18 @@
+geoclue-2.0 (2.5.3-1) unstable; urgency=medium
+
+  * [48856ed2] New upstream version 2.5.3
+  * [1bf75efb] debian/control: Bump Standards-Version to 4.4.0 (no further
+    changes)
+  * [9e941a46] debian/libgeoclue-2-0.symbols: Add newly exported symbols
+  * [158dae34] debian/geoclue-2.0.install: Install new geoclue.5 manpage
+  * [f0c2f253] debian/copyright: Use https for the format uri, to please lintian
+  * [80a3663a] debian/copyright: Removed unused file paragraph
+  * [ed125085] debian/geoclue-2.0.lintian-overrides: Override
+    package-supports-alternative-init-but-no-init.d-script. The daemon is
+    D-Bus activated, not started at boot
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 11 Jul 2019 13:53:11 +0200
+
 geoclue-2.0 (2.5.2-1) unstable; urgency=medium
 
   * [da1f3cfb] New upstream version 2.5.2

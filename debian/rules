@@ -17,7 +17,7 @@ ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
 endif
 
 override_dh_auto_configure:
-	dh_auto_configure -- --libexecdir=/usr/lib/geoclue-2.0 \
+	dh_auto_configure -- --libexecdir=/usr/libexec \
                              -Ddbus-srv-user=geoclue \
                              -Dsystemd-system-unit-dir=/lib/systemd/system \
 			     ${BUILD_DOC} \
@@ -29,11 +29,6 @@ override_dh_auto_test:
 	# database, which "geoip-database" package in debian
 	# does not include.
 	dh_auto_test || true
-
-override_dh_auto_install:
-	dh_auto_install
-	mv $(CURDIR)/debian/tmp/usr/lib/geoclue-2.0/geoclue-2.0/demos \
-		$(CURDIR)/debian/tmp/usr/lib/geoclue-2.0/demos
 
 %:
 	dh $@ --with autoreconf,gir

@@ -5,8 +5,8 @@ etc/geoclue/
 etc/xdg/autostart/geoclue-demo-agent.desktop
 lib/systemd/system/
 usr/lib/*/pkgconfig/geoclue-2.0.pc
-usr/lib/geoclue-2.0/demos/agent
-usr/lib/geoclue-2.0/geoclue
+usr/libexec/geoclue-2.0/demos/agent
+usr/libexec/geoclue
 usr/share/applications/geoclue-demo-agent.desktop
 usr/share/dbus-1/interfaces/
 usr/share/dbus-1/system-services/

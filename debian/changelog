@@ -1,3 +1,11 @@
+geoclue-2.0 (2.5.5-1) unstable; urgency=medium
+
+  * [b4cfe4e7] debian/rules: Install the NEWS file as upstream changelog
+  * [3d876ed8] New upstream version 2.5.5
+  * [29ba01cf] Set libexecdir to /usr/libexec now that the policy allows it
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 02 Oct 2019 13:20:41 +0200
+
 geoclue-2.0 (2.5.3-1) unstable; urgency=medium
 
   * [48856ed2] New upstream version 2.5.3

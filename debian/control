@@ -3,7 +3,7 @@ Section: utils
 Priority: optional
 Maintainer: Laurent Bigonville <bigon@debian.org>
 Uploaders: Craig Andrews <candrews@integralblue.com>
-Build-Depends: debhelper (>= 12~),
+Build-Depends: debhelper-compat (= 12),
                gobject-introspection (>= 0.9.6),
                intltool (>= 0.40.0),
                libavahi-client-dev (>= 0.6.10),

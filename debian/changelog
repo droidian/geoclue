@@ -1,3 +1,19 @@
+geoclue-2.0 (2.5.5-2) UNRELEASED; urgency=medium
+
+  [ Debian Janitor ]
+  * [99359d91] Bump debhelper from old 11 to 12.
+  * [f9dd0d99] Set debhelper-compat version in Build-Depends.
+  * [a0d0042a] debian/copyright: use spaces rather than tabs to start
+    continuation lines.
+  * [32c230e4] Set upstream metadata fields: Repository, Repository-Browse.
+  * [3a2f4acf] Drop unnecessary dependency on dh-autoreconf.
+
+  [ Laurent Bigonville ]
+  * [ae0a90ea] debian/control: Bump Standards-Version to 4.5.0 (no further
+    changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 18 Feb 2020 09:03:41 +0100
+
 geoclue-2.0 (2.5.5-1) unstable; urgency=medium
 
   * [b4cfe4e7] debian/rules: Install the NEWS file as upstream changelog

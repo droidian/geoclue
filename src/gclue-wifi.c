@@ -550,14 +550,18 @@ disconnect_bss_signals (GClueWifi *wifi)
 {
         GClueWifiPrivate *priv = wifi->priv;
 
-        if (priv->bss_added_id == 0 || priv->interface == NULL)
-                return;
-
         cancel_wifi_scan (wifi);
-        g_signal_handler_disconnect (priv->interface, priv->bss_added_id);
-        priv->bss_added_id = 0;
-        g_signal_handler_disconnect (priv->interface, priv->bss_removed_id);
-        priv->bss_removed_id = 0;
+
+        if (priv->bss_added_id != 0) {
+                g_signal_handler_disconnect (priv->interface,
+                                             priv->bss_added_id);
+                priv->bss_added_id = 0;
+        }
+        if (priv->bss_removed_id != 0) {
+                g_signal_handler_disconnect (priv->interface,
+                                             priv->bss_removed_id);
+                priv->bss_removed_id = 0;
+        }
 
         g_hash_table_remove_all (priv->bss_proxies);
         g_hash_table_remove_all (priv->ignored_bss_proxies);
@@ -834,10 +838,13 @@ gclue_wifi_create_query (GClueWebSource *source,
                          GError        **error)
 {
         GList *bss_list; /* As in Access Points */
+        SoupMessage *msg;
 
         bss_list = get_bss_list (GCLUE_WIFI (source), NULL);
 
-        return gclue_mozilla_create_query (bss_list, NULL, error);
+        msg = gclue_mozilla_create_query (bss_list, NULL, error);
+        g_list_free (bss_list);
+        return msg;
 }
 
 static GClueLocation *
@@ -854,13 +861,16 @@ gclue_wifi_create_submit_query (GClueWebSource  *source,
                                 GError         **error)
 {
         GList *bss_list; /* As in Access Points */
+        SoupMessage * msg;
 
         bss_list = get_bss_list (GCLUE_WIFI (source), error);
         if (bss_list == NULL)
                 return NULL;
 
-        return gclue_mozilla_create_submit_query (location,
-                                                  bss_list,
-                                                  NULL,
-                                                  error);
+        msg = gclue_mozilla_create_submit_query (location,
+                                                 bss_list,
+                                                 NULL,
+                                                 error);
+        g_list_free (bss_list);
+        return msg;
 }

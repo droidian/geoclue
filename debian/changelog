@@ -1,4 +1,4 @@
-geoclue-2.0 (2.5.6-1) UNRELEASED; urgency=medium
+geoclue-2.0 (2.5.6-1) unstable; urgency=medium
 
   [ Debian Janitor ]
   * [99359d91] Bump debhelper from old 11 to 12.
@@ -15,7 +15,7 @@ geoclue-2.0 (2.5.6-1) UNRELEASED; urgency=medium
   [ Will Thompson ]
   * [d2643a89] New upstream version 2.5.6
 
- -- Will Thompson <wjt@endlessm.com>  Mon, 02 Mar 2020 13:12:23 +0000
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 08 Mar 2020 17:06:02 +0100
 
 geoclue-2.0 (2.5.5-1) unstable; urgency=medium
 

@@ -1,3 +1,10 @@
+geoclue-2.0 (2.5.6-1mobian1) unstable; urgency=medium
+
+  * Downstream fix for #132 - Use tracking area code (TAC) as the LAC when in
+    LTE mode matching Ichneaa docs
+
+ -- Chris McGee <newton688@gmail.com>  Thu, 30 Jul 2020 08:12:02 +0100
+
 geoclue-2.0 (2.5.6-1) unstable; urgency=medium
 
   [ Debian Janitor ]

@@ -54,6 +54,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}
 Build-Profiles: <!nodoc>
+Multi-Arch: foreign
 Description: geoinformation service (D-Bus API documentation)
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.
@@ -103,6 +104,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}
 Build-Profiles: <!nodoc>
+Multi-Arch: foreign
 Description: convenience library to interact with geoinformation service (API documentation)
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.

@@ -1,3 +1,10 @@
+geoclue-2.0 (2.5.7-3) unstable; urgency=medium
+
+  * Properly detect that applications are running in flatpak when using cgroup
+    v2. Thanks to Guido Günther <agx@sigxcpu.org> (Closes: #985345)
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 17 Mar 2021 15:53:13 +0100
+
 geoclue-2.0 (2.5.7-2) unstable; urgency=medium
 
   * d/p/fix-nowifi-query.patch: Fix getting a location if the computer has no

@@ -3,3 +3,4 @@
 0003-Revert-Fixed-hang-on-startup-when-client-app-is-a-sy.patch
 0004-service-Stop-the-client-for-system-applications-when.patch
 fix-nowifi-query.patch
+0006-client-info-Support-cgroup-v2.patch

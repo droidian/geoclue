@@ -59,9 +59,9 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GClueWebSource,
                                   GCLUE_TYPE_LOCATION_SOURCE,
                                   G_ADD_PRIVATE (GClueWebSource))
 
-static void refresh_callback (SoupSession *session,
-                              SoupMessage *query,
-                              gpointer     user_data);
+static void refresh_callback (SoupSession  *session,
+                              GAsyncResult *result,
+                              gpointer      user_data);
 
 static void
 gclue_web_source_real_refresh_async (GClueWebSource      *source,
@@ -103,44 +103,48 @@ gclue_web_source_real_refresh_async (GClueWebSource      *source,
                 return;
         }
 
-        /* TODO handle cancellation */
-        soup_session_queue_message (source->priv->soup_session,
-                                    source->priv->query,
-                                    refresh_callback,
-                                    g_steal_pointer (&task));
+        soup_session_send_and_read_async (source->priv->soup_session,
+                                          source->priv->query,
+                                          G_PRIORITY_DEFAULT,
+                                          cancellable,
+                                          (GAsyncReadyCallback)refresh_callback,
+                                          g_steal_pointer (&task));
 }
 
 static void
-refresh_callback (SoupSession *session,
-                  SoupMessage *query,
-                  gpointer     user_data)
+refresh_callback (SoupSession  *session,
+                  GAsyncResult *result,
+                  gpointer      user_data)
 {
         g_autoptr(GTask) task = g_steal_pointer (&user_data);
         GClueWebSource *web;
+        g_autoptr(SoupMessage) query = NULL;
+        g_autoptr(GBytes) body = NULL;
         g_autoptr(GError) local_error = NULL;
         g_autofree char *contents = NULL;
         g_autofree char *str = NULL;
         g_autoptr(GClueLocation) location = NULL;
-        SoupURI *uri;
-
-        if (query->status_code == SOUP_STATUS_CANCELLED) {
-                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
-                                         "Operation cancelled");
-                return;
-        }
+        GUri *uri;
 
         web = GCLUE_WEB_SOURCE (g_task_get_source_object (task));
-        web->priv->query = NULL;
+        query = g_steal_pointer (&web->priv->query);
 
-        if (query->status_code != SOUP_STATUS_OK) {
-                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
-                                         "Failed to query location: %s", query->reason_phrase);
+        body = soup_session_send_and_read_finish (session, result, &local_error);
+        if (!body) {
+                g_task_return_error (task, g_steal_pointer (&local_error));
                 return;
         }
 
-        contents = g_strndup (query->response_body->data, query->response_body->length);
+        if (soup_message_get_status (query) != SOUP_STATUS_OK) {
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                         "Failed to query location: %s",
+                                         soup_message_get_reason_phrase (query));
+                return;
+        }
+
+        contents = g_strndup (g_bytes_get_data (body, NULL), g_bytes_get_size (body));
         uri = soup_message_get_uri (query);
-        str = soup_uri_to_string (uri, FALSE);
+        str = g_uri_to_string (uri);
         g_debug ("Got following response from '%s':\n%s", str, contents);
         location = GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_response (web, contents, &local_error);
         if (local_error != NULL) {
@@ -253,15 +257,12 @@ gclue_web_source_finalize (GObject *gsource)
                 priv->connectivity_changed_id = 0;
         }
 
-        if (priv->query != NULL) {
-                g_debug ("Cancelling query");
-                soup_session_cancel_message (priv->soup_session,
-                                             priv->query,
-                                             SOUP_STATUS_CANCELLED);
-                priv->query = NULL;
-        }
+        g_clear_object (&priv->query);
 
-        g_clear_object (&priv->soup_session);
+        if (priv->soup_session) {
+                soup_session_abort (priv->soup_session);
+                g_object_unref (priv->soup_session);
+        }
 
         G_OBJECT_CLASS (gclue_web_source_parent_class)->finalize (gsource);
 }
@@ -274,10 +275,8 @@ gclue_web_source_constructed (GObject *object)
 
         G_OBJECT_CLASS (gclue_web_source_parent_class)->constructed (object);
 
-        priv->soup_session = soup_session_new_with_options
-                        (SOUP_SESSION_REMOVE_FEATURE_BY_TYPE,
-                         SOUP_TYPE_PROXY_RESOLVER_DEFAULT,
-                         NULL);
+        priv->soup_session = soup_session_new ();
+        soup_session_remove_feature_by_type (priv->soup_session, G_TYPE_PROXY_RESOLVER);
 
         monitor = g_network_monitor_get_default ();
         priv->network_changed_id =
@@ -330,25 +329,33 @@ gclue_web_source_refresh (GClueWebSource *source)
 }
 
 static void
-submit_query_callback (SoupSession *session,
-                       SoupMessage *query,
-                       gpointer     user_data)
+submit_query_callback (SoupSession  *session,
+                       GAsyncResult *result)
 {
-        SoupURI *uri;
-        g_autofree char *str = NULL;
+        g_autoptr(GBytes) body = NULL;
+        g_autoptr(GError) local_error = NULL;
+        SoupMessage *query;
+        g_autofree char *uri_str = NULL;
+        gint status_code;
 
-        uri = soup_message_get_uri (query);
-        str = soup_uri_to_string (uri, FALSE);
-        if (query->status_code != SOUP_STATUS_OK &&
-            query->status_code != SOUP_STATUS_NO_CONTENT) {
+        query = soup_session_get_async_result_message (session, result);
+        uri_str = g_uri_to_string (soup_message_get_uri (query));
+
+        body = soup_session_send_and_read_finish (session, result, &local_error);
+        if (!body) {
                 g_warning ("Failed to submit location data to '%s': %s",
-                           str,
-                           query->reason_phrase);
-		return;
-	}
+                           uri_str, local_error->message);
+                return;
+        }
 
-        g_debug ("Successfully submitted location data to '%s'",
-                 str);
+        status_code = soup_message_get_status (query);
+        if (status_code != SOUP_STATUS_OK && status_code != SOUP_STATUS_NO_CONTENT) {
+                g_warning ("Failed to submit location data to '%s': %s",
+                           uri_str, soup_message_get_reason_phrase (query));
+                return;
+        }
+
+        g_debug ("Successfully submitted location data to '%s'", uri_str);
 }
 
 #define SUBMISSION_ACCURACY_THRESHOLD 100
@@ -362,8 +369,8 @@ on_submit_source_location_notify (GObject    *source_object,
         GClueLocationSource *source = GCLUE_LOCATION_SOURCE (source_object);
         GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
         GClueLocation *location;
-        SoupMessage *query;
-        GError *error = NULL;
+        g_autoptr(SoupMessage) query = NULL;
+        g_autoptr(GError) error = NULL;
 
         location = gclue_location_source_get_location (source);
         if (location == NULL ||
@@ -386,16 +393,17 @@ on_submit_source_location_notify (GObject    *source_object,
                 if (error != NULL) {
                         g_warning ("Failed to create submission query: %s",
                                    error->message);
-                        g_error_free (error);
                 }
 
                 return;
         }
 
-        soup_session_queue_message (web->priv->soup_session,
-                                    query,
-                                    submit_query_callback,
-                                    web);
+        soup_session_send_and_read_async (web->priv->soup_session,
+                                          query,
+                                          G_PRIORITY_DEFAULT,
+                                          NULL,
+                                          (GAsyncReadyCallback)submit_query_callback,
+                                          web);
 }
 
 /**

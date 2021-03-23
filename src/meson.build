@@ -1,5 +1,5 @@
 geoclue_deps = base_deps + [ dependency('json-glib-1.0', version: '>= 0.14.0'),
-                             dependency('libsoup-2.4', version: '>= 2.42.0') ]
+                             dependency('libsoup-3.0', version: '>= 3.0.0') ]
 
 sources = [ libgeoclue_public_api_gen_sources[1],
             geoclue_iface_sources,

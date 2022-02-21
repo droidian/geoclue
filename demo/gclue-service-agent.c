@@ -134,9 +134,7 @@ gclue_service_agent_class_init (GClueServiceAgentClass *klass)
 static void
 gclue_service_agent_init (GClueServiceAgent *agent)
 {
-        agent->priv = G_TYPE_INSTANCE_GET_PRIVATE (agent,
-                                                   GCLUE_TYPE_SERVICE_AGENT,
-                                                   GClueServiceAgentPrivate);
+        agent->priv = gclue_service_agent_get_instance_private (agent);
 }
 
 static void

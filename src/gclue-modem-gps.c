@@ -48,9 +48,9 @@ G_DEFINE_TYPE_WITH_CODE (GClueModemGPS,
                          GCLUE_TYPE_LOCATION_SOURCE,
                          G_ADD_PRIVATE (GClueModemGPS))
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_modem_gps_start (GClueLocationSource *source);
-static gboolean
+static GClueLocationSourceStopResult
 gclue_modem_gps_stop (GClueLocationSource *source);
 
 static void
@@ -155,7 +155,7 @@ gclue_modem_gps_init (GClueModemGPS *source)
         GClueModemGPSPrivate *priv;
         GClueMinUINT *threshold;
 
-        source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source), GCLUE_TYPE_MODEM_GPS, GClueModemGPSPrivate);
+        source->priv = gclue_modem_gps_get_instance_private (source);
         priv = source->priv;
 
         priv->cancellable = g_cancellable_new ();
@@ -209,14 +209,18 @@ gclue_modem_gps_get_singleton (void)
 
 static void
 on_fix_gps (GClueModem *modem,
-            const char *gga,
+            const char *nmeas[],
             gpointer    user_data)
 {
         GClueLocationSource *source = GCLUE_LOCATION_SOURCE (user_data);
-        GClueLocation *location;
+        GClueLocation *prev_location;
+        g_autoptr(GClueLocation) location = NULL;
         GError *error = NULL;
 
-        location = gclue_location_create_from_gga (gga, &error);
+        prev_location = gclue_location_source_get_location (source);
+        location = gclue_location_create_from_nmeas (nmeas,
+                                                     prev_location,
+                                                     &error);
 
         if (error != NULL) {
             g_warning ("Error: %s", error->message);
@@ -229,18 +233,21 @@ on_fix_gps (GClueModem *modem,
                                             location);
 }
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_modem_gps_start (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
         GClueModemGPSPrivate *priv;
+        GClueLocationSourceStartResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_START_RESULT_FAILED);
         priv = GCLUE_MODEM_GPS (source)->priv;
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_gps_parent_class);
-        if (!base_class->start (source))
-                return FALSE;
+        base_result = base_class->start (source);
+        if (base_result != GCLUE_LOCATION_SOURCE_START_RESULT_OK)
+                return base_result;
 
         g_signal_connect (priv->modem,
                           "fix-gps",
@@ -253,21 +260,23 @@ gclue_modem_gps_start (GClueLocationSource *source)
                                         on_gps_enabled,
                                         source);
 
-        return TRUE;
+        return base_result;
 }
 
-static gboolean
+static GClueLocationSourceStopResult
 gclue_modem_gps_stop (GClueLocationSource *source)
 {
         GClueModemGPSPrivate *priv = GCLUE_MODEM_GPS (source)->priv;
         GClueLocationSourceClass *base_class;
         GError *error = NULL;
+        GClueLocationSourceStopResult base_result;
 
         g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_modem_gps_parent_class);
-        if (!base_class->stop (source))
-                return FALSE;
+        base_result = base_class->stop (source);
+        if (base_result == GCLUE_LOCATION_SOURCE_STOP_RESULT_STILL_USED)
+                return base_result;
 
         g_signal_handlers_disconnect_by_func (G_OBJECT (priv->modem),
                                               G_CALLBACK (on_fix_gps),
@@ -282,5 +291,5 @@ gclue_modem_gps_stop (GClueLocationSource *source)
                         g_error_free (error);
                 }
 
-        return TRUE;
+        return base_result;
 }

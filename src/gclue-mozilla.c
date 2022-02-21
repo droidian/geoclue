@@ -40,8 +40,8 @@
  * its easy to switch to Google's API.
  **/
 
-#define BSSID_LEN 7
-#define BSSID_STR_LEN 18
+#define BSSID_LEN 6
+#define BSSID_STR_LEN 17
 #define MAX_SSID_LEN 32
 
 static guint
@@ -53,7 +53,7 @@ variant_to_string (GVariant *variant, guint max_len, char *ret)
         len = g_variant_n_children (variant);
         if (len == 0)
                 return 0;
-        g_return_val_if_fail(len < max_len, 0);
+        g_return_val_if_fail(len <= max_len, 0);
         ret[len] = '\0';
 
         for (i = 0; i < len; i++)
@@ -79,7 +79,7 @@ static gboolean
 get_bssid_from_bss (WPABSS *bss, char *bssid)
 {
         GVariant *variant;
-        char raw_bssid[BSSID_LEN] = { 0 };
+        char raw_bssid[BSSID_LEN + 1] = { 0 };
         guint raw_len, i;
 
         variant = wpa_bss_get_bssid (bss);
@@ -87,12 +87,12 @@ get_bssid_from_bss (WPABSS *bss, char *bssid)
                 return FALSE;
 
         raw_len = variant_to_string (variant, BSSID_LEN, raw_bssid);
-        g_return_val_if_fail (raw_len == BSSID_LEN - 1, FALSE);
+        g_return_val_if_fail (raw_len == BSSID_LEN, FALSE);
 
-        for (i = 0; i < BSSID_LEN - 1; i++) {
+        for (i = 0; i < BSSID_LEN; i++) {
                 unsigned char c = (unsigned char) raw_bssid[i];
 
-                if (i == BSSID_LEN - 2) {
+                if (i == BSSID_LEN - 1) {
                         g_snprintf (bssid + (i * 3), 3, "%02x", c);
                 } else {
                         g_snprintf (bssid + (i * 3), 4, "%02x:", c);
@@ -112,6 +112,30 @@ get_url (void)
         return gclue_config_get_wifi_url (config);
 }
 
+static gboolean
+operator_code_to_mcc_mnc (const gchar *opc,
+                          gint64      *mcc_p,
+                          gint64      *mnc_p)
+{
+        gchar *end;
+        gchar mcc_str[GCLUE_3G_TOWER_COUNTRY_CODE_STR_LEN + 1] = { 0 };
+
+        g_strlcpy (mcc_str, opc, GCLUE_3G_TOWER_COUNTRY_CODE_STR_LEN + 1);
+        *mcc_p = g_ascii_strtoll (mcc_str, &end, 10);
+        if (*end != '\0')
+                goto error;
+
+        *mnc_p = g_ascii_strtoll (opc + GCLUE_3G_TOWER_COUNTRY_CODE_STR_LEN,
+                                  &end, 10);
+        if (*end != '\0')
+                goto error;
+
+        return TRUE;
+error:
+        g_warning ("Operator code conversion failed");
+        return FALSE;
+}
+
 SoupMessage *
 gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
                             GClue3GTower *tower,
@@ -126,6 +150,7 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
         const char *uri;
         guint n_non_ignored_bsss;
         GList *iter;
+        gint64 mcc, mnc;
 
         builder = json_builder_new ();
         json_builder_begin_object (builder);
@@ -147,7 +172,9 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
                 n_non_ignored_bsss++;
         }
 
-        if (tower != NULL) {
+        if (tower != NULL &&
+            operator_code_to_mcc_mnc (tower->opc, &mcc, &mnc)) {
+
                 json_builder_set_member_name (builder, "radioType");
                 json_builder_add_string_value (builder, "gsm");
 
@@ -159,11 +186,15 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
                 json_builder_set_member_name (builder, "cellId");
                 json_builder_add_int_value (builder, tower->cell_id);
                 json_builder_set_member_name (builder, "mobileCountryCode");
-                json_builder_add_int_value (builder, tower->mcc);
+                json_builder_add_int_value (builder, mcc);
                 json_builder_set_member_name (builder, "mobileNetworkCode");
-                json_builder_add_int_value (builder, tower->mnc);
+                json_builder_add_int_value (builder, mnc);
                 json_builder_set_member_name (builder, "locationAreaCode");
                 json_builder_add_int_value (builder, tower->lac);
+                if (tower->tec == GCLUE_TOWER_TEC_4G) {
+                        json_builder_set_member_name (builder, "radioType");
+                        json_builder_add_string_value (builder, "lte");
+		}
 
                 json_builder_end_object (builder);
 
@@ -176,7 +207,7 @@ gclue_mozilla_create_query (GList        *bss_list, /* As in Access Points */
 
                 for (iter = bss_list; iter != NULL; iter = iter->next) {
                         WPABSS *bss = WPA_BSS (iter->data);
-                        char mac[BSSID_STR_LEN] = { 0 };
+                        char mac[BSSID_STR_LEN + 1] = { 0 };
                         gint16 strength_dbm;
 
                         if (gclue_mozilla_should_ignore_bss (bss))
@@ -294,12 +325,13 @@ gclue_mozilla_create_submit_query (GClueLocation   *location,
         JsonBuilder *builder;
         JsonGenerator *generator;
         JsonNode *root_node;
-        char *data, *timestamp;
+        char *data, *timestr;
         const char *url, *nick;
         gsize data_len;
         GList *iter;
         gdouble lat, lon, accuracy, altitude;
-        GTimeVal tv;
+        GDateTime *datetime;
+        gint64 mcc, mnc;
 
         url = get_submit_config (&nick);
         if (url == NULL)
@@ -333,12 +365,16 @@ gclue_mozilla_create_submit_query (GClueLocation   *location,
                 json_builder_add_double_value (builder, altitude);
         }
 
-        tv.tv_sec = gclue_location_get_timestamp (location);
-        tv.tv_usec = 0;
-        timestamp = g_time_val_to_iso8601 (&tv);
+        datetime = g_date_time_new_from_unix_local
+                (gclue_location_get_timestamp (location));
+        /* We need to be compatible with GLib 2.56 so we cannot use this:
+         * timestr = g_date_time_format_iso8601 (datetime);
+         * Construct the format manually instead: */
+        timestr = g_date_time_format (datetime, "%Y-%m-%dT%H:%M:%S%:::z");
         json_builder_set_member_name (builder, "time");
-        json_builder_add_string_value (builder, timestamp);
-        g_free (timestamp);
+        json_builder_add_string_value (builder, timestr);
+        g_free (timestr);
+        g_date_time_unref (datetime);
 
         json_builder_set_member_name (builder, "radioType");
         json_builder_add_string_value (builder, "gsm");
@@ -349,7 +385,7 @@ gclue_mozilla_create_submit_query (GClueLocation   *location,
 
                 for (iter = bss_list; iter != NULL; iter = iter->next) {
                         WPABSS *bss = WPA_BSS (iter->data);
-                        char mac[BSSID_STR_LEN] = { 0 };
+                        char mac[BSSID_STR_LEN + 1] = { 0 };
                         gint16 strength_dbm;
                         guint16 frequency;
 
@@ -374,7 +410,9 @@ gclue_mozilla_create_submit_query (GClueLocation   *location,
                 json_builder_end_array (builder); /* wifi */
         }
 
-        if (tower != NULL) {
+        if (tower != NULL &&
+            operator_code_to_mcc_mnc (tower->opc, &mcc, &mnc)) {
+
                 json_builder_set_member_name (builder, "cell");
                 json_builder_begin_array (builder);
 
@@ -385,9 +423,9 @@ gclue_mozilla_create_submit_query (GClueLocation   *location,
                 json_builder_set_member_name (builder, "cid");
                 json_builder_add_int_value (builder, tower->cell_id);
                 json_builder_set_member_name (builder, "mcc");
-                json_builder_add_int_value (builder, tower->mcc);
+                json_builder_add_int_value (builder, mcc);
                 json_builder_set_member_name (builder, "mnc");
-                json_builder_add_int_value (builder, tower->mnc);
+                json_builder_add_int_value (builder, mnc);
                 json_builder_set_member_name (builder, "lac");
                 json_builder_add_int_value (builder, tower->lac);
 
@@ -428,8 +466,8 @@ out:
 gboolean
 gclue_mozilla_should_ignore_bss (WPABSS *bss)
 {
-        char ssid[MAX_SSID_LEN] = { 0 };
-        char bssid[BSSID_STR_LEN] = { 0 };
+        char ssid[MAX_SSID_LEN + 1] = { 0 };
+        char bssid[BSSID_STR_LEN + 1] = { 0 };
         guint len;
 
         if (!get_bssid_from_bss (bss, bssid)) {

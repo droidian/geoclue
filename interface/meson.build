@@ -66,10 +66,12 @@ if get_option('enable-backend')
       interface_prefix: 'fi.w1.wpa_supplicant1.',
       annotations: annotations)
 
-  compass_iface_sources = gnome.gdbus_codegen(
-      'compass-interface',
-      'net.hadess.SensorProxy.xml',
-      interface_prefix: 'net.hadess.SensorProxy')
+  if get_option('compass')
+    compass_iface_sources = gnome.gdbus_codegen(
+        'compass-interface',
+        'net.hadess.SensorProxy.xml',
+        interface_prefix: 'net.hadess.SensorProxy')
+  endif
 endif
 
 install_data('org.freedesktop.GeoClue2.Agent.xml',

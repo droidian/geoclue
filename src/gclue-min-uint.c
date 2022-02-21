@@ -134,9 +134,7 @@ gclue_min_uint_class_init (GClueMinUINTClass *klass)
 static void
 gclue_min_uint_init (GClueMinUINT *muint)
 {
-        muint->priv = G_TYPE_INSTANCE_GET_PRIVATE (muint,
-                                                   GCLUE_TYPE_MIN_UINT,
-                                                   GClueMinUINTPrivate);
+        muint->priv = gclue_min_uint_get_instance_private (muint);
         muint->priv->all_values = g_hash_table_new (g_direct_hash,
                                                     g_direct_equal);
         muint->priv->notify_value = TRUE;

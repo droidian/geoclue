@@ -10,13 +10,16 @@
 
 # Whitelist of desktop IDs (without .desktop part) of all agents we recognise,
 # separated by a ';'.
-whitelist=@demo_agent@gnome-shell;io.elementary.desktop.agent-geoclue2
+whitelist=@demo_agent@gnome-shell;io.elementary.desktop.agent-geoclue2;sm.puri.Phosh;lipstick
 
 # Network NMEA source configuration options
 [network-nmea]
 
 # Fetch location from NMEA sources on local network?
 enable=true
+
+# use aa nmea unix socket as the data source
+# nmea-socket=/var/run/gps-share.sock
 
 # 3G source configuration options
 [3g]
@@ -42,13 +45,13 @@ enable=true
 # Enable WiFi source
 enable=true
 
-# URL to the wifi geolocation service. The key can currenty be anything, just
-# needs to be present but that is likely going to change in future.
-url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
+# URL to the WiFi geolocation service. If not set, defaults to Mozilla's
+# Location Service with a hardcoded key. To use a custom key, uncomment this URL
+# while changing YOUR_KEY to your MLS API key.
+#url=https://location.services.mozilla.com/v1/geolocate?key=YOUR_KEY
 
-# To use the Google geolocation service instead of mozilla's, simply uncomment
-# this url while changing API_KEY to your Google API key and comment out or
-# remove the url above.
+# To use the Google geolocation service instead of Mozilla's, uncomment this URL
+# while changing YOUR_KEY to your Google API key.
 #
 # WARNING: Please make sure that you are complying with the Google's ToS and
 #          policies if you uncomment this:
@@ -63,11 +66,19 @@ url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
 #
 submit-data=false
 
-# URL to submission API of Mozilla Location Service
-submission-url=https://location.services.mozilla.com/v1/submit?key=geoclue
+# URL to submission API of Mozilla Location Service. If not set, defaults to
+# Mozilla's API with a hardcoded key. To use a custom key, uncomment this URL
+# while changing YOUR_KEY to your MLS API key.
+#submission-url=https://location.services.mozilla.com/v1/submit?key=YOUR_KEY
 
 # A nickname to submit network data with. A nickname must be 2-32 characters long.
 submission-nick=geoclue
+
+# Compass configuration options
+[compass]
+
+# Enable Compass
+enable=true
 
 # Application configuration options
 #
@@ -117,6 +128,11 @@ allowed=true
 system=true
 users=
 
+[sm.puri.Phosh]
+allowed=true
+system=true
+users=
+
 [epiphany]
 allowed=true
 system=false
@@ -125,4 +141,9 @@ users=
 [firefox]
 allowed=true
 system=false
+users=
+
+[lipstick]
+allowed=true
+system=true
 users=

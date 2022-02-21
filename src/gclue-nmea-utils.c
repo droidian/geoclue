@@ -1,7 +1,5 @@
 /* vim: set et ts=8 sw=8: */
 /*
- * Copyright 2014 Red Hat, Inc.
- *
  * Geoclue is free software; you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free
  * Software Foundation; either version 2 of the License, or (at your option)
@@ -16,32 +14,25 @@
  * with Geoclue; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * Authors: Zeeshan Ali (Khattak) <zeeshanak@gnome.org>
  */
 
-#ifndef GCLUE_3G_TOWER_H
-#define GCLUE_3G_TOWER_H
+#include <string.h>
+#include "gclue-nmea-utils.h"
 
-G_BEGIN_DECLS
+/**
+ * gclue_nmea_type_is:
+ * @msg: NMEA sentence
+ * @nmeatype: A three character NMEA sentence type string ("GGA", "RMC" etc.)
+ *
+ * Returns: whether given NMEA sentence is of the given type
+ **/
+gboolean
+gclue_nmea_type_is (const char *msg, const char *nmeatype)
+{
+        g_assert (strnlen (nmeatype, 4) < 4);
 
-typedef enum {
-  GCLUE_TOWER_TEC_UNKNOWN = 0,
-  GCLUE_TOWER_TEC_3G = 1,
-  GCLUE_TOWER_TEC_4G = 2,
-} GClueTowerTec;
+        return strnlen (msg, 7) > 6 &&
+                g_str_has_prefix (msg, "$") &&
+                g_str_has_prefix (msg+3, nmeatype);
+}
 
-typedef struct _GClue3GTower GClue3GTower;
-
-#define GCLUE_3G_TOWER_OPERATOR_CODE_STR_LEN 6
-#define GCLUE_3G_TOWER_COUNTRY_CODE_STR_LEN 3
-
-struct _GClue3GTower {
-        gchar   opc[GCLUE_3G_TOWER_OPERATOR_CODE_STR_LEN + 1];
-        gulong  lac;
-        gulong  cell_id;
-        GClueTowerTec tec;
-};
-
-G_END_DECLS
-
-#endif /* GCLUE_3G_TOWER_H */

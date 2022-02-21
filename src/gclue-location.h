@@ -58,6 +58,8 @@ struct _GClueLocationClass
         GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GClueLocation, g_object_unref)
+
 GType gclue_location_get_type (void);
 
 /**
@@ -137,9 +139,10 @@ GClueLocation *gclue_location_new_full
                                    guint64     timestamp,
                                    const char *description);
 
-GClueLocation *gclue_location_create_from_gga
-                                  (const char *gga,
-                                   GError    **error);
+GClueLocation *gclue_location_create_from_nmeas
+                                  (const char     *nmeas[],
+                                   GClueLocation  *prev_location,
+                                   GError        **error);
 
 GClueLocation *gclue_location_duplicate
                                   (GClueLocation *location);

@@ -23,6 +23,8 @@
 
 #include <stdlib.h>
 #include <glib.h>
+#include "gclue-config.h"
+#include "gclue-nmea-utils.h"
 #include "gclue-nmea-source.h"
 #include "gclue-location.h"
 #include "config.h"
@@ -33,6 +35,7 @@
 #include <avahi-common/malloc.h>
 #include <avahi-common/error.h>
 #include <avahi-glib/glib-watch.h>
+#include <gio/gunixsocketaddress.h>
 
 typedef struct AvahiServiceInfo AvahiServiceInfo;
 
@@ -56,9 +59,9 @@ G_DEFINE_TYPE_WITH_CODE (GClueNMEASource,
                          GCLUE_TYPE_LOCATION_SOURCE,
                          G_ADD_PRIVATE (GClueNMEASource))
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_nmea_source_start (GClueLocationSource *source);
-static gboolean
+static GClueLocationSourceStopResult
 gclue_nmea_source_stop (GClueLocationSource *source);
 
 static void
@@ -90,16 +93,13 @@ avahi_service_new (const char        *identifier,
                    guint16            port,
                    GClueAccuracyLevel accuracy)
 {
-        GTimeVal tv;
-
         AvahiServiceInfo *service = g_slice_new0 (AvahiServiceInfo);
 
         service->identifier = g_strdup (identifier);
         service->host_name = g_strdup (host_name);
         service->port = port;
         service->accuracy = accuracy;
-        g_get_current_time (&tv);
-        service->timestamp = tv.tv_sec;
+        service->timestamp = g_get_real_time () / G_USEC_PER_SEC;
 
         return service;
 }
@@ -200,6 +200,12 @@ add_new_service (GClueNMEASource *source,
         char *key, *value;
         GEnumClass *enum_class;
         GEnumValue *enum_value;
+
+        if (port == 0) {
+	        accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
+
+	        goto CREATE_SERVICE;
+        }
 
         node = avahi_string_list_find (txt, "accuracy");
 
@@ -442,59 +448,87 @@ browse_callback (AvahiServiceBrowser   *service_browser,
         }
 }
 
+#define NMEA_STR_LEN 128
 static void
-on_read_gga_sentence (GObject      *object,
-                      GAsyncResult *result,
-                      gpointer      user_data)
+on_read_nmea_sentence (GObject      *object,
+                       GAsyncResult *result,
+                       gpointer      user_data)
 {
         GClueNMEASource *source = GCLUE_NMEA_SOURCE (user_data);
         GDataInputStream *data_input_stream = G_DATA_INPUT_STREAM (object);
         GError *error = NULL;
-        GClueLocation *location;
+        GClueLocation *prev_location;
+        g_autoptr(GClueLocation) location = NULL;
         gsize data_size = 0 ;
         char *message;
+        gint i;
+        static const gchar *sentences[3] = { 0 };
+        static gchar gga[NMEA_STR_LEN] = { 0 };
+        static gchar rmc[NMEA_STR_LEN] = { 0 };
+
 
         message = g_data_input_stream_read_line_finish (data_input_stream,
                                                         result,
                                                         &data_size,
                                                         &error);
 
-        if (message == NULL) {
-                if (error != NULL) {
-                        if (error->code == G_IO_ERROR_CLOSED)
-                                g_debug ("Socket closed.");
-                        else if (error->code != G_IO_ERROR_CANCELLED)
-                                g_warning ("Error when receiving message: %s",
-                                           error->message);
-                        g_error_free (error);
-                } else {
-                        g_debug ("Nothing to read");
+        do {
+                if (message == NULL) {
+                        if (error != NULL) {
+                                if (error->code == G_IO_ERROR_CLOSED)
+                                        g_debug ("Socket closed.");
+                                else if (error->code != G_IO_ERROR_CANCELLED)
+                                        g_warning ("Error when receiving message: %s",
+                                                   error->message);
+                                g_error_free (error);
+                        } else {
+                                g_debug ("Nothing to read");
+                        }
+                        g_object_unref (data_input_stream);
+
+                        if (source->priv->active_service != NULL)
+                                /* In case service did not advertise it exiting
+                                 * or we failed to receive it's notification.
+                                 */
+                                remove_service (source, source->priv->active_service);
+
+                        gga[0] = '\0';
+                        rmc[0] = '\0';
+                        return;
                 }
-                g_object_unref (data_input_stream);
+                g_debug ("Network source sent: \"%s\"", message);
 
-                if (source->priv->active_service != NULL)
-                        /* In case service did not advertise it exiting
-                         * or we failed to receive it's notification.
-                         */
-                        remove_service (source, source->priv->active_service);
+                if (gclue_nmea_type_is (message, "GGA")) {
+                        g_strlcpy (gga, message, NMEA_STR_LEN);
+                } else if (gclue_nmea_type_is (message, "RMC")) {
+                        g_strlcpy (rmc, message, NMEA_STR_LEN);
+                } else {
+                        g_debug ("Ignoring NMEA sentence, as it's neither GGA or RMC: %s", message);
+                }
 
-                return;
-        }
-        g_debug ("Network source sent: \"%s\"", message);
+                message = (char *) g_buffered_input_stream_peek_buffer
+                        (G_BUFFERED_INPUT_STREAM (data_input_stream),
+                         &data_size);
+                if (g_strstr_len (message, data_size, "\n")) {
+                    message = g_data_input_stream_read_line
+                            (data_input_stream, &data_size, NULL, &error);
+                } else {
+                    break;
+                }
+        } while (TRUE);
 
-        if (!g_str_has_prefix (message, "$GAGGA") &&  /* Galieo */
-            !g_str_has_prefix (message, "$GBGGA") &&  /* BeiDou */
-            !g_str_has_prefix (message, "$BDGGA") &&  /* BeiDou */
-            !g_str_has_prefix (message, "$GLGGA") &&  /* GLONASS */
-            !g_str_has_prefix (message, "$GNGGA") &&  /* GNSS (combined) */
-            !g_str_has_prefix (message, "$GPGGA") &&  /* GPS, SBAS, QZSS */
-            !g_str_has_prefix (message, "$QZGGA")) {  /* QZSS */
-                g_debug ("Ignoring non-GGA sentence from NMEA source");
+        i = 0;
+        if (gga[0])
+                sentences[i++] = gga;
+        if (rmc[0])
+                sentences[i++] = rmc;
+        sentences[i] = NULL;
 
-                goto READ_NEXT_LINE;
-        }
-
-        location = gclue_location_create_from_gga (message, &error);
+        prev_location = gclue_location_source_get_location
+                (GCLUE_LOCATION_SOURCE (source));
+        location = gclue_location_create_from_nmeas (sentences,
+                                                     prev_location,
+                                                     &error);
 
         if (error != NULL) {
                 g_warning ("Error: %s", error->message);
@@ -504,11 +538,14 @@ on_read_gga_sentence (GObject      *object,
                         (GCLUE_LOCATION_SOURCE (source), location);
         }
 
-READ_NEXT_LINE:
+        gga[0] = '\0';
+        rmc[0] = '\0';
+        sentences[0] = NULL;
+
         g_data_input_stream_read_line_async (data_input_stream,
                                              G_PRIORITY_DEFAULT,
                                              source->priv->cancellable,
-                                             on_read_gga_sentence,
+                                             on_read_nmea_sentence,
                                              source);
 }
 
@@ -543,7 +580,7 @@ on_connection_to_location_server (GObject      *object,
         g_data_input_stream_read_line_async (data_input_stream,
                                              G_PRIORITY_DEFAULT,
                                              source->priv->cancellable,
-                                             on_read_gga_sentence,
+                                             on_read_nmea_sentence,
                                              source);
 }
 
@@ -551,6 +588,8 @@ static void
 connect_to_service (GClueNMEASource *source)
 {
         GClueNMEASourcePrivate *priv = source->priv;
+        GSocketAddress *addr;
+        GSocketConnectable *connectable;
 
         if (priv->all_services == NULL)
                 return;
@@ -563,13 +602,23 @@ connect_to_service (GClueNMEASource *source)
          */
         priv->active_service = (AvahiServiceInfo *) priv->all_services->data;
 
-        g_socket_client_connect_to_host_async
-                (priv->client,
-                 priv->active_service->host_name,
-                 priv->active_service->port,
-                 priv->cancellable,
-                 on_connection_to_location_server,
-                 source);
+        if ( priv->active_service->port != 0 )
+		g_socket_client_connect_to_host_async
+			(priv->client,
+			 priv->active_service->host_name,
+			 priv->active_service->port,
+			 priv->cancellable,
+			 on_connection_to_location_server,
+			 source);
+        else {
+		addr = g_unix_socket_address_new(priv->active_service->host_name);
+		connectable = G_SOCKET_CONNECTABLE (addr);
+		g_socket_client_connect_async (priv->client,
+                               connectable,
+                               priv->cancellable,
+                               on_connection_to_location_server,
+                               source);
+        }
 }
 
 static void
@@ -629,17 +678,28 @@ gclue_nmea_source_init (GClueNMEASource *source)
         AvahiServiceBrowser *service_browser;
         const AvahiPoll *poll_api;
         AvahiGLibPoll *glib_poll;
+        const char *nmea_socket;
+        GClueConfig *config;
         int error;
 
-        source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source),
-                                                    GCLUE_TYPE_NMEA_SOURCE,
-                                                    GClueNMEASourcePrivate);
+        source->priv = gclue_nmea_source_get_instance_private (source);
         priv = source->priv;
 
         glib_poll = avahi_glib_poll_new (NULL, G_PRIORITY_DEFAULT);
         poll_api = avahi_glib_poll_get (glib_poll);
 
         priv->cancellable = g_cancellable_new ();
+
+        config = gclue_config_get_singleton ();
+
+        nmea_socket = gclue_config_get_nmea_socket (config);
+        if (nmea_socket != NULL) {
+                add_new_service (source,
+                                 "nmea-socket",
+                                 nmea_socket,
+                                 0,
+                                 NULL);
+        }
 
         avahi_client_new (poll_api,
                           0,
@@ -696,34 +756,39 @@ gclue_nmea_source_get_singleton (void)
         return source;
 }
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_nmea_source_start (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
+        GClueLocationSourceStartResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_NMEA_SOURCE (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_NMEA_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_START_RESULT_FAILED);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_nmea_source_parent_class);
-        if (!base_class->start (source))
-                return FALSE;
+        base_result = base_class->start (source);
+        if (base_result != GCLUE_LOCATION_SOURCE_START_RESULT_OK)
+                return base_result;
 
         connect_to_service (GCLUE_NMEA_SOURCE (source));
 
-        return TRUE;
+        return base_result;
 }
 
-static gboolean
+static GClueLocationSourceStopResult
 gclue_nmea_source_stop (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
+        GClueLocationSourceStopResult base_result;
 
         g_return_val_if_fail (GCLUE_IS_NMEA_SOURCE (source), FALSE);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_nmea_source_parent_class);
-        if (!base_class->stop (source))
-                return FALSE;
+        base_result = base_class->stop (source);
+        if (base_result == GCLUE_LOCATION_SOURCE_STOP_RESULT_STILL_USED)
+                return base_result;
 
         disconnect_from_service (GCLUE_NMEA_SOURCE (source));
 
-        return TRUE;
+        return base_result;
 }

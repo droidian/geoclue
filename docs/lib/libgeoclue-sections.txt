@@ -245,6 +245,8 @@ GClueManagerProxyPrivate
 <TITLE>GClueSimple</TITLE>
 gclue_simple_new
 gclue_simple_new_finish
+gclue_simple_new_with_thresholds
+gclue_simple_new_with_thresholds_finish
 gclue_simple_new_sync
 gclue_simple_get_client
 gclue_simple_get_location

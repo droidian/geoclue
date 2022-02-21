@@ -49,9 +49,9 @@
  * location sources from rest of the code
  */
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_locator_start (GClueLocationSource *source);
-static gboolean
+static GClueLocationSourceStopResult 
 gclue_locator_stop (GClueLocationSource *source);
 
 struct _GClueLocatorPrivate
@@ -60,8 +60,6 @@ struct _GClueLocatorPrivate
         GList *active_sources;
 
         GClueAccuracyLevel accuracy_level;
-
-        guint time_threshold;
 };
 
 G_DEFINE_TYPE_WITH_CODE (GClueLocator,
@@ -78,6 +76,9 @@ enum
 
 static GParamSpec *gParamSpecs[LAST_PROP];
 
+#define MAX_SPEED        500       /* Meters per second */
+#define MAX_LOCATION_AGE (30 * 60) /* Seconds. */
+
 static void
 set_location (GClueLocator  *locator,
               GClueLocation *location)
@@ -90,20 +91,40 @@ set_location (GClueLocator  *locator,
         g_debug ("New location available");
 
         if (cur_location != NULL) {
-            if (gclue_location_get_timestamp (location) <
-                gclue_location_get_timestamp (cur_location)) {
+            guint64 cur_timestamp, new_timestamp;
+            double dist, speed;
+
+            cur_timestamp = gclue_location_get_timestamp (cur_location);
+            new_timestamp = gclue_location_get_timestamp (location);
+            if (new_timestamp < cur_timestamp) {
                     g_debug ("New location older than current, ignoring.");
                     return;
             }
 
-            if (gclue_location_get_distance_from (location, cur_location)
-                * 1000 <
-                gclue_location_get_accuracy (location) &&
+            dist = gclue_location_get_distance_from (location, cur_location);
+            if (new_timestamp > cur_timestamp) {
+                guint64 age = new_timestamp - cur_timestamp;
+
+                if (age < MAX_LOCATION_AGE) {
+                    speed = dist / age;
+                } else {
+                    /* The previous location is too old?
+                     * Force the speed to be within the allowed range then.
+                     */
+                    speed = 0;
+                }
+            } else {
+                speed = G_MAXDOUBLE;
+            }
+
+            if ((dist <= gclue_location_get_accuracy (location) ||
+                 speed > MAX_SPEED) &&
                 gclue_location_get_accuracy (location) >
                 gclue_location_get_accuracy (cur_location)) {
                     /* We only take the new location if either the previous one
-                     * lies outside its accuracy circle or its more or as
-                     * accurate as previous one.
+                     * lies outside its accuracy circle and was reachable with
+                     * a reasonable speed, OR it is more or as accurate as
+                     * the previous one.
                      */
                     g_debug ("Ignoring less accurate new location");
                     return;
@@ -427,25 +448,25 @@ gclue_locator_class_init (GClueLocatorClass *klass)
 static void
 gclue_locator_init (GClueLocator *locator)
 {
-        locator->priv =
-                G_TYPE_INSTANCE_GET_PRIVATE (locator,
-                                            GCLUE_TYPE_LOCATOR,
-                                            GClueLocatorPrivate);
+        locator->priv = gclue_locator_get_instance_private (locator);
 }
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_locator_start (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
         GClueLocator *locator;
         GList *node;
+        GClueLocationSourceStartResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATOR (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATOR (source),
+                              GCLUE_LOCATION_SOURCE_START_RESULT_FAILED);
         locator = GCLUE_LOCATOR (source);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_locator_parent_class);
-        if (!base_class->start (source))
-                return FALSE;
+        base_result = base_class->start (source);
+        if (base_result != GCLUE_LOCATION_SOURCE_START_RESULT_OK)
+                return base_result;
 
         for (node = locator->priv->sources; node != NULL; node = node->next) {
                 GClueLocationSource *src = GCLUE_LOCATION_SOURCE (node->data);
@@ -468,22 +489,24 @@ gclue_locator_start (GClueLocationSource *source)
                 start_source (locator, src);
         }
 
-        return TRUE;
+        return base_result;
 }
 
-static gboolean
+static GClueLocationSourceStopResult
 gclue_locator_stop (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
         GClueLocator *locator;
         GList *node;
+        GClueLocationSourceStopResult base_result;
 
         g_return_val_if_fail (GCLUE_IS_LOCATOR (source), FALSE);
         locator = GCLUE_LOCATOR (source);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_locator_parent_class);
-        if (!base_class->stop (source))
-                return FALSE;
+        base_result = base_class->stop (source);
+        if (base_result == GCLUE_LOCATION_SOURCE_STOP_RESULT_STILL_USED)
+                return base_result;
 
         for (node = locator->priv->active_sources; node != NULL; node = node->next) {
                 GClueLocationSource *src = GCLUE_LOCATION_SOURCE (node->data);
@@ -497,7 +520,7 @@ gclue_locator_stop (GClueLocationSource *source)
 
         g_list_free (locator->priv->active_sources);
         locator->priv->active_sources = NULL;
-        return TRUE;
+        return base_result;
 }
 
 GClueLocator *

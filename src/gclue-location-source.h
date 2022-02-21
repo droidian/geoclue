@@ -38,6 +38,19 @@ G_BEGIN_DECLS
 #define GCLUE_IS_LOCATION_SOURCE_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass),  GCLUE_TYPE_LOCATION_SOURCE))
 #define GCLUE_LOCATION_SOURCE_GET_CLASS(obj)  (G_TYPE_INSTANCE_GET_CLASS ((obj),  GCLUE_TYPE_LOCATION_SOURCE, GClueLocationSourceClass))
 
+typedef enum {
+        GCLUE_LOCATION_SOURCE_START_RESULT_FAILED = 0,
+        GCLUE_LOCATION_SOURCE_START_RESULT_ALREADY_STARTED,
+        GCLUE_LOCATION_SOURCE_START_RESULT_OK
+} GClueLocationSourceStartResult;
+
+typedef enum {
+        GCLUE_LOCATION_SOURCE_STOP_RESULT_FAILED = 0,
+        GCLUE_LOCATION_SOURCE_STOP_RESULT_ALREADY_STOPPED,
+        GCLUE_LOCATION_SOURCE_STOP_RESULT_STILL_USED,
+        GCLUE_LOCATION_SOURCE_STOP_RESULT_OK
+} GClueLocationSourceStopResult;
+
 typedef struct _GClueLocationSource        GClueLocationSource;
 typedef struct _GClueLocationSourceClass   GClueLocationSourceClass;
 typedef struct _GClueLocationSourcePrivate GClueLocationSourcePrivate;
@@ -54,8 +67,8 @@ struct _GClueLocationSourceClass
 {
         GObjectClass parent_class;
 
-        gboolean (*start) (GClueLocationSource *source);
-        gboolean (*stop)  (GClueLocationSource *source);
+        GClueLocationSourceStartResult (*start) (GClueLocationSource *source);
+        GClueLocationSourceStopResult (*stop)  (GClueLocationSource *source);
 };
 
 GType gclue_location_source_get_type (void) G_GNUC_CONST;

@@ -1,4 +1,4 @@
-debian/local/geoclue-2.0.pkla var/lib/polkit-1/localauthority/10-vendor.d/
+debian/local/org.freedesktop.GeoClue2.pkla var/lib/polkit-1/localauthority/10-vendor.d/
 etc/dbus-1/system.d/
 etc/geoclue/
 etc/xdg/autostart/geoclue-demo-agent.desktop

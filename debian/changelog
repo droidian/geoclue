@@ -1,7 +1,7 @@
 geoclue-2.0 (2.6.0-1) unstable; urgency=medium
 
   * New upstream version 2.6.0
-    - debian/patches/: Drop all patches, they (or similar parch) have been
+    - debian/patches/: Drop all patches, they (or similar patches) have been
       merged upstream
     - debian/libgeoclue-2-0.symbols: Add newly exported symbols
   * debian/control: Bump Standards-Version to 4.6.0 (no further changes)

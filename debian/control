@@ -12,7 +12,7 @@ Build-Depends: debhelper-compat (= 12),
                libjson-glib-dev (>= 0.14),
                libmm-glib-dev (>= 1.6) [linux-any],
                libnotify-dev,
-               libsoup2.4-dev (>= 2.42),
+               libsoup-3.0-dev,
                meson (>= 0.47.2),
                pkg-config,
                valac

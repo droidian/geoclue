@@ -1,3 +1,18 @@
+geoclue-2.0 (2.6.0-2) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * debian/geoclue-2.0.lintian-overrides: Fix dbus-policy-excessively-broad
+    override
+  * debian/geoclue-2.0.install: Install polkit rules shipped by upstream
+  * debian/geoclue-2.0.install: Rename the .pkla file to match the name
+    of the upstream rules file
+
+  [ Jeremy Bicha ]
+  * Cherry-pick proposed patch to build with libsoup3
+  * Build-Depend on libsoup-3.0-dev
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 14 Sep 2022 11:46:47 -0400
+
 geoclue-2.0 (2.6.0-1) unstable; urgency=medium
 
   * New upstream version 2.6.0

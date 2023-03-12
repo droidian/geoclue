@@ -2,7 +2,6 @@ Source: geoclue-2.0
 Section: utils
 Priority: optional
 Maintainer: Laurent Bigonville <bigon@debian.org>
-Uploaders: Craig Andrews <candrews@integralblue.com>
 Build-Depends: debhelper-compat (= 12),
                gobject-introspection (>= 0.9.6),
                intltool (>= 0.40.0),
@@ -15,13 +14,13 @@ Build-Depends: debhelper-compat (= 12),
                libjson-glib-dev (>= 0.14),
                libmm-glib-dev (>= 1.10) [linux-any],
                libnotify-dev,
-               libsoup2.4-dev (>= 2.42),
+               libsoup-3.0-dev,
                meson (>= 0.47.2),
                pkg-config,
                valac
 Build-Depends-Indep: gtk-doc-tools <!nodoc>, libglib2.0-doc <!nodoc>
 Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home
-Standards-Version: 4.5.0
+Standards-Version: 4.6.0
 Vcs-Git: https://salsa.debian.org/freedesktop-team/geoclue-2.0.git
 Vcs-Browser: https://salsa.debian.org/freedesktop-team/geoclue-2.0
 Rules-Requires-Root: no
@@ -57,6 +56,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}
 Build-Profiles: <!nodoc>
+Multi-Arch: foreign
 Description: geoinformation service (D-Bus API documentation)
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.
@@ -106,6 +106,7 @@ Architecture: all
 Section: doc
 Depends: ${misc:Depends}
 Build-Profiles: <!nodoc>
+Multi-Arch: foreign
 Description: convenience library to interact with geoinformation service (API documentation)
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
  is to make creating location-aware applications as simple as possible.

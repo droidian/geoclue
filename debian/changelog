@@ -1,9 +1,78 @@
-geoclue-2.0 (2.5.6-1mobian1) unstable; urgency=medium
+geoclue-2.0 (2.6.0-2) unstable; urgency=medium
 
-  * Downstream fix for #132 - Use tracking area code (TAC) as the LAC when in
-    LTE mode matching Ichneaa docs
+  [ Laurent Bigonville ]
+  * debian/geoclue-2.0.lintian-overrides: Fix dbus-policy-excessively-broad
+    override
+  * debian/geoclue-2.0.install: Install polkit rules shipped by upstream
+  * debian/geoclue-2.0.install: Rename the .pkla file to match the name
+    of the upstream rules file
 
- -- Chris McGee <newton688@gmail.com>  Thu, 30 Jul 2020 08:12:02 +0100
+  [ Jeremy Bicha ]
+  * Cherry-pick proposed patch to build with libsoup3
+  * Build-Depend on libsoup-3.0-dev
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 14 Sep 2022 11:46:47 -0400
+
+geoclue-2.0 (2.6.0-1) unstable; urgency=medium
+
+  * New upstream version 2.6.0
+    - debian/patches/: Drop all patches, they (or similar patches) have been
+      merged upstream
+    - debian/libgeoclue-2-0.symbols: Add newly exported symbols
+  * debian/control: Bump Standards-Version to 4.6.0 (no further changes)
+
+ -- Laurent Bigonville <bigon@debian.org>  Tue, 05 Apr 2022 14:47:54 +0200
+
+geoclue-2.0 (2.5.7-3) unstable; urgency=medium
+
+  * Properly detect that applications are running in flatpak when using cgroup
+    v2. Thanks to Guido Günther <agx@sigxcpu.org> (Closes: #985345)
+
+ -- Laurent Bigonville <bigon@debian.org>  Wed, 17 Mar 2021 15:53:13 +0100
+
+geoclue-2.0 (2.5.7-2) unstable; urgency=medium
+
+  * d/p/fix-nowifi-query.patch: Fix getting a location if the computer has no
+    wifi card (Closes: #978437)
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 31 Dec 2020 04:46:07 +0100
+
+geoclue-2.0 (2.5.7-1) unstable; urgency=medium
+
+  [ Laurent Bigonville ]
+  * New upstream version 2.5.7
+    - Check the maximum allowed accuracy level even for system applications.
+      Respect the value of the user preference concerning the usage of their
+      geolocation. This should fix the privacy and GDPR conformity concerns as
+      the user explicitly needs to enable the option.
+      Note that there is no distinction between the system applications
+      anymore, turning on the option is allowing them all to get the location.
+      (Closes: #924516, #958497)
+  * debian/README.Debian: Add information about MLS and a link to the service
+    Privacy Notice page
+  * Add debian/salsa-ci.yml file
+  * debian/control: Remove Craig Andrews from the Uploaders.
+    He has not been active since 2009, thanks for his previous work on the
+    package
+  * d/p/: Add a patch to make the Mozilla API key configurable
+  * debian/rules: Use the key that has been allocated to debian for MLS queries
+  * d/gbp.conf: Stop adding the commit-id and set multimaint-merge to True
+  * debian/control: Bump Standards-Version to 4.5.1 (no further changes)
+  * d/p: Add an upstream patch to fix the display of the usage indicator
+  * d/p: Remove the remaining differences between system app and flatpak ones.
+    This fix an issue when geoclue is D-Bus activated by a client and also
+    make sure that a running client is disconnected when the user disables
+    the location services (set the accuracy to 0)
+
+  [ Chris McGee ]
+  * debian/control: Add rules requires root
+
+  [ Debian Janitor ]
+  * Refer to specific version of license LGPL-2+.
+  * Apply multi-arch hints.
+    + geoclue-doc, libgeoclue-doc: Add Multi-Arch: foreign.
+
+ -- Laurent Bigonville <bigon@debian.org>  Fri, 25 Dec 2020 14:59:35 +0100
 
 geoclue-2.0 (2.5.6-1) unstable; urgency=medium
 

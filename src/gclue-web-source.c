@@ -37,7 +37,9 @@
  **/
 
 static gboolean
-gclue_web_source_start (GClueLocationSource *source);
+get_internet_available (void);
+static void
+refresh_accuracy_level (GClueWebSource *web);
 
 struct _GClueWebSourcePrivate {
         SoupSession *soup_session;
@@ -57,50 +59,128 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (GClueWebSource,
                                   GCLUE_TYPE_LOCATION_SOURCE,
                                   G_ADD_PRIVATE (GClueWebSource))
 
+static void refresh_callback (SoupSession *session,
+                              SoupMessage *query,
+                              gpointer     user_data);
+
 static void
-query_callback (SoupSession *session,
-                SoupMessage *query,
-                gpointer     user_data)
+gclue_web_source_real_refresh_async (GClueWebSource      *source,
+                                     GCancellable        *cancellable,
+                                     GAsyncReadyCallback  callback,
+                                     gpointer             user_data)
 {
+        g_autoptr(GTask) task = NULL;
+        g_autoptr(GError) local_error = NULL;
+
+        task = g_task_new (source, cancellable, callback, user_data);
+        g_task_set_source_tag (task, gclue_web_source_real_refresh_async);
+
+        refresh_accuracy_level (source);
+
+        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source))) {
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_NOT_INITIALIZED,
+                                         "Source is inactive");
+                return;
+        }
+
+        if (!get_internet_available ()) {
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_NETWORK_UNREACHABLE,
+                                         "Network unavailable");
+                return;
+        }
+        g_debug ("Network available");
+
+        if (source->priv->query != NULL) {
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_PENDING,
+                                         "Refresh already in progress");
+                return;
+        }
+
+        source->priv->query = GCLUE_WEB_SOURCE_GET_CLASS (source)->create_query (source, &local_error);
+
+        if (source->priv->query == NULL) {
+                g_task_return_error (task, g_steal_pointer (&local_error));
+                return;
+        }
+
+        /* TODO handle cancellation */
+        soup_session_queue_message (source->priv->soup_session,
+                                    source->priv->query,
+                                    refresh_callback,
+                                    g_steal_pointer (&task));
+}
+
+static void
+refresh_callback (SoupSession *session,
+                  SoupMessage *query,
+                  gpointer     user_data)
+{
+        g_autoptr(GTask) task = g_steal_pointer (&user_data);
         GClueWebSource *web;
-        GError *error = NULL;
-        char *contents;
-        char *str;
-        GClueLocation *location;
+        g_autoptr(GError) local_error = NULL;
+        g_autofree char *contents = NULL;
+        g_autofree char *str = NULL;
+        g_autoptr(GClueLocation) location = NULL;
         SoupURI *uri;
 
-        if (query->status_code == SOUP_STATUS_CANCELLED)
+        if (query->status_code == SOUP_STATUS_CANCELLED) {
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_CANCELLED,
+                                         "Operation cancelled");
                 return;
+        }
 
-        web = GCLUE_WEB_SOURCE (user_data);
+        web = GCLUE_WEB_SOURCE (g_task_get_source_object (task));
         web->priv->query = NULL;
 
         if (query->status_code != SOUP_STATUS_OK) {
-                g_warning ("Failed to query location: %s", query->reason_phrase);
-		return;
-	}
+                g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED,
+                                         "Failed to query location: %s", query->reason_phrase);
+                return;
+        }
 
         contents = g_strndup (query->response_body->data, query->response_body->length);
         uri = soup_message_get_uri (query);
         str = soup_uri_to_string (uri, FALSE);
-        g_debug ("Got following response from '%s':\n%s",
-                 str,
-                 contents);
-        g_free (str);
-        location = GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_response (web,
-                                                                     contents,
-                                                                     &error);
-        g_free (contents);
-        if (error != NULL) {
-                g_warning ("Failed to parse following response: %s\n%s",
-                           error->message,
-                           contents);
+        g_debug ("Got following response from '%s':\n%s", str, contents);
+        location = GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_response (web, contents, &local_error);
+        if (local_error != NULL) {
+                g_task_return_error (task, g_steal_pointer (&local_error));
                 return;
         }
 
         gclue_location_source_set_location (GCLUE_LOCATION_SOURCE (web),
                                             location);
-        g_object_unref (location);
+
+        g_task_return_pointer (task, g_steal_pointer (&location), g_object_unref);
+}
+
+
+static GClueLocation *
+gclue_web_source_real_refresh_finish (GClueWebSource  *source,
+                                      GAsyncResult    *result,
+                                      GError         **error)
+{
+        GTask *task = G_TASK (result);
+
+        return g_task_propagate_pointer (task, error);
+}
+
+static void
+query_callback (GObject      *source_object,
+                GAsyncResult *result,
+                gpointer      user_data)
+{
+        GClueWebSource *web = GCLUE_WEB_SOURCE (source_object);
+        g_autoptr(GError) local_error = NULL;
+        g_autoptr(GClueLocation) location = NULL;
+
+        location = GCLUE_WEB_SOURCE_GET_CLASS (web)->refresh_finish (web, result, &local_error);
+
+        if (local_error != NULL &&
+            !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_NOT_INITIALIZED)) {
+                g_warning ("Failed to query location: %s", local_error->message);
+                return;
+        }
 }
 
 static gboolean
@@ -139,41 +219,13 @@ on_network_changed (GNetworkMonitor *monitor G_GNUC_UNUSED,
                     gpointer         user_data)
 {
         GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
-        GError *error = NULL;
         gboolean last_available = web->priv->internet_available;
 
         web->priv->internet_available = get_internet_available ();
         if (last_available == web->priv->internet_available)
                 return; /* We already reacted to network change */
 
-        refresh_accuracy_level (web);
-
-        if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (user_data)))
-                return;
-
-        if (!web->priv->internet_available) {
-                g_debug ("Network unavailable");
-                return;
-        }
-        g_debug ("Network available");
-
-        if (web->priv->query != NULL)
-                return;
-
-        web->priv->query = GCLUE_WEB_SOURCE_GET_CLASS (web)->create_query
-                                        (web,
-                                         &error);
-
-        if (web->priv->query == NULL) {
-                g_warning ("Failed to create query: %s", error->message);
-                g_error_free (error);
-                return;
-        }
-
-        soup_session_queue_message (web->priv->soup_session,
-                                    web->priv->query,
-                                    query_callback,
-                                    web);
+        GCLUE_WEB_SOURCE_GET_CLASS (web)->refresh_async (web, NULL, query_callback, NULL);
 }
 
 static void
@@ -246,10 +298,10 @@ gclue_web_source_constructed (GObject *object)
 static void
 gclue_web_source_class_init (GClueWebSourceClass *klass)
 {
-        GClueLocationSourceClass *source_class = GCLUE_LOCATION_SOURCE_CLASS (klass);
         GObjectClass *gsource_class = G_OBJECT_CLASS (klass);
 
-        source_class->start = gclue_web_source_start;
+        klass->refresh_async = gclue_web_source_real_refresh_async;
+        klass->refresh_finish = gclue_web_source_real_refresh_finish;
 
         gsource_class->finalize = gclue_web_source_finalize;
         gsource_class->constructed = gclue_web_source_constructed;
@@ -258,7 +310,7 @@ gclue_web_source_class_init (GClueWebSourceClass *klass)
 static void
 gclue_web_source_init (GClueWebSource *web)
 {
-        web->priv = G_TYPE_INSTANCE_GET_PRIVATE ((web), GCLUE_TYPE_WEB_SOURCE, GClueWebSourcePrivate);
+        web->priv = gclue_web_source_get_instance_private (web);
 }
 
 /**
@@ -274,22 +326,7 @@ gclue_web_source_refresh (GClueWebSource *source)
 {
         g_return_if_fail (GCLUE_IS_WEB_SOURCE (source));
 
-        /* Make sure ->internet_available is different from
-         * the real availability of internet access */
-        source->priv->internet_available = FALSE;
-        on_network_changed (NULL, TRUE, source);
-}
-
-static gboolean
-gclue_web_source_start (GClueLocationSource *source)
-{
-        GClueLocationSourceClass *base_class;
-
-        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_web_source_parent_class);
-        if (!base_class->start (source))
-                return FALSE;
-
-        return TRUE;
+        GCLUE_WEB_SOURCE_GET_CLASS (source)->refresh_async (source, NULL, query_callback, NULL);
 }
 
 static void
@@ -298,18 +335,20 @@ submit_query_callback (SoupSession *session,
                        gpointer     user_data)
 {
         SoupURI *uri;
+        g_autofree char *str = NULL;
 
         uri = soup_message_get_uri (query);
+        str = soup_uri_to_string (uri, FALSE);
         if (query->status_code != SOUP_STATUS_OK &&
             query->status_code != SOUP_STATUS_NO_CONTENT) {
                 g_warning ("Failed to submit location data to '%s': %s",
-                           soup_uri_to_string (uri, FALSE),
+                           str,
                            query->reason_phrase);
 		return;
 	}
 
         g_debug ("Successfully submitted location data to '%s'",
-                 soup_uri_to_string (uri, FALSE));
+                 str);
 }
 
 #define SUBMISSION_ACCURACY_THRESHOLD 100

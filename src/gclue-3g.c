@@ -50,9 +50,9 @@ G_DEFINE_TYPE_WITH_CODE (GClue3G,
                          GCLUE_TYPE_WEB_SOURCE,
                          G_ADD_PRIVATE (GClue3G))
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_3g_start (GClueLocationSource *source);
-static gboolean
+static GClueLocationSourceStopResult
 gclue_3g_stop (GClueLocationSource *source);
 static SoupMessage *
 gclue_3g_create_query (GClueWebSource *web,
@@ -152,7 +152,7 @@ gclue_3g_init (GClue3G *source)
 {
         GClue3GPrivate *priv;
 
-        source->priv = G_TYPE_INSTANCE_GET_PRIVATE ((source), GCLUE_TYPE_3G, GClue3GPrivate);
+        source->priv = gclue_3g_get_instance_private (source);
         priv = source->priv;
 
         priv->cancellable = g_cancellable_new ();
@@ -188,7 +188,9 @@ gclue_3g_get_singleton (void)
         static GClue3G *source = NULL;
 
         if (source == NULL) {
-                source = g_object_new (GCLUE_TYPE_3G, NULL);
+                source = g_object_new (GCLUE_TYPE_3G,
+                                       "compute-movement", FALSE,
+                                       NULL);
                 g_object_weak_ref (G_OBJECT (source),
                                    on_3g_destroyed,
                                    &source);
@@ -248,37 +250,41 @@ gclue_3g_get_available_accuracy_level (GClueWebSource *web,
 }
 
 static void
-on_fix_3g (GClueModem *modem,
-           guint       mcc,
-           guint       mnc,
-           gulong      lac,
-           gulong      cell_id,
+on_fix_3g (GClueModem   *modem,
+           const gchar  *opc,
+           gulong        lac,
+           gulong        cell_id,
+           GClueTowerTec tec,
            gpointer    user_data)
 {
         GClue3GPrivate *priv = GCLUE_3G (user_data)->priv;
 
         if (priv->tower == NULL)
                 priv->tower = g_slice_new0 (GClue3GTower);
-        priv->tower->mcc = mcc;
-        priv->tower->mnc = mnc;
+        g_strlcpy (priv->tower->opc, opc,
+                   GCLUE_3G_TOWER_OPERATOR_CODE_STR_LEN + 1);
         priv->tower->lac = lac;
         priv->tower->cell_id = cell_id;
+        priv->tower->tec = tec;
 
         gclue_web_source_refresh (GCLUE_WEB_SOURCE (user_data));
 }
 
-static gboolean
+static GClueLocationSourceStartResult
 gclue_3g_start (GClueLocationSource *source)
 {
         GClueLocationSourceClass *base_class;
         GClue3GPrivate *priv;
+        GClueLocationSourceStartResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_START_RESULT_FAILED);
         priv = GCLUE_3G (source)->priv;
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_3g_parent_class);
-        if (!base_class->start (source))
-                return FALSE;
+        base_result = base_class->start (source);
+        if (base_result != GCLUE_LOCATION_SOURCE_START_RESULT_OK)
+                return base_result;
 
         if (priv->tower != NULL) {
                 g_slice_free (GClue3GTower, priv->tower);
@@ -295,21 +301,23 @@ gclue_3g_start (GClueLocationSource *source)
                                        priv->cancellable,
                                        on_3g_enabled,
                                        source);
-        return TRUE;
+        return base_result;
 }
 
-static gboolean
+static GClueLocationSourceStopResult
 gclue_3g_stop (GClueLocationSource *source)
 {
         GClue3GPrivate *priv = GCLUE_3G (source)->priv;
         GClueLocationSourceClass *base_class;
         GError *error = NULL;
+        GClueLocationSourceStopResult base_result;
 
         g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_3g_parent_class);
-        if (!base_class->stop (source))
-                return FALSE;
+        base_result = base_class->stop (source);
+        if (base_result == GCLUE_LOCATION_SOURCE_STOP_RESULT_STILL_USED)
+                return base_result;
 
         g_signal_handlers_disconnect_by_func (G_OBJECT (priv->modem),
                                               G_CALLBACK (on_fix_3g),
@@ -324,5 +332,5 @@ gclue_3g_stop (GClueLocationSource *source)
                         g_error_free (error);
                 }
 
-        return TRUE;
+        return base_result;
 }

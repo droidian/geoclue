@@ -58,4 +58,12 @@ if get_option('enable-backend')
                        configuration: conf,
                        install_dir: systemd_unit_dir)
     endif
+
+    if get_option('modem-gps-source')
+        polkit_dir = join_paths(get_option('datadir'), 'polkit-1', 'rules.d')
+        configure_file(output: 'org.freedesktop.GeoClue2.rules',
+                       input: 'org.freedesktop.GeoClue2.rules.in',
+                       configuration: conf,
+                       install_dir: polkit_dir)
+    endif
 endif

@@ -56,6 +56,8 @@ struct _GClueSimpleClass
         GObjectClass parent_class;
 };
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (GClueSimple, g_object_unref)
+
 GType           gclue_simple_get_type     (void) G_GNUC_CONST;
 
 void            gclue_simple_new          (const char         *desktop_id,
@@ -67,6 +69,23 @@ GClueSimple *   gclue_simple_new_finish   (GAsyncResult       *result,
                                            GError            **error);
 GClueSimple *   gclue_simple_new_sync     (const char        *desktop_id,
                                            GClueAccuracyLevel accuracy_level,
+                                           GCancellable      *cancellable,
+                                           GError           **error);
+void            gclue_simple_new_with_thresholds
+                                          (const char         *desktop_id,
+                                           GClueAccuracyLevel  accuracy_level,
+                                           guint               time_threshold,
+                                           guint               distance_threshold,
+                                           GCancellable       *cancellable,
+                                           GAsyncReadyCallback callback,
+                                           gpointer            user_data);
+GClueSimple *   gclue_simple_new_with_thresholds_finish (GAsyncResult   *result,
+                                                         GError        **error);
+GClueSimple *   gclue_simple_new_with_thresholds_sync
+                                          (const char        *desktop_id,
+                                           GClueAccuracyLevel accuracy_level,
+                                           guint              time_threshold,
+                                           guint              distance_threshold,
                                            GCancellable      *cancellable,
                                            GError           **error);
 GClueClient *   gclue_simple_get_client   (GClueSimple        *simple);

@@ -348,9 +348,7 @@ gclue_service_location_class_init (GClueServiceLocationClass *klass)
 static void
 gclue_service_location_init (GClueServiceLocation *location)
 {
-        location->priv = G_TYPE_INSTANCE_GET_PRIVATE (location,
-                                                      GCLUE_TYPE_SERVICE_LOCATION,
-                                                      GClueServiceLocationPrivate);
+        location->priv = gclue_service_location_get_instance_private (location);
         gclue_dbus_location_set_altitude (GCLUE_DBUS_LOCATION (location),
                                           GCLUE_LOCATION_ALTITUDE_UNKNOWN);
 }

@@ -73,12 +73,18 @@ GClueAppPerm        gclue_config_get_app_perm           (GClueConfig     *config
                                                          GClueClientInfo *app_info);
 gboolean            gclue_config_is_system_component    (GClueConfig     *config,
                                                          const char      *desktop_id);
+const char *        gclue_config_get_nmea_socket        (GClueConfig     *config);
+void                gclue_config_set_nmea_socket        (GClueConfig     *config,
+                                                         const char  *nmea_socket);
+
 const char *        gclue_config_get_wifi_url           (GClueConfig     *config);
 const char *        gclue_config_get_wifi_submit_url    (GClueConfig     *config);
 const char *        gclue_config_get_wifi_submit_nick   (GClueConfig     *config);
 void                gclue_config_set_wifi_submit_nick   (GClueConfig     *config,
                                                          const char      *nick);
 gboolean            gclue_config_get_wifi_submit_data   (GClueConfig     *config);
+void                gclue_config_set_wifi_submit_data   (GClueConfig     *config,
+                                                         gboolean         submit);
 gboolean            gclue_config_get_enable_wifi_source (GClueConfig     *config);
 gboolean            gclue_config_get_enable_3g_source   (GClueConfig     *config);
 gboolean            gclue_config_get_enable_cdma_source (GClueConfig     *config);
@@ -89,6 +95,7 @@ gboolean            gclue_config_get_enable_hybris_source
                                                         (GClueConfig     *config);
 void                gclue_config_set_wifi_submit_data   (GClueConfig     *config,
                                                          gboolean         submit);
+gboolean            gclue_config_get_enable_compass     (GClueConfig     *config);
 
 G_END_DECLS
 

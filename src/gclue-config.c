@@ -44,8 +44,10 @@ struct _GClueConfigPrivate
         gboolean enable_modem_gps_source;
         gboolean enable_wifi_source;
         gboolean enable_hybris_source;
+        gboolean enable_compass;
         char *wifi_submit_url;
         char *wifi_submit_nick;
+        char *nmea_socket;
 
         GList *app_configs;
 };
@@ -84,6 +86,7 @@ gclue_config_finalize (GObject *object)
         g_clear_pointer (&priv->wifi_url, g_free);
         g_clear_pointer (&priv->wifi_submit_url, g_free);
         g_clear_pointer (&priv->wifi_submit_nick, g_free);
+        g_clear_pointer (&priv->nmea_socket, g_free);
 
         g_list_foreach (priv->app_configs, (GFunc) app_config_free, NULL);
 
@@ -121,7 +124,7 @@ static void
 load_app_configs (GClueConfig *config)
 {
         const char *known_groups[] = { "agent", "wifi", "3g", "cdma",
-                                       "modem-gps", "network-nmea",
+                                       "modem-gps", "network-nmea", "compass",
                                        "hybris", NULL };
         GClueConfigPrivate *priv = config->priv;
         gsize num_groups = 0, i;
@@ -217,8 +220,9 @@ load_enable_source_config (GClueConfig *config,
         return enable;
 }
 
-#define DEFAULT_WIFI_URL "https://location.services.mozilla.com/v1/geolocate?key=geoclue"
-#define DEFAULT_WIFI_SUBMIT_URL "https://location.services.mozilla.com/v1/submit?key=geoclue"
+#define DEFAULT_WIFI_URL "https://location.services.mozilla.com/v1/geolocate?key=" MOZILLA_API_KEY
+#define DEFAULT_WIFI_SUBMIT_URL "https://location.services.mozilla.com/v1/submit?key=" MOZILLA_API_KEY
+#define DEFAULT_WIFI_SUBMIT_NICK "geoclue"
 
 static void
 load_wifi_config (GClueConfig *config)
@@ -270,6 +274,7 @@ load_wifi_config (GClueConfig *config)
                 g_debug ("Failed to get config \"wifi/submission-nick\": %s",
                          error->message);
                 g_error_free (error);
+                priv->wifi_submit_nick = g_strdup (DEFAULT_WIFI_SUBMIT_NICK);
         }
 }
 
@@ -297,8 +302,26 @@ load_modem_gps_config (GClueConfig *config)
 static void
 load_network_nmea_config (GClueConfig *config)
 {
+        GError *error = NULL;
         config->priv->enable_nmea_source =
                 load_enable_source_config (config, "network-nmea");
+        if (!config->priv->enable_nmea_source)
+                return;
+        config->priv->nmea_socket = g_key_file_get_string (config->priv->key_file,
+                                                           "network-nmea",
+                                                           "nmea-socket",
+                                                           &error);
+        if (error != NULL) {
+                g_debug ("`nmea-socket` configuration not set.");
+                g_clear_error (&error);
+        }
+}
+
+static void
+load_compass_config (GClueConfig *config)
+{
+        config->priv->enable_compass =
+                load_enable_source_config (config, "compass");
 }
 
 static void
@@ -313,10 +336,7 @@ gclue_config_init (GClueConfig *config)
 {
         GError *error = NULL;
 
-        config->priv =
-                G_TYPE_INSTANCE_GET_PRIVATE (config,
-                                            GCLUE_TYPE_CONFIG,
-                                            GClueConfigPrivate);
+        config->priv = gclue_config_get_instance_private(config);
         config->priv->key_file = g_key_file_new ();
         g_key_file_load_from_file (config->priv->key_file,
                                    CONFIG_FILE_PATH,
@@ -338,6 +358,7 @@ gclue_config_init (GClueConfig *config)
         load_modem_gps_config (config);
         load_network_nmea_config (config);
         load_network_hybris_config (config);
+        load_compass_config (config);
 }
 
 GClueConfig *
@@ -440,6 +461,12 @@ gclue_config_is_system_component (GClueConfig *config,
 }
 
 const char *
+gclue_config_get_nmea_socket (GClueConfig *config)
+{
+        return config->priv->nmea_socket;
+}
+
+const char *
 gclue_config_get_wifi_url (GClueConfig *config)
 {
         return config->priv->wifi_url;
@@ -469,6 +496,13 @@ gboolean
 gclue_config_get_wifi_submit_data (GClueConfig *config)
 {
         return config->priv->wifi_submit;
+}
+
+void
+gclue_config_set_wifi_submit_data (GClueConfig *config,
+                                   gboolean     submit)
+{
+        config->priv->wifi_submit = submit;
 }
 
 gboolean
@@ -508,9 +542,14 @@ gclue_config_get_enable_hybris_source(GClueConfig *config)
 }
 
 void
-gclue_config_set_wifi_submit_data (GClueConfig *config,
-                                   gboolean     submit)
+gclue_config_set_nmea_socket (GClueConfig *config,
+                                   const char  *nmea_socket)
 {
+        config->priv->nmea_socket = g_strdup(nmea_socket);
+}
 
-        config->priv->wifi_submit = submit;
+gboolean
+gclue_config_get_enable_compass (GClueConfig *config)
+{
+        return config->priv->enable_compass;
 }

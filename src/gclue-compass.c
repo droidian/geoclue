@@ -196,10 +196,7 @@ on_compass_proxy_ready (GObject      *source_object,
 static void
 gclue_compass_init (GClueCompass *compass)
 {
-        compass->priv =
-                G_TYPE_INSTANCE_GET_PRIVATE (compass,
-                                             GCLUE_TYPE_COMPASS,
-                                             GClueCompassPrivate);
+        compass->priv = gclue_compass_get_instance_private(compass);
         compass->priv->cancellable = g_cancellable_new ();
 
         compass_proxy_new_for_bus (G_BUS_TYPE_SYSTEM,

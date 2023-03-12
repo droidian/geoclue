@@ -74,6 +74,7 @@ gclue_client_info_finalize (GObject *object)
                 priv->watch_id = 0;
         }
 
+        g_clear_object (&priv->dbus_proxy);
         g_clear_pointer (&priv->bus_name, g_free);
         g_clear_pointer (&priv->xdg_id, g_free);
         g_clear_object (&priv->connection);
@@ -180,6 +181,42 @@ on_name_vanished (GDBusConnection *connection,
                        0);
 }
 
+
+static gchar *
+parse_cgroup_v2 (GStrv lines)
+{
+        const char *unit, *name;
+        char *dash, *xdg_id;
+        g_autofree char *scope = NULL;
+
+        /* Cgroup v2 is always a single line:
+         * 0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-flatpak-org.gnome.Maps-3358.scope
+         */
+        if (g_strv_length (lines) != 2)
+                return NULL;
+
+        if (!g_str_has_prefix (lines[0], "0::"))
+                 return NULL;
+
+        unit = lines[0] + strlen ("0::");
+        scope = g_path_get_basename (unit);
+        if (!g_str_has_prefix (scope, "app-flatpak-") ||
+            !g_str_has_suffix (scope, ".scope"))
+                return NULL;
+
+        name = scope + strlen("app-flatpak-");
+        dash = strchr (name, '-');
+        if (dash == NULL)
+                return NULL;
+        *dash = 0;
+
+        xdg_id = g_strdup (name);
+        g_debug ("Found xdg_id %s", xdg_id);
+
+        return xdg_id;
+}
+
+
 /* Based on got_credentials_cb() from xdg-app source code */
 static char *
 get_xdg_id (guint32 pid)
@@ -187,7 +224,7 @@ get_xdg_id (guint32 pid)
         char *xdg_id = NULL;
         g_autofree char *path = NULL;
         g_autofree char *content = NULL;
-        gchar **lines;
+        g_auto(GStrv) lines = NULL;
         int i;
 
         path = g_strdup_printf ("/proc/%u/cgroup", pid);
@@ -196,24 +233,33 @@ get_xdg_id (guint32 pid)
                 return NULL;
         lines =  g_strsplit (content, "\n", -1);
 
+	xdg_id = parse_cgroup_v2 (lines);
+	if (xdg_id != NULL)
+		return xdg_id;
+
         for (i = 0; lines[i] != NULL; i++) {
                 const char *unit = lines[i] + strlen ("1:name=systemd:");
                 g_autofree char *scope = NULL;
                 const char *name;
                 char *dash;
+                const char *prefix = NULL;
 
                 if (!g_str_has_prefix (lines[i], "1:name=systemd:"))
                         continue;
 
                 scope = g_path_get_basename (unit);
-                if ((!g_str_has_prefix (scope, "xdg-app-") &&
-                     !g_str_has_prefix (scope, "flatpak-")) ||
-                    !g_str_has_suffix (scope, ".scope"))
+
+                if (g_str_has_prefix (scope, "xdg-app-"))
+                        prefix = "xdg-app-";
+                else if (g_str_has_prefix (scope, "flatpak-"))
+                        prefix = "flatpak-";
+                else if (g_str_has_prefix (scope, "app-flatpak-"))
+                        prefix = "app-flatpak-";
+
+                if (prefix == NULL || !g_str_has_suffix (scope, ".scope"))
                         break;
 
-                /* strlen("flatpak-") == strlen("xdg-app-")
-                 * so all is good here */
-                name = scope + strlen("xdg-app-");
+                name = scope + strlen(prefix);
                 dash = strchr (name, '-');
 
                 if (dash == NULL)
@@ -222,8 +268,6 @@ get_xdg_id (guint32 pid)
                 *dash = 0;
                 xdg_id = g_strdup (name);
         }
-
-        g_strfreev (lines);
 
         return xdg_id;
 }
@@ -371,9 +415,7 @@ gclue_client_info_async_initable_init (GAsyncInitableIface *iface)
 static void
 gclue_client_info_init (GClueClientInfo *info)
 {
-        info->priv = G_TYPE_INSTANCE_GET_PRIVATE (info,
-                                                  GCLUE_TYPE_CLIENT_INFO,
-                                                  GClueClientInfoPrivate);
+        info->priv = gclue_client_info_get_instance_private(info);
 }
 
 void

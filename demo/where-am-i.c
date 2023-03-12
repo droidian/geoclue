@@ -84,7 +84,6 @@ print_location (GClueSimple *simple)
         GClueLocation *location;
         gdouble altitude, speed, heading;
         GVariant *timestamp;
-        GTimeVal tv = { 0 };
         const char *desc;
 
         location = gclue_simple_get_location (simple);
@@ -111,11 +110,13 @@ print_location (GClueSimple *simple)
         timestamp = gclue_location_get_timestamp (location);
         if (timestamp) {
                 GDateTime *date_time;
+                guint64 sec, usec;
                 gchar *str;
 
-                g_variant_get (timestamp, "(tt)", &tv.tv_sec, &tv.tv_usec);
+                g_variant_get (timestamp, "(tt)", &sec, &usec);
 
-                date_time = g_date_time_new_from_timeval_local (&tv);
+                /* Ignore usec, since it is not in the output format */
+                date_time = g_date_time_new_from_unix_local ((gint64) sec);
                 str = g_date_time_format
                       (date_time,
                        "%c (%s seconds since the Epoch)");
@@ -145,29 +146,28 @@ on_simple_ready (GObject      *source_object,
 {
         GError *error = NULL;
 
-        simple = gclue_simple_new_finish (res, &error);
+        simple = gclue_simple_new_with_thresholds_finish (res, &error);
         if (error != NULL) {
             g_critical ("Failed to connect to GeoClue2 service: %s", error->message);
 
             exit (-1);
         }
         client = gclue_simple_get_client (simple);
-        g_object_ref (client);
-        g_print ("Client object: %s\n",
-                 g_dbus_proxy_get_object_path (G_DBUS_PROXY (client)));
-        if (time_threshold > 0) {
-                gclue_client_set_time_threshold (client, time_threshold);
-        }
+        if (client) {
+                g_object_ref (client);
+                g_print ("Client object: %s\n",
+                         g_dbus_proxy_get_object_path (G_DBUS_PROXY (client)));
 
+                g_signal_connect (client,
+                                  "notify::active",
+                                  G_CALLBACK (on_client_active_notify),
+                                  NULL);
+        }
         print_location (simple);
 
         g_signal_connect (simple,
                           "notify::location",
                           G_CALLBACK (print_location),
-                          NULL);
-        g_signal_connect (client,
-                          "notify::active",
-                          G_CALLBACK (on_client_active_notify),
                           NULL);
 }
 
@@ -192,11 +192,13 @@ main (gint argc, gchar *argv[])
 
         g_timeout_add_seconds (timeout, on_location_timeout, NULL);
 
-        gclue_simple_new ("geoclue-where-am-i",
-                          accuracy_level,
-                          NULL,
-                          on_simple_ready,
-                          NULL);
+        gclue_simple_new_with_thresholds ("geoclue-where-am-i",
+                                          accuracy_level,
+                                          time_threshold,
+                                          0,
+                                          NULL,
+                                          on_simple_ready,
+                                          NULL);
 
         main_loop = g_main_loop_new (NULL, FALSE);
         g_main_loop_run (main_loop);

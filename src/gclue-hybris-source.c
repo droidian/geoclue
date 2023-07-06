@@ -26,8 +26,12 @@
 #include "gclue-hybris-types.h"
 #include "gclue-hybris.h"
 #include "gclue-location.h"
+#include "gclue-web-source.h"
 #include "config.h"
 #include "gclue-enum-types.h"
+
+#define SUBMISSION_ACCURACY_THRESHOLD 100
+#define SUBMISSION_TIME_THRESHOLD     60  /* seconds */
 
 struct _GClueHybrisSourcePrivate {
         GClueHybris *hybris;
@@ -50,6 +54,18 @@ connect_to_service (GClueHybrisSource *source);
 static void
 disconnect_from_service (GClueHybrisSource *source);
 
+static gboolean
+get_internet_available (void)
+{
+        GNetworkMonitor *monitor = g_network_monitor_get_default ();
+        gboolean available;
+
+        available = (g_network_monitor_get_connectivity (monitor) ==
+                     G_NETWORK_CONNECTIVITY_FULL);
+
+        return available;
+}
+
 static void
 on_location_changed(GObject *gobject,
                     GParamSpec *pspec,
@@ -60,11 +76,22 @@ on_location_changed(GObject *gobject,
         GClueLocation *location;
 
         location = gclue_location_source_get_location(source);
+        if (location == NULL || gclue_location_get_accuracy (location) > SUBMISSION_ACCURACY_THRESHOLD ||
+                                gclue_location_get_timestamp (location) < SUBMISSION_TIME_THRESHOLD)
+                return;
+
+        double latitude = gclue_location_get_latitude(location);
+        double longitude = gclue_location_get_longitude(location);
+        double accuracy = gclue_location_get_accuracy(location);
+
+        g_debug("Latitude: %f", latitude);
+        g_debug("Longitude: %f", longitude);
+        g_debug("Accuracy: %f", accuracy);
 
         gclue_hybris_gnssInjectLocation(hybris,
-                                        gclue_location_get_latitude(location),
-                                        gclue_location_get_longitude(location),
-                                        gclue_location_get_accuracy(location));
+                                        latitude,
+                                        longitude,
+                                        accuracy);
 }
 
 static void
@@ -91,6 +118,9 @@ on_set_location(GClueHybris *hybris,
 static void
 connect_to_service (GClueHybrisSource *source)
 {
+        gdouble lat, lon, accuracy;
+
+        GClueLocation *location;
         GClueHybrisSourcePrivate *priv = source->priv;
 
         g_cancellable_reset (priv->cancellable);
@@ -109,6 +139,18 @@ connect_to_service (GClueHybrisSource *source)
                                          HYBRIS_GNSS_POSITION_MODE_STANDALONE,
                                          HYBRIS_GNSS_POSITION_RECURRENCE_PERIODIC,
                                          1000, 0, 0);
+
+       if (get_internet_available ()) {
+            location = gclue_location_source_get_location (source);
+
+            lat = gclue_location_get_latitude (location);
+            lon = gclue_location_get_longitude (location);
+            accuracy = gclue_location_get_accuracy (location);
+
+            if (accuracy != GCLUE_LOCATION_ACCURACY_UNKNOWN && lat != -1 && lon != -1 && accuracy != -1) {
+                gclue_hybris_gnssInjectLocation(priv->hybris, lat, lon, accuracy);
+            }
+       }
 
         gclue_hybris_gnssStart(priv->hybris);
 }

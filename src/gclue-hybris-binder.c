@@ -339,7 +339,7 @@ GBinderLocalReply *geoclue_binder_gnss_callback(
                 }
                 loc->accuracy = accuracy;
             }
-
+            g_debug ("Longitude: %f, Latitude: %f", loc->longitude, loc->latitude);
             g_signal_emit (hbinder, signals[SET_LOCATION], 0, loc);
             }
             break;

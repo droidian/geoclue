@@ -22,19 +22,19 @@ enable=true
 [3g]
 
 # Enable 3G source
-enable=true
+enable=false
 
 # CDMA source configuration options
 [cdma]
 
 # Enable CDMA source
-enable=true
+enable=false
 
 # Modem GPS source configuration options
 [modem-gps]
 
 # Enable Modem-GPS source
-enable=true
+enable=false
 
 # Android HAL source configuration options
 [hybris]
@@ -46,11 +46,11 @@ enable=true
 [wifi]
 
 # Enable WiFi source
-enable=true
+enable=false
 
 # URL to the wifi geolocation service. The key can currenty be anything, just
 # needs to be present but that is likely going to change in future.
-url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
+#url=https://location.services.mozilla.com/v1/geolocate?key=geoclue
 
 # To use the Google geolocation service instead of mozilla's, simply uncomment
 # this url while changing API_KEY to your Google API key and comment out or

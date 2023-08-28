@@ -52,6 +52,15 @@ Description: geoinformation service (demonstration programs)
  .
  This package contains the demonstration programs.
 
+Package: geoclue-2-keeper
+Architecture: any
+Depends: geoclue-2.0 (= ${binary:Version}), ${misc:Depends}, ${shlibs:Depends}
+Breaks: geoclue-2.0 (<< 2.4.10)
+Replaces: geoclue-2.0 (<< 2.4.10)
+Description: geoinformation hybris fix keeper
+ GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project
+ is to make creating location-aware applications as simple as possible.
+
 Package: geoclue-doc
 Architecture: all
 Section: doc

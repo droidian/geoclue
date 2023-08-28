@@ -1,0 +1,2 @@
+usr/libexec/geoclue-2.0/demos/gclue-keeper usr/libexec/geoclue-2.0/keeper
+demo/gclue-keeper.service usr/lib/systemd/system

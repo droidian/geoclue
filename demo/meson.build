@@ -25,6 +25,13 @@ if get_option('libgeoclue')
                     po_dir: '../po',
                     install: true,
                     install_dir: desktop_dir)
+
+    executable('gclue-keeper',
+               'gclue-keeper.c',
+               include_directories: include_dirs,
+               dependencies: [base_deps, libgeoclue_dep],
+               install: true,
+               install_dir: demo_dir)
 endif
 
 if get_option('demo-agent')

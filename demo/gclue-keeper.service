@@ -1,0 +1,10 @@
+[Unit]
+Description=geoclue hybris GNSS fix keeper
+After=lxc@android.service
+
+[Service]
+ExecStartPre=binder-wait android.hardware.gnss@1.0::IGnss/default
+ExecStart=/usr/libexec/geoclue-2.0/keeper/gclue-keeper
+
+[Install]
+WantedBy=multi-user.target

@@ -61,9 +61,9 @@ if get_option('hybris-source')
     geoclue_deps += [ dependency('libgbinder') ]
     sources += [ 'gclue-hybris-source.h',
                  'gclue-hybris-source.c',
-                 'gclue-hybris-binder-types.h',
-                 'gclue-hybris-binder.c',
-                 'gclue-hybris-binder.h',
+                 'gclue-hybris-binder-aidl-types.h',
+                 'gclue-hybris-binder-aidl.c',
+                 'gclue-hybris-binder-aidl.h',
                  'gclue-hybris-types.h',
                  'gclue-hybris.c',
                  'gclue-hybris.h' ]

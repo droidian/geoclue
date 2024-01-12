@@ -21,7 +21,7 @@
 
 #include <stdlib.h>
 #include <glib.h>
-#include "gclue-hybris-binder.h"
+#include "gclue-hybris-binder-aidl.h"
 #include "gclue-hybris-source.h"
 #include "gclue-hybris-types.h"
 #include "gclue-hybris.h"

@@ -2,7 +2,7 @@
 /*
     Copyright (C) 2015 Jolla Ltd.
     Copyright (C) 2018 Matti Lehtimäki <matti.lehtimaki@gmail.com>
-    Contact: Aaron McCarthy <aaron.mccarthy@jollamobile.com>
+    Copyright (C) 2024 Bardia Moshiri <fakeshell@bardia.tech>
 
     This file is part of geoclue-hybris.
 
@@ -12,14 +12,14 @@
     version 2.1 of the License.
 */
 
-#include "gclue-hybris-binder.h"
+#include "gclue-hybris-binder-aidl.h"
 
 #include <stdlib.h>
 #include <glib.h>
 #include <strings.h>
 #include <sys/time.h>
 
-#define GNSS_BINDER_DEFAULT_DEV  "/dev/hwbinder"
+#define GNSS_BINDER_DEFAULT_DEV  "/dev/binder"
 
 static void
 gclue_hybris_interface_init (GClueHybrisInterface *iface);
@@ -36,13 +36,17 @@ struct _GClueHybrisBinderPrivate {
     GBinderClient *m_clientGnssDebug;
     GBinderRemoteObject *m_remoteGnssDebug;
 
+/*
     GBinderClient *m_clientGnssNi;
     GBinderRemoteObject *m_remoteGnssNi;
     GBinderLocalObject *m_callbackGnssNi;
+*/
 
+/*
     GBinderClient *m_clientGnssXtra;
     GBinderRemoteObject *m_remoteGnssXtra;
     GBinderLocalObject *m_callbackGnssXtra;
+*/
 
     GBinderClient *m_clientAGnss;
     GBinderRemoteObject *m_remoteAGnss;
@@ -87,6 +91,8 @@ gboolean gclue_hybris_binder_gnssSetPositionMode(GClueHybris *hybris,
                                                  guint32 preferredAccuracyMeters,
                                                  guint32 preferredTimeMs);
 void gclue_hybris_binder_gnssDebugInit(GClueHybris *hybris);
+
+/*
 void gclue_hybris_binder_gnssNiInit(GClueHybris *hybris);
 void gclue_hybris_binder_gnssNiRespond(GClueHybris *hybris,
                                        int32_t notifId,
@@ -94,6 +100,7 @@ void gclue_hybris_binder_gnssNiRespond(GClueHybris *hybris,
 void gclue_hybris_binder_gnssXtraInit(GClueHybris *hybris);
 gboolean gclue_hybris_binder_gnssXtraInjectXtraData(GClueHybris *hybris,
                                                     gchar *xtraData);
+*/
 
 void gclue_hybris_binder_aGnssInit(GClueHybris *hybris);
 gboolean gclue_hybris_binder_aGnssDataConnClosed(GClueHybris *hybris);
@@ -107,42 +114,112 @@ void gclue_hybris_binder_aGnssRilInit(GClueHybris *hybris);
 
 enum GnssFunctions {
     GNSS_SET_CALLBACK = 1,
-    GNSS_START = 2,
-    GNSS_STOP = 3,
-    GNSS_CLEANUP = 4,
-    GNSS_INJECT_TIME = 5,
-    GNSS_INJECT_LOCATION = 6,
-    GNSS_DELETE_AIDING_DATA = 7,
-    GNSS_SET_POSITION_MODE = 8,
-    GNSS_GET_EXTENSION_AGNSS_RIL = 9,
-    GNSS_GET_EXTENSION_GNSS_GEOFENCING = 10,
-    GNSS_GET_EXTENSION_AGNSS = 11,
-    GNSS_GET_EXTENSION_GNSS_NI = 12,
-    GNSS_GET_EXTENSION_GNSS_MEASUREMENT = 13,
-    GNSS_GET_EXTENSION_GNSS_NAVIGATION_MESSAGE = 14,
-    GNSS_GET_EXTENSION_XTRA = 15,
-    GNSS_GET_EXTENSION_GNSS_CONFIGURATION = 16,
-    GNSS_GET_EXTENSION_GNSS_DEBUG = 17,
-    GNSS_GET_EXTENSION_GNSS_BATCHING = 18
+    GNSS_CLOSE = 2,
+    GNSS_GET_EXTENSION_PSDS = 3,
+    GNSS_GET_EXTENSION_GNSS_CONFIGURATION = 4,
+    GNSS_GET_EXTENSION_GNSS_MEASUREMENT = 5,
+    GNSS_GET_EXTENSION_GNSS_POWER_INDICATION = 6,
+    GNSS_GET_EXTENSION_GNSS_BATCHING = 7,
+    GNSS_GET_EXTENSION_GNSS_GEOFENCE = 8,
+    GNSS_GET_EXTENSION_GNSS_NAVIGATION_MESSAGE = 9,
+    GNSS_GET_EXTENSION_AGNSS = 10,
+    GNSS_GET_EXTENSION_AGNSS_RIL = 11,
+    GNSS_GET_EXTENSION_GNSS_DEBUG = 12,
+    GNSS_GET_EXTENSION_GNSS_VISIBILITY_CONTROL = 13,
+    GNSS_START = 14,
+    GNSS_STOP = 15,
+    GNSS_INJECT_TIME = 16,
+    GNSS_INJECT_LOCATION = 17,
+    GNSS_INJECT_BEST_LOCATION = 18,
+    GNSS_DELETE_AIDING_DATA = 19,
+    GNSS_SET_POSITION_MODE = 19,
+    GNSS_GET_EXTENSION_GNSS_ANTENNA_INFO = 20,
+    GNSS_GET_EXTENSION_MEASUREMENT_CORRECTIONS = 21,
+    GNSS_START_SV_STATUS = 22,
+    GNSS_STOP_SV_STATUS = 23,
+    GNSS_START_NMEA = 24,
+    GNSS_STOP_NMEA = 25
+//    GNSS_GET_EXTENSION_GNSS_NI = 12,
+//    GNSS_GET_EXTENSION_XTRA = 15, deprecated? ^^
 };
 
 enum GnssCallbacks {
-    GNSS_LOCATION_CB = 1,
+    GNSS_SET_CAPABILITIES_CB = 1,
     GNSS_STATUS_CB = 2,
     GNSS_SV_STATUS_CB = 3,
-    GNSS_NMEA_CB = 4,
-    GNSS_SET_CAPABILITIES_CB = 5,
+    GNSS_LOCATION_CB = 4,
+    GNSS_NMEA_CB = 5,
     GNSS_ACQUIRE_WAKELOCK_CB = 6,
     GNSS_RELEASE_WAKELOCK_CB = 7,
-    GNSS_REQUEST_TIME_CB = 8,
-    GNSS_SET_SYSTEM_INFO_CB = 9
+    GNSS_SET_SYSTEM_INFO_CB = 8,
+    GNSS_REQUEST_TIME_CB = 9,
+    GNSS_REQUEST_LOCATION_CB = 10
 };
 
-enum GnssDebudFunctions {
+enum GnssAntennaInfoFunctions {
+    GNSS_ANTENNA_INFO_SET_CALLBACK = 1,
+    GNSS_ANTENNA_INFO_CLOSE = 2
+};
+
+enum GnssAntennaInfoCallbacks {
+    GNSS_ANTENNA_INFO_CB = 1
+};
+
+enum GnssBatchingFunctions {
+    GNSS_BATCHING_INIT = 1,
+    GNSS_BATCHING_GET_BATCH_SIZE = 2,
+    GNSS_BATCHING_START = 3,
+    GNSS_BATCHING_FLUSH = 4,
+    GNSS_BATCHING_STOP = 5,
+    GNSS_BATCHING_CLEANUP = 6
+};
+
+enum GnssBatchingCallbacks {
+    GNSS_BATCHING_GNSS_LOCATION_BATCH_CB = 1
+};
+
+enum GnssConfigurationFunctions {
+    GNSS_CONFIGURATION_SET_SUPL_VERSION = 1,
+    GNSS_CONFIGURATION_SET_SUPL_MODE = 2,
+    GNSS_CONFIGURATION_SET_LPP_PROFILE = 3,
+    GNSS_CONFIGURATION_SET_GLONASS_POSITIONING_PROTOCOL = 4,
+    GNSS_CONFIGURATION_SET_EMERGENCY_SUPL_PDN = 5,
+    GNSS_CONFIGURATION_SET_ES_EXTENSION_SEC = 6,
+    GNSS_CONFIGURATION_SET_BLOCKLIST = 7
+};
+
+enum GnssDebugFunctions {
     GNSS_DEBUG_GET_DEBUG_DATA = 1
 };
 
-enum GnssNiFunctions {
+enum GnssGeofenceFunctions {
+    GNSS_GEOFENCE_SET_CALLBACK = 1,
+    GNSS_GEOFENCE_ADD_GEOFENCE = 2,
+    GNSS_GEOFENCE_PAUSE_GEOFENCE = 3,
+    GNSS_GEOFENCE_RESUME_GEOFENCE = 4,
+    GNSS_GEOFENCE_REMOVE_GEOFENCE = 5
+};
+
+enum GnssGeofenceCallbacks {
+    GNSS_GEOFENCE_TRANSITION_CB = 1,
+    GNSS_GEOFENCE_STATUS_CB = 2,
+    GNSS_GEOFENCE_ADD_CB = 3,
+    GNSS_GEOFENCE_REMOVE_CB = 4,
+    GNSS_GEOFENCE_PAUSE_CB = 5,
+    GNSS_GEOFENCE_RESUME_CB = 6
+};
+
+enum GnssMeasurementFunctions {
+    GNSS_MEASUREMENT_SET_CALLBACK = 1,
+    GNSS_MEASUREMENT_CLOSE = 2,
+    GNSS_MEASUREMENT_SET_CALLBACK_WITH_OPTIONS = 3
+};
+
+enum GnssMeasurementCallbacks {
+    GNSS_MEASUREMENT_CB = 1
+};
+
+/*enum GnssNiFunctions {
     GNSS_NI_SET_CALLBACK = 1,
     GNSS_NI_RESPOND = 2
 };
@@ -158,6 +235,34 @@ enum GnssXtraFunctions {
 
 enum GnssXtraCallbacks {
     GNSS_XTRA_DOWNLOAD_REQUEST_CB = 1
+};*/
+
+enum GnssNavigationMessageFunctions {
+    GNSS_NAVIGATION_MESSAGE_SET_CALLBACK = 1,
+    GNSS_NAVIGATION_MESSAGE_CLOSE = 2
+};
+
+enum GnssNavigationMessageCallbacks {
+    GNSS_NAVIGATION_MESSAGE_CB = 1
+};
+
+enum GnssPowerIndicationFunctions {
+    GNSS_POWER_INDICATION_SET_CALLBACK = 1,
+    GNSS_POWER_INDICATION_REQUEST_GNSS_POWER_STATS = 2
+};
+
+enum GnssPowerIndicationCallbacks {
+    GNSS_POWER_INDICATION_SET_CAPABILITIES_CB = 1,
+    GNSS_POWER_INDICATION_GNSS_POWER_STATS_CB = 2
+};
+
+enum GnssPsdsFunctions {
+    GNSS_PSDS_INJECT_PSDS_DATA = 1,
+    GNSS_PSDS_SET_CALLBACK = 2
+};
+
+enum GnssPsdsCallbacks {
+    GNSS_PSDS_DOWNLOAD_REQUEST_CB = 1
 };
 
 enum AGnssFunctions {
@@ -169,20 +274,18 @@ enum AGnssFunctions {
 };
 
 enum AGnssCallbacks {
-    AGNSS_STATUS_IP_V4_CB = 1,
-    AGNSS_STATUS_IP_V6_CB = 2
+    AGNSS_STATUS_CB = 1
 };
 
 enum AGnssRilFunctions {
     AGNSS_RIL_SET_CALLBACK = 1,
     AGNSS_RIL_SET_REF_LOCATION = 2,
     AGNSS_RIL_SET_ID = 3,
-    AGNSS_RIL_UPDATE_NETWORK_STATE = 4,
-    AGNSS_RIL_UPDATE_NETWORK_AVAILABILITY = 5
+    AGNSS_RIL_UPDATE_NETWORK_STATE = 4
 };
 
 enum AGnssRilCallbacks {
-    AGNSS_RIL_REQUEST_REF_ID_CB = 1,
+    AGNSS_RIL_REQUEST_SET_ID_CB = 1,
     AGNSS_RIL_REQUEST_REF_LOC_CB = 2
 };
 
@@ -193,19 +296,19 @@ enum HybrisApnIpTypeEnum {
     HYBRIS_APN_IP_IPV4V6   = 3
 };
 
-#define GNSS_IFACE(x)       "android.hardware.gnss@1.0::" x
+#define GNSS_IFACE(x)       "android.hardware.gnss." x
 #define GNSS_REMOTE         GNSS_IFACE("IGnss")
 #define GNSS_CALLBACK       GNSS_IFACE("IGnssCallback")
 #define GNSS_DEBUG_REMOTE   GNSS_IFACE("IGnssDebug")
-#define GNSS_NI_REMOTE      GNSS_IFACE("IGnssNi")
-#define GNSS_NI_CALLBACK    GNSS_IFACE("IGnssNiCallback")
-#define GNSS_XTRA_REMOTE    GNSS_IFACE("IGnssXtra")
-#define GNSS_XTRA_CALLBACK  GNSS_IFACE("IGnssXtraCallback")
+//#define GNSS_NI_REMOTE      GNSS_IFACE("IGnssNi")
+//#define GNSS_NI_CALLBACK    GNSS_IFACE("IGnssNiCallback")
+//#define GNSS_XTRA_REMOTE    GNSS_IFACE("IGnssXtra")
+//#define GNSS_XTRA_CALLBACK  GNSS_IFACE("IGnssXtraCallback")
 #define AGNSS_REMOTE        GNSS_IFACE("IAGnss")
 #define AGNSS_CALLBACK      GNSS_IFACE("IAGnssCallback")
 #define AGNSS_RIL_REMOTE    GNSS_IFACE("IAGnssRil")
 #define AGNSS_RIL_CALLBACK  GNSS_IFACE("IAGnssRilCallback")
-
+// TODO: add new interfaces such as NAVIGATION_MESSAGE and POWER_INDICATION
 
 /*==========================================================================*
  * Implementation
@@ -437,7 +540,7 @@ GBinderLocalReply *geoclue_binder_gnss_callback(
     return NULL;
 }
 
-GBinderLocalReply *geoclue_binder_gnss_xtra_callback(
+/*GBinderLocalReply *geoclue_binder_gnss_xtra_callback(
     GBinderLocalObject *obj,
     GBinderRemoteRequest *req,
     guint code,
@@ -467,7 +570,7 @@ GBinderLocalReply *geoclue_binder_gnss_xtra_callback(
         *status = GBINDER_STATUS_FAILED;
     }
     return NULL;
-}
+}*/
 
 GBinderLocalReply *geoclue_binder_agnss_callback(
     GBinderLocalObject *obj,
@@ -485,8 +588,8 @@ GBinderLocalReply *geoclue_binder_agnss_callback(
 
         gbinder_remote_request_init_reader(req, &reader);
         switch (code) {
-        case AGNSS_STATUS_IP_V4_CB:
-            {
+        //case AGNSS_STATUS_IP_V4_CB:
+            //{
             /*gint32 ipv4;
             guint8* ipv6;
             gchar *ssid;
@@ -501,10 +604,10 @@ GBinderLocalReply *geoclue_binder_agnss_callback(
             //                          Q_ARG(qint16, status->type), Q_ARG(quint16, status->status),
             //                          Q_ARG(QHostAddress, ipv4), Q_ARG(QHostAddress, ipv6),
             //                          Q_ARG(QByteArray, ssid), Q_ARG(QByteArray, password));
-            }
-            break;
-        case AGNSS_STATUS_IP_V6_CB:
-            {
+            //}
+            //break;
+        //case AGNSS_STATUS_IP_V6_CB:
+            //{
             /*gint32 ipv4;
             guint8* ipv6;
             gchar *ssid;
@@ -519,6 +622,10 @@ GBinderLocalReply *geoclue_binder_agnss_callback(
             //                          Q_ARG(qint16, status->type), Q_ARG(quint16, status->status),
             //                          Q_ARG(QHostAddress, ipv4), Q_ARG(QHostAddress, ipv6),
             //                          Q_ARG(QByteArray, ssid), Q_ARG(QByteArray, password));
+            //}
+            //break;
+        case AGNSS_STATUS_CB:
+            {
             }
             break;
         default:
@@ -551,7 +658,7 @@ GBinderLocalReply *geoclue_binder_agnss_ril_callback(
 
         gbinder_remote_request_init_reader(req, &reader);
         switch (code) {
-        case AGNSS_RIL_REQUEST_REF_ID_CB:
+        case AGNSS_RIL_REQUEST_SET_ID_CB:
             g_debug("lcGeoclueHybris: AGNSS RIL request ref ID");
             break;
         case AGNSS_RIL_REQUEST_REF_LOC_CB:
@@ -571,7 +678,7 @@ GBinderLocalReply *geoclue_binder_agnss_ril_callback(
 }
 
 
-GBinderLocalReply *geoclue_binder_gnss_ni_callback(
+/*GBinderLocalReply *geoclue_binder_gnss_ni_callback(
     GBinderLocalObject *obj,
     GBinderRemoteRequest *req,
     guint code,
@@ -601,7 +708,7 @@ GBinderLocalReply *geoclue_binder_gnss_ni_callback(
         *status = GBINDER_STATUS_FAILED;
     }
     return NULL;
-}
+}*/
 
 void geoclue_binder_gnss_gnss_died(
     GBinderRemoteObject *obj,
@@ -633,10 +740,10 @@ gclue_hybris_interface_init(GClueHybrisInterface *iface)
     iface->gnssDeleteAidingData = gclue_hybris_binder_gnssDeleteAidingData;
     iface->gnssSetPositionMode = gclue_hybris_binder_gnssSetPositionMode;
     iface->gnssDebugInit = gclue_hybris_binder_gnssDebugInit;
-    iface->gnssNiInit = gclue_hybris_binder_gnssNiInit;
-    iface->gnssNiRespond = gclue_hybris_binder_gnssNiRespond;
-    iface->gnssXtraInit = gclue_hybris_binder_gnssXtraInit;
-    iface->gnssXtraInjectXtraData = gclue_hybris_binder_gnssXtraInjectXtraData;
+    //iface->gnssNiInit = gclue_hybris_binder_gnssNiInit;
+    //iface->gnssNiRespond = gclue_hybris_binder_gnssNiRespond;
+    //iface->gnssXtraInit = gclue_hybris_binder_gnssXtraInit;
+    //iface->gnssXtraInjectXtraData = gclue_hybris_binder_gnssXtraInjectXtraData;
     iface->aGnssInit = gclue_hybris_binder_aGnssInit;
     iface->aGnssDataConnClosed = gclue_hybris_binder_aGnssDataConnClosed;
     iface->aGnssDataConnFailed = gclue_hybris_binder_aGnssDataConnFailed;
@@ -671,7 +778,7 @@ void gclue_hybris_binder_dropGnss(GClueHybrisBinder *hbinder)
         gbinder_remote_object_unref(priv->m_remoteGnssDebug);
         priv->m_remoteGnssDebug = NULL;
     }
-    if (priv->m_callbackGnssNi) {
+/*    if (priv->m_callbackGnssNi) {
         gbinder_local_object_drop(priv->m_callbackGnssNi);
         priv->m_callbackGnssNi = NULL;
     }
@@ -694,7 +801,7 @@ void gclue_hybris_binder_dropGnss(GClueHybrisBinder *hbinder)
     if (priv->m_remoteGnssXtra) {
         gbinder_remote_object_unref(priv->m_remoteGnssXtra);
         priv->m_remoteGnssXtra = NULL;
-    }
+    }*/
     if (priv->m_callbackAGnss) {
         gbinder_local_object_drop(priv->m_callbackAGnss);
         priv->m_callbackAGnss = NULL;
@@ -918,9 +1025,9 @@ void gclue_hybris_binder_gnssCleanup(GClueHybris *hybris)
     hbinder = GCLUE_HYBRIS_BINDER(hybris);
     priv = hbinder->priv;
 
-    if (priv->m_clientGnss) {
-        gbinder_client_transact(priv->m_clientGnss, GNSS_CLEANUP, 0, NULL, NULL, NULL, NULL);
-    }
+//    if (priv->m_clientGnss) {
+//        gbinder_client_transact(priv->m_clientGnss, GNSS_CLEANUP, 0, NULL, NULL, NULL, NULL);
+//    }
 }
 
 gboolean gclue_hybris_binder_gnssInjectLocation(GClueHybris *hybris, double latitudeDegrees, double longitudeDegrees, float accuracyMeters)
@@ -1086,6 +1193,7 @@ void gclue_hybris_binder_gnssDebugInit(GClueHybris *hybris)
 }
 
 // GnnNi
+/*
 void gclue_hybris_binder_gnssNiInit(GClueHybris *hybris)
 {
     GClueHybrisBinder *hbinder;
@@ -1111,7 +1219,7 @@ void gclue_hybris_binder_gnssNiInit(GClueHybris *hybris)
 
             gbinder_remote_reply_unref(reply);
 
-            /* IGnssNi::setCallback */
+            // IGnssNi::setCallback
             req = gbinder_client_new_request(priv->m_clientGnssNi);
             gbinder_local_request_append_local_object(req, priv->m_callbackGnssNi);
             reply = gbinder_client_transact_sync_reply(priv->m_clientGnssNi,
@@ -1127,7 +1235,9 @@ void gclue_hybris_binder_gnssNiInit(GClueHybris *hybris)
     }
     gbinder_remote_reply_unref(reply);
 }
+*/
 
+/*
 void gclue_hybris_binder_gnssNiRespond(GClueHybris *hybris, int32_t notifId, HybrisGnssUserResponseType userResponse)
 {
     GClueHybrisBinder *hbinder;
@@ -1160,8 +1270,10 @@ void gclue_hybris_binder_gnssNiRespond(GClueHybris *hybris, int32_t notifId, Hyb
         gbinder_remote_reply_unref(reply);
     }
 }
+*/
 
 // GnssXtra
+/*
 void gclue_hybris_binder_gnssXtraInit(GClueHybris *hybris)
 {
     GClueHybrisBinder *hbinder;
@@ -1187,7 +1299,7 @@ void gclue_hybris_binder_gnssXtraInit(GClueHybris *hybris)
 
             gbinder_remote_reply_unref(reply);
 
-            /* IGnssXtra::setCallback */
+            // IGnssXtra::setCallback
             req = gbinder_client_new_request(priv->m_clientGnssXtra);
             gbinder_local_request_append_local_object(req, priv->m_callbackGnssXtra);
             reply = gbinder_client_transact_sync_reply(priv->m_clientGnssXtra,
@@ -1201,7 +1313,9 @@ void gclue_hybris_binder_gnssXtraInit(GClueHybris *hybris)
     }
     gbinder_remote_reply_unref(reply);
 }
+*/
 
+/*
 gboolean gclue_hybris_binder_gnssXtraInjectXtraData(GClueHybris *hybris, gchar *xtraData)
 {
     GClueHybrisBinder *hbinder;
@@ -1234,6 +1348,7 @@ gboolean gclue_hybris_binder_gnssXtraInjectXtraData(GClueHybris *hybris, gchar *
     }
     return ret;
 }
+*/
 
 // AGnss
 void gclue_hybris_binder_aGnssInit(GClueHybris *hybris)

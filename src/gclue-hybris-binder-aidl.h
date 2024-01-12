@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2015 Jolla Ltd.
     Copyright (C) 2018 Matti Lehtimäki <matti.lehtimaki@gmail.com>
-    Contact: Aaron McCarthy <aaron.mccarthy@jollamobile.com>
+    Copyright (C) 2024 Bardia Moshiri <fakeshell@bardia.tech>
 
     This file is part of geoclue-hybris.
 
@@ -19,7 +19,7 @@
 
 #include <gbinder.h>
 
-#include "gclue-hybris-binder-types.h"
+#include "gclue-hybris-binder-aidl-types.h"
 #include "gclue-hybris-types.h"
 
 G_BEGIN_DECLS

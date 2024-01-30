@@ -110,30 +110,30 @@ void gclue_hybris_gnssDebugInit(GClueHybris *hybris) {
 }
 
 void gclue_hybris_gnssNiInit(GClueHybris *hybris) {
-        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
+//        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
 
-        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssNiInit(hybris);
+//        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssNiInit(hybris);
 }
 
 void gclue_hybris_gnssNiRespond(GClueHybris *hybris,
                                 int32_t notifId,
                                 HybrisGnssUserResponseType userResponse) {
-        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
+//        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
 
-        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssNiRespond(hybris, notifId, userResponse);
+//        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssNiRespond(hybris, notifId, userResponse);
 }
 
 void gclue_hybris_gnssXtraInit(GClueHybris *hybris) {
-        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
+//        g_return_if_fail(GCLUE_IS_HYBRIS(hybris));
 
-        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssXtraInit(hybris);
+//        GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssXtraInit(hybris);
 }
 
 gboolean gclue_hybris_gnssXtraInjectXtraData(GClueHybris *hybris,
                                          gchar *xtraData) {
-        g_return_val_if_fail(GCLUE_IS_HYBRIS(hybris), FALSE);
+//        g_return_val_if_fail(GCLUE_IS_HYBRIS(hybris), FALSE);
 
-        return GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssXtraInjectXtraData(hybris, xtraData);
+//        return GCLUE_HYBRIS_GET_INTERFACE(hybris)->gnssXtraInjectXtraData(hybris, xtraData);
 }
 
 void gclue_hybris_aGnssInit(GClueHybris *hybris) {

@@ -174,6 +174,8 @@ towertec_to_radiotype (GClueTowerTec tec,
         return TRUE;
 }
 
+#define USER_AGENT (PACKAGE_NAME "/" PACKAGE_VERSION)
+
 SoupMessage *
 gclue_mozilla_create_query (GClueMozilla  *mozilla,
                             gboolean skip_tower,
@@ -183,6 +185,7 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
 {
         gboolean has_tower = FALSE, has_bss = FALSE;
         SoupMessage *ret = NULL;
+        SoupMessageHeaders *request_headers;
         JsonBuilder *builder;
         g_autoptr(GList) bss_list = NULL;
         JsonGenerator *generator;
@@ -292,6 +295,8 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
 
         uri = gclue_mozilla_get_locate_url (mozilla);
         ret = soup_message_new ("POST", uri);
+        request_headers = soup_message_get_request_headers (ret);
+        soup_message_headers_append (request_headers, "User-Agent", USER_AGENT);
         body = g_bytes_new_take (data, data_len);
         soup_message_set_request_body_from_bytes (ret, "application/json", body);
         g_debug ("Sending following request to '%s':\n%s", uri, data);
@@ -551,6 +556,7 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
 
         ret = soup_message_new ("POST", url);
         request_headers = soup_message_get_request_headers (ret);
+        soup_message_headers_append (request_headers, "User-Agent", USER_AGENT);
         if (nick != NULL && nick[0] != '\0')
                 soup_message_headers_append (request_headers,
                                              "X-Nickname",

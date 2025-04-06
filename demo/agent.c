@@ -29,22 +29,34 @@
 
 #include "gclue-service-agent.h"
 
-/* Commandline options */
-static gboolean version;
-
 static GOptionEntry entries[] =
 {
         { "version",
           0,
           0,
           G_OPTION_ARG_NONE,
-          &version,
+          NULL,
           N_("Display version number"),
           NULL },
-        { NULL }
+        G_OPTION_ENTRY_NULL
 };
 
 GClueServiceAgent *agent = NULL;
+
+static gint
+handle_local_options_cb (GApplication *app,
+                         GVariantDict *options,
+                         gpointer      user_data)
+{
+        gboolean version;
+
+        if (g_variant_dict_lookup (options, "version", "b", &version)) {
+                g_print ("%s\n", PACKAGE_VERSION);
+                return EXIT_SUCCESS;
+        }
+
+        return -1;
+}
 
 static void
 on_get_bus_ready (GObject      *source_object,
@@ -67,12 +79,32 @@ on_get_bus_ready (GObject      *source_object,
 
 #define ABS_PATH ABS_SRCDIR "/agent"
 
+static void
+activate_cb (GApplication *app,
+             gpointer      user_data)
+{
+        g_bus_get (G_BUS_TYPE_SYSTEM,
+                   NULL,
+                   on_get_bus_ready,
+                   NULL);
+
+        g_application_hold (app);
+}
+
+static void
+is_registered_cb (GApplication *app,
+                  GParamSpec   *pspec,
+                  gpointer      user_data)
+{
+        if (g_application_get_is_registered (app) && g_application_get_is_remote (app))
+                g_message ("Another instance of GeoClue DemoAgent is running.");
+}
+
 int
 main (int argc, char **argv)
 {
-        GMainLoop *main_loop;
-        GError *error = NULL;
-        GOptionContext *context;
+        g_autoptr (GApplication) app = NULL;
+        int status = 0;
 
         setlocale (LC_ALL, "");
 
@@ -83,29 +115,20 @@ main (int argc, char **argv)
 
         notify_init (_("GeoClue"));
 
-        context = g_option_context_new ("- Geoclue Agent service");
-        g_option_context_add_main_entries (context, entries, GETTEXT_PACKAGE);
-        if (!g_option_context_parse (context, &argc, &argv, &error)) {
-                g_critical ("option parsing failed: %s\n", error->message);
-                exit (-1);
-        }
+        app = g_application_new ("org.freedesktop.GeoClue2.DemoAgent",
+                                 G_APPLICATION_DEFAULT_FLAGS);
 
-        if (version) {
-                g_print ("%s\n", PACKAGE_VERSION);
-                exit (0);
-        }
+        g_application_add_main_option_entries (app, entries);
+        g_application_set_option_context_parameter_string (app, "- Geoclue Agent service");
 
-        g_bus_get (G_BUS_TYPE_SYSTEM,
-                   NULL,
-                   on_get_bus_ready,
-                   NULL);
+        g_signal_connect (app, "activate", G_CALLBACK (activate_cb), NULL);
+        g_signal_connect (app, "handle-local-options", G_CALLBACK (handle_local_options_cb), NULL);
+        g_signal_connect (app, "notify::is-registered", G_CALLBACK (is_registered_cb), NULL);
 
-        main_loop = g_main_loop_new (NULL, FALSE);
-        g_main_loop_run (main_loop);
+        status = g_application_run (G_APPLICATION (app), argc, argv);
 
         if (agent != NULL)
                 g_object_unref (agent);
-        g_main_loop_unref (main_loop);
 
-        return 0;
+        return status;
 }

@@ -361,9 +361,9 @@ add_new_service (GClueNMEASource *source,
         }
 
         if (!txt) {
-	        accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
+                accuracy = GCLUE_ACCURACY_LEVEL_EXACT;
 
-	        goto CREATE_SERVICE;
+                goto CREATE_SERVICE;
         }
 
         node = avahi_string_list_find (txt, "accuracy");
@@ -872,18 +872,18 @@ try_connect_to_service (GClueNMEASource *source)
                  (unsigned int) priv->active_service->port);
 
         if (!priv->active_service->is_socket) {
-		g_socket_client_connect_to_host_async
-			(priv->client,
-			 priv->active_service->host_name,
-			 priv->active_service->port,
-			 priv->cancellable,
-			 on_connection_to_location_server,
-			 source);
+                g_socket_client_connect_to_host_async
+                        (priv->client,
+                         priv->active_service->host_name,
+                         priv->active_service->port,
+                         priv->cancellable,
+                         on_connection_to_location_server,
+                         source);
         } else {
                 g_autoptr(GSocketAddress) addr = NULL;
 
                 addr = g_unix_socket_address_new (priv->active_service->host_name);
-		g_socket_client_connect_async (priv->client,
+                g_socket_client_connect_async (priv->client,
                                G_SOCKET_CONNECTABLE (addr),
                                priv->cancellable,
                                on_connection_to_location_server,

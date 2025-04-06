@@ -8,6 +8,12 @@ if get_option('enable-backend')
         conf.set('demo_agent', '')
     endif
 
+    if get_option('default-wifi-url') != ''
+        conf.set('default_wifi_enable', 'true')
+    else
+        conf.set('default_wifi_enable', 'false')
+    endif
+
     conf_dir = join_paths(sysconfdir, 'geoclue')
     configure_file(output: 'geoclue.conf',
                    input: 'geoclue.conf.in',

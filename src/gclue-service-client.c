@@ -318,7 +318,7 @@ on_agent_props_changed (GDBusProxy *agent_proxy,
         GVariantIter *iter;
         GVariant *value;
         gchar *key;
-        
+
         if (g_variant_n_children (changed_properties) <= 0)
                 return;
 

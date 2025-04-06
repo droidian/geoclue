@@ -25,7 +25,7 @@ enable=true
 [3g]
 
 # Enable 3G source
-enable=false
+enable=@default_wifi_enable@
 
 # CDMA source configuration options
 [cdma]
@@ -51,14 +51,14 @@ enable=true
 # Enable WiFi source
 # If this source and the static source below are both disabled a GeoIP-only
 # source will be used instead.
-enable=false
+enable=@default_wifi_enable@
 
-# URL to the WiFi geolocation service. If not set, defaults to Mozilla's
-# Location Service with a hardcoded key. To use a custom key, uncomment this URL
-# while changing YOUR_KEY to your MLS API key.
-#url=https://location.services.mozilla.com/v1/geolocate?key=YOUR_KEY
+# URL to a WiFi geolocation service compatible with the Ichnaea API
+# (https://ichnaea.readthedocs.io/en/latest/api/geolocate.html).
+# An API key can be set by using the 'key' URL parameter.
+#url=https://example.com/v1/geolocate?key=YOUR_KEY
 
-# To use the Google geolocation service instead of Mozilla's, uncomment this URL
+# To use the Google geolocation service, uncomment this URL
 # while changing YOUR_KEY to your Google API key.
 #
 # WARNING: Please make sure that you are complying with the Google's ToS and
@@ -68,8 +68,8 @@ enable=false
 #
 #url=https://www.googleapis.com/geolocation/v1/geolocate?key=YOUR_KEY
 
-# Submit data to Mozilla Location Service
-# If set to true, geoclue will automatically submit network data to Mozilla
+# Submit data to WiFi geolocation service
+# If set to true, geoclue will automatically submit network data
 # each time it gets a GPS lock.
 #
 # Currently, only Modem-GPS or Network NMEA sources are supported as providers
@@ -80,12 +80,12 @@ enable=false
 #
 submit-data=false
 
-# URL to submission API of Mozilla Location Service. If not set, defaults to
-# Mozilla's API with a hardcoded key. To use a custom key, uncomment this URL
-# while changing YOUR_KEY to your MLS API key.
-#submission-url=https://location.services.mozilla.com/v2/geosubmit?key=YOUR_KEY
+# URL to submit data to a WiFi geolocation service with an Ichnaea compatible API
+# (https://ichnaea.readthedocs.io/en/latest/api/geosubmit2.html).
+#submission-url=https://example.com/v2/geosubmit?key=YOUR_KEY
 
-# A nickname to submit network data with. A nickname must be 2-32 characters long.
+# A nickname to submit network data with. If empty, omitted from the submission.
+# Otherwise, must be 2 to 32 characters long. Defaults to "geoclue".
 submission-nick=geoclue
 
 # Compass configuration options

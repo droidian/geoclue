@@ -651,7 +651,7 @@ gclue_location_create_from_rmc (const char     *rmc,
         gdouble altitude;
 
         parts = g_strsplit (rmc, ",", -1);
-        if (g_strv_length (parts) < 13) {
+        if (g_strv_length (parts) < 12) {
                 g_warning ("Invalid NMEA RMC sentence.");
                 return NULL;
         }

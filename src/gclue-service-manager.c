@@ -21,7 +21,9 @@
  */
 
 #include <glib/gi18n.h>
+#include <glib-unix.h>
 #include <config.h>
+#include <signal.h>
 
 #include "gclue-service-manager.h"
 #include "gclue-service-client.h"
@@ -45,6 +47,7 @@ struct _GClueServiceManagerPrivate
 
         guint last_client_id;
         guint num_clients;
+        guint unix_signal_source;
 
         GClueLocator *locator;
 };
@@ -76,6 +79,37 @@ typedef struct
         gboolean reuse_client;
 
 } OnClientInfoNewReadyData;
+
+static gboolean
+log_client_list (gpointer user_data)
+{
+        GClueServiceManager *manager = GCLUE_SERVICE_MANAGER (user_data);
+        GList *l;
+
+        g_message ("SIGUSR1 received, printing client list:");
+        if (!manager->priv->clients) {
+                g_message ("    (No clients)");
+                return G_SOURCE_CONTINUE;
+        }
+        g_message ("    System  Active  UID     Id");
+        for (l = manager->priv->clients; l != NULL; l = l->next) {
+                GClueDBusClient *dbus_client = GCLUE_DBUS_CLIENT (l->data);
+                GClueClientInfo *client_info =
+                        gclue_service_client_get_client_info (GCLUE_SERVICE_CLIENT (l->data));
+                GClueConfig *config;
+                guint32 uid;
+                const char *system, *active, *id;
+                const char *y = "x";
+                const char *n = "-";
+                id = gclue_dbus_client_get_desktop_id (dbus_client);
+                uid = gclue_client_info_get_user_id (client_info);
+                config = gclue_config_get_singleton ();
+                system = gclue_config_is_system_component (config, id) ? y : n;
+                active = gclue_dbus_client_get_active (dbus_client) ? y : n;
+                g_message ("    %s       %s       %-7d %s", system, active, uid, id);
+        }
+        return G_SOURCE_CONTINUE;
+}
 
 static void
 on_client_info_new_ready_data_free (gpointer data)
@@ -588,6 +622,7 @@ gclue_service_manager_finalize (GObject *object)
                                    on_client_info_new_ready_data_free);
                 priv->clients_waiting_agent = NULL;
         }
+        g_clear_handle_id (&priv->unix_signal_source, g_source_remove);
 
         /* Chain up to the parent class */
         G_OBJECT_CLASS (gclue_service_manager_parent_class)->finalize (object);
@@ -650,7 +685,8 @@ on_avail_accuracy_level_changed (GObject    *object,
 static void
 gclue_service_manager_constructed (GObject *object)
 {
-        GClueServiceManagerPrivate *priv = GCLUE_SERVICE_MANAGER (object)->priv;
+        GClueServiceManager *manager = GCLUE_SERVICE_MANAGER (object);
+        GClueServiceManagerPrivate *priv = manager->priv;
 
         G_OBJECT_CLASS (gclue_service_manager_parent_class)->constructed (object);
 
@@ -662,6 +698,7 @@ gclue_service_manager_constructed (GObject *object)
         on_avail_accuracy_level_changed (G_OBJECT (priv->locator),
                                          NULL,
                                          object);
+        priv->unix_signal_source = g_unix_signal_add (SIGUSR1, log_client_list, manager);
 }
 
 static void

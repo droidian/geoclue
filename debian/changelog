@@ -1,3 +1,26 @@
+geoclue-2.0 (2.7.2-2) unstable; urgency=medium
+
+  * debian/control: Add Provides: ${gir:Provides} for the -dev package
+  * debian/rules: Use api.beacondb.net instead of beacondb.net
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 22 Dec 2024 10:11:37 +0100
+
+geoclue-2.0 (2.7.2-1) unstable; urgency=low
+
+  * New upstream release
+    - Bump build-dependencies
+  * debian/watch: Fix the logic after GitLab changes (Closes: #1079914)
+  * debian/geoclue-2.0.lintian-overrides: Drop
+    package-supports-alternative-init-but-no-init.d-script, not used anymore
+  * debian/control:
+    - Bump Standards-Version to 4.7.0 (no further changes)
+    - Update build-dependencies to please lintian: pkg-config => pkgconf
+  * debian/rules: Use beaconDB as a source, with the maintainer approval
+    (Closes: #1074427)
+  * debian/patches: Cherry-pick several patches for beaconDB
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 12 Dec 2024 11:49:19 +0100
+
 geoclue-2.0 (2.7.1-2) unstable; urgency=medium
 
   * Team upload

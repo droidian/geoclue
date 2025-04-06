@@ -43,6 +43,9 @@ option('systemd-system-unit-dir',
 option('dbus-srv-user',
        type: 'string', value: 'root',
        description: 'The user (existing) as which the service will run')
-option('mozilla-api-key',
-       type: 'string', value: 'geoclue',
-       description: 'Your API key for Mozilla Location Service')
+option('default-wifi-url',
+       type: 'string',
+       description: 'Default URL for Ichnaea-compatible WiFi geolocation')
+option('default-wifi-submit-url',
+       type: 'string',
+       description: 'Default URL for Ichnaea-compatible WiFi location submission')

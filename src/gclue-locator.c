@@ -157,8 +157,9 @@ set_location (GClueLocator  *locator,
 
             if (locator->priv->priority_source_lock &&
                 !gclue_location_source_get_priority_source (source)) {
-                     g_debug ("Priority Source Lock (age %lu) active, ignoring new %s location",
-                              new_timestamp - locator->priv->priority_source_lock_timestamp, src_name);
+                     g_debug ("Priority Source Lock (age %u s) active, ignoring new %s location",
+                              (guint) (new_timestamp - locator->priv->priority_source_lock_timestamp),
+                              src_name);
                      return;
             }
 

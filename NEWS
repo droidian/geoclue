@@ -1,3 +1,31 @@
+2.7.2
+=====
+
+- Don't warn about missing conf.d directory
+- Accept 11-part RMC NMEA sentences from pre NMEA v2.3 GPS sources
+- Log the service client list on SIGUSR1
+- Read GPS locations from non-enabled ModemManager modem, enabling GPS use without a SIM card
+- Bump ModemManager dependency to version 1.12
+- Mozilla Location Service (MLS) has been retired, remove MLS related constants and configs:
+  - Remove DEFAULT_WIFI_URL and DEFAULT_WIFI_SUBMIT_URL
+  - If wifi URL is not set in config, disable wifi and 3g sources
+  - Remove Mozilla URLs from default config file
+  - Remove mozilla-api-key option from meson build
+- Allow specifying default Ichnaea-compatible locate and submit URLs in meson build
+- Allow setting an empty submission-nick in config
+- Add User-Agent header to locate and submit queries
+- Upgrade GLib / Gio dependency to version 2.74.0
+- Use GApplication in demo agent, ensuring a unique, user session bound process
+- The async constructor gclue_simple_new in libgeoclue now can be canceled properly
+
+Contributors:
+- Kira Bruneau
+- Teemu Ikonen
+- Maciej S. Szmigiero
+- Jan Alexander Steffens (heftig)
+- Balló György
+- Markus Göllnitz
+
 2.7.1
 =====
 
@@ -62,9 +90,9 @@ Contributors:
 - Modem manager: add polkit rule to allow GPS access
 - Allow disabling compass at build and at runtime
 - Fix heading computation for identical locations
-- Be strict with time and distance threshold 
+- Be strict with time and distance threshold
 - Fix the XDG location portal integration
-- Replace agent wait timeout with a queue 
+- Replace agent wait timeout with a queue
 - Other bugs fixes
 
 Contributors:
@@ -72,10 +100,10 @@ Contributors:
 - Laurent Bigonville
 - Angus Ainslie
 - Dan Nicholson
-- Guido Günther 
+- Guido Günther
 - Jan Alexander Steffens
-- Abderrahim Kitouni 
-- clayton craft 
+- Abderrahim Kitouni
+- clayton craft
 - Ian Douglas Scott
 - Chupligin Sergey
 - Dor Askayo

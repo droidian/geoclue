@@ -28,6 +28,7 @@
     </signal>
     <property access="read" name="State" type="s"/>
     <property access="read" name="Ifname" type="s"/>
+    <property access="read" name="Driver" type="s"/>
     <property access="read" name="BSSs" type="ao"/>
   </interface>
   <interface name="fi.w1.wpa_supplicant1.BSS">

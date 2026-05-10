@@ -49,7 +49,6 @@ struct _GClueServiceClientPrivate
 
         GClueServiceLocation *location;
         GClueServiceLocation *prev_location;
-        GClueLocation *signaled_location;
         guint distance_threshold;
         guint time_threshold;
 
@@ -127,14 +126,16 @@ distance_below_threshold (GClueServiceClient *client,
         GClueServiceClientPrivate *priv = client->priv;
         gdouble distance;
         gdouble threshold;
+        g_autoptr(GClueLocation) current_location = NULL;
 
         if (priv->distance_threshold == 0)
                 return FALSE;
 
-        if (!priv->signaled_location)
+        if (!priv->location)
                 return FALSE;
 
-        distance = gclue_location_get_distance_from (priv->signaled_location,
+        g_object_get (priv->location, "location", &current_location, NULL);
+        distance = gclue_location_get_distance_from (current_location,
                                                      location);
         threshold = priv->distance_threshold;
         if (distance < threshold) {
@@ -154,14 +155,16 @@ time_below_threshold (GClueServiceClient *client,
         GClueServiceClientPrivate *priv = client->priv;
         gint64 cur_ts, new_ts;
         guint64 diff_ts;
+        g_autoptr(GClueLocation) current_location = NULL;
 
         if (priv->time_threshold == 0)
                 return FALSE;
 
-        if (!priv->signaled_location)
+        if (!priv->location)
                 return FALSE;
 
-        cur_ts = gclue_location_get_timestamp (priv->signaled_location);
+        g_object_get (priv->location, "location", &current_location, NULL);
+        cur_ts = gclue_location_get_timestamp (current_location);
         new_ts = gclue_location_get_timestamp (location);
         diff_ts = ABS (new_ts - cur_ts);
 
@@ -201,6 +204,7 @@ on_locator_location_changed (GObject    *gobject,
         GClueServiceClientPrivate *priv = client->priv;
         GClueLocationSource *locator = GCLUE_LOCATION_SOURCE (gobject);
         GClueLocation *new_location;
+        GClueServiceLocation *new_service_location;
         g_autofree char *path = NULL;
         const char *prev_path;
         g_autoptr(GError) error = NULL;
@@ -210,27 +214,26 @@ on_locator_location_changed (GObject    *gobject,
                 return; /* No location found yet */
 
         if (priv->location != NULL && below_threshold (client, new_location)) {
-                g_debug ("Updating location, below threshold");
-                g_object_set (priv->location,
-                              "location", new_location,
-                              NULL);
+                g_debug ("New location is below threshold, not updating");
                 return;
         }
+
+        path = next_location_path (client);
+        new_service_location = gclue_service_location_new (priv->client_info,
+                                                           path,
+                                                           priv->connection,
+                                                           new_location,
+                                                           &error);
+        if (new_service_location == NULL)
+                goto error_out;
 
         if (priv->prev_location != NULL)
                 // Lets try to ensure that apps are not still accessing the
                 // last location before unrefing (and therefore destroying) it.
                 g_timeout_add_seconds (5, on_prev_location_timeout, priv->prev_location);
-        priv->prev_location = priv->location;
 
-        path = next_location_path (client);
-        priv->location = gclue_service_location_new (priv->client_info,
-                                                     path,
-                                                     priv->connection,
-                                                     new_location,
-                                                     &error);
-        if (priv->location == NULL)
-                goto error_out;
+        priv->prev_location = priv->location;
+        priv->location = new_service_location;
 
         if (priv->prev_location != NULL)
                 prev_path = gclue_service_location_get_path (priv->prev_location);
@@ -238,9 +241,6 @@ on_locator_location_changed (GObject    *gobject,
                 prev_path = "/";
 
         gclue_dbus_client_set_location (GCLUE_DBUS_CLIENT (client), path);
-
-        g_clear_object (&priv->signaled_location);
-        priv->signaled_location = g_object_ref (new_location);
 
         if (!emit_location_updated (client, prev_path, path, &error))
                 goto error_out;
@@ -650,7 +650,6 @@ gclue_service_client_finalize (GObject *object)
         g_clear_object (&priv->locator);
         g_clear_object (&priv->location);
         g_clear_object (&priv->prev_location);
-        g_clear_object (&priv->signaled_location);
         g_clear_object (&priv->client_info);
 
         /* Chain up to the parent class */

@@ -1,3 +1,17 @@
+2.8.1
+=====
+
+Fixes:
+- Accept NMEA GGA sentences with 11 or more parts (needed 14 or more previously)
+- Use async D-bus 'Set' methods to set client properties in libgeoclue to improve robustness
+- Do not change Client Location property on updates which are below threshold to avoid leaking location to D-bus
+- Ignore wired WPA interfaces when finding an interface for WiFi scanning
+
+Contributors:
+- Thorben T
+- Teemu Ikonen
+- Markus Teich
+
 2.8.0
 =====
 

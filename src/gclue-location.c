@@ -626,8 +626,8 @@ gclue_location_create_from_gga (const char *gga)
         g_auto(GStrv) parts = NULL;
 
         parts = g_strsplit (gga, ",", -1);
-        if (g_strv_length (parts) < 14) {
-                g_warning ("Invalid NMEA GGA sentence.");
+        if (g_strv_length (parts) < 11) {
+                g_warning ("Received short NMEA GGA sentence, discarding.");
                 return NULL;
         }
 

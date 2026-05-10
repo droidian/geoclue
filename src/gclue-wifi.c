@@ -903,8 +903,9 @@ on_interface_proxy_ready (GObject      *source_object,
                           gpointer      user_data)
 {
         GClueWifi *wifi;
-        WPAInterface *interface;
+        g_autoptr(WPAInterface) interface = NULL;
         g_autoptr(GError) error = NULL;
+        const gchar *driver;
 
         interface = wpa_interface_proxy_new_for_bus_finish (res, &error);
         if (interface == NULL) {
@@ -920,21 +921,25 @@ on_interface_proxy_ready (GObject      *source_object,
                 return;
         }
 
-        wifi = GCLUE_WIFI (user_data);
-        if (wifi->priv->interface != NULL) {
-                g_object_unref (interface);
+        driver = wpa_interface_get_driver (interface);
+        if (g_strcmp0 (driver, "wired") == 0) {
+                g_info ("Skipping wired interface '%s'", wpa_interface_get_ifname (interface));
                 return;
         }
 
-        wifi->priv->interface = interface;
+        wifi = GCLUE_WIFI (user_data);
+        if (wifi->priv->interface != NULL) {
+                return;
+        }
+
+        wifi->priv->interface = g_steal_pointer (&interface);
         g_debug ("WiFi device '%s' added.",
-                 wpa_interface_get_ifname (interface));
+                 wpa_interface_get_ifname (wifi->priv->interface));
 
         if (gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (wifi)))
                 connect_bss_signals (wifi);
         else
                 gclue_web_source_refresh_available_accuracy_level (GCLUE_WEB_SOURCE (wifi));
-
 }
 
 static void
@@ -1019,6 +1024,7 @@ gclue_wifi_init (GClueWifi *wifi)
 static void
 gclue_wifi_constructed (GObject *object)
 {
+        guint i;
         GClueWifi *wifi = GCLUE_WIFI (object);
         GClueWifiPrivate *priv = wifi->priv;
         const gchar *const *interfaces;
@@ -1051,11 +1057,18 @@ gclue_wifi_constructed (GObject *object)
                                  wifi, 0);
 
         interfaces = wpa_supplicant_get_interfaces (priv->supplicant);
-        if (interfaces != NULL && interfaces[0] != NULL)
+        if (interfaces == NULL)
+                return;
+
+        /* Dispatch proxy creation for all initial interfaces. The asyncs
+         * callback `on_interface_proxy_ready` will filter out wired ones and
+         * keep only the first valid WiFi interface. */
+        for (i = 0; interfaces[i] != NULL; i++) {
                 on_interface_added (priv->supplicant,
-                                    interfaces[0],
+                                    interfaces[i],
                                     NULL,
                                     wifi);
+        }
 }
 
 static void

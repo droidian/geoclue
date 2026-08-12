@@ -78,6 +78,7 @@ gclue_mozilla_get_tower (GClueMozilla *mozilla);
 
 SoupMessage *
 gclue_mozilla_create_query (GClueMozilla  *mozilla,
+                            const char *url,
                             gboolean skip_tower,
                             gboolean skip_bss,
                             const char **query_data_description,
@@ -88,13 +89,15 @@ gclue_mozilla_parse_response (const char *json,
                               GError    **error);
 SoupMessage *
 gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
-                                   GClueLocation   *location,
-                                   GError         **error);
+                                   const char    *url,
+                                   GClueLocation *location,
+                                   GError       **error);
+gboolean
+gclue_mozilla_parse_submit_response (const char  *response_contents,
+                                     gint         status_code,
+                                     GError     **error);
 gboolean
 gclue_mozilla_should_ignore_bss (WPABSS *bss);
-
-const char *gclue_mozilla_get_locate_url (GClueMozilla *mozilla);
-const char *gclue_mozilla_get_submit_url (GClueMozilla *mozilla);
 
 G_END_DECLS
 

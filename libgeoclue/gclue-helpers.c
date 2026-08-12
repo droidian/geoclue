@@ -118,28 +118,75 @@ on_client_destroyed (gpointer data,
 }
 
 static void
+on_req_accuracy_level_set (GObject *source_object,
+                           GAsyncResult* res,
+                           gpointer user_data)
+{
+        g_autoptr(GVariant) retval = NULL;
+        g_autoptr(GError) error = NULL;
+        g_autoptr(GDBusProxy) client = G_DBUS_PROXY (source_object);
+        g_autoptr(GTask) task = G_TASK (user_data);
+
+        retval = g_dbus_proxy_call_finish (client, res, &error); // NOLINT (unread variable warning)
+        if (error != NULL) {
+                g_task_return_error (task, g_steal_pointer (&error));
+                return;
+        }
+
+        g_task_return_pointer (task, g_steal_pointer (&client), g_object_unref);
+}
+
+static void
+on_desktop_id_set (GObject *source_object,
+                   GAsyncResult* res,
+                   gpointer user_data)
+{
+        g_autoptr(GError) error = NULL;
+        g_autoptr(GVariant) retval = NULL;
+        g_autoptr(GVariant) params = NULL;
+        g_autoptr(GDBusProxy) client = G_DBUS_PROXY (source_object);
+        g_autoptr(GTask) task = G_TASK (user_data);
+        ClientCreateData *data = g_task_get_task_data (task);
+
+        retval = g_dbus_proxy_call_finish (client, res, &error); // NOLINT (unread variable warning)
+        if (error != NULL) {
+                g_task_return_error (task, g_steal_pointer (&error));
+                return;
+        }
+
+        params = g_variant_new ("(ssv)",
+                                "org.freedesktop.GeoClue2.Client",
+                                "RequestedAccuracyLevel",
+                                g_variant_new_uint32 (data->accuracy_level));
+        g_dbus_proxy_call (g_steal_pointer (&client),
+                           "org.freedesktop.DBus.Properties.Set",
+                           params,
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           NULL,
+                           on_req_accuracy_level_set,
+                           g_steal_pointer (&task));
+}
+
+static void
 on_client_proxy_ready (GObject      *source_object,
                        GAsyncResult *res,
                        gpointer      user_data)
 {
-        GTask *task = G_TASK (user_data);
         ClientCreateData *data;
         ClientDestroyData *destroy;
-        GClueClient *client;
-        GError *error = NULL;
+        g_autoptr(GClueClient) client = NULL;
+        g_autoptr(GError) error = NULL;
+        g_autoptr(GVariant) params = NULL;
+        g_autoptr(GTask) task = G_TASK (user_data);
 
         client = gclue_client_proxy_new_for_bus_finish (res, &error);
         if (error != NULL) {
-                g_task_return_error (task, error);
-                g_object_unref (task);
-
+                g_task_return_error (task, g_steal_pointer (&error));
                 return;
         }
 
         data = g_task_get_task_data (task);
-        gclue_client_set_desktop_id (client, data->desktop_id);
-        gclue_client_set_requested_accuracy_level (client, data->accuracy_level);
-
         if (data->flags & GCLUE_CLIENT_PROXY_CREATE_AUTO_DELETE) {
                 destroy = client_destroy_data_new (
                                   data->manager,
@@ -150,8 +197,18 @@ on_client_proxy_ready (GObject      *source_object,
                                    destroy);
        }
 
-        g_task_return_pointer (task, client, g_object_unref);
-        g_object_unref (task);
+        params = g_variant_new ("(ssv)",
+                                "org.freedesktop.GeoClue2.Client",
+                                "DesktopId",
+                                g_variant_new_string (data->desktop_id));
+        g_dbus_proxy_call (G_DBUS_PROXY (g_steal_pointer (&client)),
+                           "org.freedesktop.DBus.Properties.Set",
+                           params,
+                           G_DBUS_CALL_FLAGS_NONE,
+                           -1,
+                           NULL,
+                           on_desktop_id_set,
+                           g_steal_pointer (&task));
 }
 
 static void

@@ -8,10 +8,18 @@ if get_option('enable-backend')
         conf.set('demo_agent', '')
     endif
 
+    if get_option('default-wifi-submit-url') != ''
+        conf.set('default_wifi_submit_url', get_option('default-wifi-submit-url'))
+    else
+        conf.set('default_wifi_submit_url', '<UNSET>')
+    endif
+
     if get_option('default-wifi-url') != ''
         conf.set('default_wifi_enable', 'true')
+        conf.set('default_wifi_url', get_option('default-wifi-url'))
     else
         conf.set('default_wifi_enable', 'false')
+        conf.set('default_wifi_url', '<UNSET>')
     endif
 
     conf_dir = join_paths(sysconfdir, 'geoclue')
@@ -20,9 +28,11 @@ if get_option('enable-backend')
                    configuration: conf,
                    install_dir: conf_dir)
 
+    dbus_srv_user = get_option('dbus-srv-user')
+
     conf = configuration_data()
     conf.set('libexecdir', libexecdir)
-    conf.set('dbus_srv_user', get_option('dbus-srv-user'))
+    conf.set('dbus_srv_user', dbus_srv_user)
     conf.set('sysconfdir', sysconfdir)
 
     confd_dir = join_paths(conf_dir, 'conf.d')
@@ -54,11 +64,23 @@ if get_option('enable-backend')
                    configuration: conf,
                    install_dir: dbus_service_dir)
 
+    systemd = dependency('systemd', required: false)
+    if dbus_srv_user != 'root'
+        if systemd.found()
+            sysusers_dir = systemd.get_variable(pkgconfig: 'sysusersdir')
+        else
+            sysusers_dir = '/usr/lib/sysusers.d'
+        endif
+        configure_file(output: 'geoclue-sysusers.conf',
+                       input: 'geoclue-sysusers.conf.in',
+                       configuration: conf,
+                       install_dir: sysusers_dir)
+    endif
+
     systemd_unit_dir = get_option('systemd-system-unit-dir')
     if systemd_unit_dir == ''
-        dep = dependency('systemd', required: false)
-        if dep.found()
-            systemd_unit_dir = dep.get_variable(pkgconfig: 'systemdsystemunitdir')
+        if systemd.found()
+            systemd_unit_dir = systemd.get_variable(pkgconfig: 'systemdsystemunitdir')
         endif
     endif
 

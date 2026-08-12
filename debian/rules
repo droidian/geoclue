@@ -9,36 +9,17 @@ ifneq ($(DEB_BUILD_ARCH_OS),linux)
                  -Dcdma-source=false
 endif
 
-ifeq ($(shell which gtkdoc-scan),)
-  BUILD_DOC := -Dgtk-doc=false
-endif
-ifneq ($(filter nodoc, $(DEB_BUILD_OPTIONS)),)
-  BUILD_DOC := -Dgtk-doc=false
-endif
-
 override_dh_auto_configure:
-	dh_auto_configure -- --libexecdir=/usr/libexec \
-                             -Ddbus-srv-user=geoclue \
-                             -Dsystemd-system-unit-dir=/usr/lib/systemd/system \
-			     ${BUILD_DOC} \
-                             ${MM_NM_FLAGS} \
-                             -Ddefault-wifi-url=https://api.beacondb.net/v1/geolocate
-
-override_dh_auto_test:
-	# testsuite fails on missing latitude (et.al)
-	# which is only available when using GeoLiteCity.dat
-	# database, which "geoip-database" package in debian
-	# does not include.
-	dh_auto_test || true
+	dh_auto_configure -- \
+		-Ddbus-srv-user=geoclue \
+		-Dgtk-doc=$(if $(filter %-doc,$(shell dh_listpackages)),true,false) \
+		-Dsystemd-system-unit-dir=/usr/lib/systemd/system \
+		${MM_NM_FLAGS}
 
 %:
-	dh $@ --with gir
+	dh $@
 
-override_dh_missing:
-	dh_missing --list-missing
-
-override_dh_install-arch:
-	dh_install -a
+execute_after_dh_install-arch:
 	dh_apparmor --profile-name=usr.libexec.geoclue -pgeoclue-2.0
 
 override_dh_installchangelogs:

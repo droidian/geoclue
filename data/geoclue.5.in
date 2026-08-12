@@ -17,10 +17,9 @@ order. Thus, a configuration file '90-config.conf' will overwrite parameters
 specified in another configuration file '50-config.conf' in the conf.d
 directory.
 .PP
-All configurations settings below are mandatory and the defaults are
-what you see before you edit them in geoclue.conf. If you want to keep the default
-values around, copy and comment out the appropriate line(s) before
-changing them.
+All configurations settings below are mandatory and the defaults are what you
+see before you edit them in geoclue.conf. If you want to keep the default values
+around, copy and comment out the appropriate line(s) before changing them.
 .PP
 Missing 'enable' key for a particular source in the main configuration file
 causes that source to be enabled by default. Adding 'enable' key setting
@@ -35,6 +34,41 @@ separated by a ';'.
 .IP
 .B whitelist=geoclue-demo-agent;gnome-shell;io.elementary.desktop.agent-geoclue2
 .br
+.SH LOCATION SOURCE CONFIGURATION OPTIONS
+.IP \fB[ip]
+.br
+IP source configuration options
+.IP
+.B \fBenable=true
+.br
+Enable the GeoIP source
+.br
+.IP
+.B \fBmethod=ichnaea
+.br
+Method (backend) to use for IP location. Currently implemented are:
+.br
+"ichnaea": Use the Ichnaea API with the URL from the wifi source.
+.br
+"gmaps": Use the location determined by Google Maps.
+"reallyfreegeoip": reallyfreegeoip.org. This API does not return accuracy, so we
+use a constant value. See the accuracy option below.
+.br
+.IP
+The following options do not need to be set, but can be provided if you want to
+override the method defaults:
+.br
+.IP
+.B \fBurl=https://example.com/v1/geolocate
+.br
+Alternative URL to the GeoIP service implemented by the selected method.
+.br
+.IP
+.B \fBaccuracy=30000.0
+.br
+Override the accuracy received from the GeoIP server (or hardcoded into the
+method) with this value.
+.br
 .IP \fB[network-nmea]
 .br
 Network NMEA source configuration options
@@ -42,6 +76,8 @@ Network NMEA source configuration options
 .B \fBenable=true
 .br
 Fetch location from NMEA sources on local network?
+.br
+(Sources are automatically discovered using avahi, domain "_nmea-0183._tcp".)
 .br
 .IP
 .B \fBnmea-socket=/var/run/gps-share.sock
@@ -55,7 +91,8 @@ If not set, unix socket will not be used.
 .IP
 .B \fBenable=true
 .br
-Enable 3G source
+Enable 3G source. The 3G source uses the wireless geolocation service URL
+defined in the "wifi" section.
 .br
 .IP \fB[cdma]
 .br
@@ -81,25 +118,35 @@ WiFi source configuration options
 .br
 Enable WiFi source
 .IP
-.B url=\fIhttps://location.services.mozilla.com/v1/geolocate?key=YOUR_KEY
+.B url=\fIhttps://example.com/v1/geolocate?key=YOUR_KEY
 .br
-URL to the WiFi geolocation service. If not set, defaults to Mozilla's
-Location Service with a hardcoded key. To use a custom key, uncomment this URL
-while changing YOUR_KEY to your MLS API key.
+URL to wireless geolocation service compatible with the Ichnaea API
+(https://ichnaea.readthedocs.io/en/latest/api/geolocate.html). If not set,
+defaults to an URL set in the build configuration. If an URL is not set here or
+in the build configuration, the wifi and 3g sources will be disabled. An API key
+can be set with the "key" URL parameter.
 .IP
 .B submit-data=false
-Submit data to Mozilla Location Service
 .br
-If set to true, geoclue will automatically submit network data to Mozilla
-each time it gets a GPS lock.
+Submit data to a wireless geolocation service.
+.br
+If set to true, geoclue will automatically submit network data to a wireless
+geolocation service each time it gets a GPS lock. Currently, only Modem-GPS or
+Network NMEA sources are supported as providers of a location to submit (one at
+a time). If Modem-GPS source is enabled above it will be the exclusive provider
+(regardless whether the system is actually equipped with such modem), otherwise
+Network NMEA source will be considered.
 .IP
-.B submission-url=\fIhttps://location.services.mozilla.com/v2/geosubmit?key=YOUR_KEY
+.B submission-url=\fIhttps://example.com/v2/geosubmit?key=YOUR_KEY
 .br
-URL to submission API of Mozilla Location Service
+URL to submit data to a wireless geolocation service with an Ichnaea compatible
+API (https://ichnaea.readthedocs.io/en/latest/api/geosubmit2.html).
 .IP
 .B submission-nick=geoclue
 .br
-A nickname to submit network data with. If empty, omitted from the submission. Otherwise, must be 2 to 32 characters long. Defaults to "geoclue".
+A nickname to submit network data with. Sets an "X-Nickname" HTTP header to the
+submit request. If set to an empty string, omitted from the submission.
+Otherwise, must be 2 to 32 characters long. Defaults to "geoclue".
 .br
 .IP \fB[compass]
 .br
@@ -113,7 +160,11 @@ Enable Compass
 .br
 Static source configuration options.
 .br
-This source reads location from "geolocation" file in @sysconfdir@. While this file is constantly monitored for changes during geoclue operation, and the reported static location is updated accordingly, this source isn't meant for inputting a dynamically changing location to geoclue (please use the Network NMEA source for that).
+This source reads location from "geolocation" file in @sysconfdir@. See "STATIC
+LOCATION FILE" below for the format of this file. While this file is constantly
+monitored for changes during geoclue operation, and the reported static location
+is updated accordingly, this source isn't meant for inputting a dynamically
+changing location to geoclue (please use the Network NMEA source for that).
 .IP
 .B \fBenable=true
 .br
@@ -205,7 +256,8 @@ users=
 .br
 .SH STATIC LOCATION FILE
 .SS Basic format:
-The static location file in @sysconfdir@ (used by the static source) is a text file consisting of the following:
+The static location file in @sysconfdir@ (used by the static source) is a text
+file consisting of the following:
 .nr step 1 1
 .IP \n[step]
 Latitude (floating point number; positive values mean north, negative south)
@@ -220,7 +272,8 @@ Accuracy radius (floating point number; in meters)
 These values need to be separated by newline characters.
 .SS Additional format information:
 .IP \[bu]
-The '\[sh]' character starts a comment, which continues until the end of the current line.
+The '\[sh]' character starts a comment, which continues until the end of the
+current line.
 .IP \[bu]
 Leading and trailing white-space on each line is ignored.
 .IP \[bu]
@@ -235,14 +288,16 @@ Empty lines (or containing just white-space or a comment) are ignored.
 1.83         # accuracy radius (the diameter of the torch is 12 feet)
 .EE
 .SS Notes:
-For extra security, the static location file can be made readable just by the geoclue user:
+For extra security, the static location file can be made readable just by the
+geoclue user:
 .EX
 # chown @dbus_srv_user@ @sysconfdir@/geolocation
 # chmod 600 @sysconfdir@/geolocation
 .EE
 .br
 .SH CLIENT LIST
-Sending SIGUSR1 to a running geoclue process prints the current list of clients to the log.
+Sending SIGUSR1 to a running geoclue process prints the current list of clients
+to the log.
 .br
 .SH AUTHOR
 .na

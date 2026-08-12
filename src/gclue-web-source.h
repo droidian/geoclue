@@ -73,21 +73,36 @@ struct _GClueWebSourceClass {
         SoupMessage *     (*create_query)        (GClueWebSource *source,
                                                   const char **query_data_description,
                                                   GError        **error);
+        GClueLocation *   (*parse_response)      (GClueWebSource *source,
+                                                  const char *content,
+                                                  GError    **error);
         SoupMessage *     (*create_submit_query) (GClueWebSource  *source,
                                                   GClueLocation   *location,
                                                   GError         **error);
+        gboolean          (*parse_submit_response)
+                                                 (GClueWebSource *source,
+                                                  const char     *content,
+                                                  gint            status_code,
+                                                  GError        **error);
         GClueAccuracyLevel (*get_available_accuracy_level)
                                                  (GClueWebSource *source,
                                                   gboolean        network_available);
 };
 
 void gclue_web_source_refresh           (GClueWebSource      *source);
+void gclue_web_source_refresh_available_accuracy_level (GClueWebSource *source);
 void gclue_web_source_set_submit_source (GClueWebSource      *source,
                                          GClueLocationSource *submit_source);
 void gclue_web_source_set_locate_url    (GClueWebSource      *source,
                                          const char          *url);
+const char *gclue_web_source_get_locate_url
+                                        (GClueWebSource      *source);
 void gclue_web_source_set_submit_url    (GClueWebSource      *source,
                                          const char          *url);
+const char *gclue_web_source_get_submit_url
+                                        (GClueWebSource      *source);
+const char *gclue_web_source_get_query_data_description
+                                        (GClueWebSource      *source);
 
 G_END_DECLS
 

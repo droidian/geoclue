@@ -551,10 +551,7 @@ on_portal_started_finish (GObject      *source_object,
         g_autoptr (GError) error = NULL;
 
         if (!xdp_location_call_start_finish (priv->portal, NULL, res, &error)) {
-                if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-                        g_task_return_error (task, g_steal_pointer (&error));
-                else
-                        g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_FAILED, "Start failed");
+                g_task_return_error (task, g_steal_pointer (&error));
         } else {
                 async_init_return_error_when_cancelled (task);
         }

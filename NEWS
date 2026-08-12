@@ -1,3 +1,56 @@
+2.8.1
+=====
+
+Fixes:
+- Accept NMEA GGA sentences with 11 or more parts (needed 14 or more previously)
+- Use async D-bus 'Set' methods to set client properties in libgeoclue to improve robustness
+- Do not change Client Location property on updates which are below threshold to avoid leaking location to D-bus
+- Ignore wired WPA interfaces when finding an interface for WiFi scanning
+
+Contributors:
+- Thorben T
+- Teemu Ikonen
+- Markus Teich
+
+2.8.0
+=====
+
+New features:
+- Add URL and API key for the Positon location service to default config comments
+- Include the SSID in queries to the Ichnaea server to support BeaconDB
+- Set User-Agent in web source queries and add OS info to it
+- Allow disabling WiFi source and static source during compilation
+- Show default Wifi URLs set on compile time in default config comments
+- Add BeaconDB URLs to to default config comments
+- Add a separate GeoIP location source:
+  - Add an 'ip' config section with selectable backend methods: ichnaea, gmaps and reallyfreegeoip
+  - Allow overriding URL and accuracy in ip methods with values from config
+  - Use BeaconDB as the backup GeoIP URL, if URLs are not defined in ip or web source configs
+  - Remove the GeoIP functionality from the web source, it now only handles queries with Wifi and 3G data
+- Install sysusers.d file for the geoclue user
+- Use BeaconDB as the compiled-in default server for locate and submit queries in the web source
+
+Fixes:
+- Forward xdp location start errors in the GClueSimple API
+- Stricter NMEA coordinate parsing: Ignore NMEA coordinates without degree digits, reject coordinates with incorrect range etc.
+- where-am-i: Output accuracy without unnecessary decimals
+- Don't crash when running without enabled location sources but warn that location is not available
+- Fix crash on removing a modem without location capabilities
+- Make SOUP_STATUS_OK as the only successful response code from Ichnaea servers
+- Gracefully handle empty response from Ichnaea server
+- Add more details for network-nmea in the manpage
+
+Contributors:
+- Jonas Dreßler
+- Chris Talbot
+- Sara Marcondes
+- Teemu Ikonen
+- Benoit Maurin
+- Maciej S. Szmigiero
+- Andrey Skvortsov
+- Luca Boccassi
+- Thorben T
+
 2.7.2
 =====
 

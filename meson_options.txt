@@ -10,18 +10,27 @@ option('vapi',
 option('gtk-doc',
        type: 'boolean', value: true,
        description: 'Whether to generate the API reference for Geocode-GLib')
+option('wifi-source',
+       type: 'boolean', value: true,
+       description: 'Enable WiFi source')
 option('3g-source',
        type: 'boolean', value: true,
-       description: 'Enable 3G source (requires ModemManager')
+       description: 'Enable 3G source (requires ModemManager)')
 option('cdma-source',
        type: 'boolean', value: true,
-       description: 'Enable CDMA source (requires ModemManager')
+       description: 'Enable CDMA source (requires ModemManager)')
 option('modem-gps-source',
        type: 'boolean', value: true,
-       description: 'Enable modem GPS source (requires ModemManager')
+       description: 'Enable modem GPS source (requires ModemManager)')
 option('nmea-source',
        type: 'boolean', value: true,
        description: 'Enable network NMEA source (requires Avahi libraries)')
+option('static-source',
+       type: 'boolean', value: true,
+       description: 'Enable static source (geolocation file)')
+option('ip-source',
+       type: 'boolean', value: true,
+       description: 'Enable ip source (GeoIP)')
 option('hybris-source',
        type: 'boolean', value: true,
        description: 'Enable Android HAL GPS source (requires gbinder)')
@@ -44,8 +53,8 @@ option('dbus-srv-user',
        type: 'string', value: 'root',
        description: 'The user (existing) as which the service will run')
 option('default-wifi-url',
-       type: 'string',
+       type: 'string', value: 'https://api.beacondb.net/v1/geolocate',
        description: 'Default URL for Ichnaea-compatible WiFi geolocation')
 option('default-wifi-submit-url',
-       type: 'string',
+       type: 'string', value: 'https://api.beacondb.net/v2/geosubmit',
        description: 'Default URL for Ichnaea-compatible WiFi location submission')

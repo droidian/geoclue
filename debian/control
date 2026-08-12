@@ -2,16 +2,16 @@ Source: geoclue-2.0
 Section: utils
 Priority: optional
 Maintainer: Laurent Bigonville <bigon@debian.org>
-Build-Depends: debhelper-compat (= 12),
-               debhelper (>= 13.11.6),
+Build-Depends: debhelper-compat (= 13),
                dh-apparmor,
                dh-exec,
-               gobject-introspection (>= 0.9.6),
-               intltool (>= 0.40.0),
+               dh-sequence-gir,
+               dh-sequence-installsysusers,
+               gir1.2-gio-2.0-dev,
+               gir1.2-gobject-2.0-dev,
                libavahi-client-dev (>= 0.6.10),
                libavahi-glib-dev (>= 0.6.10),
                libgbinder-dev,
-               libgirepository1.0-dev (>= 0.9.6),
                libglib2.0-dev (>= 2.74.0),
                libjson-glib-dev (>= 0.14),
                libmm-glib-dev (>= 1.12) [linux-any],
@@ -22,14 +22,14 @@ Build-Depends: debhelper-compat (= 12),
                valac
 Build-Depends-Indep: gtk-doc-tools <!nodoc>, libglib2.0-doc <!nodoc>
 Homepage: https://gitlab.freedesktop.org/geoclue/geoclue/wikis/home
-Standards-Version: 4.7.0
+Standards-Version: 4.7.2
 Vcs-Git: https://salsa.debian.org/freedesktop-team/geoclue-2.0.git
 Vcs-Browser: https://salsa.debian.org/freedesktop-team/geoclue-2.0
 Rules-Requires-Root: no
 
 Package: geoclue-2.0
 Architecture: any
-Depends: adduser, ${misc:Depends}, ${shlibs:Depends}
+Depends: ${misc:Depends}, ${shlibs:Depends}
 Recommends: avahi-daemon,
             iio-sensor-proxy [linux-any],
             modemmanager [linux-any],
@@ -77,11 +77,10 @@ Description: convenience library to interact with geoinformation service
 Package: libgeoclue-2-dev
 Architecture: any
 Section: libdevel
-Depends: gir1.2-geoclue-2.0 (= ${binary:Version}),
-         libgeoclue-2-0 (= ${binary:Version}),
+Depends: libgeoclue-2-0 (= ${binary:Version}),
          libglib2.0-dev (>= 2.44.0),
-         ${misc:Depends},
-         ${shlibs:Depends}
+         ${gir:Depends},
+         ${misc:Depends}
 Suggests: libgeoclue-doc
 Multi-Arch: same
 Provides: ${gir:Provides}
@@ -94,7 +93,7 @@ Description: convenience library to interact with geoinformation service (devel 
 Package: gir1.2-geoclue-2.0
 Section: introspection
 Architecture: any
-Depends: ${gir:Depends}, ${misc:Depends}, ${shlibs:Depends}
+Depends: ${gir:Depends}, ${misc:Depends}
 Multi-Arch: same
 Description: convenience library to interact with geoinformation service (introspection)
  GeoClue is a D-Bus geoinformation service. The goal of the Geoclue project

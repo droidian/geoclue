@@ -120,14 +120,6 @@ get_bssid_from_bss (WPABSS *bss, char *bssid)
         return TRUE;
 }
 
-const char *
-gclue_mozilla_get_locate_url (GClueMozilla *mozilla)
-{
-        GClueConfig *config = gclue_config_get_singleton ();
-
-        return gclue_config_get_wifi_url (config);
-}
-
 static gboolean
 operator_code_to_mcc_mnc (const gchar *opc,
                           gint64      *mcc_p,
@@ -174,10 +166,9 @@ towertec_to_radiotype (GClueTowerTec tec,
         return TRUE;
 }
 
-#define USER_AGENT (PACKAGE_NAME "/" PACKAGE_VERSION)
-
 SoupMessage *
 gclue_mozilla_create_query (GClueMozilla  *mozilla,
+                            const char *url,
                             gboolean skip_tower,
                             gboolean skip_bss,
                             const char **query_data_description,
@@ -185,14 +176,13 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
 {
         gboolean has_tower = FALSE, has_bss = FALSE;
         SoupMessage *ret = NULL;
-        SoupMessageHeaders *request_headers;
         JsonBuilder *builder;
         g_autoptr(GList) bss_list = NULL;
         JsonGenerator *generator;
         JsonNode *root_node;
         char *data;
         gsize data_len;
-        const char *uri, *radiotype;
+        const char *radiotype;
         guint n_non_ignored_bsss;
         GList *iter;
         gint64 mcc, mnc;
@@ -257,6 +247,7 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
                 for (iter = bss_list; iter != NULL; iter = iter->next) {
                         WPABSS *bss = WPA_BSS (iter->data);
                         char mac[BSSID_STR_LEN + 1] = { 0 };
+                        char ssid[MAX_SSID_LEN + 1] = { 0 };
                         gint16 strength_dbm;
                         guint age_ms;
 
@@ -268,6 +259,10 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
                         json_builder_set_member_name (builder, "macAddress");
                         get_bssid_from_bss (bss, mac);
                         json_builder_add_string_value (builder, mac);
+
+                        json_builder_set_member_name (builder, "ssid");
+                        get_ssid_from_bss (bss, ssid);
+                        json_builder_add_string_value (builder, ssid);
 
                         json_builder_set_member_name (builder, "signalStrength");
                         strength_dbm = wpa_bss_get_signal (bss);
@@ -293,13 +288,10 @@ gclue_mozilla_create_query (GClueMozilla  *mozilla,
         g_object_unref (builder);
         g_object_unref (generator);
 
-        uri = gclue_mozilla_get_locate_url (mozilla);
-        ret = soup_message_new ("POST", uri);
-        request_headers = soup_message_get_request_headers (ret);
-        soup_message_headers_append (request_headers, "User-Agent", USER_AGENT);
+        ret = soup_message_new ("POST", url);
         body = g_bytes_new_take (data, data_len);
         soup_message_set_request_body_from_bytes (ret, "application/json", body);
-        g_debug ("Sending following request to '%s':\n%s", uri, data);
+        g_debug ("Sending following request to '%s':\n%s", url, data);
 
         if (query_data_description) {
                 if (has_tower && has_bss) {
@@ -371,6 +363,14 @@ gclue_mozilla_parse_response (const char *json,
                 }
         }
 
+        if (!json_object_has_member (object, "location")) {
+                g_set_error_literal (error,
+                                     G_IO_ERROR,
+                                     G_IO_ERROR_FAILED,
+                                     "No location object received");
+                return NULL;
+        }
+
         loc_object = json_object_get_object_member (object, "location");
         latitude = json_object_get_double_member (loc_object, "lat");
         longitude = json_object_get_double_member (loc_object, "lng");
@@ -383,21 +383,19 @@ gclue_mozilla_parse_response (const char *json,
         return location;
 }
 
-const char *
-gclue_mozilla_get_submit_url (GClueMozilla *mozilla)
+gboolean
+gclue_mozilla_parse_submit_response (const char *response_contents,
+                                     gint        status_code,
+                                     GError    **error)
 {
-        GClueConfig *config = gclue_config_get_singleton ();
-
-        if (gclue_config_get_wifi_submit_data (config))
-                return gclue_config_get_wifi_submit_url (config);
-        else
-                return NULL;
+        return status_code == SOUP_STATUS_OK;
 }
 
 SoupMessage *
 gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
-                                   GClueLocation   *location,
-                                   GError         **error)
+                                   const char    *url,
+                                   GClueLocation *location,
+                                   GError       **error)
 {
         SoupMessage *ret = NULL;
         SoupMessageHeaders *request_headers;
@@ -406,7 +404,7 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
         JsonNode *root_node;
         char *data;
         g_autoptr(GList) bss_list = NULL;
-        const char *url, *nick, *radiotype;
+        const char *nick, *radiotype;
         gsize data_len;
         GList *iter;
         gdouble lat, lon, accuracy, altitude, speed;
@@ -426,10 +424,8 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
                 goto out;
         }
 
+        g_assert (url != NULL);
 
-        url = gclue_mozilla_get_submit_url (mozilla);
-        if (url == NULL)
-                goto out;
         config = gclue_config_get_singleton ();
         nick = gclue_config_get_wifi_submit_nick (config);
 
@@ -486,6 +482,7 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
                 for (iter = bss_list; iter != NULL; iter = iter->next) {
                         WPABSS *bss = WPA_BSS (iter->data);
                         char mac[BSSID_STR_LEN + 1] = { 0 };
+                        char ssid[MAX_SSID_LEN + 1] = { 0 };
                         gint16 strength_dbm;
                         guint16 frequency;
                         guint age_ms;
@@ -498,6 +495,10 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
                         json_builder_set_member_name (builder, "macAddress");
                         get_bssid_from_bss (bss, mac);
                         json_builder_add_string_value (builder, mac);
+
+                        json_builder_set_member_name (builder, "ssid");
+                        get_ssid_from_bss (bss, ssid);
+                        json_builder_add_string_value (builder, ssid);
 
                         json_builder_set_member_name (builder, "signalStrength");
                         strength_dbm = wpa_bss_get_signal (bss);
@@ -556,7 +557,6 @@ gclue_mozilla_create_submit_query (GClueMozilla  *mozilla,
 
         ret = soup_message_new ("POST", url);
         request_headers = soup_message_get_request_headers (ret);
-        soup_message_headers_append (request_headers, "User-Agent", USER_AGENT);
         if (nick != NULL && nick[0] != '\0')
                 soup_message_headers_append (request_headers,
                                              "X-Nickname",

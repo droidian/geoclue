@@ -20,5 +20,5 @@ indent_style = space
 indent_size = 4
 indent_style = space
 
-[*.md]
+[*.{md,5.in}]
 max_line_length = 80

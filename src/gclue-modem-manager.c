@@ -944,7 +944,7 @@ on_mm_object_removed (GDBusObjectManager *object_manager,
         MMObject *mm_object = MM_OBJECT (object);
         GClueModemManager *manager = GCLUE_MODEM_MANAGER (user_data);
         GClueModemManagerPrivate *priv = manager->priv;
-        const char *path = mm_object_get_path (priv->mm_object);
+        const char *path = mm_object_get_path (mm_object);
 
         g_hash_table_remove (manager->priv->modems_not_enabled, path);
 

@@ -25,6 +25,7 @@
 #include <string.h>
 #include "gclue-3g.h"
 #include "gclue-3g-tower.h"
+#include "gclue-config.h"
 #include "gclue-modem-manager.h"
 #include "gclue-location.h"
 #include "gclue-mozilla.h"
@@ -128,6 +129,26 @@ static void cancel_location_3gpp_timeout (GClue3G *g3g)
         priv->location_3gpp_timeout_id = 0;
 }
 
+static GClueLocation *
+gclue_3g_parse_response (GClueWebSource *source,
+                         const char     *content,
+                         GError        **error)
+{
+        const char *location_description =
+                gclue_web_source_get_query_data_description (source);
+
+        return gclue_mozilla_parse_response (content, location_description, error);
+}
+
+static gboolean
+gclue_3g_parse_submit_response (GClueWebSource *source,
+                                const char     *content,
+                                gint            status_code,
+                                GError        **error)
+{
+        return gclue_mozilla_parse_submit_response (content, status_code, error);
+}
+
 static void
 gclue_3g_finalize (GObject *g3g)
 {
@@ -161,7 +182,9 @@ gclue_3g_class_init (GClue3GClass *klass)
         source_class->start = gclue_3g_start;
         source_class->stop = gclue_3g_stop;
         web_class->create_query = gclue_3g_create_query;
+        web_class->parse_response = gclue_3g_parse_response;
         web_class->create_submit_query = gclue_3g_create_submit_query;
+        web_class->parse_submit_response = gclue_3g_parse_submit_response;
         web_class->get_available_accuracy_level =
                 gclue_3g_get_available_accuracy_level;
 }
@@ -171,6 +194,7 @@ gclue_3g_init (GClue3G *source)
 {
         GClue3GPrivate *priv;
         GClueWebSource *web_source = GCLUE_WEB_SOURCE (source);
+        GClueConfig *config = gclue_config_get_singleton ();
 
         source->priv = gclue_3g_get_instance_private (source);
         priv = source->priv;
@@ -179,9 +203,9 @@ gclue_3g_init (GClue3G *source)
 
         priv->mozilla = gclue_mozilla_get_singleton ();
         gclue_web_source_set_locate_url (web_source,
-                                         gclue_mozilla_get_locate_url (priv->mozilla));
+                                         gclue_config_get_wifi_url (config));
         gclue_web_source_set_submit_url (web_source,
-                                         gclue_mozilla_get_submit_url (priv->mozilla));
+                                         gclue_config_get_wifi_submit_url (config));
 
         priv->modem = gclue_modem_manager_get_singleton ();
         priv->threeg_notify_id =
@@ -249,6 +273,7 @@ gclue_3g_create_query (GClueWebSource *web,
         GClue3G *g3g = GCLUE_3G (web);
         GClue3GPrivate *priv = g3g->priv;
         gboolean skip_bss;
+        const char *url;
 
         if (!gclue_mozilla_has_tower (priv->mozilla)) {
                 g_set_error_literal (error,
@@ -263,7 +288,8 @@ gclue_3g_create_query (GClueWebSource *web,
                 g_debug ("Will skip BSSs in query due to our accuracy level");
         }
 
-        return gclue_mozilla_create_query (priv->mozilla, FALSE, skip_bss,
+        url = gclue_web_source_get_locate_url (web);
+        return gclue_mozilla_create_query (priv->mozilla, url, FALSE, skip_bss,
                                            query_data_description, error);
 }
 
@@ -273,6 +299,11 @@ gclue_3g_create_submit_query (GClueWebSource  *web,
                               GError         **error)
 {
         GClue3GPrivate *priv = GCLUE_3G (web)->priv;
+        const char *submit_url;
+        GClueConfig *config = gclue_config_get_singleton ();
+
+        if (!gclue_config_get_wifi_submit_data (config))
+                return NULL;
 
         if (!gclue_mozilla_has_tower (priv->mozilla)) {
                 g_set_error_literal (error,
@@ -282,7 +313,9 @@ gclue_3g_create_submit_query (GClueWebSource  *web,
                 return NULL; /* Not initialized yet */
         }
 
+        submit_url = gclue_web_source_get_submit_url (web);
         return gclue_mozilla_create_submit_query (priv->mozilla,
+                                                  submit_url,
                                                   location,
                                                   error);
 }
@@ -409,7 +442,8 @@ gclue_3g_stop (GClueLocationSource *source)
         g_autoptr(GError) error = NULL;
         GClueLocationSourceStopResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_STOP_RESULT_FAILED);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_3g_parent_class);
         base_result = base_class->stop (source);

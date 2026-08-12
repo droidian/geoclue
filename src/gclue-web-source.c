@@ -28,6 +28,7 @@
 #include "gclue-error.h"
 #include "gclue-location.h"
 #include "gclue-mozilla.h"
+#include "config.h"
 
 /**
  * SECTION:gclue-web-source
@@ -36,9 +37,6 @@
  *
  * Baseclass for all sources that solely use a web resource for geolocation.
  **/
-
-static void
-refresh_accuracy_level (GClueWebSource *web);
 
 struct _GClueWebSourcePrivate {
         GCancellable *cancellable;
@@ -59,6 +57,7 @@ struct _GClueWebSourcePrivate {
         const char *submit_url;
         gboolean locate_url_reachable;
         gboolean submit_url_reachable;
+        gboolean refresh_needed;
 };
 
 enum
@@ -90,7 +89,7 @@ gclue_web_source_real_refresh_async (GClueWebSource      *source,
         task = g_task_new (source, cancellable, callback, user_data);
         g_task_set_source_tag (task, gclue_web_source_real_refresh_async);
 
-        refresh_accuracy_level (source);
+        gclue_web_source_refresh_available_accuracy_level (source);
 
         if (!gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (source))) {
                 g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_NOT_INITIALIZED,
@@ -137,6 +136,7 @@ refresh_callback (SoupSession  *session,
         g_autoptr(GError) local_error = NULL;
         g_autofree char *contents = NULL;
         g_autofree char *str = NULL;
+        g_autofree char *short_contents = NULL;
         g_autoptr(GClueLocation) location = NULL;
         GUri *uri;
 
@@ -159,10 +159,12 @@ refresh_callback (SoupSession  *session,
         contents = g_strndup (g_bytes_get_data (body, NULL), g_bytes_get_size (body));
         uri = soup_message_get_uri (query);
         str = g_uri_to_string (uri);
-        g_debug ("Got following response from '%s':\n%s", str, contents);
-        location = gclue_mozilla_parse_response (contents,
-                                                 web->priv->query_data_description,
-                                                 &local_error);
+        short_contents = g_strndup (contents, 256);
+        g_debug ("Got a response of %" G_GSIZE_FORMAT " bytes from '%s' starting with:\n%s",
+                 strlen(contents), str, short_contents);
+        location = GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_response (web,
+                                                                     contents,
+                                                                     &local_error);
         if (local_error != NULL) {
                 g_task_return_error (task, g_steal_pointer (&local_error));
                 return;
@@ -192,9 +194,11 @@ query_callback (GObject      *source_object,
 {
         GClueWebSource *web = GCLUE_WEB_SOURCE (source_object);
         g_autoptr(GError) local_error = NULL;
-        g_autoptr(GClueLocation) location = NULL;
 
-        location = GCLUE_WEB_SOURCE_GET_CLASS (web)->refresh_finish (web, result, &local_error);
+        /* Ignore returned location */
+        GClueLocation *location = GCLUE_WEB_SOURCE_GET_CLASS (web)->refresh_finish (web, result, &local_error);
+        if (location)
+                g_object_unref (location);
 
         if (local_error != NULL &&
             !g_error_matches (local_error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
@@ -209,8 +213,8 @@ query_callback (GObject      *source_object,
         }
 }
 
-static void
-refresh_accuracy_level (GClueWebSource *web)
+void
+gclue_web_source_refresh_available_accuracy_level (GClueWebSource *web)
 {
         GClueAccuracyLevel new, existing;
 
@@ -236,6 +240,9 @@ get_internet_available (void)
                 G_NETWORK_CONNECTIVITY_FULL;
 }
 
+/* This should be equal to WIFI_SCAN_TIMEOUT_HIGH_ACCURACY in gclue-wifi.c */
+#define WEB_LOCATION_TIMEOUT 10
+
 static void
 locate_url_checked_cb (GObject      *source_object,
                        GAsyncResult *result,
@@ -243,6 +250,7 @@ locate_url_checked_cb (GObject      *source_object,
 {
         GNetworkMonitor *mon = G_NETWORK_MONITOR (source_object);
         GClueWebSource *web;
+        GClueLocation *current_location;
         gboolean reachable, last_reachable;
         g_autoptr(GError) error = NULL;
 
@@ -260,15 +268,23 @@ locate_url_checked_cb (GObject      *source_object,
         web = GCLUE_WEB_SOURCE (user_data);
         last_reachable = web->priv->locate_url_reachable;
         web->priv->locate_url_reachable = reachable;
-        if (last_reachable == reachable)
-                return; /* We already reacted to network change */
+        if (last_reachable != reachable) {
+                g_debug ("Network changed: %s",
+                         reachable ? "Enabling locate URL queries" :
+                                     "Disabling locate URL queries");
+        }
+        if (!reachable)
+                return;
 
-        g_debug ("Network changed: %s",
-                 reachable ? "Enabling locate URL queries" :
-                             "Disabling locate URL queries");
-        if (reachable) {
-                GCLUE_WEB_SOURCE_GET_CLASS (web)->refresh_async
-                        (web, NULL, query_callback, NULL);
+        current_location = gclue_location_source_get_location (GCLUE_LOCATION_SOURCE (web));
+        if (!current_location || (g_get_real_time () / G_USEC_PER_SEC)
+            > (gclue_location_get_timestamp (current_location) + WEB_LOCATION_TIMEOUT)) {
+                g_debug ("Network changed: Refreshing");
+                gclue_web_source_refresh_available_accuracy_level (web);
+                if (gclue_location_source_get_active (GCLUE_LOCATION_SOURCE (web)))
+                        gclue_web_source_refresh (web);
+                else
+                        web->priv->refresh_needed = TRUE; /* postpone to start */
         }
 }
 
@@ -372,6 +388,30 @@ on_connectivity_changed (GObject    *gobject,
         on_network_changed (NULL, FALSE, user_data);
 }
 
+static GClueLocationSourceStartResult
+gclue_web_source_start (GClueLocationSource *source)
+{
+        GClueLocationSourceClass *base_class;
+        GClueWebSource *web;
+        GClueLocationSourceStartResult base_result;
+
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_START_RESULT_FAILED);
+        web = GCLUE_WEB_SOURCE (source);
+
+        base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_web_source_parent_class);
+        base_result = base_class->start (source);
+        if (base_result != GCLUE_LOCATION_SOURCE_START_RESULT_OK)
+                return base_result;
+
+        if (web->priv->refresh_needed) {
+                web->priv->refresh_needed = FALSE;
+                gclue_web_source_refresh (web);
+        }
+
+        return base_result;
+}
+
 static void
 gclue_web_source_finalize (GObject *gsource)
 {
@@ -402,16 +442,45 @@ gclue_web_source_finalize (GObject *gsource)
         G_OBJECT_CLASS (gclue_web_source_parent_class)->finalize (gsource);
 }
 
+static char *
+get_os_info (void)
+{
+        g_autofree char *pretty_name = NULL;
+        g_autofree char *os_name = g_get_os_info (G_OS_INFO_KEY_NAME);
+        g_autofree char *os_version = g_get_os_info (G_OS_INFO_KEY_VERSION);
+
+        if (os_name && os_version)
+                return g_strdup_printf ("%s; %s", os_name, os_version);
+
+        pretty_name = g_get_os_info (G_OS_INFO_KEY_PRETTY_NAME);
+        if (pretty_name)
+                return g_steal_pointer (&pretty_name);
+
+        /* Translators: Not marked as translatable as debug output should stay English */
+        return g_strdup ("Unknown");
+}
+
+#define USER_AGENT (PACKAGE_NAME "/" PACKAGE_VERSION)
+
+static char *
+get_user_agent (void)
+{
+        g_autofree char *os_info = get_os_info ();
+        return g_strdup_printf ("%s (%s)", USER_AGENT, os_info);
+}
+
 static void
 gclue_web_source_constructed (GObject *object)
 {
         GNetworkMonitor *monitor;
         GClueWebSourcePrivate *priv = GCLUE_WEB_SOURCE (object)->priv;
+        g_autofree char *user_agent = get_user_agent ();
 
         G_OBJECT_CLASS (gclue_web_source_parent_class)->constructed (object);
 
         priv->soup_session = soup_session_new ();
         soup_session_set_proxy_resolver (priv->soup_session, NULL);
+        soup_session_set_user_agent (priv->soup_session, user_agent);
 
         monitor = g_network_monitor_get_default ();
         priv->network_changed_id =
@@ -468,15 +537,18 @@ gclue_web_source_set_property (GObject      *object,
 static void
 gclue_web_source_class_init (GClueWebSourceClass *klass)
 {
-        GObjectClass *gsource_class = G_OBJECT_CLASS (klass);
+        GObjectClass *object_class = G_OBJECT_CLASS (klass);
+        GClueLocationSourceClass *source_class = GCLUE_LOCATION_SOURCE_CLASS (klass);
 
         klass->refresh_async = gclue_web_source_real_refresh_async;
         klass->refresh_finish = gclue_web_source_real_refresh_finish;
 
-        gsource_class->get_property = gclue_web_source_get_property;
-        gsource_class->set_property = gclue_web_source_set_property;
-        gsource_class->finalize = gclue_web_source_finalize;
-        gsource_class->constructed = gclue_web_source_constructed;
+        source_class->start = gclue_web_source_start;
+
+        object_class->get_property = gclue_web_source_get_property;
+        object_class->set_property = gclue_web_source_set_property;
+        object_class->finalize = gclue_web_source_finalize;
+        object_class->constructed = gclue_web_source_constructed;
 
         gParamSpecs[PROP_ACCURACY_LEVEL] = g_param_spec_enum ("accuracy-level",
                                                               "AccuracyLevel",
@@ -485,7 +557,7 @@ gclue_web_source_class_init (GClueWebSourceClass *klass)
                                                               GCLUE_ACCURACY_LEVEL_CITY,
                                                               G_PARAM_READWRITE |
                                                               G_PARAM_CONSTRUCT_ONLY);
-        g_object_class_install_property (gsource_class,
+        g_object_class_install_property (object_class,
                                          PROP_ACCURACY_LEVEL,
                                          gParamSpecs[PROP_ACCURACY_LEVEL]);
 }
@@ -518,8 +590,10 @@ submit_query_callback (SoupSession  *session,
                        GAsyncResult *result,
                        gpointer      user_data)
 {
+        GClueWebSource *web = GCLUE_WEB_SOURCE (user_data);
         g_autoptr(GBytes) body = NULL;
         g_autoptr(GError) local_error = NULL;
+        g_autofree char *contents = NULL;
         SoupMessage *query;
         g_autofree char *uri_str = NULL;
         gint status_code;
@@ -529,13 +603,16 @@ submit_query_callback (SoupSession  *session,
 
         body = soup_session_send_and_read_finish (session, result, &local_error);
         if (!body) {
-                g_warning ("Failed to submit location data to '%s': %s",
+                g_warning ("Failed to submit location data to '%s' (no body): %s",
                            uri_str, local_error->message);
                 return;
         }
+        contents = g_strndup (g_bytes_get_data (body, NULL), g_bytes_get_size (body));
 
         status_code = soup_message_get_status (query);
-        if (status_code != SOUP_STATUS_OK && status_code != SOUP_STATUS_NO_CONTENT) {
+
+        if (!GCLUE_WEB_SOURCE_GET_CLASS (web)->parse_submit_response
+                        (web, contents, status_code, &local_error)) {
                 g_warning ("Failed to submit location data to '%s': %s",
                            uri_str, soup_message_get_reason_phrase (query));
                 return;
@@ -620,6 +697,12 @@ gclue_web_source_set_submit_source (GClueWebSource      *web,
         on_submit_source_location_notify (G_OBJECT (submit_source), NULL, web);
 }
 
+const char *
+gclue_web_source_get_locate_url (GClueWebSource      *source)
+{
+        return source->priv->locate_url;
+}
+
 void
 gclue_web_source_set_locate_url (GClueWebSource *source,
                                  const char     *url)
@@ -627,9 +710,21 @@ gclue_web_source_set_locate_url (GClueWebSource *source,
         source->priv->locate_url = url;
 }
 
+const char *
+gclue_web_source_get_submit_url (GClueWebSource      *source)
+{
+        return source->priv->submit_url;
+}
+
 void
 gclue_web_source_set_submit_url (GClueWebSource *source,
                                  const char     *url)
 {
         source->priv->submit_url = url;
+}
+
+const char *gclue_web_source_get_query_data_description
+                                        (GClueWebSource      *source)
+{
+        return source->priv->query_data_description;
 }

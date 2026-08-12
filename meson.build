@@ -1,4 +1,4 @@
-project('geoclue', 'c', version: '2.7.2', meson_version : '>= 0.60.0')
+project('geoclue', 'c', version: '2.8.1', meson_version : '>= 0.60.0')
 
 gclue_version = meson.project_version()
 ver_arr = gclue_version.split('.')
@@ -32,10 +32,13 @@ conf.set_quoted('LOCALEDIR', localedir)
 conf.set_quoted('SYSCONFDIR', sysconfdir)
 conf.set_quoted('DEFAULT_WIFI_URL', get_option('default-wifi-url'))
 conf.set_quoted('DEFAULT_WIFI_SUBMIT_URL', get_option('default-wifi-submit-url'))
+conf.set10('GCLUE_USE_WIFI_SOURCE', get_option('wifi-source'))
 conf.set10('GCLUE_USE_3G_SOURCE', get_option('3g-source'))
 conf.set10('GCLUE_USE_CDMA_SOURCE', get_option('cdma-source'))
 conf.set10('GCLUE_USE_MODEM_GPS_SOURCE', get_option('modem-gps-source'))
 conf.set10('GCLUE_USE_NMEA_SOURCE', get_option('nmea-source'))
+conf.set10('GCLUE_USE_STATIC_SOURCE', get_option('static-source'))
+conf.set10('GCLUE_USE_IP_SOURCE', get_option('ip-source'))
 conf.set10('GCLUE_USE_COMPASS', get_option('compass'))
 conf.set10('GCLUE_USE_HYBRIS_SOURCE', get_option('hybris-source'))
 
@@ -91,12 +94,15 @@ summary = '''
         Backend:                  @4@
         Convenience library:      @5@
         Introspection:            @6@
-        3G source:                @7@
-        CDMA source:              @8@
-        Modem GPS source:         @9@
-        Network NMEA source:      @10@
-        Compass:                  @11@
-        Android HAL source:       @12@
+        WiFi source:              @7@
+        3G source:                @8@
+        CDMA source:              @9@
+        Modem GPS source:         @10@
+        Network NMEA source:      @11@
+        Static source:            @12@
+        IP source:                @13@
+        Compass:                  @14@
+        Android HAL source:       @15@
 '''.format(gclue_version,
            get_option('prefix'),
            cc.get_id(),
@@ -104,10 +110,13 @@ summary = '''
            get_option('enable-backend'),
            get_option('libgeoclue'),
            get_option('introspection'),
+           get_option('wifi-source'),
            get_option('3g-source'),
            get_option('cdma-source'),
            get_option('modem-gps-source'),
            get_option('nmea-source'),
+           get_option('static-source'),
+           get_option('ip-source'),
            get_option('compass'),
            get_option('hybris-source'))
 message(summary)

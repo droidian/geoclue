@@ -85,6 +85,9 @@ void                gclue_config_set_wifi_submit_nick   (GClueConfig     *config
 gboolean            gclue_config_get_wifi_submit_data   (GClueConfig     *config);
 void                gclue_config_set_wifi_submit_data   (GClueConfig     *config,
                                                          gboolean         submit);
+const char *        gclue_config_get_ip_method          (GClueConfig     *config);
+const char *        gclue_config_get_ip_url             (GClueConfig     *config);
+double              gclue_config_get_ip_accuracy        (GClueConfig     *config);
 gboolean            gclue_config_get_enable_wifi_source (GClueConfig     *config);
 gboolean            gclue_config_get_enable_3g_source   (GClueConfig     *config);
 gboolean            gclue_config_get_enable_cdma_source (GClueConfig     *config);
@@ -97,6 +100,7 @@ gboolean            gclue_config_get_enable_hybris_source
 gboolean            gclue_config_get_enable_compass     (GClueConfig     *config);
 gboolean            gclue_config_get_enable_static_source
                                                         (GClueConfig *config);
+gboolean            gclue_config_get_enable_ip_source   (GClueConfig     *config);
 
 G_END_DECLS
 

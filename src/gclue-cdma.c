@@ -246,7 +246,8 @@ gclue_cdma_stop (GClueLocationSource *source)
         g_autoptr(GError) error = NULL;
         GClueLocationSourceStopResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATION_SOURCE (source),
+                              GCLUE_LOCATION_SOURCE_STOP_RESULT_FAILED);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_cdma_parent_class);
         base_result = base_class->stop (source);

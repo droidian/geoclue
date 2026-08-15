@@ -5,7 +5,7 @@ include <tunables/global>
 
 /usr/libexec/geoclue flags=(attach_disconnected) {
   include <abstractions/base>
-  include <abstractions/dbus-session-strict>
+  include <abstractions/dbus-strict>
   include <abstractions/gnome>
   include <abstractions/nameservice>
 
@@ -17,71 +17,77 @@ include <tunables/global>
   /proc/*/cgroup r,
   /usr/libexec/geoclue mr,
 
-  # Permissions required to start the geoclue systemd service (LP: #2030951)
+  # own dbus name
+  dbus bind
+       bus=system
+       name=org.freedesktop.GeoClue2,
   dbus send
        bus=system
-       path=/fi/w1/wpa_supplicant1
-       interface=org.freedesktop.DBus.Properties
-       member=GetAll
-       peer=(label=unconfined),
+       path=/org/freedesktop/DBus
+       interface=org.freedesktop.DBus
+       member={RequestName,ReleaseName}
+       peer=(name=org.freedesktop.DBus),
 
+  # register objects
+  dbus (send receive)
+       bus=system
+       path=/org/freedesktop/GeoClue2{,/**}
+       interface={org.freedesktop.GeoClue2{,.*},org.freedesktop.DBus.*},
+
+  # auth
+  dbus send
+       bus=system
+       path=/org/freedesktop/DBus
+       interface=org.freedesktop.DBus
+       member={GetConnectionUnixUser,GetConnectionUnixProcessID}
+       peer=(name=org.freedesktop.DBus),
+
+  # use Avahi
   dbus send
        bus=system
        path=/
        interface=org.freedesktop.DBus.Peer
-       member=Ping,
-
-  dbus send
-       bus=system
-       path=/org/freedesktop/DBus
-       interface=org.freedesktop.DBus
-       member=RequestName
-       peer=(label=unconfined),
-
-  dbus send
-       bus=system
-       path=/org/freedesktop/ModemManager1
-       interface=org.freedesktop.DBus.ObjectManager
-       member=GetManagedObjects
-       peer=(label=unconfined),
-
-  dbus send
-       bus=system
-       path=/org/freedesktop/NetworkManager
-       interface=org.freedesktop.DBus.Properties
-       member=GetAll
-       peer=(label=unconfined),
-
-  dbus bind
-       bus=system
-       name=org.freedesktop.GeoClue2,
-
+       member=Ping
+       peer=(name=org.freedesktop.Avahi),
   dbus send
        bus=system
        path=/
        interface=org.freedesktop.Avahi.Server
-       member={GetAPIVersion,GetState,ServiceBrowserNew},
+       peer=(name=org.freedesktop.Avahi),
+  dbus (send receive)
+       bus=system
+       path=/Client[0-9]*/ServiceBrowser[0-9]*
+       interface=org.freedesktop.Avahi.ServiceBrowser,
 
+  # use wpa_supplicant
+  dbus (send receive)
+       bus=system
+       path=/fi/w1/wpa_supplicant1{,/**}
+       interface={fi.w1.wpa_supplicant1{,.*},org.freedesktop.DBus.Properties},
+  dbus receive
+       bus=system
+       path=/org/freedesktop
+       interface=org.freedesktop.DBus.ObjectManager
+       member=InterfacesRemoved,
+
+  # use ModemManager
   dbus send
        bus=system
-       path=/org/freedesktop/DBus
-       interface=org.freedesktop.DBus
-       member=ReleaseName
-       peer=(label=unconfined),
+       path=/org/freedesktop/ModemManager1
+       interface={org.freedesktop.DBus.ObjectManager,org.freedesktop.DBus.Properties},
 
-  dbus receive
+  # use NetworkManager
+  dbus send
        bus=system
-       path=/Client[0-9]*/ServiceBrowser1
-       interface=org.freedesktop.Avahi.ServiceBrowser
-       member={CacheExhausted,AllForNow},
+       path=/org/freedesktop
+       interface=org.freedesktop.DBus.ObjectManager
+       member=GetManagedObjects,
+  dbus (send receive)
+       bus=system
+       path=/org/freedesktop/NetworkManager{,/**}
+       interface={org.freedesktop.NetworkManager{,.*},org.freedesktop.DBus.Properties},
 
-  dbus receive
-       bus=system
-       path=/org/freedesktop/GeoClue2/Manager
-       interface=org.freedesktop.DBus.Properties
-       member={GetAll,AddAgent,PropertiesChanged}
-       peer=(label=unconfined),
 
   # Site-specific additions and overrides. See local/README for details.
-  #include <local/usr.libexec.geoclue>
+  #include if exists <local/usr.libexec.geoclue>
 }

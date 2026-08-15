@@ -206,4 +206,7 @@ double gclue_location_get_distance_from
                                   (GClueLocation *loca,
                                    GClueLocation *locb);
 
+void gclue_location_set_accuracy  (GClueLocation *loc,
+                                   gdouble        accuracy);
+
 #endif /* GCLUE_LOCATION_H */

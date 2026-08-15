@@ -1,2 +1,5 @@
-Repository: https://gitlab.freedesktop.org/geoclue.git
-Repository-Browse: https://gitlab.freedesktop.org/geoclue
+---
+Bug-Database: https://gitlab.freedesktop.org/geoclue/geoclue/-/issues
+Bug-Submit: https://gitlab.freedesktop.org/geoclue/geoclue/-/issues/new
+Repository: https://gitlab.freedesktop.org/geoclue/geoclue.git
+Repository-Browse: https://gitlab.freedesktop.org/geoclue/geoclue

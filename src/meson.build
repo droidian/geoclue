@@ -26,6 +26,7 @@ sources += [ 'gclue-main.c',
              'gclue-service-location.h', 'gclue-service-location.c',
              'gclue-static-source.c', 'gclue-static-source.h',
              'gclue-web-source.c', 'gclue-web-source.h',
+             'gclue-ip.h', 'gclue-ip.c',
              'gclue-wifi.h', 'gclue-wifi.c',
              'gclue-mozilla.h', 'gclue-mozilla.c',
              'gclue-min-uint.h', 'gclue-min-uint.c',
@@ -33,7 +34,7 @@ sources += [ 'gclue-main.c',
              'gclue-utils.h' ]
 
 if get_option('3g-source') or get_option('cdma-source') or get_option('modem-gps-source')
-    geoclue_deps += [ dependency('mm-glib', version: '>= 1.10') ]
+    geoclue_deps += [ dependency('mm-glib', version: '>= 1.12') ]
     sources += [ 'gclue-modem.c',
 				 'gclue-modem.h',
 				 'gclue-modem-manager.c',

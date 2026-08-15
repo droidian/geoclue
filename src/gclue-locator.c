@@ -28,9 +28,11 @@
 
 #include "gclue-locator.h"
 
-#include "gclue-static-source.h"
-#include "gclue-wifi.h"
 #include "gclue-config.h"
+
+#if GCLUE_USE_WIFI_SOURCE
+#include "gclue-wifi.h"
+#endif
 
 #if GCLUE_USE_3G_SOURCE
 #include "gclue-3g.h"
@@ -46,6 +48,14 @@
 
 #if GCLUE_USE_NMEA_SOURCE
 #include "gclue-nmea-source.h"
+#endif
+
+#if GCLUE_USE_STATIC_SOURCE
+#include "gclue-static-source.h"
+#endif
+
+#if GCLUE_USE_IP_SOURCE
+#include "gclue-ip.h"
 #endif
 
 #if GCLUE_USE_HYBRIS_SOURCE
@@ -157,8 +167,9 @@ set_location (GClueLocator  *locator,
 
             if (locator->priv->priority_source_lock &&
                 !gclue_location_source_get_priority_source (source)) {
-                     g_debug ("Priority Source Lock (age %lu) active, ignoring new %s location",
-                              new_timestamp - locator->priv->priority_source_lock_timestamp, src_name);
+                     g_debug ("Priority Source Lock (age %u s) active, ignoring new %s location",
+                              (guint) (new_timestamp - locator->priv->priority_source_lock_timestamp),
+                              src_name);
                      return;
             }
 
@@ -210,8 +221,10 @@ refresh_available_accuracy_level (GClueLocator *locator)
                         (locator->priv->sources,
                          (GCompareFunc) compare_accuracy_level);
 
-        new = gclue_location_source_get_available_accuracy_level
-                        (GCLUE_LOCATION_SOURCE (locator->priv->sources->data));
+        new = locator->priv->sources ?
+                gclue_location_source_get_available_accuracy_level
+                                (GCLUE_LOCATION_SOURCE (locator->priv->sources->data)) :
+                GCLUE_ACCURACY_LEVEL_NONE;
 
         existing = gclue_location_source_get_available_accuracy_level
                         (GCLUE_LOCATION_SOURCE (locator));
@@ -403,7 +416,6 @@ gclue_locator_constructed (GObject *object)
         GClueLocator *locator = GCLUE_LOCATOR (object);
         GClueLocationSource *submit_source = NULL;
         GClueConfig *gconfig = gclue_config_get_singleton ();
-        GClueWifi *wifi = NULL;
         GList *node;
         GClueMinUINT *threshold;
 
@@ -423,20 +435,13 @@ gclue_locator_constructed (GObject *object)
                                                         cdma);
         }
 #endif
+#if GCLUE_USE_WIFI_SOURCE
         if (gclue_config_get_enable_wifi_source (gconfig)) {
-                wifi = gclue_wifi_get_singleton (locator->priv->accuracy_level);
-        } else {
-                if (gclue_config_get_enable_static_source (gconfig)) {
-                        g_debug ("Disabling GeoIP-only source since static source is enabled");
-                } else {
-                        /* City-level accuracy will give us GeoIP-only source */
-                        wifi = gclue_wifi_get_singleton (GCLUE_ACCURACY_LEVEL_CITY);
-                }
-        }
-        if (wifi) {
+                GClueWifi *wifi = gclue_wifi_get_singleton (locator->priv->accuracy_level);
                 locator->priv->sources = g_list_append (locator->priv->sources,
                                                         wifi);
         }
+#endif
 #if GCLUE_USE_MODEM_GPS_SOURCE
         if (gclue_config_get_enable_modem_gps_source (gconfig)) {
                 GClueModemGPS *gps = gclue_modem_gps_get_singleton ();
@@ -465,7 +470,7 @@ gclue_locator_constructed (GObject *object)
                                                         hybris);
         }
 #endif
-
+#if GCLUE_USE_STATIC_SOURCE
         if (gclue_config_get_enable_static_source (gconfig)) {
                 GClueStaticSource *static_source;
 
@@ -473,6 +478,19 @@ gclue_locator_constructed (GObject *object)
                         (locator->priv->accuracy_level);
                 locator->priv->sources = g_list_append (locator->priv->sources,
                                                         static_source);
+        }
+#endif
+#if GCLUE_USE_IP_SOURCE
+        if (gclue_config_get_enable_ip_source (gconfig)) {
+                GClueIp *source = gclue_ip_get_singleton ();
+                locator->priv->sources = g_list_append (locator->priv->sources,
+                                                        source);
+        }
+#endif
+
+        if (locator->priv->sources == NULL) {
+                g_warning ("No sources enabled in configuration, "
+                           "location not available");
         }
 
         for (node = locator->priv->sources; node != NULL; node = node->next) {
@@ -579,7 +597,9 @@ gclue_locator_stop (GClueLocationSource *source)
         GList *node;
         GClueLocationSourceStopResult base_result;
 
-        g_return_val_if_fail (GCLUE_IS_LOCATOR (source), FALSE);
+        g_return_val_if_fail (GCLUE_IS_LOCATOR (source),
+                              GCLUE_LOCATION_SOURCE_STOP_RESULT_FAILED);
+
         locator = GCLUE_LOCATOR (source);
 
         base_class = GCLUE_LOCATION_SOURCE_CLASS (gclue_locator_parent_class);

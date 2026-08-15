@@ -323,7 +323,7 @@ GBinderLocalReply *geoclue_binder_gnss_callback(
                 loc->altitude = location->altitudeMeters;
 
             if (location->gnssLocationFlags & HYBRIS_GNSS_LOCATION_HAS_SPEED)
-                loc->speed = location->speedMetersPerSec * MpsToKnots;
+                loc->speed = location->speedMetersPerSec;
 
             if (location->gnssLocationFlags & HYBRIS_GNSS_LOCATION_HAS_BEARING)
                 loc->direction = location->bearingDegrees;

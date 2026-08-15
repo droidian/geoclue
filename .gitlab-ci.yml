@@ -1,31 +1,26 @@
 before_script:
-    -  sed -i '/^#\sdeb-src /s/^#//' '/etc/apt/sources.list'
+    - sed -i 's/^\(Types. .*\)$/\1 deb-src/' /etc/apt/sources.list.d/debian.sources
     - apt-get --allow-unauthenticated update && apt-get build-dep --yes geoclue-2.0
-    - apt-get install --yes git gobject-introspection libmm-glib-dev wget valac
-    - apt-get install --yes libnotify-dev xsltproc gtk-doc-tools python3-pip
-    - apt-get install --yes ninja-build gettext modemmanager-dev
-    - DEBIAN_FRONTEND=noninteractive apt-get install --yes libsoup-3.0
-    - pip3 install meson==0.60.0
 
 workflow:
     rules:
         - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
         - if: $CI_PIPELINE_SOURCE == 'push'
 
-ubuntu-22.04:
-    image: ubuntu:22.04
+debian-bookworm:
+    image: debian:bookworm
     artifacts:
         when: always
-        name: "jammy-${CI_COMMIT_REF_NAME}"
+        name: "bookworm-${CI_COMMIT_REF_NAME}"
         paths:
             - "${CI_PROJECT_DIR}/build"
-    script: meson build && ninja -C build && ninja -C build test && ninja -C build install
+    script: meson setup build && ninja -C build && ninja -C build test && ninja -C build install
 
-ubuntu-22.04-no-backend:
-    image: ubuntu:22.04
+debian-bookworm-no-backend:
+    image: debian:bookworm
     artifacts:
         when: always
-        name: "jammy-no-backend-${CI_COMMIT_REF_NAME}"
+        name: "bookworm-no-backend-${CI_COMMIT_REF_NAME}"
         paths:
             - "${CI_PROJECT_DIR}/build"
-    script: meson -Denable-backend=false build && ninja -C build && ninja -C build test && ninja -C build install
+    script: meson setup -Denable-backend=false build && ninja -C build && ninja -C build test && ninja -C build install

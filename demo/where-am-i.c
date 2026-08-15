@@ -88,7 +88,7 @@ print_location (GClueSimple *simple)
 
         location = gclue_simple_get_location (simple);
         g_print ("\nNew location:\n");
-        g_print ("Latitude:    %f°\nLongitude:   %f°\nAccuracy:    %f meters\n",
+        g_print ("Latitude:    %f°\nLongitude:   %f°\nAccuracy:    %.0f meters\n",
                  gclue_location_get_latitude (location),
                  gclue_location_get_longitude (location),
                  gclue_location_get_accuracy (location));

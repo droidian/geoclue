@@ -188,7 +188,7 @@ on_compass_proxy_ready (GObject      *source_object,
 
         compass = GCLUE_COMPASS (user_data);
 
-        compass_call_claim_compass (proxy, 
+        compass_call_claim_compass (proxy,
                                     compass->priv->cancellable,
                                     on_compass_claimed,
                                     compass);

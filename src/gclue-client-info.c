@@ -233,9 +233,9 @@ get_xdg_id (guint32 pid)
                 return NULL;
         lines =  g_strsplit (content, "\n", -1);
 
-	xdg_id = parse_cgroup_v2 (lines);
-	if (xdg_id != NULL)
-		return xdg_id;
+        xdg_id = parse_cgroup_v2 (lines);
+        if (xdg_id != NULL)
+                return xdg_id;
 
         for (i = 0; lines[i] != NULL; i++) {
                 const char *unit = lines[i] + strlen ("1:name=systemd:");

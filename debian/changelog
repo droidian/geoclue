@@ -1,3 +1,58 @@
+geoclue-2.0 (2.8.1-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 10 May 2026 12:07:39 +0200
+
+geoclue-2.0 (2.8.0-1) unstable; urgency=medium
+
+  * Team upload
+
+  [ Jeremy Bícha ]
+  * New upstream release
+  * Bump debhelper compat to 13
+  * Update debian/upstream/metadata
+  * Update gir handling (Closes: #1118821)
+  * Use sysusers.d instead of adduser
+  * Remove obsolete maintscript
+  * Remove all patches: applied in new release
+
+  [ Laurent Bigonville ]
+  * d/README.Debian: Update the README to explicitly state we are using beaconDB
+  * debian/copyright: Update the FSF address
+  * debian/control: Bump Standards-Version to 4.7.2 (no further changes)
+
+  [ Alessandro Astone ]
+  * Fix AppArmor rules for DBus (LP: #2030951, Closes: #1110134)
+
+  [ Chris Talbot ]
+  * debian/rules: Make beacondb.net default for wifi submissions
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 03 Dec 2025 16:51:04 -0500
+
+geoclue-2.0 (2.7.2-2) unstable; urgency=medium
+
+  * debian/control: Add Provides: ${gir:Provides} for the -dev package
+  * debian/rules: Use api.beacondb.net instead of beacondb.net
+
+ -- Laurent Bigonville <bigon@debian.org>  Sun, 22 Dec 2024 10:11:37 +0100
+
+geoclue-2.0 (2.7.2-1) unstable; urgency=low
+
+  * New upstream release
+    - Bump build-dependencies
+  * debian/watch: Fix the logic after GitLab changes (Closes: #1079914)
+  * debian/geoclue-2.0.lintian-overrides: Drop
+    package-supports-alternative-init-but-no-init.d-script, not used anymore
+  * debian/control:
+    - Bump Standards-Version to 4.7.0 (no further changes)
+    - Update build-dependencies to please lintian: pkg-config => pkgconf
+  * debian/rules: Use beaconDB as a source, with the maintainer approval
+    (Closes: #1074427)
+  * debian/patches: Cherry-pick several patches for beaconDB
+
+ -- Laurent Bigonville <bigon@debian.org>  Thu, 12 Dec 2024 11:49:19 +0100
+
 geoclue-2.0 (2.7.1-2) unstable; urgency=medium
 
   * Team upload

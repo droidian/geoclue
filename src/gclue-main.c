@@ -66,7 +66,7 @@ static GOptionEntry entries[] =
           0,
           G_OPTION_ARG_STRING,
           &submit_nick,
-          N_("Nickname to submit network data under (2-32 characters)"),
+          N_("Nickname to submit network data under (empty or 2 to 32 characters)"),
           "NICK" },
         { "nmea-socket",
           'u',
